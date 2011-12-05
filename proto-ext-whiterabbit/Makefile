@@ -6,4 +6,4 @@
 
 P := proto-ext-$(PROTO_EXT)
 
-OBJ-y += $P/ext-one.o
+OBJ-y += $P/ext-wr.o
