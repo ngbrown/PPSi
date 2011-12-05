@@ -1,0 +1,6 @@
+*.map*
+*.o
+*.a
+pproto.bin
+*.patch
+

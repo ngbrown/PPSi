@@ -1,0 +1,35 @@
+# Alessandro Rubini for CERN, 2011 -- public domain
+
+CFLAGS += -ffreestanding -Os  \
+	-ffunction-sections -fdata-sections \
+	-mmultiply-enabled -mbarrel-shift-enabled
+
+ARCH_LDFLAGS = -nostdlib -static -T $(ARCH).lds
+
+# All files are under A (short for ARCH): I'm lazy
+A := arch-$(ARCH)
+
+LIBARCH := $A/libarch.a
+
+OBJ-libarch := $A/spec-startup.o \
+	$A/main-loop.o \
+	$A/spec-socket.o \
+	$A/spec-io.o \
+	$A/dev/uart.o \
+	$A/dev/timer.o \
+	$A/dev/endpoint.o \
+	$A/dev/minic.o
+
+$(LIBARCH): $(OBJ-libarch)
+	$(AR) r $@ $^
+
+all: $(TARGET) $(TARGET).bin
+
+# to build the target, we need -lstd again, in case we call functions that
+# were not selected yet (e.g., pp_open_instance() ).
+$(TARGET): $(TARGET).o $A/crt0.o $(LIBARCH)
+	$(CC) -Wl,-Map,$(TARGET).map2 $(ARCH_LDFLAGS) -o $@ $A/crt0.o \
+		$(TARGET).o -L$A -larch -L$D -lstd
+
+$(TARGET).bin: $(TARGET)
+	$(OBJCOPY) -O binary $^ $@

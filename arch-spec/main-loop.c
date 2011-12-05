@@ -1,0 +1,53 @@
+
+/*
+ * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
+ */
+
+/*
+ * This is the main loop for the Spec board
+ */
+#include <pproto/pproto.h>
+#include "spec.h"
+
+void spec_main_loop(struct pp_instance *ppi)
+{
+	int i, delay_ms;
+
+	/*
+	 * The main loop here is polling every ms. While we are not
+	 * doing anything else but the protocol, this allows extra stuff
+	 * to fit.
+	 */
+	delay_ms = pp_state_machine(ppi, NULL, 0);
+	while (1) {
+		unsigned char packet[1500];
+		/* Wait for a packet or for the timeout */
+		while (delay_ms && !minic_poll_rx()) {
+			spec_udelay(1000);
+			delay_ms--;
+		}
+		if (!minic_poll_rx()) {
+			delay_ms = pp_state_machine(ppi, NULL, 0);
+			continue;
+		}
+		/*
+		 * We got a packet. If it's not ours, continue consuming
+		 * the pending timeout
+		 */
+		i = spec_recv_packet(ppi, packet, sizeof(packet));
+		if (0) {
+			int j;
+			pp_printf("recvd: %i\n", i);
+			for (j = 0; j < 32 && j < i; j++)
+				pp_printf(" %02x", packet[j]);
+			pp_printf("\n");
+		}
+		if (i < sizeof(struct pp_packet) /* or minimum of all pckts */)
+			continue;
+		/* Warning: PP_PROTO_NR is endian-agnostic by design */
+		if ( ((struct spec_ethhdr *)packet)->h_proto !=
+		     htons(PP_PROTO_NR))
+			continue;
+		delay_ms = pp_state_machine(ppi, packet, i);
+	}
+}
