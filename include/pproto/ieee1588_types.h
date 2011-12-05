@@ -44,7 +44,12 @@ typedef struct  {
 	UInteger32 nanosecondsField;
 } Timestamp;
 
-typedef Octet ClockIdentity[CLOCK_IDENTITY_LENGTH];
+typedef struct {
+  Integer32 seconds;
+  Integer32 nanoseconds;
+} TimeInternal;
+
+typedef Octet *ClockIdentity; /*FIXME: allocate CLOCK_IDENTITY_LENGTH = 8 */
 
 typedef struct {
 	ClockIdentity clockIdentity;
@@ -165,5 +170,73 @@ typedef struct {
 	Enumeration4 actionField;
 	char* tlv;
 } MsgManagement;
+
+
+
+/* Default Data Set */
+typedef struct {
+	/* Static */
+	Boolean twoStepFlag;
+	ClockIdentity clockIdentity;
+	UInteger16 numberPorts;
+	/* Dynamic */
+	ClockQuality clockQuality;
+	/* Configurable */
+	UInteger8 priority1;
+	UInteger8 priority2;
+	UInteger8 domainNumber;
+	Boolean slaveOnly;
+} DSDefault;
+
+/* Current Data Set */
+typedef struct {
+	/* Dynamic */
+	UInteger16 stepsRemoved;
+	TimeInternal offsetFromMaster;
+	TimeInternal meanPathDelay;
+} DSCurrent;
+
+/* Parent Data Set */
+typedef struct {
+	/* Dynamic */
+	PortIdentity parentPortIdentity;
+	Boolean parentStats;
+	UInteger16 observedParentOffsetScaledLogVariance;
+	Integer32 observedParentClockPhaseChangeRate;
+	ClockIdentity grandmasterIdentity;
+	ClockQuality grandmasterClockQuality;
+	UInteger8 grandmasterPriority1;
+	UInteger8 grandmasterPriority2;
+} DSParent;
+
+/* Port Data set */
+typedef struct {
+	/* Static */
+	PortIdentity portIdentity;
+	/* Dynamic */
+	Enumeration8 portState;
+	Integer8 logMinDelayReqInterval;
+	TimeInternal peerMeanPathDelay;
+	/* Configurable */
+	Integer8 logAnnounceInterval;
+	UInteger8 announceReceiptTimeout;
+	Integer8 logSyncInterval;
+	Enumeration8 delayMechanism;
+	Integer8 logMinPdelayReqInterval;
+	UInteger4 versionNumber;
+} DSPort;
+
+/* Time Properties Data Set */
+typedef struct {
+	/* Dynamic */
+	Integer16 currentUtcOffset;
+	Boolean currentUtcOffsetValid;
+	Boolean leap59;
+	Boolean leap61;
+	Boolean timeTraceable;
+	Boolean frequencyTraceable;
+	Boolean ptpTimescale;
+	Enumeration8 timeSource;
+} DSTimeProperties;
 
 #endif /*IEEE_1588_TYPES_H_*/

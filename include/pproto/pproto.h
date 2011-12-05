@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <arch/arch.h> /* ntohs and so on */
+#include <pproto/ieee1588_types.h>
+
 
 /*
  * This is the struct handling runtime options. Default values can be
@@ -61,6 +63,13 @@ struct pp_instance {
 	struct pp_channel ch;
 	struct pp_runtime_opts *rt_opts;
 	struct pp_clock *ppc;
+
+	/* Data sets */
+	DSDefault *defaultDS;
+	DSCurrent *currentDS;
+	DSParent *parentDS;
+	DSPort *portDS;
+	DSTimeProperties *timePropertiesDS;
 };
 
 
