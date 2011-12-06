@@ -6,7 +6,6 @@
 #ifndef IEEE_1588_TYPES_H_
 #define IEEE_1588_TYPES_H_
 
-/* FIXME needed? #include <stdio.h> */
 #include <stdint.h>
 
 
@@ -238,5 +237,69 @@ typedef struct {
 	Boolean ptpTimescale;
 	Enumeration8 timeSource;
 } DSTimeProperties;
+
+/* Enumeration States (table 8, page 73) */
+enum pp_std_states {
+	PPS_END_OF_TABLE = 0,
+	PPS_INITIALIZING,
+	PPS_FAULTY,
+	PPS_DISABLED,
+	PPS_LISTENING,
+	PPS_PRE_MASTER,
+	PPS_MASTER,
+	PPS_PASSIVE,
+	PPS_UNCALIBRATED,
+	PPS_SLAVE,
+};
+
+enum pp_std_messages {
+	PPM_SYNC = 0x0,
+	PPM_DELAY_REQ,
+	PPM_PDELAY_REQ,
+	PPM_PDELAY_RESP,
+	PPM_FOLLOW_UP = 0x8,
+	PPM_DELAY_RESP,
+	PPM_PDELAY_RESP_FOLLOW_UP,
+	PPM_ANNOUNCE,
+	PPM_SIGNALING,
+	PPM_MANAGEMENT,
+};
+
+/* Enumeration Domain Number (table 2, page 41) */
+enum ENDomainNumber {
+	DFLT_DOMAIN_NUMBER = 0,
+	ALT1_DOMAIN_NUMBER,
+	ALT2_DOMAIN_NUMBER,
+	ALT3_DOMAIN_NUMBER
+};
+
+/* Enumeration Network Protocol (table 3, page 46) */
+enum ENNetworkProtocol {
+	UDP_IPV4 = 1,
+	UDP_IPV6,
+	IEE_802_3,
+	DeviceNet,
+	ControlNet,
+	PROFINET
+};
+
+/* Enumeration Time Source (table 7, page 57) */
+enum ENTimeSource{
+	ATOMIC_CLOCK = 0x10,
+	GPS = 0x20,
+	TERRESTRIAL_RADIO = 0x30,
+	PTP = 0x40,
+	NTP = 0x50,
+	HAND_SET = 0x60,
+	OTHER = 0x90,
+	INTERNAL_OSCILLATOR = 0xA0
+};
+
+/* Enumeration Delay mechanism (table 9, page 74) */
+enum ENDelayMechanism {
+	E2E = 1,
+	P2P = 2,
+	DELAY_DISABLED = 0xFE
+};
 
 #endif /*IEEE_1588_TYPES_H_*/

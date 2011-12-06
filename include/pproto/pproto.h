@@ -25,7 +25,7 @@ extern struct pp_runtime_opts default_rt_opts; /* preinitialized
  */
 struct pp_channel {
 	union {
-		int fd;		/* Poisx wants fide descriptor */
+		int fd;		/* Posix wants fid descriptor */
 		void *custom;	/* Other archs want other stuff */
 	};
 	void *arch_data;	/* Other arch-private info, if any */
@@ -84,18 +84,7 @@ struct pp_state_table_item {
 
 extern struct pp_state_table_item pp_state_table[]; /* 0-terminated */
 
-enum pp_std_states {
-	PPS_END_OF_TABLE = 0,
-	PPS_INITIALIZING,
-	PPS_FAULTY,
-	PPS_DISABLED,
-	PPS_LISTENING,
-	PPS_PRE_MASTER,
-	PPS_MASTER,
-	PPS_PASSIVE,
-	PPS_UNCALIBRATED,
-	PPS_SLAVE,
-};
+
 
 /* Use a typedef, to avoid long prototypes */
 typedef int pp_action(struct pp_instance *ppi, uint8_t *packet, int plen);
