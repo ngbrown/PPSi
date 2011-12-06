@@ -39,4 +39,7 @@
 #define PP_TIMER_ANNOUNCE_RECEIPT 	3
 #define PP_TIMER_ANNOUNCE_INTERVAL 	4
 
+#define PP_TWO_STEP_FLAG		2
+#define PP_VERSION_PTP			2
+
 #endif /* __PTP_CONSTANTS_H__ */

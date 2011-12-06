@@ -24,6 +24,10 @@ typedef uint8_t Enumeration4;
 typedef uint8_t UInteger4;
 typedef uint8_t Nibble;
 
+#define PP_CLOCK_IDENTITY_LENGTH 8
+
+/* FIXME: each struct must be aligned for lower memory usage */
+
 typedef struct {
 	uint32_t lsb;
 	uint16_t msb;
@@ -48,7 +52,7 @@ typedef struct {
   Integer32 nanoseconds;
 } TimeInternal;
 
-typedef Octet *ClockIdentity; /*FIXME: allocate CLOCK_IDENTITY_LENGTH = 8 */
+typedef Octet ClockIdentity[PP_CLOCK_IDENTITY_LENGTH];
 
 typedef struct {
 	ClockIdentity clockIdentity;

@@ -91,3 +91,16 @@ int posix_net_init(struct pp_instance *ppi)
 
 int pp_net_init(struct pp_instance *ppi)
 	__attribute__((alias("posix_net_init")));
+
+
+/*
+ * Shutdown all the network stuff
+ * TODO
+ */
+int posix_net_shutdown(struct pp_instance *ppi)
+{
+	return 0;
+}
+
+int pp_net_shutdown(struct pp_instance *ppi)
+__attribute__((alias("posix_net_shutdown")));

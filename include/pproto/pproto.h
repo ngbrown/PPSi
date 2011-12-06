@@ -1,5 +1,5 @@
 /*
- * Alessandro Rubini for CERN, 2011 -- public domain
+ * FIXME: header
  */
 #ifndef __PTP_PROTO_H__
 #define __PTP_PROTO_H__
@@ -8,15 +8,47 @@
 #include <stdarg.h>
 #include <arch/arch.h> /* ntohs and so on */
 #include <pproto/ieee1588_types.h>
+#include <pproto/constants.h>
 
 
 /*
  * Runtime options. Default values can be overridden by command line.
  */
 struct pp_runtime_opts {
-	/* TODO */
-};
+	ClockQuality clock_quality;
+	TimeInternal inboundLatency, outboundLatency;
+	Integer32 max_rst; /* Maximum number of nanoseconds to reset */
+	Integer32 max_dly; /* Maximum number of nanoseconds of delay */
+	Integer32 ttl;
+	char *unicast_addr;
+	UInteger32	slave_only:1,
+			no_adjust:1,
+			display_stats:1,
+			csv_stats:1,
+			ethernet_mode:1,
+			e2e_mode:1,
+			ofst_first_updated:1,
+			no_rst_clk:1,
+			use_syslog:1;
+	Integer16 ap, ai;
+	Integer16 s;
+	Integer16 max_foreign_records;
+	Integer16 cur_utc_ofst;
+	Integer8 announce_intvl;
+	Integer8 sync_intvl;
+	UInteger8 prio1;
+	UInteger8 prio2;
+	UInteger8 domain_number;
+	char *iface_name;
+	void *arch_opts;
 
+	/*TODO ARCH: arch_opts, for arch-gnu-linux, might include the following:
+	 * int log_fd;
+	 * char *record_file; [PP_PATH_MAX]
+	 * FILE *record_fp;
+	 * char *file; [PP_PATH_MAX]
+	 */
+};
 extern struct pp_runtime_opts default_rt_opts; /* preinitialized
                                                 * with default values */
 
@@ -64,13 +96,25 @@ extern int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv);
 
 /* Network stuff */
 extern int pp_net_init(struct pp_instance *ppi);
+extern int pp_net_shutdown(struct pp_instance *ppi);
 extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len);
 extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len);
+
+/* Timer stuff */
+struct pp_timer
+{
+	int dummy; /* FIXME */
+};
+
+extern int pp_timer_init(struct pp_timer *tm);
+extern int pp_timer_start(struct pp_timer *tm);
+extern int pp_timer_stop(struct pp_timer *tm);
+extern int pp_timer_update(struct pp_timer *tm);
+extern int pp_timer_expired(struct pp_timer *tm);
 
 
 /* Get a timestamp */
 extern void pp_get_stamp(uint32_t *sptr);
-
 
 /*
  * The state machine itself is an array of these structures.

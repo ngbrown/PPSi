@@ -31,6 +31,16 @@ int main(int argc, char **argv)
 	if (!ppi)
 		exit(__LINE__);
 
+	ppi->defaultDS = calloc(1, sizeof(*ppi->defaultDS));
+	ppi->currentDS = calloc(1, sizeof(*ppi->currentDS));
+	ppi->parentDS = calloc(1, sizeof(*ppi->parentDS));
+	ppi->portDS = calloc(1, sizeof(*ppi->portDS));
+	ppi->timePropertiesDS = calloc(1, sizeof(*ppi->timePropertiesDS));
+
+	if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
+	    || (!ppi->portDS) || (!ppi->timePropertiesDS))
+		exit(__LINE__);
+
 	if (posix_open_ch(ppi, ifname)) {
 		pp_diag_fatal(ppi, "open_ch", strerror(errno));
 	}

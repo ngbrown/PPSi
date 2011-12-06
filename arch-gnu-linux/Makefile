@@ -8,7 +8,8 @@ LIBARCH := $A/libarch.a
 OBJ-libarch := $A/posix-startup.o \
 	$A/main-loop.o \
 	$A/posix-socket.o \
-	$A/posix-io.o
+	$A/posix-io.o \
+	$A/posix-timer.o \
 
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^
