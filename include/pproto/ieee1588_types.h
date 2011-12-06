@@ -3,8 +3,8 @@
  * Structs defined in IEEE Std 1588-2008
  */
 
-#ifndef IEEE_1588_TYPES_H_
-#define IEEE_1588_TYPES_H_
+#ifndef __PTP_IEEE_1588_TYPES_H__
+#define __PTP_IEEE_1588_TYPES_H__
 
 #include <stdint.h>
 
@@ -302,4 +302,4 @@ enum ENDelayMechanism {
 	DELAY_DISABLED = 0xFE
 };
 
-#endif /*IEEE_1588_TYPES_H_*/
+#endif /* __PTP_IEEE_1588_TYPES_H__ */

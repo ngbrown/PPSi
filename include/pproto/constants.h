@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_H_
-#define CONSTANTS_H_
+#ifndef __PTP_CONSTANTS_H__
+#define __PTP_CONSTANTS_H__
 
 /* implementation specific constants */
 #define PP_DEFAULT_INBOUND_LATENCY		0	/* in nsec */
@@ -39,4 +39,4 @@
 #define PP_TIMER_ANNOUNCE_RECEIPT 	3
 #define PP_TIMER_ANNOUNCE_INTERVAL 	4
 
-#endif /*CONSTANTS_H_*/
+#endif /* __PTP_CONSTANTS_H__ */
