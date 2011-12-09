@@ -65,6 +65,17 @@ struct pp_channel {
 	unsigned char peer[6];	/* Our peer's MAC address */
 };
 
+
+/*
+ * Timer
+ */
+struct pp_timer
+{
+	uint32_t start;
+	uint32_t interval;
+};
+
+
 /*
  * Structure for the standard protocol
  */
@@ -82,6 +93,7 @@ struct pp_instance {
 	DSParent *parentDS;
 	DSPort *portDS;
 	DSTimeProperties *timePropertiesDS;
+	struct pp_timer *timers[PP_TIMER_ARRAY_SIZE];
 };
 
 
@@ -100,17 +112,12 @@ extern int pp_net_shutdown(struct pp_instance *ppi);
 extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len);
 extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len);
 
-/* Timer stuff */
-struct pp_timer
-{
-	int dummy; /* FIXME */
-};
 
-extern int pp_timer_init(struct pp_timer *tm);
+extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common
+                                                      structure */
 extern int pp_timer_start(struct pp_timer *tm);
 extern int pp_timer_stop(struct pp_timer *tm);
-extern int pp_timer_update(struct pp_timer *tm);
-extern int pp_timer_expired(struct pp_timer *tm);
+extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
 
 
 /* Get a timestamp */

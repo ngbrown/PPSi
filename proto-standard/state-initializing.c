@@ -47,7 +47,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	ppi->portDS->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
 	ppi->portDS->versionNumber = PP_VERSION_PTP;
 
-	if (pp_timer_init(0)) /* FIXME */
+	if (pp_timer_init(ppi))
 		goto failure;
 
 	/* TODO Check the following code coming from ptpd.

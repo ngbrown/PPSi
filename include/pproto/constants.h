@@ -32,12 +32,12 @@
 #define PP_DEFAULT_MAX_FOREIGN_RECORDS		5
 #define PP_DEFAULT_PARENTS_STATS		0
 
-/* FIXME: check if the following defines are really useful */
 #define PP_TIMER_PDELAYREQ_INTERVAL 	0
 #define PP_TIMER_DELAYREQ_INTERVAL 	1
 #define PP_TIMER_SYNC_INTERVAL		2
 #define PP_TIMER_ANNOUNCE_RECEIPT 	3
 #define PP_TIMER_ANNOUNCE_INTERVAL 	4
+#define PP_TIMER_ARRAY_SIZE		5
 
 #define PP_TWO_STEP_FLAG		2
 #define PP_VERSION_PTP			2
