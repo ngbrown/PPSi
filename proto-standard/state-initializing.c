@@ -18,34 +18,34 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto failure;
 
 	/* Initialize default data set */
-	ppi->defaultDS->twoStepFlag = PP_TWO_STEP_FLAG;
+	DSDEF(ppi)->twoStepFlag = PP_TWO_STEP_FLAG;
 	/* TODO initialize clockIdentity with MAC address */
-	ppi->defaultDS->clockIdentity[3] = 0xff;
-	ppi->defaultDS->clockIdentity[4] = 0xfe;
-	ppi->defaultDS->numberPorts = 1;
-	pp_memcpy(&ppi->defaultDS->clockQuality, &rt_opts->clock_quality,
+	DSDEF(ppi)->clockIdentity[3] = 0xff;
+	DSDEF(ppi)->clockIdentity[4] = 0xfe;
+	DSDEF(ppi)->numberPorts = 1;
+	pp_memcpy(&DSDEF(ppi)->clockQuality, &rt_opts->clock_quality,
 		sizeof(ClockQuality));
-	ppi->defaultDS->priority1 = rt_opts->prio1;
-	ppi->defaultDS->priority2 = rt_opts->prio2;
-	ppi->defaultDS->domainNumber = rt_opts->domain_number;
-	ppi->defaultDS->slaveOnly = rt_opts->slave_only;
+	DSDEF(ppi)->priority1 = rt_opts->prio1;
+	DSDEF(ppi)->priority2 = rt_opts->prio2;
+	DSDEF(ppi)->domainNumber = rt_opts->domain_number;
+	DSDEF(ppi)->slaveOnly = rt_opts->slave_only;
 	if (rt_opts->slave_only)
 		ppi->defaultDS->clockQuality.clockClass = 255;
 
 	/* Initialize port data set */
 	pp_memcpy(ppi->portDS->portIdentity.clockIdentity,
 		ppi->defaultDS->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
-	ppi->portDS->portIdentity.portNumber = 1;
-	ppi->portDS->logMinDelayReqInterval = PP_DEFAULT_DELAYREQ_INTERVAL;
-	ppi->portDS->peerMeanPathDelay.seconds = 0;
-	ppi->portDS->peerMeanPathDelay.nanoseconds = 0;
-	ppi->portDS->logAnnounceInterval = rt_opts->announce_intvl;
-	ppi->portDS->announceReceiptTimeout =
+	DSPOR(ppi)->portIdentity.portNumber = 1;
+	DSPOR(ppi)->logMinDelayReqInterval = PP_DEFAULT_DELAYREQ_INTERVAL;
+	DSPOR(ppi)->peerMeanPathDelay.seconds = 0;
+	DSPOR(ppi)->peerMeanPathDelay.nanoseconds = 0;
+	DSPOR(ppi)->logAnnounceInterval = rt_opts->announce_intvl;
+	DSPOR(ppi)->announceReceiptTimeout =
 		PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT;
-	ppi->portDS->logSyncInterval = rt_opts->sync_intvl;
-	ppi->portDS->delayMechanism = PP_DEFAULT_DELAY_MECHANISM;
-	ppi->portDS->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
-	ppi->portDS->versionNumber = PP_VERSION_PTP;
+	DSPOR(ppi)->logSyncInterval = rt_opts->sync_intvl;
+	DSPOR(ppi)->delayMechanism = PP_DEFAULT_DELAY_MECHANISM;
+	DSPOR(ppi)->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
+	DSPOR(ppi)->versionNumber = PP_VERSION_PTP;
 
 	if (pp_timer_init(ppi))
 		goto failure;

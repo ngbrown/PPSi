@@ -96,6 +96,11 @@ struct pp_instance {
 	struct pp_timer *timers[PP_TIMER_ARRAY_SIZE];
 };
 
+#define DSDEF(x) x->defaultDS
+#define DSCUR(x) x->currentDS
+#define DSPAR(x) x->parentDS
+#define DSPOR(x) x->portDS
+#define DSPRO(x) x->timePropertiesDS
 
 
 /* The channel for an instance must be created and possibly destroyed. */
