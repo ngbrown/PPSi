@@ -14,5 +14,6 @@ extern int pp_vsprintf(char *buf, const char *, va_list)
 extern void pp_puts(const char *s);
 extern int pp_strnlen(const char *s, int maxlen);
 extern void *pp_memcpy(void *d, const void *s, int count);
+extern int pp_memcmp(void *s1, const void *s2, int count);
 
 #endif /* __PTP_DEP_H__ */

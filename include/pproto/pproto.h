@@ -55,7 +55,8 @@ extern struct pp_runtime_opts default_rt_opts; /* preinitialized
 /*
  * Communication channel
  */
-struct pp_channel {
+struct pp_channel
+{
 	union {
 		int fd;		/* Posix wants fid descriptor */
 		void *custom;	/* Other archs want other stuff */
@@ -65,6 +66,18 @@ struct pp_channel {
 	unsigned char peer[6];	/* Our peer's MAC address */
 };
 
+/*
+ * Foreign master record. Used to manage Foreign masters
+ */
+struct pp_frgn_master
+{
+	PortIdentity port_identity;
+	UInteger16 ann_messages;
+
+	//This one is not in the spec
+	MsgAnnounce ann;
+	MsgHeader hdr;
+};
 
 /*
  * Timer
@@ -94,6 +107,27 @@ struct pp_instance {
 	DSPort *portDS;
 	DSTimeProperties *timePropertiesDS;
 	struct pp_timer *timers[PP_TIMER_ARRAY_SIZE];
+
+	/* FIXME: check the variables below. Now inherited from ptpd src*/
+	UInteger16 number_foreign_records;
+	Integer16  max_foreign_records;
+	Integer16  foreign_record_i;
+	Integer16  foreign_record_best;
+	Boolean  record_update;
+	MsgHeader msg_tmp_header;
+	union {
+		MsgSync  sync;
+		MsgFollowUp  follow;
+		MsgDelayReq  req;
+		MsgDelayResp resp;
+		MsgPDelayReq  preq;
+		MsgPDelayResp  presp;
+		MsgPDelayRespFollowUp  prespfollow;
+		MsgManagement  manage;
+		MsgAnnounce  announce;
+		MsgSignaling signaling;
+	} msg_tmp;
+
 };
 
 #define DSDEF(x) x->defaultDS
