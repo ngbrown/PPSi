@@ -151,13 +151,13 @@ typedef struct {
 typedef struct {
 	Timestamp requestReceiptTimestamp;
 	PortIdentity requestingPortIdentity;
-} MsgPdelayResp;
+} MsgPDelayResp;
 
 /* PdelayRespFollowUp Message (table 31, page 132) */
 typedef struct {
 	Timestamp responseOriginTimestamp;
 	PortIdentity requestingPortIdentity;
-} MsgPdelayRespFollowUp;
+} MsgPDelayRespFollowUp;
 
 /* Signaling Message (table 33, page 133) */
 typedef struct {
