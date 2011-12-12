@@ -27,6 +27,11 @@ int pp_memcmp(void *s1, const void *s2, int count)
 	return memcmp(s1, s2, count);
 }
 
+void *pp_memset(void *s, int c, int count)
+{
+	return memset(s, c, count);
+}
+
 void pp_get_stamp(uint32_t *sptr)
 {
 	*sptr = htonl(time(NULL));

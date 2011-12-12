@@ -18,6 +18,7 @@ OBJ-libstd := $D/state-table-default.o \
 	$D/state-uncalibrated.o \
 	$D/state-slave.o \
 	$D/bmc.o \
+	$D/msg.o \
 	$D/open-close.o
 
 $(TARGET).o: $(LIBSTD)

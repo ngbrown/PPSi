@@ -15,5 +15,6 @@ extern void pp_puts(const char *s);
 extern int pp_strnlen(const char *s, int maxlen);
 extern void *pp_memcpy(void *d, const void *s, int count);
 extern int pp_memcmp(void *s1, const void *s2, int count);
+extern void *pp_memset(void *s, int c, int count);
 
 #endif /* __PTP_DEP_H__ */

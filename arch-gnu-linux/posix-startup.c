@@ -31,6 +31,7 @@ int main(int argc, char **argv)
 	if (!ppi)
 		exit(__LINE__);
 
+	ppi->sent_seq_id = calloc(16, sizeof(*ppi->sent_seq_id));
 	ppi->defaultDS = calloc(1, sizeof(*ppi->defaultDS));
 	ppi->currentDS = calloc(1, sizeof(*ppi->currentDS));
 	ppi->parentDS = calloc(1, sizeof(*ppi->parentDS));
@@ -38,7 +39,8 @@ int main(int argc, char **argv)
 	ppi->timePropertiesDS = calloc(1, sizeof(*ppi->timePropertiesDS));
 
 	if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
-	    || (!ppi->portDS) || (!ppi->timePropertiesDS))
+	    || (!ppi->portDS) || (!ppi->timePropertiesDS) || (!ppi->sent_seq_id)
+	   )
 		exit(__LINE__);
 
 	if (posix_open_ch(ppi, ifname)) {

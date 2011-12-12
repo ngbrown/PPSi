@@ -108,13 +108,13 @@ struct pp_instance {
 	DSTimeProperties *timePropertiesDS;
 	struct pp_timer *timers[PP_TIMER_ARRAY_SIZE];
 
-	/* FIXME: check the variables below. Now inherited from ptpd src*/
+	/* FIXME: check the variables from now on. Now inherited from ptpd src*/
 	UInteger16 number_foreign_records;
 	Integer16  max_foreign_records;
 	Integer16  foreign_record_i;
 	Integer16  foreign_record_best;
 	Boolean  record_update;
-	MsgHeader msg_tmp_header;
+
 	union {
 		MsgSync  sync;
 		MsgFollowUp  follow;
@@ -127,6 +127,11 @@ struct pp_instance {
 		MsgAnnounce  announce;
 		MsgSignaling signaling;
 	} msg_tmp;
+	UInteger16 *sent_seq_id; /* sequence id of the last message sent of the
+				  * same type
+				  */
+	MsgHeader msg_tmp_header;
+	MsgHeader pdelay_req_hdr;
 
 };
 
@@ -150,8 +155,11 @@ extern int pp_net_init(struct pp_instance *ppi);
 extern int pp_net_shutdown(struct pp_instance *ppi);
 extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len);
 extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len);
+extern UInteger32 pp_htonl(UInteger32 hostlong);
+extern UInteger16 pp_htons(UInteger16 hostlong);
 
 
+/* Timers */
 extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common
                                                       structure */
 extern int pp_timer_start(struct pp_timer *tm);
