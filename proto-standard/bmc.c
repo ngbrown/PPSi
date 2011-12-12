@@ -40,10 +40,10 @@ void m1(struct pp_instance *ppi)
 
 
 /* Local clock is synchronized to Ebest Table 16 (9.3.5) of the spec. */
-void s1(MsgHeader *header, MsgAnnounce *announce, struct pp_instance *ppi)
+void s1(MsgHeader *header, MsgAnnounce *ann, struct pp_instance *ppi)
 {
 	/* Current DS */
-	DSCUR(ppi)->stepsRemoved = announce->stepsRemoved + 1;
+	DSCUR(ppi)->stepsRemoved = ann->stepsRemoved + 1;
 
 	/* Parent DS */
 	pp_memcpy(DSPAR(ppi)->parentPortIdentity.clockIdentity,
@@ -53,19 +53,19 @@ void s1(MsgHeader *header, MsgAnnounce *announce, struct pp_instance *ppi)
 		header->sourcePortIdentity.portNumber;
 
 	pp_memcpy(DSPAR(ppi)->grandmasterIdentity,
-		  announce->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
+		  ann->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
 
 	DSPAR(ppi)->grandmasterClockQuality.clockAccuracy =
-		announce->grandmasterClockQuality.clockAccuracy;
+		ann->grandmasterClockQuality.clockAccuracy;
 	DSPAR(ppi)->grandmasterClockQuality.clockClass =
-		announce->grandmasterClockQuality.clockClass;
+		ann->grandmasterClockQuality.clockClass;
 	DSPAR(ppi)->grandmasterClockQuality.offsetScaledLogVariance =
-		announce->grandmasterClockQuality.offsetScaledLogVariance;
-	DSPAR(ppi)->grandmasterPriority1 = announce->grandmasterPriority1;
-	DSPAR(ppi)->grandmasterPriority2 = announce->grandmasterPriority2;
+		ann->grandmasterClockQuality.offsetScaledLogVariance;
+	DSPAR(ppi)->grandmasterPriority1 = ann->grandmasterPriority1;
+	DSPAR(ppi)->grandmasterPriority2 = ann->grandmasterPriority2;
 
 	/* Timeproperties DS */
-	DSPRO(ppi)->currentUtcOffset = announce->currentUtcOffset;
+	DSPRO(ppi)->currentUtcOffset = ann->currentUtcOffset;
         /* "Valid" is bit 2 in second octet of flagfield */
 	DSPRO(ppi)->currentUtcOffsetValid = ((header->flagField[1] & 0x04) ==
 					   0x04);
@@ -76,24 +76,24 @@ void s1(MsgHeader *header, MsgAnnounce *announce, struct pp_instance *ppi)
 	DSPRO(ppi)->frequencyTraceable = ((header->flagField[1] & 0x20)
 					   == 0x20);
 	DSPRO(ppi)->ptpTimescale = ((header->flagField[1] & 0x08) == 0x08);
-	DSPRO(ppi)->timeSource = announce->timeSource;
+	DSPRO(ppi)->timeSource = ann->timeSource;
 }
 
 
-/* Copy local data set into header and announce message. 9.3.4 table 12. */
-void copy_d0(MsgHeader *header, MsgAnnounce *announce, struct pp_instance *ppi)
+/* Copy local data set into header and ann message. 9.3.4 table 12. */
+void copy_d0(MsgHeader *header, MsgAnnounce *ann, struct pp_instance *ppi)
 {
-	announce->grandmasterPriority1 = DSDEF(ppi)->priority1;
-	pp_memcpy(announce->grandmasterIdentity, DSDEF(ppi)->clockIdentity,
+	ann->grandmasterPriority1 = DSDEF(ppi)->priority1;
+	pp_memcpy(ann->grandmasterIdentity, DSDEF(ppi)->clockIdentity,
 	       PP_CLOCK_IDENTITY_LENGTH);
-	announce->grandmasterClockQuality.clockClass =
+	ann->grandmasterClockQuality.clockClass =
 		DSDEF(ppi)->clockQuality.clockClass;
-	announce->grandmasterClockQuality.clockAccuracy =
+	ann->grandmasterClockQuality.clockAccuracy =
 		DSDEF(ppi)->clockQuality.clockAccuracy;
-	announce->grandmasterClockQuality.offsetScaledLogVariance =
+	ann->grandmasterClockQuality.offsetScaledLogVariance =
 		DSDEF(ppi)->clockQuality.offsetScaledLogVariance;
-	announce->grandmasterPriority2 = DSDEF(ppi)->priority2;
-	announce->stepsRemoved = 0;
+	ann->grandmasterPriority2 = DSDEF(ppi)->priority2;
+	ann->stepsRemoved = 0;
 	pp_memcpy(header->sourcePortIdentity.clockIdentity,
 	       DSDEF(ppi)->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
 }
