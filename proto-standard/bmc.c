@@ -315,5 +315,3 @@ UInteger8 bmc(struct pp_frgn_master *frgn_master,
 				   &frgn_master[best].ann,
 				   rt_opts,ppi));
 }
-
-
