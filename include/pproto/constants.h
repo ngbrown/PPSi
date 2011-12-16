@@ -1,6 +1,9 @@
 #ifndef __PTP_CONSTANTS_H__
 #define __PTP_CONSTANTS_H__
 
+/* general purpose constants */
+#define PP_NSEC_PER_SEC 1000000000
+
 /* implementation specific constants */
 #define PP_DEFAULT_INBOUND_LATENCY		0	/* in nsec */
 #define PP_DEFAULT_OUTBOUND_LATENCY		0	/* in nsec */
