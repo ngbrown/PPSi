@@ -2,7 +2,7 @@
 
 # This trivially compiles all known-good configurations
 
-function build_one () {
+build_one () {
     make -s clean
     echo "####################"
     echo "Build for " "$1"
@@ -11,13 +11,13 @@ function build_one () {
     test -f pproto && size pproto
 }
 
-function build_diags () {
+build_diags () {
     build_one "arch \"$ARCH\", ext \"$PROTO_EXT\", no diag"
     build_one "arch \"$ARCH\", ext \"$PROTO_EXT\", mini diag" HAS_DIAG=y
     build_one "arch \"$ARCH\", ext \"$PROTO_EXT\", full diag" HAS_FULL_DIAG=y
 }
 
-function build_ext () {
+build_ext () {
     unset PROTO_EXT
     build_diags
     #export PROTO_EXT=one
