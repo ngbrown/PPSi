@@ -5,8 +5,8 @@ ENTRY(_pproto_start)
 SECTIONS
 {
 	. = 0x10000000; /* A random address, non-standard by choice*/
-	_pproto_start = .;
 	.text : {
+		_pproto_start = .;
 		*(.boot)
 		*(.text)
 	}
