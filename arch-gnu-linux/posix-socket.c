@@ -4,6 +4,7 @@
 
 /* Socket interface for GNU/Linux (and most likely other posix systems */
 
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
@@ -17,16 +18,40 @@
 #include <pproto/diag.h>
 #include "posix.h"
 
+static int ch_check_stat = 0;
 
-/* Receive and send is trivial */
+/* Receive and send is *not* so trivial */
 int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len)
 {
-	return recv(ppi->ch.fd, pkt, len, 0);
+	struct pp_channel *ch1 = NULL, *ch2 = NULL;
+
+	switch (ch_check_stat) {
+		case 0:
+			ch1 = &(ppi->net_path->evt_ch);
+			ch2 = &(ppi->net_path->gen_ch);
+			break;
+		case 1:
+			ch1 = &(ppi->net_path->gen_ch);
+			ch2 = &(ppi->net_path->evt_ch);
+			break;
+		default:
+			/* Impossible! */
+			break;
+	}
+
+	if (ch1->pkt_present)
+		return recv(ch1->fd, pkt, len, 0);
+
+	if (ch2->pkt_present)
+		return recv(ch2->fd, pkt, len, 0);
+
+	ch_check_stat = (ch_check_stat + 1) % 2;
+	return -1;
 }
 
 int posix_send_packet(struct pp_instance *ppi, void *pkt, int len)
 {
-	return send(ppi->ch.fd, pkt, len, 0);
+	return send(/*FIXME which socket?! ppi->ch.fd*/ -1, pkt, len, 0);
 }
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len)
@@ -37,6 +62,14 @@ int pp_send_packet(struct pp_instance *ppi, void *pkt, int len)
 /* To open a channel we must bind to an interface and so on */
 int posix_open_ch(struct pp_instance *ppi, char *ifname)
 {
+	/* TODO. In our first implementation, inherited by ptpd-2.1.0, we
+	 * will handle UDP/IP packets. So, SOCK_DGRAM, IPPROTO_UDP, and all
+	 * of standard UDP must be used when opening a socket. The port number
+	 * should be passed to this function. (see posix-socket file too).
+	 *
+	 * Moreover, ptpd makes use of multicast, so setsockopt with
+	 * IP_ADD_MEMBERSHIP must be called.
+	 */
 	int sock, iindex;
 	struct ifreq ifr;
 	struct sockaddr_ll addr;
@@ -63,7 +96,9 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname)
 		close(sock);
 		return -1;
 	}
+	/* FIXME
 	memcpy(ppi->ch.addr, ifr.ifr_hwaddr.sa_data, 6);
+	*/
 
 	/* bind and setsockopt */
 	memset(&addr, 0, sizeof(addr));
@@ -75,17 +110,27 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname)
 		close(sock);
 		return -1;
 	}
-
+	/* FIXME
 	ppi->ch.fd = sock;
+	*/
 	return 0;
 }
 
 /*
  * Inits all the network stuff
- * TODO: check with the posix_open_ch, maybe it's the same
  */
 int posix_net_init(struct pp_instance *ppi)
 {
+	char *ifname = "eth0"; /* TODO get it from rt_opts, or find interface if
+				* not present in cmd line */
+
+	/* TODO: how to handle udp ports? current pp_open_ch does not support
+	 * it. Is it arch-specific? Actually, it is net protocol specific.
+	 * We must decide how generic we want to be. Will we ever handle
+	 * non-udp? Probably yes.
+	 */
+	posix_open_ch(ppi,ifname); /* FIXME: to be called twice, one for evt,
+				    * one for general ? */
 	return 0;
 }
 
@@ -100,6 +145,54 @@ int pp_net_init(struct pp_instance *ppi)
 int posix_net_shutdown(struct pp_instance *ppi)
 {
 	return 0;
+}
+
+int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
+{
+	fd_set set;
+	int i;
+	int ret = 0;
+	int maxfd;
+
+	if (delay_ms != -1) {
+		/* Wait for a packet or for the timeout */
+		ppi->tv.tv_sec = delay_ms / 1000;
+		ppi->tv.tv_usec = (delay_ms % 1000) * 1000;
+	}
+
+	ppi->net_path->gen_ch.pkt_present = 0;
+	ppi->net_path->evt_ch.pkt_present = 0;
+
+	maxfd = (ppi->net_path->gen_ch.fd > ppi->net_path->evt_ch.fd) ?
+		 ppi->net_path->gen_ch.fd : ppi->net_path->evt_ch.fd;
+	FD_ZERO(&set);
+	FD_SET(ppi->net_path->gen_ch.fd, &set);
+	FD_SET(ppi->net_path->evt_ch.fd, &set);
+	i = select(maxfd + 1, &set, NULL, NULL, &ppi->tv);
+
+	if (i < 0 && errno != EINTR)
+		exit(__LINE__);
+
+	if (i < 0) {
+		ret = i;
+		goto _end;
+	}
+
+	if (i == 0)
+		goto _end;
+
+	if (FD_ISSET(ppi->net_path->gen_ch.fd,&set)) {
+		ret++;
+		ppi->net_path->gen_ch.pkt_present = 1;
+	}
+
+	if (FD_ISSET(ppi->net_path->evt_ch.fd,&set)) {
+		ret++;
+		ppi->net_path->evt_ch.pkt_present = 1;
+	}
+
+_end:
+	return ret;
 }
 
 int pp_net_shutdown(struct pp_instance *ppi)

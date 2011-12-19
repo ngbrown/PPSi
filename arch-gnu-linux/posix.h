@@ -7,6 +7,7 @@
  */
 
 extern int posix_net_init(struct pp_instance *ppi);
+extern int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms);
 
 extern int posix_open_ch(struct pp_instance *ppi, char *name);
 

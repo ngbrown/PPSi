@@ -27,19 +27,12 @@ void posix_main_loop(struct pp_instance *ppi)
 	while (1) {
 		fd_set set;
 		int i;
-		struct timeval tv;
 		unsigned char packet[1500];
 
-		/* Wait for a packet or for the timeout */
-		tv.tv_sec = delay_ms / 1000;
-		tv.tv_usec = (delay_ms % 1000) * 1000;
-
 	again:
-		FD_ZERO(&set);
-		FD_SET(ppi->ch.fd, &set);
-		i = select(ppi->ch.fd + 1, &set, NULL, NULL, &tv);
-		if (i < 0 && errno != EINTR)
-			exit(__LINE__);
+
+		i = posix_net_check_pkt(ppi, delay_ms);
+
 		if (i < 0)
 			continue;
 
@@ -54,12 +47,16 @@ void posix_main_loop(struct pp_instance *ppi)
 		 */
 		i = posix_recv_packet(ppi, packet, sizeof(packet));
 		/* FIXME
-		if (i < sizeof(struct pp_packet))
+		if (i < sizeof(struct pp_packet)) {
+			delay_ms = -1;
 			goto again;
+		}
 		*/
 		/* Warning: PP_PROTO_NR is endian-agnostic by design */
-		if ( ((struct ethhdr *)packet)->h_proto != htons(PP_PROTO_NR))
+		if ( ((struct ethhdr *)packet)->h_proto != htons(PP_PROTO_NR)) {
+			delay_ms = -1;
 			goto again;
+		}
 
 		delay_ms = pp_state_machine(ppi, packet, i);
 	}

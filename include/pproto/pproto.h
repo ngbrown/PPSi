@@ -64,6 +64,7 @@ struct pp_channel
 	void *arch_data;	/* Other arch-private info, if any */
 	unsigned char addr[6];	/* Our own MAC address */
 	unsigned char peer[6];	/* Our peer's MAC address */
+	int pkt_present;
 };
 
 /*
@@ -88,6 +89,17 @@ struct pp_timer
 	uint32_t interval;
 };
 
+/*
+ * Net Path
+ */
+struct pp_net_path
+{
+	struct pp_channel evt_ch;
+	struct pp_channel gen_ch;
+	Integer32 ucast_addr;
+	Integer32 mcast_addr;
+	Integer32 peer_mcast_addr;
+};
 
 /*
  * Structure for the standard protocol
@@ -97,8 +109,9 @@ struct pp_instance {
 	int next_state, next_delay;	/* set by state processing */
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
-	struct pp_channel ch;
 	struct pp_runtime_opts *rt_opts;
+	struct pp_net_path *net_path;
+	struct timeval tv;
 
 	/* Data sets */
 	DSDefault *defaultDS;
