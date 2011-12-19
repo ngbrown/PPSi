@@ -6,6 +6,7 @@
  */
 #include <stdarg.h>
 #include <pproto/pproto.h>
+#include <pproto/diag.h>
 
 #define PP_BUF 128		/* We prefer small targets */
 

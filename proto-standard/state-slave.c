@@ -2,7 +2,6 @@
  * FIXME: header
  */
 #include <pproto/pproto.h>
-#include <dep/dep.h>
 #include "state-common-fun.h"
 
 int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)

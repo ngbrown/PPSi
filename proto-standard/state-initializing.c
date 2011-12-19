@@ -2,7 +2,7 @@
  * FIXME: header
  */
 #include <pproto/pproto.h>
-#include <dep/dep.h>
+#include <pproto/diag.h>
 
 /*
  * Initializes network and other stuff

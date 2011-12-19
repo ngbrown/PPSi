@@ -1,14 +1,8 @@
 /*
- * FIXME: header
+ * Alessandro Rubini and Aurelio Colosimo for CERN, 2011 -- public domain
  */
-#ifndef __PTP_DEP_H__
-#define __PTP_DEP_H__
-
-/* Our printf, that is implemented internally */
-extern int pp_printf(const char *fmt, ...)
-	__attribute__((format(printf,1,2)));
-extern int pp_vsprintf(char *buf, const char *, va_list)
-        __attribute__ ((format (printf, 2, 0)));
+#ifndef __PTP_LIB_H__
+#define __PTP_LIB_H__
 
 /* We base on puts and a few more functions: each arch must have it */
 extern void pp_puts(const char *s);

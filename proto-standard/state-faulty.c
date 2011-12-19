@@ -2,7 +2,7 @@
  * FIXME: header
  */
 #include <pproto/pproto.h>
-#include <dep/dep.h>
+#include <pproto/diag.h>
 
 /*
  * Fault troubleshooting. Now only prints an error messages and comes back to

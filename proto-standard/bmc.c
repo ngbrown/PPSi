@@ -2,9 +2,6 @@
  * FIXME header
  */
 #include <pproto/pproto.h>
-#include <dep/dep.h>
-
-
 
 /* Local clock is becoming Master. Table 13 (9.3.5) of the spec. */
 void m1(struct pp_instance *ppi)
