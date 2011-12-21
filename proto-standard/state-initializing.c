@@ -54,13 +54,11 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	 *
 	 * Init all remaining stuff:
 	 * initClock(rtOpts, ptpClock);
-	 *
-	 * Set myself as master (in case will not receive any announce):
-	 * m1(ptpClock);
-	 *
-	 * Prepare a message:
-	 * msgPackHeader(ptpClock->msgObuf,ptpClock);
 	 */
+
+	m1(ppi);
+
+	msg_pack_header(ppi->buf_out,ppi);
 
 	ppi->next_state = PPS_LISTENING;
 	return 0;

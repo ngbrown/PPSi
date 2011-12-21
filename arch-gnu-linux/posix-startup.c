@@ -38,10 +38,12 @@ int main(int argc, char **argv)
 	ppi->portDS = calloc(1, sizeof(*ppi->portDS));
 	ppi->timePropertiesDS = calloc(1, sizeof(*ppi->timePropertiesDS));
 	ppi->net_path = calloc(1, sizeof(*ppi->net_path));
+	ppi->buf_out = calloc(1, PP_PACKET_SIZE);
+	ppi->buf_in = calloc(1, PP_PACKET_SIZE);
 
 	if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
 	    || (!ppi->portDS) || (!ppi->timePropertiesDS) || (!ppi->sent_seq_id)
-	    || (!ppi->net_path)
+	    || (!ppi->net_path) || (!ppi->buf_out) || (!ppi->buf_in)
 	   )
 		exit(__LINE__);
 

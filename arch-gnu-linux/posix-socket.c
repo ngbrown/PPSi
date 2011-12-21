@@ -14,6 +14,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
+
 #include <pproto/pproto.h>
 #include <pproto/diag.h>
 #include "posix.h"
@@ -197,3 +198,24 @@ _end:
 
 int pp_net_shutdown(struct pp_instance *ppi)
 __attribute__((alias("posix_net_shutdown")));
+
+
+extern UInteger32 posix_htonl(UInteger32 hostlong)
+{
+	/* FIXME: compile (link) fails (arch 64 bit)
+	 * return hotnl(hostlong); */
+	return 0; /* FIXME */
+}
+
+extern UInteger16 posix_htons(UInteger16 hostshort)
+{
+	/* FIXME: compile (link) fails (arch 64 bit)
+	 * return hotns(hostlong); */
+	return 0; /* FIXME */
+}
+
+UInteger32 pp_htonl(UInteger32 hostlong)
+__attribute__((alias("posix_htonl")));
+
+UInteger16 pp_htons(UInteger16 hostlong)
+__attribute__((alias("posix_htons")));

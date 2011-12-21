@@ -127,6 +127,8 @@ struct pp_instance {
 	Integer16  foreign_record_i;
 	Integer16  foreign_record_best;
 	Boolean  record_update;
+	Octet *buf_out;
+	Octet *buf_in;
 
 	union {
 		MsgSync  sync;
@@ -169,7 +171,7 @@ extern int pp_net_shutdown(struct pp_instance *ppi);
 extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len);
 extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len);
 extern UInteger32 pp_htonl(UInteger32 hostlong);
-extern UInteger16 pp_htons(UInteger16 hostlong);
+extern UInteger16 pp_htons(UInteger16 hostshort);
 
 
 /* Timers */
