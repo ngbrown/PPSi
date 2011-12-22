@@ -202,16 +202,12 @@ __attribute__((alias("posix_net_shutdown")));
 
 extern UInteger32 posix_htonl(UInteger32 hostlong)
 {
-	/* FIXME: compile (link) fails (arch 64 bit)
-	 * return hotnl(hostlong); */
-	return 0; /* FIXME */
+	return htonl(hostlong);
 }
 
 extern UInteger16 posix_htons(UInteger16 hostshort)
 {
-	/* FIXME: compile (link) fails (arch 64 bit)
-	 * return hotns(hostlong); */
-	return 0; /* FIXME */
+	return htons(hostshort);
 }
 
 UInteger32 pp_htonl(UInteger32 hostlong)
