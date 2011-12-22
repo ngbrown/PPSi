@@ -62,7 +62,7 @@ void msg_pack_header(void *buf, struct pp_instance *ppi)
 
 
 /* Pack Sync message into out buffer of ppi */
-void msg_pack_sync(void *buf, Timestamp * orig_tstamp, struct pp_instance *ppi)
+void msg_pack_sync(void *buf, Timestamp *orig_tstamp, struct pp_instance *ppi)
 {
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;

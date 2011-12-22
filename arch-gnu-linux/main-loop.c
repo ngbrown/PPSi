@@ -46,12 +46,12 @@ void posix_main_loop(struct pp_instance *ppi)
 		 * the pending timeout
 		 */
 		i = posix_recv_packet(ppi, packet, sizeof(packet));
-		/* FIXME
-		if (i < sizeof(struct pp_packet)) {
+
+		if (i < PP_PACKET_SIZE) {
 			delay_ms = -1;
 			goto again;
 		}
-		*/
+
 		/* Warning: PP_PROTO_NR is endian-agnostic by design */
 		if ( ((struct ethhdr *)packet)->h_proto != htons(PP_PROTO_NR)) {
 			delay_ms = -1;

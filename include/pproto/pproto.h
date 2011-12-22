@@ -106,7 +106,7 @@ struct pp_net_path
  */
 struct pp_instance {
 	int state;
-	int next_state, next_delay;	/* set by state processing */
+	int next_state, next_delay, is_new_state; /* set by state processing */
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
 	struct pp_runtime_opts *rt_opts;
@@ -127,8 +127,9 @@ struct pp_instance {
 	Integer16  foreign_record_i;
 	Integer16  foreign_record_best;
 	Boolean  record_update;
+	struct pp_frgn_master *frgn_master;
 	Octet *buf_out;
-	Octet *buf_in;
+	Octet *buf_in;	/* FIXME really useful? Probably not*/
 
 	union {
 		MsgSync  sync;
@@ -177,10 +178,44 @@ extern UInteger16 pp_htons(UInteger16 hostshort);
 /* Timers */
 extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common
                                                       structure */
-extern int pp_timer_start(struct pp_timer *tm);
+extern int pp_timer_start(uint32_t interval, struct pp_timer *tm);
 extern int pp_timer_stop(struct pp_timer *tm);
 extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
 
+
+/* bmc.c */
+extern void m1(struct pp_instance *ppi);
+extern void s1(MsgHeader *header, MsgAnnounce *ann, struct pp_instance *ppi);
+extern UInteger8 bmc(struct pp_frgn_master *frgn_master,
+	      struct pp_runtime_opts *rt_opts, struct pp_instance *ppi);
+
+/* msg.c */
+extern void msg_pack_header(void *buf, struct pp_instance *ppi);
+extern void msg_unpack_header(void *buf, MsgHeader *hdr);
+extern void msg_pack_sync(void *buf, Timestamp *orig_tstamp,
+		struct pp_instance *ppi);
+extern void msg_unpack_sync(void *buf, MsgSync *sync);
+extern void msg_pack_announce(void *buf, struct pp_instance *ppi);
+extern void msg_unpack_announce(void *buf, MsgAnnounce *ann);
+extern void msg_pack_follow_up(void *buf, Timestamp *prec_orig_tstamp,
+		struct pp_instance *ppi);
+extern void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup);
+extern void msg_pack_pdelay_req(void *buf, Timestamp *orig_tstamp,
+		struct pp_instance *ppi);
+extern void msg_unpack_pdelay_req(void *buf, MsgPDelayReq *pdelay_req);
+extern void msg_pack_delay_req(void *buf, Timestamp *orig_tstamp,
+		struct pp_instance *ppi);
+extern void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req);
+extern void msg_pack_delay_resp(void *buf, MsgHeader *hdr,
+		Timestamp *rcv_tstamp, struct pp_instance *ppi);
+extern void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp);
+extern void msg_pack_pdelay_resp(void *buf, MsgHeader *hdr,
+		Timestamp *req_rec_tstamp, struct pp_instance *ppi);
+extern void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp);
+extern void msg_pack_pdelay_resp_followup(void *buf, MsgHeader *hdr,
+	Timestamp *resp_orig_tstamp, struct pp_instance* ppi);
+extern void msg_unpack_pdelay_resp_followup(void *buf,
+	MsgPDelayRespFollowUp *presp_follow);
 
 /* Get a timestamp */
 extern void pp_get_stamp(uint32_t *sptr);

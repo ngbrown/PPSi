@@ -18,6 +18,10 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 	struct pp_state_table_item *ip;
 	int state, err;
 
+	if (packet) {
+		msg_unpack_header(packet, &ppi->msg_tmp_header);
+	}
+
 	state = ppi->state;
 
 	/* a linear search is affordable up to a few dozen items */
@@ -27,6 +31,7 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		/* found: handle this state */
 		ppi->next_state = state;
 		ppi->next_delay = 0;
+		ppi->is_new_state = 0;
 		pp_diag_fsm(ppi, 0 /* enter */, plen);
 		err = ip->f1(ppi, packet, plen);
 		if (!err && ip->f2)
@@ -36,7 +41,10 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		pp_diag_fsm(ppi, 1 /* leave */, 0 /* unused */);
 
 		/* done: accept next state and delay */
-		ppi->state = ppi->next_state;
+		if (ppi->state != ppi->next_state) {
+			ppi->state = ppi->next_state;
+			ppi->is_new_state = 1;
+		}
 		return ppi->next_delay;
 	}
 	/* Unknwon state, can't happen */

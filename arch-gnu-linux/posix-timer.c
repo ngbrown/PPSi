@@ -79,7 +79,7 @@ extern int posix_timer_expired(struct pp_timer *tm)
 int pp_timer_init(struct pp_instance *ppi)
 	__attribute__((alias("posix_timer_init")));
 
-int pp_timer_start(struct pp_timer *tm)
+int pp_timer_start(uint32_t interval, struct pp_timer *tm)
 	__attribute__((alias("posix_timer_start")));
 
 int pp_timer_stop(struct pp_timer *tm)
