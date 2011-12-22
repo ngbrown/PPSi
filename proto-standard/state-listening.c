@@ -69,13 +69,13 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		/* TODO addForeign(ptpClock->msgIbuf,header,ptpClock); */
 
 		ppi->record_update = TRUE;
+	}
 
-		if(ppi->record_update) {
-			/* FIXME diag DBGV("event STATE_DECISION_EVENT\n"); */
-			ppi->record_update = FALSE;
-			ppi->next_state = bmc(ppi->frgn_master,
-					      ppi->rt_opts, ppi);
-		}
+	if(ppi->record_update) {
+		/* FIXME diag DBGV("event STATE_DECISION_EVENT\n"); */
+		ppi->record_update = FALSE;
+		ppi->next_state = bmc(ppi->frgn_master,
+				      ppi->rt_opts, ppi);
 	}
 
 	/* Leaving this state */
