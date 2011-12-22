@@ -78,5 +78,10 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		}
 	}
 
+	/* Leaving this state */
+	if (ppi->next_state != ppi->state) {
+		pp_timer_stop(ppi->timers[PP_TIMER_ANNOUNCE_RECEIPT]);
+	}
+
 	return 0;
 }
