@@ -25,7 +25,6 @@ void posix_main_loop(struct pp_instance *ppi)
 	 */
 	delay_ms = pp_state_machine(ppi, NULL, 0);
 	while (1) {
-		fd_set set;
 		int i;
 		unsigned char packet[1500];
 
