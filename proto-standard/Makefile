@@ -17,6 +17,7 @@ OBJ-libstd := $D/state-table-default.o \
 	$D/state-passive.o \
 	$D/state-uncalibrated.o \
 	$D/state-slave.o \
+	$D/state-common-fun.o \
 	$D/bmc.o \
 	$D/msg.o \
 	$D/open-close.o
