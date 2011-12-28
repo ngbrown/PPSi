@@ -2,6 +2,7 @@
  * FIXME: header
  */
 #include <pproto/pproto.h>
+#include <dep/dep.h>
 #include "state-common-fun.h"
 
 void st_com_execute_slave(struct pp_instance *ppi)
@@ -65,7 +66,7 @@ int st_com_check_record_update(struct pp_instance *ppi)
 	return 0;
 }
 
-void st_com_add_foreign(unsigned char *buf, MsgHeader *header,
+void st_com_add_foreign(unsigned char *buf, MsgHeader *hdr,
 			struct pp_instance *ppi)
 {
 /*TODO "translate" it into ptp-wr structs*/
@@ -124,4 +125,37 @@ void st_com_add_foreign(unsigned char *buf, MsgHeader *header,
 			ptpClock->max_foreign_records;
 	}
 #endif  /* _FROM_PTPD_2_1_0_ */
+}
+
+
+int st_com_slave_handle_announce(unsigned char *buf, int len,
+				  struct pp_instance *ppi)
+{
+	MsgHeader *hdr = &ppi->msg_tmp_header;
+
+	if (len < PP_ANNOUNCE_LENGTH)
+		return -1;
+
+	if (ppi->is_from_self)
+		return 0;
+
+	/*
+	 * Valid announce message is received : BMC algorithm
+	 * will be executed
+	 */
+	ppi->record_update = TRUE;
+
+	if (!ppi->is_from_cur_par) {
+		msg_unpack_announce(buf, &ppi->msg_tmp.announce);
+		s1(hdr, &ppi->msg_tmp.announce, ppi);
+	}
+	else {
+		/* st_com_add_foreign takes care of announce unpacking */
+		st_com_add_foreign(buf, hdr, ppi);
+	}
+
+	/*Reset Timer handling Announce receipt timeout*/
+	st_com_restart_annrec_timer(ppi);
+
+	return 0;
 }
