@@ -7,8 +7,10 @@
 
 
 /* Unpack header from in buffer to msg_tmp_header field */
-void msg_unpack_header(void *buf, MsgHeader *hdr)
+void msg_unpack_header(void *buf, struct pp_instance *ppi)
 {
+	MsgHeader *hdr = &ppi->msg_tmp_header;
+
 	hdr->transportSpecific = (*(Nibble *) (buf + 0)) >> 4;
 	hdr->messageType = (*(Enumeration4 *) (buf + 0)) & 0x0F;
 	hdr->versionPTP = (*(UInteger4 *) (buf + 1)) & 0x0F;
@@ -30,6 +32,16 @@ void msg_unpack_header(void *buf, MsgHeader *hdr)
 	hdr->sequenceId = pp_htons(*(UInteger16 *) (buf + 30));
 	hdr->controlField = (*(UInteger8 *) (buf + 32));
 	hdr->logMessageInterval = (*(Integer8 *) (buf + 33));
+
+	if (DSPOR(ppi)->portIdentity.portNumber ==
+	    ppi->msg_tmp_header.sourcePortIdentity.portNumber
+	    && !pp_memcmp(ppi->msg_tmp_header.sourcePortIdentity.clockIdentity,
+			DSPOR(ppi)->portIdentity.clockIdentity,
+			PP_CLOCK_IDENTITY_LENGTH))
+		ppi->is_from_self = 1;
+	else
+		ppi->is_from_self = 0;
+
 
 /* FIXME: diag
 #ifdef PTPD_DBG

@@ -16,12 +16,13 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto state_updated;
 
 	if (ppi->msg_tmp_header.messageType == PPM_ANNOUNCE) {
-		/* TODO check isFromSelf?
-		if (isFromSelf) {
+
+		if (ppi->is_from_self) {
+			/* FIXME diag
 			DBGV("HandleAnnounce : Ignore message from self \n");
+			*/
 			return;
 		}
-		*/
 
 		/* FIXME diag
 		 * DBGV("Announce message from another foreign master");

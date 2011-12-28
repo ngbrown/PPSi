@@ -19,7 +19,7 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 	int state, err;
 
 	if (packet) {
-		msg_unpack_header(packet, &ppi->msg_tmp_header);
+		msg_unpack_header(packet, ppi);
 	}
 
 	state = ppi->state;

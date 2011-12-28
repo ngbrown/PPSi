@@ -148,6 +148,7 @@ struct pp_instance {
 				  */
 	MsgHeader msg_tmp_header;
 	MsgHeader pdelay_req_hdr;
+	int is_from_self;
 
 };
 
@@ -191,7 +192,7 @@ extern UInteger8 bmc(struct pp_frgn_master *frgn_master,
 
 /* msg.c */
 extern void msg_pack_header(void *buf, struct pp_instance *ppi);
-extern void msg_unpack_header(void *buf, MsgHeader *hdr);
+extern void msg_unpack_header(void *buf, struct pp_instance *ppi);
 extern void msg_pack_sync(void *buf, Timestamp *orig_tstamp,
 		struct pp_instance *ppi);
 extern void msg_unpack_sync(void *buf, MsgSync *sync);

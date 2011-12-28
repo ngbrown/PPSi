@@ -19,7 +19,7 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (ppi->msg_tmp_header.messageType == PPM_PDELAY_REQ) {
 #ifdef _FROM_PTPD_2_1_0_
 		/* TODO "translate" it into ptp-wr structs*/
-		if (isFromSelf) {
+		if (ppi->is_from_self) {
 			/*
 			 * Get sending timestamp from IP stack
 			 * with So_TIMESTAMP
