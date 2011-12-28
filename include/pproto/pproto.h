@@ -147,8 +147,8 @@ struct pp_instance {
 				  */
 	MsgHeader msg_tmp_header;
 	MsgHeader pdelay_req_hdr;
-	int is_from_self;
-
+	Boolean is_from_self;
+	Boolean is_from_cur_par;
 };
 
 #define DSDEF(x) x->defaultDS

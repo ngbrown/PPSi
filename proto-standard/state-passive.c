@@ -16,7 +16,8 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (st_com_check_record_update(ppi))
 		goto state_updated;
 
-	if (ppi->msg_tmp_header.messageType == PPM_PDELAY_REQ) {
+	switch (ppi->msg_tmp_header.messageType) {
+	case PPM_PDELAY_REQ:
 #ifdef _FROM_PTPD_2_1_0_
 		/* TODO "translate" it into ptp-wr structs*/
 		if (ppi->is_from_self) {
@@ -42,6 +43,12 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			break;
 		}
 #endif /* _FROM_PTPD_2_1_0_ */
+		break;
+
+	default:
+		/* disreguard, nothing to do */
+		break;
+
 	}
 
 	st_com_execute_slave(ppi);

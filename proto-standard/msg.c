@@ -42,6 +42,14 @@ void msg_unpack_header(void *buf, struct pp_instance *ppi)
 	else
 		ppi->is_from_self = 0;
 
+	if (!pp_memcmp(DSPAR(ppi)->parentPortIdentity.clockIdentity,
+			hdr->sourcePortIdentity.clockIdentity,
+			PP_CLOCK_IDENTITY_LENGTH) &&
+			(DSPAR(ppi)->parentPortIdentity.portNumber ==
+			hdr->sourcePortIdentity.portNumber))
+		ppi->is_from_cur_par = 1;
+	else
+		ppi->is_from_cur_par = 0;
 
 /* FIXME: diag
 #ifdef PTPD_DBG
