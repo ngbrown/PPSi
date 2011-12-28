@@ -61,12 +61,12 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	msg_pack_header(ppi->buf_out,ppi);
 
 	ppi->next_state = PPS_LISTENING;
-	ppi->next_delay = PP_DEFAULT_NEXT_DELAY;
+	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 	return 0;
 
 failure:
 	pp_printf("Failed to initialize network\n");
 	ppi->next_state = PPS_FAULTY;
-	ppi->next_delay = PP_DEFAULT_NEXT_DELAY;
+	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 	return 0;
 }
