@@ -1,6 +1,6 @@
 # Alessandro Rubini for CERN, 2011 -- public domain
 
-CFLAGS += -ffreestanding -Os
+CFLAGS += -ffreestanding -Os -fno-stack-protector
 ARCH_LDFLAGS = -nostdlib -static -T $(ARCH).lds
 
 # All files are under A (short for ARCH): I'm lazy
