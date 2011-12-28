@@ -111,7 +111,6 @@ struct pp_instance {
 	void *ext_data;			/* if protocol ext needs it */
 	struct pp_runtime_opts *rt_opts;
 	struct pp_net_path *net_path;
-	struct timeval tv;
 
 	/* Data sets */
 	DSDefault *defaultDS;

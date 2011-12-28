@@ -154,11 +154,13 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 	int i;
 	int ret = 0;
 	int maxfd;
+	struct posix_arch_data *arch_data =
+		(struct posix_arch_data *)ppi->arch_data;
 
 	if (delay_ms != -1) {
 		/* Wait for a packet or for the timeout */
-		ppi->tv.tv_sec = delay_ms / 1000;
-		ppi->tv.tv_usec = (delay_ms % 1000) * 1000;
+		arch_data->tv.tv_sec = delay_ms / 1000;
+		arch_data->tv.tv_usec = (delay_ms % 1000) * 1000;
 	}
 
 	ppi->net_path->gen_ch.pkt_present = 0;
@@ -169,7 +171,7 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 	FD_ZERO(&set);
 	FD_SET(ppi->net_path->gen_ch.fd, &set);
 	FD_SET(ppi->net_path->evt_ch.fd, &set);
-	i = select(maxfd + 1, &set, NULL, NULL, &ppi->tv);
+	i = select(maxfd + 1, &set, NULL, NULL, &arch_data->tv);
 
 	if (i < 0 && errno != EINTR)
 		exit(__LINE__);

@@ -40,12 +40,13 @@ int main(int argc, char **argv)
 	ppi->net_path = calloc(1, sizeof(*ppi->net_path));
 	ppi->buf_out = calloc(1, PP_PACKET_SIZE);
 	ppi->buf_in = calloc(1, PP_PACKET_SIZE);
-	ppi->frgn_master = calloc(1, sizeof(*ppi->frgn_master));;
+	ppi->frgn_master = calloc(1, sizeof(*ppi->frgn_master));
+	ppi->arch_data = calloc(1, sizeof(struct posix_arch_data));
 
 	if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
 	    || (!ppi->portDS) || (!ppi->timePropertiesDS) || (!ppi->sent_seq_id)
 	    || (!ppi->net_path) || (!ppi->buf_out) || (!ppi->buf_in)
-	    || (!ppi->frgn_master)
+	    || (!ppi->frgn_master) || (!ppi->arch_data)
 	   )
 		exit(__LINE__);
 

@@ -6,6 +6,11 @@
  * These are the functions provided by the various posix files
  */
 
+struct posix_arch_data
+{
+	struct timeval tv;
+};
+
 extern int posix_net_init(struct pp_instance *ppi);
 extern int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms);
 
