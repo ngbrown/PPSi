@@ -53,5 +53,7 @@ state_updated:
 		pp_timer_stop(ppi->timers[PP_TIMER_PDELAYREQ_INTERVAL]);
 	}
 
+	ppi->next_delay = PP_DEFAULT_NEXT_DELAY;
+
 	return 0;
 }

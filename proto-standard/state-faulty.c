@@ -12,7 +12,7 @@
 int pp_faulty(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	pp_printf("event FAULT_CLEARED\n");
-	ppi->next_state = 1000;
-	ppi->next_delay = PPS_INITIALIZING;
+	ppi->next_state = PPS_INITIALIZING;
+	ppi->next_delay = PP_DEFAULT_NEXT_DELAY;
 	return 0;
 }
