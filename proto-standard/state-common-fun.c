@@ -225,6 +225,9 @@ int st_com_slave_handle_followup(unsigned char *buf, int len,
 
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
+	if (len < PP_FOLLOW_UP_LENGTH)
+		return -1;
+
 	if (!ppi->is_from_cur_par) {
 		/* FIXME diag
 		DBGV("SequenceID doesn't match with "
