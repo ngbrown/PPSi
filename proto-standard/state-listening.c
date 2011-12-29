@@ -4,7 +4,6 @@
 #include <pproto/pproto.h>
 #include "state-common-fun.h"
 
-
 int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	if (ppi->is_new_state) {

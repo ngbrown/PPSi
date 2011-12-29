@@ -20,7 +20,7 @@ int pp_uncalibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_FOLLOW_UP:
-		e = st_com_slave_handle_followup(pkt, plen);
+		e = st_com_slave_handle_followup(pkt, plen, ppi);
 		break;
 
 	default:

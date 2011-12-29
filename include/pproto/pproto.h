@@ -132,6 +132,10 @@ struct pp_instance {
 	TimeInternal sync_receive_time;
 	UInteger16 recv_sync_sequence_id;
 	TimeInternal last_sync_correction_field;
+	TimeInternal pdelay_req_send_time;
+	TimeInternal pdelay_req_receive_time;
+	TimeInternal pdelay_resp_send_time;
+	TimeInternal pdelay_resp_receive_time;
 
 	union {
 		MsgSync  sync;
@@ -188,6 +192,7 @@ extern int pp_timer_stop(struct pp_timer *tm);
 extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
 
 /* Servo */
+extern void pp_init_clock(struct pp_instance *ppi);
 extern void pp_update_offset(TimeInternal *send_time, TimeInternal *recv_time,
 			TimeInternal *correctionField, struct pp_instance *ppi);
 			/* FIXME: offset_from_master_filter: put it in ppi */

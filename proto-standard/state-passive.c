@@ -19,7 +19,10 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	switch (ppi->msg_tmp_header.messageType) {
 	case PPM_PDELAY_REQ:
 #ifdef _FROM_PTPD_2_1_0_
-		/* TODO "translate" it into ptp-wr structs*/
+		/* TODO "translate" it into ptp-wr structs
+		 * put the code in a function (will be used by SLAVE and
+		 * MASTER state too
+		 */
 		if (ppi->is_from_self) {
 			/*
 			 * Get sending timestamp from IP stack

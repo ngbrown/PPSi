@@ -20,3 +20,6 @@ int st_com_slave_handle_announce(unsigned char *buf, int len,
 
 int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
 				struct pp_instance *ppi);
+
+int st_com_slave_handle_followup(unsigned char *buf, int len,
+				 struct pp_instance *ppi);
