@@ -129,6 +129,9 @@ struct pp_instance {
 	struct pp_frgn_master *frgn_master;
 	Octet *buf_out;
 	Octet *buf_in;	/* FIXME really useful? Probably not*/
+	TimeInternal sync_receive_time;
+	UInteger16 recv_sync_sequence_id;
+	TimeInternal last_sync_correction_field;
 
 	union {
 		MsgSync  sync;
@@ -147,8 +150,10 @@ struct pp_instance {
 				  */
 	MsgHeader msg_tmp_header;
 	MsgHeader pdelay_req_hdr;
-	Boolean is_from_self;
-	Boolean is_from_cur_par;
+	UInteger32
+		is_from_self:1,
+		is_from_cur_par:1,
+		waiting_for_follow:1;
 };
 
 #define DSDEF(x) x->defaultDS
@@ -181,6 +186,12 @@ extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common
 extern int pp_timer_start(uint32_t interval, struct pp_timer *tm);
 extern int pp_timer_stop(struct pp_timer *tm);
 extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
+
+/* Servo */
+extern void pp_update_offset(TimeInternal *send_time, TimeInternal *recv_time,
+			TimeInternal *correctionField, struct pp_instance *ppi);
+			/* FIXME: offset_from_master_filter: put it in ppi */
+extern void pp_update_clock(struct pp_instance *ppi);
 
 
 /* bmc.c */
@@ -216,6 +227,17 @@ extern void msg_pack_pdelay_resp_followup(void *buf, MsgHeader *hdr,
 	Timestamp *resp_orig_tstamp, struct pp_instance* ppi);
 extern void msg_unpack_pdelay_resp_followup(void *buf,
 	MsgPDelayRespFollowUp *presp_follow);
+
+
+/* arith.c */
+/* FIXME: add prefix in function name? */
+extern void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal);
+extern void from_TimeInternal(TimeInternal *internal, Timestamp *external);
+extern void to_TimeInternal(TimeInternal *internal, Timestamp *external);
+extern void normalize_TimeInternal(TimeInternal *r);
+extern void add_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
+extern void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
+
 
 /* Get a timestamp */
 extern void pp_get_stamp(uint32_t *sptr);

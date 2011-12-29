@@ -20,6 +20,8 @@ OBJ-libstd := $D/state-table-default.o \
 	$D/state-common-fun.o \
 	$D/bmc.o \
 	$D/msg.o \
+	$D/arith.o \
+	$D/servo.o \
 	$D/open-close.o
 
 $(TARGET).o: $(LIBSTD)

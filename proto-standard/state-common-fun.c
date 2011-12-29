@@ -159,3 +159,110 @@ int st_com_slave_handle_announce(unsigned char *buf, int len,
 
 	return 0;
 }
+
+int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
+				struct pp_instance *ppi)
+{
+	TimeInternal origin_tstamp;
+	TimeInternal correction_field;
+	MsgHeader *hdr = &ppi->msg_tmp_header;
+
+	if (len < PP_SYNC_LENGTH)
+		return -1;
+
+	if (ppi->is_from_self) {
+		return 0;
+	}
+
+	if (ppi->is_from_cur_par) {
+		ppi->sync_receive_time.seconds = time->seconds;
+		ppi->sync_receive_time.nanoseconds = time->nanoseconds;
+
+		/* FIXME diag check. Delete it?
+		if (ppi->rt_opts->recordFP)
+			fprintf(rtOpts->recordFP, "%d %llu\n",
+				header->sequenceId,
+				((time->seconds * 1000000000ULL) +
+					time->nanoseconds));
+		*/
+
+		if ((hdr->flagField[0] & 0x02) == PP_TWO_STEP_FLAG) {
+			ppi->waiting_for_follow = TRUE;
+			ppi->recv_sync_sequence_id = hdr->sequenceId;
+			/* Save correctionField of Sync message */
+			int64_to_TimeInternal(
+				hdr->correctionfield,
+				&correction_field);
+			ppi->last_sync_correction_field.seconds =
+				correction_field.seconds;
+			ppi->last_sync_correction_field.nanoseconds =
+				correction_field.nanoseconds;
+		} else {
+			msg_unpack_sync(buf, &ppi->msg_tmp.sync);
+			int64_to_TimeInternal(
+				ppi->msg_tmp_header.correctionfield,
+				&correction_field);
+			/* FIXME diag check
+			 * timeInternal_display(&correctionfield);
+			 */
+			ppi->waiting_for_follow = FALSE;
+			to_TimeInternal(&origin_tstamp,
+					&ppi->msg_tmp.sync.originTimestamp);
+			pp_update_offset(&origin_tstamp,
+					&ppi->sync_receive_time,
+					&correction_field,ppi);
+			pp_update_clock(ppi);
+		}
+	}
+	return 0;
+}
+
+int st_com_slave_handle_followup(unsigned char *buf, int len,
+				 struct pp_instance *ppi)
+{
+	TimeInternal precise_orig_timestamp;
+	TimeInternal correction_field;
+
+	MsgHeader *hdr = &ppi->msg_tmp_header;
+
+	if (!ppi->is_from_cur_par) {
+		/* FIXME diag
+		DBGV("SequenceID doesn't match with "
+			"last Sync message \n");
+		*/
+		return 0;
+	}
+
+	if (!ppi->waiting_for_follow) {
+		/* FIXME diag
+		DBGV("Slave was not waiting a follow up "
+			"message \n");
+		*/
+		return 0;
+	}
+
+	if (ppi->recv_sync_sequence_id != hdr->sequenceId) {
+		/* FIXME diag
+		DBGV("Follow up message is not from current parent \n");
+		*/
+		return 0;
+	}
+
+	msg_unpack_follow_up(buf, &ppi->msg_tmp.follow);
+	ppi->waiting_for_follow = FALSE;
+	to_TimeInternal(&precise_orig_timestamp,
+			&ppi->msg_tmp.follow.preciseOriginTimestamp);
+
+	int64_to_TimeInternal(ppi->msg_tmp_header.correctionfield,
+					&correction_field);
+
+	add_TimeInternal(&correction_field,&correction_field,
+		&ppi->last_sync_correction_field);
+
+	pp_update_offset(&precise_orig_timestamp,
+			&ppi->sync_receive_time,
+			&correction_field, ppi);
+
+	pp_update_clock(ppi);
+	return 0;
+}

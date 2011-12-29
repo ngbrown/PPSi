@@ -17,3 +17,6 @@ void st_com_add_foreign(unsigned char *buf, MsgHeader *header,
 
 int st_com_slave_handle_announce(unsigned char *buf, int len,
 				struct pp_instance *ppi);
+
+int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
+				struct pp_instance *ppi);
