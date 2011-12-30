@@ -50,11 +50,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (pp_timer_init(ppi))
 		goto failure;
 
-	/* TODO Check the following code coming from ptpd.
-	 *
-	 * Init all remaining stuff:
-	 * initClock(rtOpts, ptpClock);
-	 */
+	pp_init_clock(ppi);
 
 	m1(ppi);
 
