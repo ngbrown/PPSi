@@ -6,6 +6,9 @@
 
 int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
+	TimeInternal time; /* TODO: handle it, see handle(...) in protocol.c */
+	int e = 0;
+
 	if (ppi->is_new_state) {
 		pp_timer_start(1 << DSPOR(ppi)->logMinPdelayReqInterval,
 			ppi->timers[PP_TIMER_PDELAYREQ_INTERVAL]);
@@ -18,34 +21,7 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	switch (ppi->msg_tmp_header.messageType) {
 	case PPM_PDELAY_REQ:
-#ifdef _FROM_PTPD_2_1_0_
-		/* TODO "translate" it into ptp-wr structs
-		 * put the code in a function (will be used by SLAVE and
-		 * MASTER state too
-		 */
-		if (ppi->is_from_self) {
-			/*
-			 * Get sending timestamp from IP stack
-			 * with So_TIMESTAMP
-			 */
-			ptpClock->pdelay_req_send_time.seconds =
-				time->seconds;
-			ptpClock->pdelay_req_send_time.nanoseconds =
-				time->nanoseconds;
-
-			/*Add latency*/
-			addTime(&ptpClock->pdelay_req_send_time,
-				&ptpClock->pdelay_req_send_time,
-				&rtOpts->outboundLatency);
-			break;
-		} else {
-			msgUnpackHeader(ptpClock->msgIbuf,
-					&ptpClock->PdelayReqHeader);
-			issuePDelayResp(time, header, rtOpts,
-					ptpClock);
-			break;
-		}
-#endif /* _FROM_PTPD_2_1_0_ */
+		e = st_com_handle_pdelay_req(pkt, plen, &time, ppi);
 		break;
 
 	default:
@@ -54,7 +30,11 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	}
 
-	st_com_execute_slave(ppi);
+	if (e == 0)
+		st_com_execute_slave(ppi);
+	else
+		ppi->next_state = PPS_FAULTY;
+
 
 state_updated:
 	/* Leaving this state */

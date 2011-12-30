@@ -23,3 +23,6 @@ int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
 
 int st_com_slave_handle_followup(unsigned char *buf, int len,
 				 struct pp_instance *ppi);
+
+int st_com_handle_pdelay_req(unsigned char *buf, int len, TimeInternal *time,
+				struct pp_instance *ppi);

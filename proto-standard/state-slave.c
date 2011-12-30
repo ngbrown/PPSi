@@ -125,37 +125,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_PDELAY_REQ:
-		if (ppi->rt_opts->e2e_mode)
-			break;
-
-		e = (plen < PP_PDELAY_REQ_LENGTH);
-
-		if (e)
-			break;
-
-		if (ppi->is_from_self) {
-			/* Get sending timestamp from IP stack
-			 * with So_TIMESTAMP */
-			ppi->pdelay_req_send_time.seconds =
-				time.seconds;
-			ppi->pdelay_req_send_time.nanoseconds =
-				time.nanoseconds;
-
-			/*Add latency*/
-			add_TimeInternal(&ppi->pdelay_req_send_time,
-				&ppi->pdelay_req_send_time,
-				&ppi->rt_opts->outbound_latency);
-			break;
-		} else {
-			msg_copy_header(&ppi->pdelay_req_hdr,hdr);
-
-			/* TODO
-			issuePDelayResp(time, header, rtOpts,
-					ptpClock);
-			*/
-			break;
-		}
-
+		e = st_com_handle_pdelay_req(pkt, plen, &time, ppi);
 		break;
 
 	case PPM_PDELAY_RESP:

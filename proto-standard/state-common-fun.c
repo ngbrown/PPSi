@@ -269,3 +269,38 @@ int st_com_slave_handle_followup(unsigned char *buf, int len,
 	pp_update_clock(ppi);
 	return 0;
 }
+
+
+int st_com_handle_pdelay_req(unsigned char *buf, int len,
+		      TimeInternal *time, struct pp_instance *ppi)
+{
+	MsgHeader *hdr = &ppi->msg_tmp_header;
+
+	if (len < PP_PDELAY_REQ_LENGTH)
+		return -1;
+
+	if (ppi->rt_opts->e2e_mode)
+		return 0;
+
+	if (ppi->is_from_self) {
+		/* Get sending timestamp from IP stack
+		 * with So_TIMESTAMP */
+		ppi->pdelay_req_send_time.seconds =
+			time->seconds;
+		ppi->pdelay_req_send_time.nanoseconds =
+			time->nanoseconds;
+
+		/*Add latency*/
+		add_TimeInternal(&ppi->pdelay_req_send_time,
+			&ppi->pdelay_req_send_time,
+			&ppi->rt_opts->outbound_latency);
+	} else {
+		msg_copy_header(&ppi->pdelay_req_hdr,hdr);
+
+		/* TODO
+		issuePDelayResp(time, header, rtOpts,
+				ptpClock);
+		*/
+	}
+	return 0;
+}
