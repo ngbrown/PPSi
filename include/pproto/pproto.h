@@ -213,7 +213,7 @@ extern UInteger8 bmc(struct pp_frgn_master *frgn_master,
 /* msg.c */
 extern void msg_pack_header(void *buf, struct pp_instance *ppi);
 extern void msg_unpack_header(void *buf, struct pp_instance *ppi);
-int msg_copy_header(MsgHeader *dest, MsgHeader *src);
+void *msg_copy_header(MsgHeader *dest, MsgHeader *src);
 extern void msg_pack_sync(void *buf, Timestamp *orig_tstamp,
 		struct pp_instance *ppi);
 extern void msg_unpack_sync(void *buf, MsgSync *sync);

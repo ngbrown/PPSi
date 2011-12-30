@@ -80,7 +80,7 @@ void msg_pack_header(void *buf, struct pp_instance *ppi)
 	/* Default value(spec Table 24) */
 }
 
-int msg_copy_header(MsgHeader *dest, MsgHeader *src)
+void *msg_copy_header(MsgHeader *dest, MsgHeader *src)
 {
 	return pp_memcpy(dest,src,sizeof(MsgHeader));
 }
