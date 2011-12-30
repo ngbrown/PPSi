@@ -159,6 +159,7 @@ struct pp_instance {
 				  */
 	MsgHeader msg_tmp_header;
 	MsgHeader pdelay_req_hdr;
+	MsgHeader delay_req_hdr;
 	UInteger32
 		is_from_self:1,
 		is_from_cur_par:1,

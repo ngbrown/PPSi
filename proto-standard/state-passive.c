@@ -20,6 +20,11 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto state_updated;
 
 	switch (ppi->msg_tmp_header.messageType) {
+
+	case PPM_ANNOUNCE:
+		e = st_com_master_handle_announce(pkt, plen, ppi);
+		break;
+
 	case PPM_PDELAY_REQ:
 		e = st_com_handle_pdelay_req(pkt, plen, &time, ppi);
 		break;

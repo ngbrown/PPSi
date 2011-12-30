@@ -67,65 +67,68 @@ int st_com_check_record_update(struct pp_instance *ppi)
 	return 0;
 }
 
-void st_com_add_foreign(unsigned char *buf, MsgHeader *hdr,
-			struct pp_instance *ppi)
+void st_com_add_foreign(unsigned char *buf, struct pp_instance *ppi)
 {
-/*TODO "translate" it into ptp-wr structs*/
-#ifdef _FROM_PTPD_2_1_0_
-	int i,j;
+	int i, j;
 	Boolean found = FALSE;
+	MsgHeader *hdr = &ppi->msg_tmp_header;
 
-	j = ptpClock->foreign_record_best;
+	j = ppi->foreign_record_best;
 
-	/*Check if Foreign master is already known*/
-	for (i=0;i<ptpClock->number_foreign_records;i++) {
-		if (!memcmp(header->sourcePortIdentity.clockIdentity,
-			    ptpClock->foreign[j].foreignMasterPortIdentity.clockIdentity,
-			    CLOCK_IDENTITY_LENGTH) &&
-		    (header->sourcePortIdentity.portNumber ==
-		     ptpClock->foreign[j].foreignMasterPortIdentity.portNumber))
+	/* Check if foreign master is already known */
+	for (i = 0; i < ppi->number_foreign_records; i++) {
+		if (!pp_memcmp(hdr->sourcePortIdentity.clockIdentity,
+			    ppi->frgn_master[j].port_identity.
+			    clockIdentity,
+			    PP_CLOCK_IDENTITY_LENGTH) &&
+		    (hdr->sourcePortIdentity.portNumber ==
+		     ppi->frgn_master[j].port_identity.portNumber))
 		{
-			/*Foreign Master is already in Foreignmaster data set*/
-			ptpClock->foreign[j].foreignMasterAnnounceMessages++;
+			/* Foreign Master is already in Foreign master data set
+			 */
+			ppi->frgn_master[j].ann_messages++;
 			found = TRUE;
+			/* FIXME diag
 			DBGV("addForeign : AnnounceMessage incremented \n");
-			msgUnpackHeader(buf,&ptpClock->foreign[j].header);
-			msgUnpackAnnounce(buf,&ptpClock->foreign[j].announce);
+			*/
+			msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
+			msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
 			break;
 		}
 
-		j = (j+1)%ptpClock->number_foreign_records;
+		j = (j + 1) % ppi->number_foreign_records;
 	}
 
-	/*New Foreign Master*/
+	/* New foreign master */
 	if (!found) {
-		if (ptpClock->number_foreign_records <
-		    ptpClock->max_foreign_records) {
-			ptpClock->number_foreign_records++;
+		if (ppi->number_foreign_records <
+		    ppi->max_foreign_records) {
+			ppi->number_foreign_records++;
 		}
-		j = ptpClock->foreign_record_i;
 
-		/*Copy new foreign master data set from Announce message*/
-		memcpy(ptpClock->foreign[j].foreignMasterPortIdentity.clockIdentity,
-		       header->sourcePortIdentity.clockIdentity,
-		       CLOCK_IDENTITY_LENGTH);
-		ptpClock->foreign[j].foreignMasterPortIdentity.portNumber =
-			header->sourcePortIdentity.portNumber;
-		ptpClock->foreign[j].foreignMasterAnnounceMessages = 0;
+		j = ppi->foreign_record_i;
+
+		/* Copy new foreign master data set from announce message */
+		pp_memcpy(ppi->frgn_master[j].port_identity.clockIdentity,
+			hdr->sourcePortIdentity.clockIdentity,
+			PP_CLOCK_IDENTITY_LENGTH);
+		ppi->frgn_master[j].port_identity.portNumber =
+			hdr->sourcePortIdentity.portNumber;
+		ppi->frgn_master[j].ann_messages = 0;
 
 		/*
 		 * header and announce field of each Foreign Master are
 		 * usefull to run Best Master Clock Algorithm
 		 */
-		msgUnpackHeader(buf,&ptpClock->foreign[j].header);
-		msgUnpackAnnounce(buf,&ptpClock->foreign[j].announce);
-		DBGV("New foreign Master added \n");
+		msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
 
-		ptpClock->foreign_record_i =
-			(ptpClock->foreign_record_i+1) %
-			ptpClock->max_foreign_records;
+		msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
+
+		/* FIXME diag DBGV("New foreign Master added \n");*/
+
+		ppi->foreign_record_i = (ppi->foreign_record_i+1) %
+			ppi->max_foreign_records;
 	}
-#endif  /* _FROM_PTPD_2_1_0_ */
 }
 
 
@@ -152,7 +155,7 @@ int st_com_slave_handle_announce(unsigned char *buf, int len,
 	}
 	else {
 		/* st_com_add_foreign takes care of announce unpacking */
-		st_com_add_foreign(buf, hdr, ppi);
+		st_com_add_foreign(buf, ppi);
 	}
 
 	/*Reset Timer handling Announce receipt timeout*/
@@ -298,10 +301,48 @@ int st_com_handle_pdelay_req(unsigned char *buf, int len,
 	} else {
 		msg_copy_header(&ppi->pdelay_req_hdr,hdr);
 
-		/* TODO
-		issuePDelayResp(time, header, rtOpts,
+		/* TODO issuePDelayResp(time, header, rtOpts,
 				ptpClock);
 		*/
 	}
+	return 0;
+}
+
+int st_com_master_handle_announce(unsigned char *buf, int len,
+				struct pp_instance *ppi)
+{
+	if (len < PP_ANNOUNCE_LENGTH)
+		return -1;
+
+	if (ppi->is_from_self) {
+		/* FIXME diag
+		DBGV("HandleAnnounce : Ignore message from self \n");
+		*/
+		return 0;
+	}
+
+	/* FIXME diag
+	 * DBGV("Announce message from another foreign master");
+	 */
+
+	st_com_add_foreign(buf, ppi);
+
+	ppi->record_update = TRUE;
+
+	return 0;
+}
+
+int st_com_master_handle_sync(unsigned char *buf, int len, TimeInternal *time,
+				struct pp_instance *ppi)
+{
+	if (len < PP_SYNC_LENGTH)
+		return -1;
+
+	if (!ppi->is_from_self)
+		return 0;
+
+	/* Add latency */
+	add_TimeInternal(time,time,&ppi->rt_opts->outbound_latency);
+	/* TODO issueFollowup(time,rtOpts,ptpClock);*/
 	return 0;
 }

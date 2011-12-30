@@ -140,8 +140,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if (ppi->is_from_self)	{
 			add_TimeInternal(&time, &time,
 					&ppi->rt_opts->outbound_latency);
-			/* TODO
-			issuePDelayRespFollowUp(time,
+			/* TODO issuePDelayRespFollowUp(time,
 						&ptpClock->PdelayReqHeader,
 						rtOpts,ptpClock);
 			*/
