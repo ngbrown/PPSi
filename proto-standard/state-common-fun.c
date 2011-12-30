@@ -19,6 +19,7 @@ void st_com_execute_slave(struct pp_instance *ppi)
 			ppi->next_state = PPS_MASTER;
 		}
 		else {
+			ppi->next_state = PPS_LISTENING;
 			st_com_restart_annrec_timer(ppi);
 		}
 	}
