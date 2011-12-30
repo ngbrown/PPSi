@@ -193,9 +193,9 @@ int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
 			int64_to_TimeInternal(
 				hdr->correctionfield,
 				&correction_field);
-			ppi->last_sync_correction_field.seconds =
+			ppi->last_sync_corr_field.seconds =
 				correction_field.seconds;
-			ppi->last_sync_correction_field.nanoseconds =
+			ppi->last_sync_corr_field.nanoseconds =
 				correction_field.nanoseconds;
 		} else {
 			msg_unpack_sync(buf, &ppi->msg_tmp.sync);
@@ -260,7 +260,7 @@ int st_com_slave_handle_followup(unsigned char *buf, int len,
 					&correction_field);
 
 	add_TimeInternal(&correction_field,&correction_field,
-		&ppi->last_sync_correction_field);
+		&ppi->last_sync_corr_field);
 
 	pp_update_offset(&precise_orig_timestamp,
 			&ppi->sync_receive_time,

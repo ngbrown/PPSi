@@ -16,7 +16,7 @@
  */
 struct pp_runtime_opts {
 	ClockQuality clock_quality;
-	TimeInternal inboundLatency, outboundLatency;
+	TimeInternal inbound_latency, outbound_latency;
 	Integer32 max_rst; /* Maximum number of nanoseconds to reset */
 	Integer32 max_dly; /* Maximum number of nanoseconds of delay */
 	Integer32 ttl;
@@ -131,11 +131,16 @@ struct pp_instance {
 	Octet *buf_in;	/* FIXME really useful? Probably not*/
 	TimeInternal sync_receive_time;
 	UInteger16 recv_sync_sequence_id;
-	TimeInternal last_sync_correction_field;
+	TimeInternal last_sync_corr_field;
+	TimeInternal last_pdelay_req_corr_field;
+	TimeInternal last_pdelay_resp_corr_field;
 	TimeInternal pdelay_req_send_time;
 	TimeInternal pdelay_req_receive_time;
 	TimeInternal pdelay_resp_send_time;
 	TimeInternal pdelay_resp_receive_time;
+	TimeInternal delay_req_send_time;
+	TimeInternal delay_req_receive_time;
+	Integer8 log_min_delay_req_interval;
 
 	union {
 		MsgSync  sync;
@@ -208,6 +213,7 @@ extern UInteger8 bmc(struct pp_frgn_master *frgn_master,
 /* msg.c */
 extern void msg_pack_header(void *buf, struct pp_instance *ppi);
 extern void msg_unpack_header(void *buf, struct pp_instance *ppi);
+int msg_copy_header(MsgHeader *dest, MsgHeader *src);
 extern void msg_pack_sync(void *buf, Timestamp *orig_tstamp,
 		struct pp_instance *ppi);
 extern void msg_unpack_sync(void *buf, MsgSync *sync);
