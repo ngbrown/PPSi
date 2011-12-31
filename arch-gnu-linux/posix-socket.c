@@ -97,9 +97,9 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname)
 		close(sock);
 		return -1;
 	}
-	/* FIXME
-	memcpy(ppi->ch.addr, ifr.ifr_hwaddr.sa_data, 6);
-	*/
+	/* FIXME: what to do with hw address */
+	memcpy(ppi->net_path->gen_ch.addr, ifr.ifr_hwaddr.sa_data, 6);
+	memcpy(ppi->net_path->evt_ch.addr, ifr.ifr_hwaddr.sa_data, 6);
 
 	/* bind and setsockopt */
 	memset(&addr, 0, sizeof(addr));
@@ -111,9 +111,9 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname)
 		close(sock);
 		return -1;
 	}
-	/* FIXME
-	ppi->ch.fd = sock;
-	*/
+	/* FIXME: we are using the same socket for both channels by now */
+	ppi->net_path->gen_ch.fd = sock;
+	ppi->net_path->evt_ch.fd = sock;
 	return 0;
 }
 
