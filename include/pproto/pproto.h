@@ -187,9 +187,6 @@ extern int pp_net_init(struct pp_instance *ppi);
 extern int pp_net_shutdown(struct pp_instance *ppi);
 extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len);
 extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len);
-extern UInteger32 pp_htonl(UInteger32 hostlong);
-extern UInteger16 pp_htons(UInteger16 hostshort);
-
 
 /* Timers */
 extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common

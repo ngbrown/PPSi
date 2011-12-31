@@ -200,20 +200,3 @@ _end:
 
 int pp_net_shutdown(struct pp_instance *ppi)
 __attribute__((alias("posix_net_shutdown")));
-
-
-extern UInteger32 posix_htonl(UInteger32 hostlong)
-{
-	return htonl(hostlong);
-}
-
-extern UInteger16 posix_htons(UInteger16 hostshort)
-{
-	return htons(hostshort);
-}
-
-UInteger32 pp_htonl(UInteger32 hostlong)
-__attribute__((alias("posix_htonl")));
-
-UInteger16 pp_htons(UInteger16 hostlong)
-__attribute__((alias("posix_htons")));
