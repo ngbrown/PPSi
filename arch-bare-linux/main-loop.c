@@ -30,7 +30,7 @@ void bare_main_loop(struct pp_instance *ppi)
 	delay_ms = pp_state_machine(ppi, NULL, 0);
 	while (1) {
 		bare_fd_set set;
-		int i;
+		int i, maxfd;
 		struct bare_timeval tv;
 		unsigned char packet[1500];
 
@@ -40,8 +40,13 @@ void bare_main_loop(struct pp_instance *ppi)
 
 	again:
 		FD_ZERO(&set);
-		FD_SET(ppi->ch.fd, &set);
-		i = sys_select(ppi->ch.fd + 1, &set, NULL, NULL, &tv);
+		FD_SET(ppi->net_path->gen_ch.fd, &set);
+		FD_SET(ppi->net_path->evt_ch.fd, &set);
+		maxfd = ppi->net_path->gen_ch.fd;
+		if (ppi->net_path->evt_ch.fd > maxfd)
+			maxfd = ppi->net_path->evt_ch.fd;
+
+		i = sys_select(maxfd + 1, &set, NULL, NULL, &tv);
 		if (i < 0 && bare_errno != 4 /* EINTR */)
 			sys_exit(__LINE__);
 		if (i < 0)
@@ -54,14 +59,12 @@ void bare_main_loop(struct pp_instance *ppi)
 
 		/*
 		 * We got a packet. If it's not ours, continue consuming
-		 * the pending timeout
+		 * the pending timeout.
+		 *
+		 * FIXME: we don't know which socket to receive from
 		 */
 		i = bare_recv_packet(ppi, packet, sizeof(packet));
-		/* FIXME
-		if (i < sizeof(struct pp_packet))
-			goto again;
-		*/
-		/* Warning: PP_PROTO_NR is endian-agnostic by design */
+		/* FIXME: PP_PROTO_NR is a legacy number */
 		if ( ((struct bare_ethhdr *)packet)->h_proto
 		     != htons(PP_PROTO_NR))
 			goto again;

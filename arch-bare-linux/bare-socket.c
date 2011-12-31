@@ -4,17 +4,18 @@
 
 /* Socket interface for bare Linux */
 #include <pproto/pproto.h>
+#include <pproto/diag.h>
 #include "bare-linux.h"
 
-/* Receive and send is trivial */
+/* FIXME: which socket we receive and send with? */
 int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len)
 {
-	return sys_recv(ppi->ch.fd, pkt, len, 0);
+	return sys_recv(ppi->net_path->gen_ch.fd, pkt, len, 0);
 }
 
 int bare_send_packet(struct pp_instance *ppi, void *pkt, int len)
 {
-	return sys_send(ppi->ch.fd, pkt, len, 0);
+	return sys_send(ppi->net_path->gen_ch.fd, pkt, len, 0);
 }
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len)
@@ -52,7 +53,8 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		pp_diag_error(ppi, bare_errno);
 		pp_diag_fatal(ppi, "ioctl(GIFHWADDR)", "");
 	}
-	memcpy(ppi->ch.addr, ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
+	memcpy(ppi->net_path->gen_ch.addr, ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
+	memcpy(ppi->net_path->evt_ch.addr, ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
 
 	/* bind and setsockopt */
 	memset(&addr, 0, sizeof(addr));
@@ -64,6 +66,7 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		pp_diag_fatal(ppi, "bind", "");
 	}
 
-	ppi->ch.fd = sock;
+	ppi->net_path->gen_ch.fd = sock;
+	ppi->net_path->evt_ch.fd = sock;
 	return 0;
 }

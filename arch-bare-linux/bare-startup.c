@@ -7,6 +7,7 @@
  * It must also clear the BSS as I'm too lazy to do that in asm
  */
 #include <pproto/pproto.h>
+#include <pproto/diag.h>
 #include "bare-linux.h"
 
 extern int __bss_start, __bss_end;
@@ -20,6 +21,7 @@ void pproto_clear_bss(void)
 }
 
 static struct pp_instance ppi_static;
+static struct pp_net_path net_path_static;
 
 void pproto_main(void)
 {
@@ -27,6 +29,7 @@ void pproto_main(void)
 
 	pp_puts("bare: starting. Compiled on " __DATE__ "\n");
 
+	ppi->net_path = &net_path_static;
 	if (bare_open_ch(ppi, "eth0")) {
 		pp_diag_error(ppi, bare_errno);
 		pp_diag_fatal(ppi, "open_ch", "");
