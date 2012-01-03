@@ -7,7 +7,7 @@ LIBSTD := $D/libstd.a
 
 LIBS += -L$D -lstd
 
-OBJ-libstd := $D/state-table-default.o \
+OBJ-libstd := $D/fsm-table.o \
 	$D/state-initializing.o \
 	$D/state-faulty.o \
 	$D/state-disabled.o \
