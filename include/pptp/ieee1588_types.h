@@ -10,19 +10,19 @@
 
 
 typedef enum {FALSE=0, TRUE} Boolean; /* FIXME really needed? */
-typedef char Octet;
-typedef int8_t Integer8;
-typedef int16_t Integer16;
-typedef int32_t Integer32;
-typedef uint8_t UInteger8;
-typedef uint16_t UInteger16;
-typedef uint32_t UInteger32;
+typedef uint8_t		Octet;
+typedef int8_t		Integer8;
+typedef int16_t		Integer16;
+typedef int32_t		Integer32;
+typedef uint8_t		UInteger8;
+typedef uint16_t	UInteger16;
+typedef uint32_t	UInteger32;
 /* Enumerations are unsigned, see 5.4.2, page 15 */
-typedef uint16_t Enumeration16;
-typedef uint8_t Enumeration8;
-typedef uint8_t Enumeration4;
-typedef uint8_t UInteger4;
-typedef uint8_t Nibble;
+typedef uint16_t	Enumeration16;
+typedef uint8_t		Enumeration8;
+typedef uint8_t		Enumeration4;
+typedef uint8_t		UInteger4;
+typedef uint8_t		Nibble;
 
 #define PP_CLOCK_IDENTITY_LENGTH 8
 
