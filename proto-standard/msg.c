@@ -2,7 +2,7 @@
  * FIXME header
  */
 
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 /* Unpack header from in buffer to msg_tmp_header field */
 void msg_unpack_header(void *buf, struct pp_instance *ppi)

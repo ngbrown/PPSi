@@ -4,7 +4,7 @@
  *
  * GNU LGPL 2.1 or later versions
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 #include "../spec.h"
 //#include "pps_gen.h" /* for pps_gen_get_time() */
 

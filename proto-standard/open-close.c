@@ -1,7 +1,7 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- public domain
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 /*
  * This file deals with opening and closing an instance. The channel

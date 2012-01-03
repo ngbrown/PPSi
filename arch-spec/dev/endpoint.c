@@ -4,7 +4,7 @@
  *
  * GNU LGPL 2.1 or later versions
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 #include "../spec.h"
 
 #include <hw/endpoint_regs.h>

@@ -2,7 +2,7 @@
  * FIXME: header
  */
 
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 /* Contains all functions common to more than one state */
 

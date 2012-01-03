@@ -1,7 +1,7 @@
 /*
  * FIXME: header
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 /*
  * This is the default state machine table. It is weak so an extension

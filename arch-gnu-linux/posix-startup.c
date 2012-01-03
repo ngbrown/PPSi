@@ -10,8 +10,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include <pproto/pproto.h>
-#include <pproto/diag.h>
+#include <pptp/pptp.h>
+#include <pptp/diag.h>
 #include "posix.h"
 
 int main(int argc, char **argv)

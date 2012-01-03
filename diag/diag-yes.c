@@ -1,8 +1,8 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- public domain
  */
-#include <pproto/pproto.h>
-#include <pproto/diag.h>
+#include <pptp/pptp.h>
+#include <pptp/diag.h>
 
 /*
  * This has diagnostics. It calls pp_printf (which one, we don't know)

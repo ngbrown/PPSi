@@ -2,7 +2,7 @@
  * FIXME header
  */
 
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 /* FIXME: This is a temp workaround. How to define it? */
 #define PP_INT_MAX 2147483647

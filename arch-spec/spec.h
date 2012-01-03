@@ -1,7 +1,7 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 /*
  * These are the functions provided by the various bare files
  */
@@ -12,7 +12,7 @@ extern int spec_send_packet(struct pp_instance *ppi, void *pkt, int len);
 
 extern void spec_main_loop(struct pp_instance *ppi);
 extern void _irq_entry(void); /* unused, to make crt0.S happy */
-extern int main(void); /* alias to pproto_main, so crt0.S is happy */
+extern int main(void); /* alias to pptp_main, so crt0.S is happy */
 
 /* basics */
 extern void *memset(void *s, int c, int count);

@@ -7,9 +7,9 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <arch/arch.h> /* ntohs and so on */
-#include <pproto/lib.h>
-#include <pproto/ieee1588_types.h>
-#include <pproto/constants.h>
+#include <pptp/lib.h>
+#include <pptp/ieee1588_types.h>
+#include <pptp/constants.h>
 
 
 /*

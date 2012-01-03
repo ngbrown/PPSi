@@ -3,7 +3,7 @@
  */
 #include <asm/unistd.h>
 
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 #include "bare-linux.h"
 #include "syscalls.h"
 

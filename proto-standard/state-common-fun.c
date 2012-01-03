@@ -1,7 +1,7 @@
 /*
  * FIXME: header
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 #include "state-common-fun.h"
 
 void st_com_execute_slave(struct pp_instance *ppi)

@@ -15,8 +15,8 @@
 #include <arpa/inet.h>
 
 
-#include <pproto/pproto.h>
-#include <pproto/diag.h>
+#include <pptp/pptp.h>
+#include <pptp/diag.h>
 #include "posix.h"
 
 static int ch_check_stat = 0;

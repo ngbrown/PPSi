@@ -6,7 +6,7 @@
 /*
  * This is the main loop for "freestanding" stuff under Linux.
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 #include "bare-linux.h"
 
 /* Define other hackish stuff */

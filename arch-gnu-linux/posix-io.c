@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 void pp_puts(const char *s)
 {

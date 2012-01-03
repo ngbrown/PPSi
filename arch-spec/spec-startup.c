@@ -1,13 +1,13 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 #include "spec.h"
 #include "include/gpio.h"
 
 static struct pp_instance ppi_static;
 
-void pproto_main(void)
+void pptp_main(void)
 {
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
 
@@ -35,7 +35,7 @@ void pproto_main(void)
 
 /* Our crt0.S is unchanged: it wants a "main" function, and "_irq_entry" too" */
 
-int main(void) __attribute__((alias("pproto_main")));
+int main(void) __attribute__((alias("pptp_main")));
 
 void _irq_entry(void)
 {

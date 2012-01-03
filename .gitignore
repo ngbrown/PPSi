@@ -1,6 +1,6 @@
 *.map*
 *.o
 *.a
-pproto.bin
+pptp.bin
 *.patch
 

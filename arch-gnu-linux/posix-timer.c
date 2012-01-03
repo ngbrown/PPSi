@@ -9,8 +9,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include <pproto/pproto.h>
-#include <pproto/diag.h>
+#include <pptp/pptp.h>
+#include <pptp/diag.h>
 #include "posix.h"
 
 /* FIXME

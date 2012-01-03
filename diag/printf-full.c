@@ -14,7 +14,7 @@
 #include <stdarg.h>
 
 /* BEGIN OF HACKS */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 /* <ctype.h> */
 static inline int isdigit(int c)

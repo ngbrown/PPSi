@@ -1,7 +1,7 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 #include "spec.h"
 #include "include/gpio.h"
 

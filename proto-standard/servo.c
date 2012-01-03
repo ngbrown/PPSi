@@ -2,7 +2,7 @@
  * FIXME header
  */
 
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 
 void pp_init_clock(struct pp_instance *ppi)

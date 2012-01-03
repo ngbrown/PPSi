@@ -1,8 +1,8 @@
 /*
  * FIXME: header
  */
-#include <pproto/pproto.h>
-#include <pproto/diag.h>
+#include <pptp/pptp.h>
+#include <pptp/diag.h>
 
 /*
  * Fault troubleshooting. Now only prints an error messages and comes back to

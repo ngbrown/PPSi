@@ -1,7 +1,7 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- public domain
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 /*
  * Having no diagnostics, just make one function that returns 0 and alias

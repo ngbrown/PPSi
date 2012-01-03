@@ -4,7 +4,7 @@
  * based on code by Tomasz Wlostowski
  */
 
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 #include "../spec.h"
 
 

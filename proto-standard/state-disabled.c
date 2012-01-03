@@ -1,7 +1,7 @@
 /*
  * FIXME: header
  */
-#include <pproto/pproto.h>
+#include <pptp/pptp.h>
 
 int pp_disabled(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
