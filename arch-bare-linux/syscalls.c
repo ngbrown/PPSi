@@ -1,7 +1,7 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- public domain
  */
-#include <asm/unistd.h>
+#include <linux/unistd.h>
 
 #include <pptp/pptp.h>
 #include "bare-linux.h"
@@ -10,9 +10,9 @@
 int bare_errno;
 
 struct sel_arg_struct {
-        unsigned long n;
-        void *inp, *outp, *exp;
-        void *tvp;
+	unsigned long n;
+	void *inp, *outp, *exp;
+	void *tvp;
 };
 
 /*
@@ -49,24 +49,24 @@ int sys_select(int max, void *in, void *out, void *exc, void *tout)
 }
 
 /* i386 has the socketcall thing. Bah! */
-#define SYS_SOCKET      1               /* sys_socket(2)                */
-#define SYS_BIND        2               /* sys_bind(2)                  */
-#define SYS_CONNECT     3               /* sys_connect(2)               */
-#define SYS_LISTEN      4               /* sys_listen(2)                */
-#define SYS_ACCEPT      5               /* sys_accept(2)                */
-#define SYS_GETSOCKNAME 6               /* sys_getsockname(2)           */
-#define SYS_GETPEERNAME 7               /* sys_getpeername(2)           */
-#define SYS_SOCKETPAIR  8               /* sys_socketpair(2)            */
-#define SYS_SEND        9               /* sys_send(2)                  */
-#define SYS_RECV        10              /* sys_recv(2)                  */
-#define SYS_SENDTO      11              /* sys_sendto(2)                */
-#define SYS_RECVFROM    12              /* sys_recvfrom(2)              */
-#define SYS_SHUTDOWN    13              /* sys_shutdown(2)              */
-#define SYS_SETSOCKOPT  14              /* sys_setsockopt(2)            */
-#define SYS_GETSOCKOPT  15              /* sys_getsockopt(2)            */
-#define SYS_SENDMSG     16              /* sys_sendmsg(2)               */
-#define SYS_RECVMSG     17              /* sys_recvmsg(2)               */
-#define SYS_PACCEPT     18              /* sys_paccept(2)               */
+#define SYS_SOCKET	1		/* sys_socket(2)		*/
+#define SYS_BIND	2		/* sys_bind(2)			*/
+#define SYS_CONNECT	3		/* sys_connect(2)		*/
+#define SYS_LISTEN	4		/* sys_listen(2)		*/
+#define SYS_ACCEPT	5		/* sys_accept(2)		*/
+#define SYS_GETSOCKNAME 6		/* sys_getsockname(2)		*/
+#define SYS_GETPEERNAME 7		/* sys_getpeername(2)		*/
+#define SYS_SOCKETPAIR	8		/* sys_socketpair(2)		*/
+#define SYS_SEND	9		/* sys_send(2)			*/
+#define SYS_RECV	10		/* sys_recv(2)			*/
+#define SYS_SENDTO	11		/* sys_sendto(2)		*/
+#define SYS_RECVFROM	12		/* sys_recvfrom(2)		*/
+#define SYS_SHUTDOWN	13		/* sys_shutdown(2)		*/
+#define SYS_SETSOCKOPT	14		/* sys_setsockopt(2)		*/
+#define SYS_GETSOCKOPT	15		/* sys_getsockopt(2)		*/
+#define SYS_SENDMSG	16		/* sys_sendmsg(2)		*/
+#define SYS_RECVMSG	17		/* sys_recvmsg(2)		*/
+#define SYS_PACCEPT	18		/* sys_paccept(2)		*/
 
 static unsigned long args[4];
 
@@ -74,7 +74,7 @@ int sys_socket(int domain, int type, int proto)
 {
 	/*
 	 * Strangely, this is not working for me:
-	 * 	unsigned long args[3] = {domain, type, proto};
+	 *     unsigned long args[3] = {domain, type, proto};
 	 * So let's use an external thing. Who knows why...
 	 */
 	args[0] = domain;

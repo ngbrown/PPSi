@@ -30,7 +30,6 @@ extern int sys_bind(int fd, const struct bare_sockaddr *addr, int addrlen);
 extern int sys_recv(int fd, void *pkt, int plen, int flags);
 extern int sys_send(int fd, void *pkt, int plen, int flags);
 
-
 extern int bare_errno;
 
 /* structures passed to syscalls */
@@ -42,8 +41,7 @@ struct bare_sockaddr {
 };
 
 struct bare_ifreq {
-	union
-	{
+	union {
 		char	ifrn_name[IFNAMSIZ];
 	} ifr_ifrn;
 
@@ -68,7 +66,7 @@ struct bare_sockaddr_ll {
 
 /* other network stuff, bah.... */
 struct bare_ethhdr {
-        unsigned char   h_dest[6];
-        unsigned char   h_source[6];
-        uint16_t          h_proto;
+	unsigned char	h_dest[6];
+	unsigned char	h_source[6];
+	uint16_t	h_proto;
 } __attribute__((packed));

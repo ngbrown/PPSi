@@ -52,9 +52,9 @@ extern int ep_cal_pattern_disable();
 /* other network lstuff, bah.... */
 
 struct spec_ethhdr {
-        unsigned char   h_dest[6];
-        unsigned char   h_source[6];
-        uint16_t          h_proto;
+	unsigned char	h_dest[6];
+	unsigned char	h_source[6];
+	uint16_t	h_proto;
 } __attribute__((packed));
 
 /* Low-level details (from board.h in wr-core-tools) */
@@ -65,7 +65,7 @@ struct spec_ethhdr {
 #define BASE_PPSGEN	0x50000
 #define BASE_EP		0x20000
 #define BASE_MINIC	0x10000
-#define BASE_SOFTPLL   	0x40000
+#define BASE_SOFTPLL	0x40000
 
 #define CPU_CLOCK	62500000ULL
 

@@ -52,7 +52,7 @@ void posix_main_loop(struct pp_instance *ppi)
 		}
 
 		/* Warning: PP_PROTO_NR is endian-agnostic by design */
-		if ( ((struct ethhdr *)packet)->h_proto != htons(PP_PROTO_NR)) {
+		if (((struct ethhdr *)packet)->h_proto != htons(PP_PROTO_NR)) {
 			delay_ms = -1;
 			goto again;
 		}

@@ -10,11 +10,11 @@
 #include <pptp/diag.h>
 #include "bare-linux.h"
 
-extern int __bss_start, __bss_end;
 
 void pptp_clear_bss(void)
 {
 	int *ptr;
+	extern int __bss_start, __bss_end;
 
 	for (ptr = &__bss_start; ptr < &__bss_end; ptr++)
 		*ptr = 0;
@@ -34,7 +34,7 @@ void pptp_main(void)
 		pp_diag_error(ppi, bare_errno);
 		pp_diag_fatal(ppi, "open_ch", "");
 	}
-	pp_open_instance(ppi,0);
+	pp_open_instance(ppi, 0);
 
 	bare_main_loop(ppi);
 }

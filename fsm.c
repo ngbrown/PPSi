@@ -18,9 +18,8 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 	struct pp_state_table_item *ip;
 	int state, err;
 
-	if (packet) {
+	if (packet)
 		msg_unpack_header(packet, ppi);
-	}
 
 	state = ppi->state;
 

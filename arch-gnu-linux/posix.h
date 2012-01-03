@@ -6,8 +6,7 @@
  * These are the functions provided by the various posix files
  */
 
-struct posix_arch_data
-{
+struct posix_arch_data {
 	struct timeval tv;
 };
 

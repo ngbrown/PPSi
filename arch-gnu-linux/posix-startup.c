@@ -24,7 +24,8 @@ int main(int argc, char **argv)
 	 * To keep things simple, just run one thing for one interface.
 	 */
 	ifname = getenv("PPROTO_IF");
-	if (!ifname) ifname = "eth0";
+	if (!ifname)
+		ifname = "eth0";
 
 	/* We are hosted, so we can allocate */
 	ppi = calloc(1, sizeof(*ppi));
@@ -50,12 +51,12 @@ int main(int argc, char **argv)
 	   )
 		exit(__LINE__);
 
-	if (posix_open_ch(ppi, ifname)) {
+	if (posix_open_ch(ppi, ifname))
 		pp_diag_fatal(ppi, "open_ch", strerror(errno));
-	}
+
 	pp_open_instance(ppi, NULL);
 
-	pp_parse_cmdline(ppi,argc,argv);
+	pp_parse_cmdline(ppi, argc, argv);
 
 	posix_main_loop(ppi);
 	return 0; /* never reached */

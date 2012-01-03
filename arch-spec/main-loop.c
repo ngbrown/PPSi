@@ -45,7 +45,7 @@ void spec_main_loop(struct pp_instance *ppi)
 		if (i < sizeof(struct pp_packet) /* or minimum of all pckts */)
 			continue;
 		/* Warning: PP_PROTO_NR is endian-agnostic by design */
-		if ( ((struct spec_ethhdr *)packet)->h_proto !=
+		if (((struct spec_ethhdr *)packet)->h_proto !=
 		     htons(PP_PROTO_NR))
 			continue;
 		delay_ms = pp_state_machine(ppi, packet, i);

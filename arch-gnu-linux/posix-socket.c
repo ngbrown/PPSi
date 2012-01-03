@@ -27,17 +27,17 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len)
 	struct pp_channel *ch1 = NULL, *ch2 = NULL;
 
 	switch (ch_check_stat) {
-		case 0:
-			ch1 = &(ppi->net_path->evt_ch);
-			ch2 = &(ppi->net_path->gen_ch);
-			break;
-		case 1:
-			ch1 = &(ppi->net_path->gen_ch);
-			ch2 = &(ppi->net_path->evt_ch);
-			break;
-		default:
-			/* Impossible! */
-			break;
+	case 0:
+		ch1 = &(ppi->net_path->evt_ch);
+		ch2 = &(ppi->net_path->gen_ch);
+		break;
+	case 1:
+		ch1 = &(ppi->net_path->gen_ch);
+		ch2 = &(ppi->net_path->evt_ch);
+		break;
+	default:
+		/* Impossible! */
+		break;
 	}
 
 	if (ch1->pkt_present)
@@ -83,7 +83,7 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname)
 	}
 
 	/* hw interface information */
-	memset (&ifr, 0, sizeof(ifr));
+	memset(&ifr, 0, sizeof(ifr));
 	strcpy(ifr.ifr_name, ifname);
 	if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
 		pp_diag_error_str2(ppi, "SIOCGIFINDEX", strerror(errno));
@@ -130,7 +130,7 @@ int posix_net_init(struct pp_instance *ppi)
 	 * We must decide how generic we want to be. Will we ever handle
 	 * non-udp? Probably yes.
 	 */
-	posix_open_ch(ppi,ifname); /* FIXME: to be called twice, one for evt,
+	posix_open_ch(ppi, ifname); /* FIXME: to be called twice, one for evt,
 				    * one for general ? */
 	return 0;
 }
@@ -184,12 +184,12 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 	if (i == 0)
 		goto _end;
 
-	if (FD_ISSET(ppi->net_path->gen_ch.fd,&set)) {
+	if (FD_ISSET(ppi->net_path->gen_ch.fd, &set)) {
 		ret++;
 		ppi->net_path->gen_ch.pkt_present = 1;
 	}
 
-	if (FD_ISSET(ppi->net_path->evt_ch.fd,&set)) {
+	if (FD_ISSET(ppi->net_path->evt_ch.fd, &set)) {
 		ret++;
 		ppi->net_path->evt_ch.pkt_present = 1;
 	}

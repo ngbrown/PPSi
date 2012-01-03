@@ -31,7 +31,7 @@ extern int posix_timer_init(struct pp_instance *ppi)
 
 	for (i = 0; i < PP_TIMER_ARRAY_SIZE; i++) {
 
-		t = calloc(1,sizeof(*t));
+		t = calloc(1, sizeof(*t));
 		if (!t)
 			return -1;
 

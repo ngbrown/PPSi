@@ -10,11 +10,17 @@
 #include "bare-linux.h"
 
 /* Define other hackish stuff */
-typedef struct {unsigned long bits[1024/32];} bare_fd_set;
-#define FD_ZERO(p) memset(p, 0, sizeof(p))
-#define FD_SET(bit, p) ((p)->bits[0] |= (1 << (bit)))
+struct bare_fd_set {
+	unsigned long bits[1024/32];
+};
 
-struct bare_timeval {unsigned long tv_sec; unsigned long tv_usec;};
+#define FD_ZERO(p)	memset(p, 0, sizeof(p))
+#define FD_SET(bit, p)	((p)->bits[0] |= (1 << (bit)))
+
+struct bare_timeval {
+	unsigned long tv_sec;
+	unsigned long tv_usec;
+};
 
 #define NULL 0
 
@@ -29,7 +35,7 @@ void bare_main_loop(struct pp_instance *ppi)
 	 */
 	delay_ms = pp_state_machine(ppi, NULL, 0);
 	while (1) {
-		bare_fd_set set;
+		struct bare_fd_set set;
 		int i, maxfd;
 		struct bare_timeval tv;
 		unsigned char packet[1500];
@@ -65,7 +71,7 @@ void bare_main_loop(struct pp_instance *ppi)
 		 */
 		i = bare_recv_packet(ppi, packet, sizeof(packet));
 		/* FIXME: PP_PROTO_NR is a legacy number */
-		if ( ((struct bare_ethhdr *)packet)->h_proto
+		if (((struct bare_ethhdr *)packet)->h_proto
 		     != htons(PP_PROTO_NR))
 			goto again;
 

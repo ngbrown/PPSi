@@ -12,11 +12,12 @@ void pp_puts(const char *s)
 int pp_strnlen(const char *s, int maxlen)
 {
 	int len = 0;
-	while (*(s++)) len++;
+	while (*(s++))
+		len++;
 	return len;
 }
 
-void *pp_memcpy(void * dest, const void *src, int count)
+void *pp_memcpy(void *dest, const void *src, int count)
 {
 	/* from u-boot-1.1.2 */
 	char *tmp = (char *) dest, *s = (char *) src;
