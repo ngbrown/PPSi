@@ -2,6 +2,7 @@
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 #include "spec.h"
 #include "include/gpio.h"
 
@@ -27,7 +28,7 @@ void pptp_main(void)
 		pp_diag_error(ppi, spec_errno);
 		pp_diag_fatal(ppi, "open_ch", "");
 	}
-	pp_open_instance(ppi);
+	pp_open_instance(ppi, 0 /* no opts */);
 
 	spec_main_loop(ppi);
 }

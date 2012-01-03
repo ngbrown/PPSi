@@ -7,6 +7,7 @@
  * This is the main loop for the Spec board
  */
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 #include "spec.h"
 
 void spec_main_loop(struct pp_instance *ppi)
@@ -42,8 +43,6 @@ void spec_main_loop(struct pp_instance *ppi)
 				pp_printf(" %02x", packet[j]);
 			pp_printf("\n");
 		}
-		if (i < sizeof(struct pp_packet) /* or minimum of all pckts */)
-			continue;
 		/* Warning: PP_PROTO_NR is endian-agnostic by design */
 		if (((struct spec_ethhdr *)packet)->h_proto !=
 		     htons(PP_PROTO_NR))
