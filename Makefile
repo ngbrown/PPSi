@@ -23,7 +23,7 @@ all: $(TARGET).o
 CFLAGS += -Wall -O2 -ggdb -Iinclude
 
 # to avoid ifdef as much as possible, I use the kernel trick for OBJ variables
-OBJ-y := state-machine.o
+OBJ-y := fsm.o
 
 # include diagnostic objects
 include diag/Makefile
