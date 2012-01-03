@@ -18,11 +18,11 @@ extern void pp_diag_error(struct pp_instance *ppi, int err);
 extern void pp_diag_error_str2(struct pp_instance *ppi, char *s1, char *s2);
 extern void pp_diag_fatal(struct pp_instance *ppi, char *s1, char *s2);
 extern void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...)
-	__attribute__((format(printf,2,3)));
+	__attribute__((format(printf, 2, 3)));
 
 /* Our printf, that is implemented internally */
 extern int pp_printf(const char *fmt, ...)
-	__attribute__((format(printf,1,2)));
+	__attribute__((format(printf, 1, 2)));
 extern int pp_vsprintf(char *buf, const char *, va_list)
         __attribute__ ((format (printf, 2, 0)));
 

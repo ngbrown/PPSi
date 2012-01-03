@@ -50,14 +50,12 @@ struct pp_runtime_opts {
 	 * char *file; [PP_PATH_MAX]
 	 */
 };
-extern struct pp_runtime_opts default_rt_opts; /* preinitialized
-                                                * with default values */
+extern struct pp_runtime_opts default_rt_opts; /* preinited with defaults */
 
 /*
  * Communication channel
  */
-struct pp_channel
-{
+struct pp_channel {
 	union {
 		int fd;		/* Posix wants fid descriptor */
 		void *custom;	/* Other archs want other stuff */
@@ -71,8 +69,7 @@ struct pp_channel
 /*
  * Foreign master record. Used to manage Foreign masters
  */
-struct pp_frgn_master
-{
+struct pp_frgn_master {
 	PortIdentity port_identity;
 	UInteger16 ann_messages;
 
@@ -84,8 +81,7 @@ struct pp_frgn_master
 /*
  * Timer
  */
-struct pp_timer
-{
+struct pp_timer {
 	uint32_t start;
 	uint32_t interval;
 };
@@ -93,8 +89,7 @@ struct pp_timer
 /*
  * Net Path
  */
-struct pp_net_path
-{
+struct pp_net_path {
 	struct pp_channel evt_ch;
 	struct pp_channel gen_ch;
 	Integer32 ucast_addr;
@@ -167,16 +162,16 @@ struct pp_instance {
 		waiting_for_follow:1;
 };
 
-#define DSDEF(x) x->defaultDS
-#define DSCUR(x) x->currentDS
-#define DSPAR(x) x->parentDS
-#define DSPOR(x) x->portDS
-#define DSPRO(x) x->timePropertiesDS
+#define DSDEF(x) ((x)->defaultDS)
+#define DSCUR(x) ((x)->currentDS)
+#define DSPAR(x) ((x)->parentDS)
+#define DSPOR(x) ((x)->portDS)
+#define DSPRO(x) ((x)->timePropertiesDS)
 
 
 /* The channel for an instance must be created and possibly destroyed. */
 extern int pp_open_instance(struct pp_instance *ppi,
-                            struct pp_runtime_opts *rt_opts);
+			    struct pp_runtime_opts *rt_opts);
 
 extern int pp_close_instance(struct pp_instance *ppi);
 
@@ -190,7 +185,7 @@ extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len);
 
 /* Timers */
 extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common
-                                                      structure */
+						      structure */
 extern int pp_timer_start(uint32_t interval, struct pp_timer *tm);
 extern int pp_timer_stop(struct pp_timer *tm);
 extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
@@ -234,7 +229,7 @@ extern void msg_pack_pdelay_resp(void *buf, MsgHeader *hdr,
 		Timestamp *req_rec_tstamp, struct pp_instance *ppi);
 extern void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp);
 extern void msg_pack_pdelay_resp_followup(void *buf, MsgHeader *hdr,
-	Timestamp *resp_orig_tstamp, struct pp_instance* ppi);
+	Timestamp *resp_orig_tstamp, struct pp_instance *ppi);
 extern void msg_unpack_pdelay_resp_followup(void *buf,
 	MsgPDelayRespFollowUp *presp_follow);
 
@@ -271,8 +266,8 @@ typedef int pp_action(struct pp_instance *ppi, uint8_t *packet, int plen);
 
 /* Standard state-machine functions */
 extern pp_action pp_initializing, pp_faulty, pp_disabled, pp_listening,
-                 pp_pre_master, pp_master, pp_passive, pp_uncalibrated,
-                 pp_slave;
+		 pp_pre_master, pp_master, pp_passive, pp_uncalibrated,
+		 pp_slave;
 
 /* The engine */
 extern int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen);

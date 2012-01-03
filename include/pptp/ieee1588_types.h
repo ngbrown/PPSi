@@ -8,7 +8,6 @@
 
 #include <stdint.h>
 
-
 typedef enum {FALSE=0, TRUE} Boolean; /* FIXME really needed? */
 typedef uint8_t		Octet;
 typedef int8_t		Integer8;
@@ -29,94 +28,94 @@ typedef uint8_t		Nibble;
 /* FIXME: each struct must be aligned for lower memory usage */
 
 typedef struct {
-	uint32_t lsb;
-	uint16_t msb;
+	uint32_t	lsb;
+	uint16_t	msb;
 } UInteger48;
 
 typedef struct {
-	uint32_t lsb;
-	int32_t msb;
+	uint32_t	lsb;
+	int32_t		msb;
 } Integer64;
 
 typedef struct {
-	Integer64 scaledNanoseconds;
+	Integer64	scaledNanoseconds;
 } TimeInterval;
 
 typedef struct  {
-	UInteger48 secondsField;
-	UInteger32 nanosecondsField;
+	UInteger48	secondsField;
+	UInteger32	nanosecondsField;
 } Timestamp;
 
 typedef struct {
-  Integer32 seconds;
-  Integer32 nanoseconds;
+	Integer32	seconds;
+	Integer32	nanoseconds;
 } TimeInternal;
 
-typedef Octet ClockIdentity[PP_CLOCK_IDENTITY_LENGTH];
+typedef Octet		ClockIdentity[PP_CLOCK_IDENTITY_LENGTH];
 
 typedef struct {
-	ClockIdentity clockIdentity;
-	UInteger16 portNumber;
+	ClockIdentity	clockIdentity;
+	UInteger16	portNumber;
 } PortIdentity;
 
 typedef struct {
-	Enumeration16 networkProtocol;
-	UInteger16 adressLength;
-	Octet* adressField;
+	Enumeration16	networkProtocol;
+	UInteger16	adressLength;
+	Octet		*adressField;
 } PortAdress;
 
 typedef struct {
-	UInteger8 clockClass;
-	Enumeration8 clockAccuracy;
-	UInteger16 offsetScaledLogVariance;
+	UInteger8	clockClass;
+	Enumeration8	clockAccuracy;
+	UInteger16	offsetScaledLogVariance;
 } ClockQuality;
 
 typedef struct {
-	Enumeration16 tlvType;
-	UInteger16 lengthField;
-	Octet* valueField;
+	Enumeration16	tlvType;
+	UInteger16	lengthField;
+	Octet		*valueField;
 } TLV;
 
 typedef struct {
-	UInteger8 lengthField;
-	Octet* textField;
+	UInteger8	lengthField;
+	Octet		*textField;
 } PTPText;
 
 typedef struct {
-	UInteger16 faultRecordLength;
-	Timestamp faultTime;
-	Enumeration8 severityCode;
-	PTPText faultName;
-	PTPText faultValue;
-	PTPText faultDescription;
+	UInteger16	faultRecordLength;
+	Timestamp	faultTime;
+	Enumeration8	severityCode;
+	PTPText		faultName;
+	PTPText		faultValue;
+	PTPText		faultDescription;
 } FaultRecord;
 
 
 /* Common Message header (table 18, page 124) */
 typedef struct {
- 	Nibble transportSpecific;
- 	Enumeration4 messageType;
- 	UInteger4 versionPTP;
- 	UInteger16 messageLength;
- 	UInteger8 domainNumber;
- 	Octet flagField[2];
- 	Integer64 correctionfield;
-	PortIdentity sourcePortIdentity;
- 	UInteger16 sequenceId;
- 	UInteger8 controlField;
- 	Integer8 logMessageInterval;
+	Nibble		transportSpecific;
+	Enumeration4	messageType;
+	UInteger4	versionPTP;
+	UInteger16	messageLength;
+	UInteger8	domainNumber;
+	Octet		flagField[2];
+	Integer64	correctionfield;
+	PortIdentity	sourcePortIdentity;
+	UInteger16	sequenceId;
+	UInteger8	controlField;
+	Integer8	logMessageInterval;
 } MsgHeader;
 
 /* Announce Message (table 25, page 129) */
 typedef struct {
-	Timestamp originTimestamp;
-	Integer16 currentUtcOffset;
-	UInteger8 grandmasterPriority1;
-	ClockQuality grandmasterClockQuality;
-	UInteger8 grandmasterPriority2;
-	ClockIdentity grandmasterIdentity;
-	UInteger16 stepsRemoved;
-	Enumeration8 timeSource;
+	Timestamp	originTimestamp;
+	Integer16	currentUtcOffset;
+	UInteger8	grandmasterPriority1;
+	ClockQuality	grandmasterClockQuality;
+	UInteger8	grandmasterPriority2;
+	ClockIdentity	grandmasterIdentity;
+	UInteger16	stepsRemoved;
+	Enumeration8	timeSource;
 } MsgAnnounce;
 
 /* Sync Message (table 26, page 129) */
@@ -126,52 +125,52 @@ typedef struct {
 
 /* DelayReq Message (table 26, page 129) */
 typedef struct {
-	Timestamp originTimestamp;
+	Timestamp	originTimestamp;
 } MsgDelayReq;
 
 /* DelayResp Message (table 27, page 130) */
 typedef struct {
-	Timestamp preciseOriginTimestamp;
+	Timestamp	preciseOriginTimestamp;
 } MsgFollowUp;
 
 
 /* DelayResp Message (table 28, page 130) */
 typedef struct {
-	Timestamp receiveTimestamp;
-	PortIdentity requestingPortIdentity;
+	Timestamp	receiveTimestamp;
+	PortIdentity	requestingPortIdentity;
 } MsgDelayResp;
 
 /* PdelayReq Message (table 29, page 131) */
 typedef struct {
-	Timestamp originTimestamp;
+	Timestamp	originTimestamp;
 
 } MsgPDelayReq;
 
 /* PdelayResp Message (table 30, page 131) */
 typedef struct {
-	Timestamp requestReceiptTimestamp;
-	PortIdentity requestingPortIdentity;
+	Timestamp	requestReceiptTimestamp;
+	PortIdentity	requestingPortIdentity;
 } MsgPDelayResp;
 
 /* PdelayRespFollowUp Message (table 31, page 132) */
 typedef struct {
-	Timestamp responseOriginTimestamp;
-	PortIdentity requestingPortIdentity;
+	Timestamp	responseOriginTimestamp;
+	PortIdentity	requestingPortIdentity;
 } MsgPDelayRespFollowUp;
 
 /* Signaling Message (table 33, page 133) */
 typedef struct {
-	PortIdentity targetPortIdentity;
-	char* tlv;
+	PortIdentity	targetPortIdentity;
+	char		*tlv;
 } MsgSignaling;
 
 /* Management Message (table 37, page 137) */
 typedef struct {
-	PortIdentity targetPortIdentity;
-	UInteger8 startingBoundaryHops;
-	UInteger8 boundaryHops;
-	Enumeration4 actionField;
-	char* tlv;
+	PortIdentity	targetPortIdentity;
+	UInteger8	startingBoundaryHops;
+	UInteger8	boundaryHops;
+	Enumeration4	actionField;
+	char		*tlv;
 } MsgManagement;
 
 
@@ -179,72 +178,72 @@ typedef struct {
 /* Default Data Set */
 typedef struct {
 	/* Static */
-	Boolean twoStepFlag;
-	ClockIdentity clockIdentity;
-	UInteger16 numberPorts;
+	Boolean		twoStepFlag;
+	ClockIdentity	clockIdentity;
+	UInteger16	numberPorts;
 	/* Dynamic */
-	ClockQuality clockQuality;
+	ClockQuality	clockQuality;
 	/* Configurable */
-	UInteger8 priority1;
-	UInteger8 priority2;
-	UInteger8 domainNumber;
-	Boolean slaveOnly;
+	UInteger8	priority1;
+	UInteger8	priority2;
+	UInteger8	domainNumber;
+	Boolean		slaveOnly;
 } DSDefault;
 
 /* Current Data Set */
 typedef struct {
 	/* Dynamic */
-	UInteger16 stepsRemoved;
-	TimeInternal offsetFromMaster;
-	TimeInternal meanPathDelay;
+	UInteger16	stepsRemoved;
+	TimeInternal	offsetFromMaster;
+	TimeInternal	meanPathDelay;
 } DSCurrent;
 
 /* Parent Data Set */
 typedef struct {
 	/* Dynamic */
-	PortIdentity parentPortIdentity;
-	Boolean parentStats;
-	UInteger16 observedParentOffsetScaledLogVariance;
-	Integer32 observedParentClockPhaseChangeRate;
-	ClockIdentity grandmasterIdentity;
-	ClockQuality grandmasterClockQuality;
-	UInteger8 grandmasterPriority1;
-	UInteger8 grandmasterPriority2;
+	PortIdentity	parentPortIdentity;
+	Boolean		parentStats;
+	UInteger16	observedParentOffsetScaledLogVariance;
+	Integer32	observedParentClockPhaseChangeRate;
+	ClockIdentity	grandmasterIdentity;
+	ClockQuality	grandmasterClockQuality;
+	UInteger8	grandmasterPriority1;
+	UInteger8	grandmasterPriority2;
 } DSParent;
 
 /* Port Data set */
 typedef struct {
 	/* Static */
-	PortIdentity portIdentity;
+	PortIdentity	portIdentity;
 	/* Dynamic */
-	Enumeration8 portState;
-	Integer8 logMinDelayReqInterval;
-	TimeInternal peerMeanPathDelay;
+	Enumeration8	portState;
+	Integer8	logMinDelayReqInterval;
+	TimeInternal	peerMeanPathDelay;
 	/* Configurable */
-	Integer8 logAnnounceInterval;
-	UInteger8 announceReceiptTimeout;
-	Integer8 logSyncInterval;
-	Enumeration8 delayMechanism;
-	Integer8 logMinPdelayReqInterval;
-	UInteger4 versionNumber;
+	Integer8	logAnnounceInterval;
+	UInteger8	announceReceiptTimeout;
+	Integer8	logSyncInterval;
+	Enumeration8	delayMechanism;
+	Integer8	logMinPdelayReqInterval;
+	UInteger4	versionNumber;
 } DSPort;
 
 /* Time Properties Data Set */
 typedef struct {
 	/* Dynamic */
-	Integer16 currentUtcOffset;
-	Boolean currentUtcOffsetValid;
-	Boolean leap59;
-	Boolean leap61;
-	Boolean timeTraceable;
-	Boolean frequencyTraceable;
-	Boolean ptpTimescale;
-	Enumeration8 timeSource;
+	Integer16	currentUtcOffset;
+	Boolean	currentUtcOffsetValid;
+	Boolean	leap59;
+	Boolean	leap61;
+	Boolean	timeTraceable;
+	Boolean	frequencyTraceable;
+	Boolean	ptpTimescale;
+	Enumeration8	timeSource;
 } DSTimeProperties;
 
 /* Enumeration States (table 8, page 73) */
 enum pp_std_states {
-	PPS_END_OF_TABLE = 0,
+	PPS_END_OF_TABLE	= 0,
 	PPS_INITIALIZING,
 	PPS_FAULTY,
 	PPS_DISABLED,
@@ -257,11 +256,11 @@ enum pp_std_states {
 };
 
 enum pp_std_messages {
-	PPM_SYNC = 0x0,
+	PPM_SYNC		= 0x0,
 	PPM_DELAY_REQ,
 	PPM_PDELAY_REQ,
 	PPM_PDELAY_RESP,
-	PPM_FOLLOW_UP = 0x8,
+	PPM_FOLLOW_UP		= 0x8,
 	PPM_DELAY_RESP,
 	PPM_PDELAY_RESP_FOLLOW_UP,
 	PPM_ANNOUNCE,
@@ -271,7 +270,7 @@ enum pp_std_messages {
 
 /* Enumeration Domain Number (table 2, page 41) */
 enum ENDomainNumber {
-	DFLT_DOMAIN_NUMBER = 0,
+	DFLT_DOMAIN_NUMBER	= 0,
 	ALT1_DOMAIN_NUMBER,
 	ALT2_DOMAIN_NUMBER,
 	ALT3_DOMAIN_NUMBER
@@ -279,7 +278,7 @@ enum ENDomainNumber {
 
 /* Enumeration Network Protocol (table 3, page 46) */
 enum ENNetworkProtocol {
-	UDP_IPV4 = 1,
+	UDP_IPV4	= 1,
 	UDP_IPV6,
 	IEE_802_3,
 	DeviceNet,
@@ -288,22 +287,22 @@ enum ENNetworkProtocol {
 };
 
 /* Enumeration Time Source (table 7, page 57) */
-enum ENTimeSource{
-	ATOMIC_CLOCK = 0x10,
-	GPS = 0x20,
-	TERRESTRIAL_RADIO = 0x30,
-	PTP = 0x40,
-	NTP = 0x50,
-	HAND_SET = 0x60,
-	OTHER = 0x90,
-	INTERNAL_OSCILLATOR = 0xA0
+enum ENTimeSource {
+	ATOMIC_CLOCK		= 0x10,
+	GPS			= 0x20,
+	TERRESTRIAL_RADIO	= 0x30,
+	PTP			= 0x40,
+	NTP			= 0x50,
+	HAND_SET		= 0x60,
+	OTHER			= 0x90,
+	INTERNAL_OSCILLATOR	= 0xA0
 };
 
 /* Enumeration Delay mechanism (table 9, page 74) */
 enum ENDelayMechanism {
-	E2E = 1,
-	P2P = 2,
-	DELAY_DISABLED = 0xFE
+	E2E		= 1,
+	P2P		= 2,
+	DELAY_DISABLED	= 0xFE
 };
 
 #endif /* __PPTP_IEEE_1588_TYPES_H__ */
