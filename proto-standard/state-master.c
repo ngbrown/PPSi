@@ -55,11 +55,11 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	switch (ppi->msg_tmp_header.messageType) {
 
 	case PPM_ANNOUNCE:
-		e = st_com_master_handle_announce(pkt, plen, ppi);
+		e = st_com_master_handle_announce(ppi, pkt, plen);
 		break;
 
 	case PPM_SYNC:
-		e = st_com_master_handle_sync(pkt, plen, &time, ppi);
+		e = st_com_master_handle_sync(ppi, pkt, plen, &time);
 		break;
 
 	case PPM_DELAY_REQ:
@@ -69,7 +69,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_PDELAY_REQ:
-		e = st_com_handle_pdelay_req(pkt, plen, &time, ppi);
+		e = st_com_handle_pdelay_req(ppi, pkt, plen, &time);
 		break;
 
 	case PPM_PDELAY_RESP:

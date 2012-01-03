@@ -56,8 +56,7 @@ int st_com_check_record_update(struct pp_instance *ppi)
 	if (ppi->record_update) {
 		/* FIXME diag DBGV("event STATE_DECISION_EVENT\n"); */
 		ppi->record_update = FALSE;
-		ppi->next_state = bmc(ppi->frgn_master,
-				      ppi->rt_opts, ppi);
+		ppi->next_state = bmc(ppi, ppi->frgn_master, ppi->rt_opts);
 
 		if (ppi->next_state != ppi->state)
 			return 1;
@@ -65,7 +64,7 @@ int st_com_check_record_update(struct pp_instance *ppi)
 	return 0;
 }
 
-void st_com_add_foreign(unsigned char *buf, struct pp_instance *ppi)
+void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 {
 	int i, j;
 	int found = 0;
@@ -130,8 +129,8 @@ void st_com_add_foreign(unsigned char *buf, struct pp_instance *ppi)
 }
 
 
-int st_com_slave_handle_announce(unsigned char *buf, int len,
-				  struct pp_instance *ppi)
+int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
+				 int len)
 {
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
@@ -149,10 +148,10 @@ int st_com_slave_handle_announce(unsigned char *buf, int len,
 
 	if (!ppi->is_from_cur_par) {
 		msg_unpack_announce(buf, &ppi->msg_tmp.announce);
-		s1(hdr, &ppi->msg_tmp.announce, ppi);
+		s1(ppi, hdr, &ppi->msg_tmp.announce);
 	} else {
 		/* st_com_add_foreign takes care of announce unpacking */
-		st_com_add_foreign(buf, ppi);
+		st_com_add_foreign(ppi, buf);
 	}
 
 	/*Reset Timer handling Announce receipt timeout*/
@@ -161,8 +160,8 @@ int st_com_slave_handle_announce(unsigned char *buf, int len,
 	return 0;
 }
 
-int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
-				struct pp_instance *ppi)
+int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
+			     int len, TimeInternal *time)
 {
 	TimeInternal origin_tstamp;
 	TimeInternal correction_field;
@@ -208,17 +207,17 @@ int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
 			ppi->waiting_for_follow = FALSE;
 			to_TimeInternal(&origin_tstamp,
 					&ppi->msg_tmp.sync.originTimestamp);
-			pp_update_offset(&origin_tstamp,
+			pp_update_offset(ppi, &origin_tstamp,
 					&ppi->sync_receive_time,
-					&correction_field, ppi);
+					&correction_field);
 			pp_update_clock(ppi);
 		}
 	}
 	return 0;
 }
 
-int st_com_slave_handle_followup(unsigned char *buf, int len,
-				 struct pp_instance *ppi)
+int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
+				 int len)
 {
 	TimeInternal precise_orig_timestamp;
 	TimeInternal correction_field;
@@ -262,17 +261,17 @@ int st_com_slave_handle_followup(unsigned char *buf, int len,
 	add_TimeInternal(&correction_field, &correction_field,
 		&ppi->last_sync_corr_field);
 
-	pp_update_offset(&precise_orig_timestamp,
+	pp_update_offset(ppi, &precise_orig_timestamp,
 			&ppi->sync_receive_time,
-			&correction_field, ppi);
+			&correction_field);
 
 	pp_update_clock(ppi);
 	return 0;
 }
 
 
-int st_com_handle_pdelay_req(unsigned char *buf, int len,
-		      TimeInternal *time, struct pp_instance *ppi)
+int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
+			     int len, TimeInternal *time)
 {
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
@@ -304,8 +303,8 @@ int st_com_handle_pdelay_req(unsigned char *buf, int len,
 	return 0;
 }
 
-int st_com_master_handle_announce(unsigned char *buf, int len,
-				struct pp_instance *ppi)
+int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
+				  int len)
 {
 	if (len < PP_ANNOUNCE_LENGTH)
 		return -1;
@@ -321,15 +320,15 @@ int st_com_master_handle_announce(unsigned char *buf, int len,
 	 * DBGV("Announce message from another foreign master");
 	 */
 
-	st_com_add_foreign(buf, ppi);
+	st_com_add_foreign(ppi, buf);
 
 	ppi->record_update = TRUE;
 
 	return 0;
 }
 
-int st_com_master_handle_sync(unsigned char *buf, int len, TimeInternal *time,
-				struct pp_instance *ppi)
+int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
+			      int len, TimeInternal *time)
 {
 	if (len < PP_SYNC_LENGTH)
 		return -1;

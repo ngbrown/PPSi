@@ -54,7 +54,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	m1(ppi);
 
-	msg_pack_header(ppi->buf_out, ppi);
+	msg_pack_header(ppi, ppi->buf_out);
 
 	ppi->next_state = PPS_LISTENING;
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;

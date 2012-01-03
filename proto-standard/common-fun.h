@@ -17,20 +17,20 @@ void st_com_add_foreign(unsigned char *buf, MsgHeader *header,
 			struct pp_instance *ppi);
 */
 
-int st_com_slave_handle_announce(unsigned char *buf, int len,
-				struct pp_instance *ppi);
+int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
+				 int len);
 
-int st_com_master_handle_announce(unsigned char *buf, int len,
-				struct pp_instance *ppi);
+int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
+				  int len);
 
-int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
-				struct pp_instance *ppi);
+int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
+			     int len, TimeInternal *time);
 
-int st_com_master_handle_sync(unsigned char *buf, int len, TimeInternal *time,
-				struct pp_instance *ppi);
+int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
+			      int len, TimeInternal *time);
 
-int st_com_slave_handle_followup(unsigned char *buf, int len,
-				 struct pp_instance *ppi);
+int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
+				 int len);
 
-int st_com_handle_pdelay_req(unsigned char *buf, int len, TimeInternal *time,
-				struct pp_instance *ppi);
+int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
+			     int len, TimeInternal *time);

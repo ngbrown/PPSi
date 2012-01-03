@@ -12,15 +12,15 @@ int pp_uncalibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	switch (ppi->msg_tmp_header.messageType) {
 
 	case PPM_ANNOUNCE:
-		e = st_com_slave_handle_announce(pkt, plen, ppi);
+		e = st_com_slave_handle_announce(ppi, pkt, plen);
 		break;
 
 	case PPM_SYNC:
-		e = st_com_slave_handle_sync(pkt, plen, &time, ppi);
+		e = st_com_slave_handle_sync(ppi, pkt, plen, &time);
 		break;
 
 	case PPM_FOLLOW_UP:
-		e = st_com_slave_handle_followup(pkt, plen, ppi);
+		e = st_com_slave_handle_followup(ppi, pkt, plen);
 		break;
 
 	default:

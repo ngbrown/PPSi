@@ -37,7 +37,7 @@ void m1(struct pp_instance *ppi)
 
 
 /* Local clock is synchronized to Ebest Table 16 (9.3.5) of the spec. */
-void s1(MsgHeader *hdr, MsgAnnounce *ann, struct pp_instance *ppi)
+void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 {
 	/* Current DS */
 	DSCUR(ppi)->stepsRemoved = ann->stepsRemoved + 1;
@@ -78,7 +78,7 @@ void s1(MsgHeader *hdr, MsgAnnounce *ann, struct pp_instance *ppi)
 
 
 /* Copy local data set into header and ann message. 9.3.4 table 12. */
-void copy_d0(MsgHeader *hdr, MsgAnnounce *ann, struct pp_instance *ppi)
+void copy_d0( struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 {
 	ann->grandmasterPriority1 = DSDEF(ppi)->priority1;
 	pp_memcpy(ann->grandmasterIdentity, DSDEF(ppi)->clockIdentity,
@@ -100,9 +100,9 @@ void copy_d0(MsgHeader *hdr, MsgAnnounce *ann, struct pp_instance *ppi)
  * Data set comparison bewteen two foreign masters (9.3.4 fig 27)
  * return similar to memcmp()
  */
-Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
-		     MsgHeader *hdr_b, MsgAnnounce *ann_b,
-		     struct pp_instance *ppi)
+Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
+			 MsgHeader *hdr_a, MsgAnnounce *ann_a,
+			 MsgHeader *hdr_b, MsgAnnounce *ann_b)
 {
 	/* FIXME DBGV("Data set comparison \n"); */
 	short comp = 0;
@@ -232,25 +232,27 @@ Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
 }
 
 /* State decision algorithm 9.3.3 Fig 26 */
-UInteger8 bmc_state_decision(MsgHeader *hdr, MsgAnnounce *ann,
-		 struct pp_runtime_opts *rt_opts, struct pp_instance *ppi)
+UInteger8 bmc_state_decision( struct pp_instance *ppi,
+			      MsgHeader *hdr, MsgAnnounce *ann,
+			      struct pp_runtime_opts *rt_opts)
 {
 	int cmpres;
 
 	if (rt_opts->slave_only) {
-		s1(hdr, ann, ppi);
+		s1(ppi, hdr, ann);
 		return PPS_SLAVE;
 	}
 
 	if ((!ppi->number_foreign_records) && (ppi->state == PPS_LISTENING))
 		return PPS_LISTENING;
 
-	copy_d0(&ppi->msg_tmp_header, &ppi->msg_tmp.announce, ppi);
+	copy_d0(ppi, &ppi->msg_tmp_header, &ppi->msg_tmp.announce);
 
 
-	cmpres = bmc_dataset_cmp(&ppi->msg_tmp_header,
+	cmpres = bmc_dataset_cmp(ppi,
+				 &ppi->msg_tmp_header,
 				 &ppi->msg_tmp.announce,
-				 hdr, ann, ppi);
+				 hdr, ann);
 
 	if (DSDEF(ppi)->clockQuality.clockClass < 128) {
 
@@ -258,7 +260,7 @@ UInteger8 bmc_state_decision(MsgHeader *hdr, MsgAnnounce *ann,
 			m1(ppi);
 			return PPS_MASTER;
 		} else if (cmpres > 0) {
-			s1(hdr, ann, ppi);
+			s1(ppi, hdr, ann);
 			return PPS_PASSIVE;
 		} else {
 			/* FIXME DBG("Error in bmcDataSetComparison..\n"); */
@@ -270,7 +272,7 @@ UInteger8 bmc_state_decision(MsgHeader *hdr, MsgAnnounce *ann,
 			m1(ppi);
 			return PPS_MASTER;
 		} else if (cmpres > 0) {
-			s1(hdr, ann, ppi);
+			s1(ppi, hdr, ann);
 			return PPS_SLAVE;
 		} else {
 			/* FIXME DBG("Error in bmcDataSetComparison..\n"); */
@@ -285,8 +287,8 @@ UInteger8 bmc_state_decision(MsgHeader *hdr, MsgAnnounce *ann,
 
 
 
-UInteger8 bmc(struct pp_frgn_master *frgn_master,
-	      struct pp_runtime_opts *rt_opts, struct pp_instance *ppi)
+UInteger8 bmc(struct pp_instance *ppi, struct pp_frgn_master *frgn_master,
+	      struct pp_runtime_opts *rt_opts)
 {
 	Integer16 i, best;
 
@@ -297,17 +299,17 @@ UInteger8 bmc(struct pp_frgn_master *frgn_master,
 		}
 
 	for (i = 1, best = 0; i < ppi->number_foreign_records; i++)
-		if ((bmc_dataset_cmp(&frgn_master[i].hdr,
+		if (bmc_dataset_cmp(ppi,
+				     &frgn_master[i].hdr,
 				     &frgn_master[i].ann,
 				     &frgn_master[best].hdr,
-				     &frgn_master[best].ann,
-				     ppi)) < 0)
+				     &frgn_master[best].ann) < 0)
 			best = i;
 
 	/* FIXME DBGV("Best record : %d \n",best); */
 	ppi->foreign_record_best = best;
 
-	return bmc_state_decision(&frgn_master[best].hdr,
+	return bmc_state_decision(ppi, &frgn_master[best].hdr,
 				   &frgn_master[best].ann,
-				   rt_opts, ppi);
+				   rt_opts);
 }

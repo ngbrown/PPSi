@@ -17,7 +17,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	switch (ppi->msg_tmp_header.messageType) {
 
 	case PPM_ANNOUNCE:
-		e = st_com_master_handle_announce(pkt, plen, ppi);
+		e = st_com_master_handle_announce(ppi, pkt, plen);
 		break;
 
 	default:

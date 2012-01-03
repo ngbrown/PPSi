@@ -5,7 +5,7 @@
 #include <pptp/pptp.h>
 
 /* Unpack header from in buffer to msg_tmp_header field */
-void msg_unpack_header(void *buf, struct pp_instance *ppi)
+void msg_unpack_header(struct pp_instance *ppi, void *buf)
 {
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
@@ -57,7 +57,7 @@ void msg_unpack_header(void *buf, struct pp_instance *ppi)
 }
 
 /* Pack header message into out buffer of ppi */
-void msg_pack_header(void *buf, struct pp_instance *ppi)
+void msg_pack_header(struct pp_instance *ppi, void *buf)
 {
 	Nibble transport = 0x80;
 
@@ -85,7 +85,7 @@ void *msg_copy_header(MsgHeader *dest, MsgHeader *src)
 
 
 /* Pack Sync message into out buffer of ppi */
-void msg_pack_sync(void *buf, Timestamp *orig_tstamp, struct pp_instance *ppi)
+void msg_pack_sync(struct pp_instance *ppi, void *buf, Timestamp *orig_tstamp)
 {
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -125,7 +125,7 @@ void msg_unpack_sync(void *buf, MsgSync *sync)
 }
 
 /* Pack Announce message into out buffer of ppi */
-void msg_pack_announce(void *buf, struct pp_instance *ppi)
+void msg_pack_announce(struct pp_instance *ppi, void *buf)
 {
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -185,8 +185,8 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 
 
 /* Pack Follow Up message into out buffer of ppi*/
-void msg_pack_follow_up(void *buf, Timestamp *prec_orig_tstamp,
-			struct pp_instance *ppi)
+void msg_pack_follow_up(struct pp_instance *ppi, void *buf,
+			Timestamp *prec_orig_tstamp)
 {
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -230,8 +230,8 @@ void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup)
 }
 
 /* pack PdelayReq message into out buffer of ppi */
-void msg_pack_pdelay_req(void *buf, Timestamp *orig_tstamp,
-		    struct pp_instance *ppi)
+void msg_pack_pdelay_req(struct pp_instance *ppi, void *buf,
+			 Timestamp *orig_tstamp)
 {
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -261,8 +261,8 @@ void msg_pack_pdelay_req(void *buf, Timestamp *orig_tstamp,
 
 
 /*pack DelayReq message into out buffer of ppi*/
-void msg_pack_delay_req(void *buf, Timestamp *orig_tstamp,
-			struct pp_instance *ppi)
+void msg_pack_delay_req(struct pp_instance *ppi, void *buf,
+			Timestamp *orig_tstamp)
 {
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -288,8 +288,8 @@ void msg_pack_delay_req(void *buf, Timestamp *orig_tstamp,
 
 
 /*pack delayResp message into OUT buffer of ppi*/
-void msg_pack_delay_resp(void *buf, MsgHeader *hdr, Timestamp *rcv_tstamp,
-			 struct pp_instance *ppi)
+void msg_pack_delay_resp(struct pp_instance *ppi, void *buf,
+			 MsgHeader *hdr, Timestamp *rcv_tstamp)
 {
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -328,8 +328,8 @@ void msg_pack_delay_resp(void *buf, MsgHeader *hdr, Timestamp *rcv_tstamp,
 
 
 /* Pack PdelayResp message into out buffer of ppi */
-void msg_pack_pdelay_resp(void *buf, MsgHeader *hdr,
-			  Timestamp *req_rec_tstamp, struct pp_instance *ppi)
+void msg_pack_pdelay_resp(struct pp_instance *ppi, void *buf, MsgHeader *hdr,
+			  Timestamp *req_rec_tstamp)
 {
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -436,8 +436,9 @@ void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp)
 }
 
 /* Pack PdelayRespFollowUp message into out buffer of ppi */
-void msg_pack_pdelay_resp_followup(void *buf, MsgHeader *hdr,
-	Timestamp *resp_orig_tstamp, struct pp_instance *ppi)
+void msg_pack_pdelay_resp_followup(struct pp_instance *ppi, void *buf,
+				   MsgHeader *hdr,
+				   Timestamp *resp_orig_tstamp)
 {
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
