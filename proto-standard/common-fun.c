@@ -68,7 +68,7 @@ int st_com_check_record_update(struct pp_instance *ppi)
 void st_com_add_foreign(unsigned char *buf, struct pp_instance *ppi)
 {
 	int i, j;
-	Boolean found = FALSE;
+	int found = 0;
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
 	j = ppi->foreign_record_best;
@@ -85,7 +85,7 @@ void st_com_add_foreign(unsigned char *buf, struct pp_instance *ppi)
 			/* Foreign Master is already in Foreign master data set
 			 */
 			ppi->frgn_master[j].ann_messages++;
-			found = TRUE;
+			found = 1;
 			/* FIXME diag
 			DBGV("addForeign : AnnounceMessage incremented \n");
 			*/
