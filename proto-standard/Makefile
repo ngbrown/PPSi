@@ -17,7 +17,7 @@ OBJ-libstd := $D/fsm-table.o \
 	$D/state-passive.o \
 	$D/state-uncalibrated.o \
 	$D/state-slave.o \
-	$D/state-common-fun.o \
+	$D/common-fun.o \
 	$D/bmc.o \
 	$D/msg.o \
 	$D/arith.o \

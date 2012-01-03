@@ -2,7 +2,7 @@
  * FIXME: header
  */
 #include <pptp/pptp.h>
-#include "state-common-fun.h"
+#include "common-fun.h"
 
 int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
