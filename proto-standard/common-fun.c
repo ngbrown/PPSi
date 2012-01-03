@@ -6,7 +6,7 @@
 
 void st_com_execute_slave(struct pp_instance *ppi)
 {
-	if (pp_timer_expired(ppi->timers[PP_TIMER_ANNOUNCE_RECEIPT])) {
+	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_RECEIPT])) {
 		/* FIXME diag
 		 * DBGV("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
 		 */
@@ -23,14 +23,14 @@ void st_com_execute_slave(struct pp_instance *ppi)
 	}
 
 	if (ppi->rt_opts->e2e_mode) {
-		if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ_INTERVAL])) {
+		if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {
 			/* FIXME diag
 			 * DBGV("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
 			 */
 			/* TODO issueDelayReq(rtOpts,ptpClock); */
 		}
 	} else {
-		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ_INTERVAL]))
+		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ]))
 		{
 			/* FIXME diag
 			DBGV("event PDELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
@@ -47,7 +47,7 @@ void st_com_restart_annrec_timer(struct pp_instance *ppi)
 	 * shift?*/
 	pp_timer_start((DSPOR(ppi)->announceReceiptTimeout) <<
 			DSPOR(ppi)->logAnnounceInterval,
-			ppi->timers[PP_TIMER_ANNOUNCE_RECEIPT]);
+			ppi->timers[PP_TIMER_ANN_RECEIPT]);
 }
 
 

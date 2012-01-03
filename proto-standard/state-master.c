@@ -16,26 +16,26 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		pp_timer_start(1 << DSPOR(ppi)->logSyncInterval,
-			ppi->timers[PP_TIMER_SYNC_INTERVAL]);
+			ppi->timers[PP_TIMER_SYNC]);
 
 		pp_timer_start(1 << DSPOR(ppi)->logAnnounceInterval,
-			ppi->timers[PP_TIMER_ANNOUNCE_INTERVAL]);
+			ppi->timers[PP_TIMER_ANN_INTERVAL]);
 
 		pp_timer_start(1 << DSPOR(ppi)->logMinPdelayReqInterval,
-			ppi->timers[PP_TIMER_PDELAYREQ_INTERVAL]);
+			ppi->timers[PP_TIMER_PDELAYREQ]);
 	}
 
 	if (st_com_check_record_update(ppi))
 		goto state_updated;
 
-	if (pp_timer_expired(ppi->timers[PP_TIMER_SYNC_INTERVAL])) {
+	if (pp_timer_expired(ppi->timers[PP_TIMER_SYNC])) {
 		/* FIXME diag
 		 * DBGV("event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
 		 */
 		/* TODO issueSync(rtOpts, ptpClock); */
 	}
 
-	if (pp_timer_expired(ppi->timers[PP_TIMER_ANNOUNCE_INTERVAL])) {
+	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_INTERVAL])) {
 		/* FIXME diag
 		 * DBGV("event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
 		 */
@@ -43,8 +43,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 	if (!ppi->rt_opts->e2e_mode) {
-		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ_INTERVAL]))
-		{
+		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ])) {
 			/* FIXME diag
 			 * DBGV("event PDELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
 			 */
@@ -191,9 +190,9 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 state_updated:
 	/* Leaving this state */
 	if (ppi->next_state != ppi->state) {
-		pp_timer_stop(ppi->timers[PP_TIMER_SYNC_INTERVAL]);
-		pp_timer_stop(ppi->timers[PP_TIMER_ANNOUNCE_INTERVAL]);
-		pp_timer_stop(ppi->timers[PP_TIMER_PDELAYREQ_INTERVAL]);
+		pp_timer_stop(ppi->timers[PP_TIMER_SYNC]);
+		pp_timer_stop(ppi->timers[PP_TIMER_ANN_INTERVAL]);
+		pp_timer_stop(ppi->timers[PP_TIMER_PDELAYREQ]);
 	}
 
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;

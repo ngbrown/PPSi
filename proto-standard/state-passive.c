@@ -11,7 +11,7 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		pp_timer_start(1 << DSPOR(ppi)->logMinPdelayReqInterval,
-			ppi->timers[PP_TIMER_PDELAYREQ_INTERVAL]);
+			ppi->timers[PP_TIMER_PDELAYREQ]);
 
 		st_com_restart_annrec_timer(ppi);
 	}
@@ -44,8 +44,8 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 state_updated:
 	/* Leaving this state */
 	if (ppi->next_state != ppi->state) {
-		pp_timer_stop(ppi->timers[PP_TIMER_ANNOUNCE_RECEIPT]);
-		pp_timer_stop(ppi->timers[PP_TIMER_PDELAYREQ_INTERVAL]);
+		pp_timer_stop(ppi->timers[PP_TIMER_ANN_RECEIPT]);
+		pp_timer_stop(ppi->timers[PP_TIMER_PDELAYREQ]);
 	}
 
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
