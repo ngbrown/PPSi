@@ -15,7 +15,7 @@ void m1(struct pp_instance *ppi)
 
 	/* Parent data set */
 	pp_memcpy(DSPAR(ppi)->parentPortIdentity.clockIdentity,
-		  DSDEF(ppi)->clockIdentity,PP_CLOCK_IDENTITY_LENGTH);
+		  DSDEF(ppi)->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
 	DSPAR(ppi)->parentPortIdentity.portNumber = 0;
 	DSPAR(ppi)->parentStats = PP_DEFAULT_PARENTS_STATS;
 	DSPAR(ppi)->observedParentClockPhaseChangeRate = 0;
@@ -63,7 +63,7 @@ void s1(MsgHeader *hdr, MsgAnnounce *ann, struct pp_instance *ppi)
 
 	/* Timeproperties DS */
 	DSPRO(ppi)->currentUtcOffset = ann->currentUtcOffset;
-        /* "Valid" is bit 2 in second octet of flagfield */
+	/* "Valid" is bit 2 in second octet of flagfield */
 	DSPRO(ppi)->currentUtcOffsetValid = ((hdr->flagField[1] & 0x04) ==
 					   0x04);
 
@@ -101,7 +101,7 @@ void copy_d0(MsgHeader *hdr, MsgAnnounce *ann, struct pp_instance *ppi)
  * return similar to memcmp()
  */
 Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
-		     MsgHeader *hdr_b,MsgAnnounce *ann_b,
+		     MsgHeader *hdr_b, MsgAnnounce *ann_b,
 		     struct pp_instance *ppi)
 {
 	/* FIXME DBGV("Data set comparison \n"); */
@@ -110,7 +110,7 @@ Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
 
 	/* Identity comparison */
 	if (!pp_memcmp(ann_a->grandmasterIdentity,
-		       ann_b->grandmasterIdentity,PP_CLOCK_IDENTITY_LENGTH)) {
+		       ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH)) {
 
 		/* Algorithm part2 Fig 28 */
 		if (ann_a->stepsRemoved > ann_b->stepsRemoved + 1)
@@ -147,8 +147,7 @@ Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
 				} else {
 					return -1;
 				}
-			}
-			else { /* steps removed A == steps removed B */
+			} else { /* steps removed A == steps removed B */
 				if (!pp_memcmp(
 					hdr_a->sourcePortIdentity.clockIdentity,
 					hdr_b->sourcePortIdentity.clockIdentity,
@@ -168,13 +167,13 @@ Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
 		}
 	} else { /* GrandMaster are not identical */
 		/* FIXME: rewrite in a more readable way */
-		if(ann_a->grandmasterPriority1 == ann_b->grandmasterPriority1) {
+		if (ann_a->grandmasterPriority1 == ann_b->grandmasterPriority1) {
 			if (ann_a->grandmasterClockQuality.clockClass ==
 			    ann_b->grandmasterClockQuality.clockClass) {
 				if (ann_a->grandmasterClockQuality.clockAccuracy == ann_b->grandmasterClockQuality.clockAccuracy) {
 					if (ann_a->grandmasterClockQuality.offsetScaledLogVariance == ann_b->grandmasterClockQuality.offsetScaledLogVariance) {
 						if (ann_a->grandmasterPriority2 == ann_b->grandmasterPriority2) {
-							comp = pp_memcmp(ann_a->grandmasterIdentity,ann_b->grandmasterIdentity,PP_CLOCK_IDENTITY_LENGTH);
+							comp = pp_memcmp(ann_a->grandmasterIdentity, ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
 							if (comp < 0)
 								return -1;
 							else if (comp > 0)
@@ -183,7 +182,7 @@ Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
 								return 0;
 						} else {
 						/* Priority2 are not identical */
-							comp =pp_memcmp(&ann_a->grandmasterPriority2,&ann_b->grandmasterPriority2,1);
+							comp = pp_memcmp(&ann_a->grandmasterPriority2, &ann_b->grandmasterPriority2, 1);
 							if (comp < 0)
 								return -1;
 							else if (comp > 0)
@@ -193,7 +192,7 @@ Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
 						}
 					} else {
 						/* offsetScaledLogVariance are not identical */
-						comp= pp_memcmp(&ann_a->grandmasterClockQuality.clockClass,&ann_b->grandmasterClockQuality.clockClass,1);
+						comp = pp_memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
 						if (comp < 0)
 							return -1;
 						else if (comp > 0)
@@ -203,7 +202,7 @@ Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
 					}
 
 				} else { /*  Accuracy are not identitcal */
-					comp = pp_memcmp(&ann_a->grandmasterClockQuality.clockAccuracy,&ann_b->grandmasterClockQuality.clockAccuracy,1);
+					comp = pp_memcmp(&ann_a->grandmasterClockQuality.clockAccuracy, &ann_b->grandmasterClockQuality.clockAccuracy, 1);
 					if (comp < 0)
 						return -1;
 					else if (comp > 0)
@@ -212,7 +211,7 @@ Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
 						return 0;
 				}
 			} else { /* ClockClass are not identical */
-				comp =  pp_memcmp(&ann_a->grandmasterClockQuality.clockClass,&ann_b->grandmasterClockQuality.clockClass,1);
+				comp = pp_memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
 				if (comp < 0)
 					return -1;
 				else if (comp > 0)
@@ -221,7 +220,7 @@ Integer8 bmc_dataset_cmp(MsgHeader *hdr_a, MsgAnnounce *ann_a,
 					return 0;
 			}
 		} else { /*  Priority1 are not identical */
-			comp =  pp_memcmp(&ann_a->grandmasterPriority1,&ann_b->grandmasterPriority1,1);
+			comp = pp_memcmp(&ann_a->grandmasterPriority1, &ann_b->grandmasterPriority1, 1);
 			if (comp < 0)
 				return -1;
 			else if (comp > 0)
@@ -251,7 +250,7 @@ UInteger8 bmc_state_decision(MsgHeader *hdr, MsgAnnounce *ann,
 
 	cmpres = bmc_dataset_cmp(&ppi->msg_tmp_header,
 				 &ppi->msg_tmp.announce,
-				 hdr,ann,ppi);
+				 hdr, ann, ppi);
 
 	if (DSDEF(ppi)->clockQuality.clockClass < 128) {
 
@@ -271,7 +270,7 @@ UInteger8 bmc_state_decision(MsgHeader *hdr, MsgAnnounce *ann,
 			m1(ppi);
 			return PPS_MASTER;
 		} else if (cmpres > 0) {
-			s1(hdr,ann,ppi);
+			s1(hdr, ann, ppi);
 			return PPS_SLAVE;
 		} else {
 			/* FIXME DBG("Error in bmcDataSetComparison..\n"); */
@@ -297,7 +296,7 @@ UInteger8 bmc(struct pp_frgn_master *frgn_master,
 			return ppi->state;
 		}
 
-	for (i=1, best = 0; i < ppi->number_foreign_records; i++)
+	for (i = 1, best = 0; i < ppi->number_foreign_records; i++)
 		if ((bmc_dataset_cmp(&frgn_master[i].hdr,
 				     &frgn_master[i].ann,
 				     &frgn_master[best].hdr,
@@ -308,7 +307,7 @@ UInteger8 bmc(struct pp_frgn_master *frgn_master,
 	/* FIXME DBGV("Best record : %d \n",best); */
 	ppi->foreign_record_best = best;
 
-	return (bmc_state_decision(&frgn_master[best].hdr,
+	return bmc_state_decision(&frgn_master[best].hdr,
 				   &frgn_master[best].ann,
-				   rt_opts,ppi));
+				   rt_opts, ppi);
 }

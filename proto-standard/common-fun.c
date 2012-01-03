@@ -16,8 +16,7 @@ void st_com_execute_slave(struct pp_instance *ppi)
 			DSDEF(ppi)->clockQuality.clockClass != 255) {
 			m1(ppi);
 			ppi->next_state = PPS_MASTER;
-		}
-		else {
+		} else {
 			ppi->next_state = PPS_LISTENING;
 			st_com_restart_annrec_timer(ppi);
 		}
@@ -54,7 +53,7 @@ void st_com_restart_annrec_timer(struct pp_instance *ppi)
 
 int st_com_check_record_update(struct pp_instance *ppi)
 {
-	if(ppi->record_update) {
+	if (ppi->record_update) {
 		/* FIXME diag DBGV("event STATE_DECISION_EVENT\n"); */
 		ppi->record_update = FALSE;
 		ppi->next_state = bmc(ppi->frgn_master,
@@ -151,8 +150,7 @@ int st_com_slave_handle_announce(unsigned char *buf, int len,
 	if (!ppi->is_from_cur_par) {
 		msg_unpack_announce(buf, &ppi->msg_tmp.announce);
 		s1(hdr, &ppi->msg_tmp.announce, ppi);
-	}
-	else {
+	} else {
 		/* st_com_add_foreign takes care of announce unpacking */
 		st_com_add_foreign(buf, ppi);
 	}
@@ -173,9 +171,8 @@ int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
 	if (len < PP_SYNC_LENGTH)
 		return -1;
 
-	if (ppi->is_from_self) {
+	if (ppi->is_from_self)
 		return 0;
-	}
 
 	if (ppi->is_from_cur_par) {
 		ppi->sync_receive_time.seconds = time->seconds;
@@ -213,7 +210,7 @@ int st_com_slave_handle_sync(unsigned char *buf, int len, TimeInternal *time,
 					&ppi->msg_tmp.sync.originTimestamp);
 			pp_update_offset(&origin_tstamp,
 					&ppi->sync_receive_time,
-					&correction_field,ppi);
+					&correction_field, ppi);
 			pp_update_clock(ppi);
 		}
 	}
@@ -262,7 +259,7 @@ int st_com_slave_handle_followup(unsigned char *buf, int len,
 	int64_to_TimeInternal(ppi->msg_tmp_header.correctionfield,
 					&correction_field);
 
-	add_TimeInternal(&correction_field,&correction_field,
+	add_TimeInternal(&correction_field, &correction_field,
 		&ppi->last_sync_corr_field);
 
 	pp_update_offset(&precise_orig_timestamp,
@@ -298,7 +295,7 @@ int st_com_handle_pdelay_req(unsigned char *buf, int len,
 			&ppi->pdelay_req_send_time,
 			&ppi->rt_opts->outbound_latency);
 	} else {
-		msg_copy_header(&ppi->pdelay_req_hdr,hdr);
+		msg_copy_header(&ppi->pdelay_req_hdr, hdr);
 
 		/* TODO issuePDelayResp(time, header, rtOpts,
 				ptpClock);
@@ -341,7 +338,7 @@ int st_com_master_handle_sync(unsigned char *buf, int len, TimeInternal *time,
 		return 0;
 
 	/* Add latency */
-	add_TimeInternal(time,time,&ppi->rt_opts->outbound_latency);
+	add_TimeInternal(time, time, &ppi->rt_opts->outbound_latency);
 	/* TODO issueFollowup(time,rtOpts,ptpClock);*/
 	return 0;
 }

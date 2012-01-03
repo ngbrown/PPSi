@@ -124,8 +124,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				ppi->last_pdelay_resp_corr_field.nanoseconds =
 					correction_field.nanoseconds;
 				break;
-			}
-			else {
+			} else {
 				/* One step Clock */
 				/* Store t4 (Fig 35)*/
 				ppi->pdelay_resp_receive_time.seconds =
@@ -185,10 +184,9 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if (DSDEF(ppi)->slaveOnly ||
 			DSDEF(ppi)->clockQuality.clockClass == 255)
 			ppi->next_state = PPS_LISTENING;
-	}
-	else
+	} else {
 		ppi->next_state = PPS_FAULTY;
-
+	}
 
 state_updated:
 	/* Leaving this state */

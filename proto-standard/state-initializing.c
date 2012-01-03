@@ -13,7 +13,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	struct pp_runtime_opts *rt_opts = ppi->rt_opts;
 
 	pp_net_shutdown(ppi);
-	
+
 	if (pp_net_init(ppi) < 0)
 		goto failure;
 
@@ -54,7 +54,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	m1(ppi);
 
-	msg_pack_header(ppi->buf_out,ppi);
+	msg_pack_header(ppi->buf_out, ppi);
 
 	ppi->next_state = PPS_LISTENING;
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;

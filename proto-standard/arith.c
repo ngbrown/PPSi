@@ -12,7 +12,7 @@ void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal)
 	int64_t bigint_val;
 
 	bigint_val = bigint.lsb;
-	bigint_val+= ((int64_t)bigint.msb) << 32;
+	bigint_val += ((int64_t)bigint.msb) << 32;
 
 	internal->nanoseconds = bigint_val % PP_NSEC_PER_SEC;
 	internal->seconds = bigint_val / PP_NSEC_PER_SEC;
@@ -24,7 +24,7 @@ void from_TimeInternal(TimeInternal *internal, Timestamp *external)
 	 * fromInternalTime is only used to convert time given by the system
 	 * to a timestamp As a consequence, no negative value can normally
 	 * be found in (internal)
-	 * 
+	 *
 	 * Note that offsets are also represented with TimeInternal structure,
 	 * and can be negative, but offset are never convert into Timestamp
 	 * so there is no problem here.
@@ -60,15 +60,15 @@ void to_TimeInternal(TimeInternal *internal, Timestamp *external)
 
 void normalize_TimeInternal(TimeInternal *r)
 {
-	r->seconds+= r->nanoseconds / PP_NSEC_PER_SEC;
-	r->nanoseconds-= r->nanoseconds / PP_NSEC_PER_SEC * PP_NSEC_PER_SEC;
+	r->seconds += r->nanoseconds / PP_NSEC_PER_SEC;
+	r->nanoseconds -= r->nanoseconds / PP_NSEC_PER_SEC * PP_NSEC_PER_SEC;
 
 	if (r->seconds > 0 && r->nanoseconds < 0) {
-		r->seconds-= 1;
-		r->nanoseconds+= PP_NSEC_PER_SEC;
+		r->seconds -= 1;
+		r->nanoseconds += PP_NSEC_PER_SEC;
 	} else if (r->seconds < 0 && r->nanoseconds > 0) {
-		r->seconds+= 1;
-		r->nanoseconds-= PP_NSEC_PER_SEC;
+		r->seconds += 1;
+		r->nanoseconds -= PP_NSEC_PER_SEC;
 	}
 }
 
