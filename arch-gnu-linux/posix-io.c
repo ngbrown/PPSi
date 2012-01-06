@@ -22,7 +22,7 @@ void *pp_memcpy(void *d, const void *s, int count)
 	return memcpy(d, s, count);
 }
 
-int pp_memcmp(void *s1, const void *s2, int count)
+int pp_memcmp(const void *s1, const void *s2, int count)
 {
 	return memcmp(s1, s2, count);
 }
