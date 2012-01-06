@@ -28,5 +28,22 @@ extern int pp_vprintf(const char *fmt, va_list args)
 extern int pp_vsprintf(char *buf, const char *, va_list)
 	__attribute__ ((format (printf, 2, 0)));
 
+/*
+ * Temporarily, define DBGV. I should get __attribute__((deprecated))
+ * at some point, and then disappear over time.
+ */
+static inline void DBGV(const char *msg) /* most DBGV are constant strings */
+{
+	pp_printf("%s", msg);
+}
+
+static inline void DBGV_ARGS(const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	pp_vprintf(fmt, args);
+	va_end(args);
+}
 
 #endif /* __PTP_DIAG_H__ */
