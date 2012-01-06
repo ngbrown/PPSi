@@ -10,6 +10,7 @@ OBJ-libarch := $A/posix-startup.o \
 	$A/posix-socket.o \
 	$A/posix-io.o \
 	$A/posix-timer.o \
+	lib/div64.o
 
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^
