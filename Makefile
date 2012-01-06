@@ -37,7 +37,7 @@ ifdef PROTO_EXT
 endif
 
 # Include arch code, the default is hosted GNU/Linux stuff
-# we need this -I so <arch/endianness.h> can be found
+# we need this -I so <arch/arch.h> can be found
 ARCH ?= gnu-linux
 CFLAGS += -Iarch-$(ARCH)/include
 include arch-$(ARCH)/Makefile
