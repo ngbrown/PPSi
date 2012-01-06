@@ -3,4 +3,6 @@
 *.a
 pptp.bin
 *.patch
+*~
+/pptp
 
