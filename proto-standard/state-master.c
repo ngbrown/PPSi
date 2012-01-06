@@ -2,6 +2,7 @@
  * FIXME: header
  */
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 #include "common-fun.h"
 
 int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
@@ -29,24 +30,18 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto state_updated;
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_SYNC])) {
-		/* FIXME diag
-		 * DBGV("event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
-		 */
+		DBGV("TODO: event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
 		/* TODO issueSync(rtOpts, ptpClock); */
 	}
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_INTERVAL])) {
-		/* FIXME diag
-		 * DBGV("event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
-		 */
+		DBGV("TODO: event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
 		/* TODO issueAnnounce(rtOpts, ptpClock); */
 	}
 
 	if (!ppi->rt_opts->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ])) {
-			/* FIXME diag
-			 * DBGV("event PDELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
-			 */
+			DBGV("TODO: event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
 			/* TODO issuePDelayReq(rtOpts,ptpClock); */
 		}
 	}

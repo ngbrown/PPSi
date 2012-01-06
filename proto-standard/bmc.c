@@ -2,6 +2,7 @@
  * FIXME header
  */
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 
 /* Local clock is becoming Master. Table 13 (9.3.5) of the spec. */
 void m1(struct pp_instance *ppi)
@@ -104,9 +105,10 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 			 MsgHeader *hdr_a, MsgAnnounce *ann_a,
 			 MsgHeader *hdr_b, MsgAnnounce *ann_b)
 {
-	/* FIXME DBGV("Data set comparison \n"); */
 	short comp = 0;
 	Octet *ppci;
+
+	DBGV("Data set comparison\n");
 
 	/* Identity comparison */
 	if (!pp_memcmp(ann_a->grandmasterIdentity,
@@ -306,7 +308,7 @@ UInteger8 bmc(struct pp_instance *ppi, struct pp_frgn_master *frgn_master,
 				     &frgn_master[best].ann) < 0)
 			best = i;
 
-	/* FIXME DBGV("Best record : %d \n",best); */
+	DBGV_ARGS("Best record : %d\n", best);
 	ppi->foreign_record_best = best;
 
 	return bmc_state_decision(ppi, &frgn_master[best].hdr,

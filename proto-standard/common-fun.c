@@ -2,14 +2,13 @@
  * FIXME: header
  */
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 #include "common-fun.h"
 
 void st_com_execute_slave(struct pp_instance *ppi)
 {
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_RECEIPT])) {
-		/* FIXME diag
-		 * DBGV("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
-		 */
+		DBGV("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
 		ppi->number_foreign_records = 0;
 		ppi->foreign_record_i = 0;
 		if (!DSDEF(ppi)->slaveOnly &&
@@ -24,17 +23,13 @@ void st_com_execute_slave(struct pp_instance *ppi)
 
 	if (ppi->rt_opts->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {
-			/* FIXME diag
-			 * DBGV("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
-			 */
+			DBGV("TODO: event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
 			/* TODO issueDelayReq(rtOpts,ptpClock); */
 		}
 	} else {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ]))
 		{
-			/* FIXME diag
-			DBGV("event PDELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
-			*/
+			DBGV("TODO: event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
 			/* TODO issuePDelayReq(rtOpts,ptpClock); */
 		}
 	}
@@ -54,7 +49,7 @@ void st_com_restart_annrec_timer(struct pp_instance *ppi)
 int st_com_check_record_update(struct pp_instance *ppi)
 {
 	if (ppi->record_update) {
-		/* FIXME diag DBGV("event STATE_DECISION_EVENT\n"); */
+		DBGV("event STATE_DECISION_EVENT\n");
 		ppi->record_update = FALSE;
 		ppi->next_state = bmc(ppi, ppi->frgn_master, ppi->rt_opts);
 
@@ -85,9 +80,8 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 			 */
 			ppi->frgn_master[j].ann_messages++;
 			found = 1;
-			/* FIXME diag
 			DBGV("addForeign : AnnounceMessage incremented \n");
-			*/
+
 			msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
 			msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
 			break;
@@ -121,7 +115,7 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 
 		msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
 
-		/* FIXME diag DBGV("New foreign Master added \n");*/
+		DBGV("New foreign Master added \n");
 
 		ppi->foreign_record_i = (ppi->foreign_record_i+1) %
 			ppi->max_foreign_records;
@@ -228,25 +222,17 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 		return -1;
 
 	if (!ppi->is_from_cur_par) {
-		/* FIXME diag
-		DBGV("SequenceID doesn't match with "
-			"last Sync message \n");
-		*/
+		DBGV("SequenceID doesn't match last Sync message\n");
 		return 0;
 	}
 
 	if (!ppi->waiting_for_follow) {
-		/* FIXME diag
-		DBGV("Slave was not waiting a follow up "
-			"message \n");
-		*/
+		DBGV("Slave was not waiting a follow up message\n");
 		return 0;
 	}
 
 	if (ppi->recv_sync_sequence_id != hdr->sequenceId) {
-		/* FIXME diag
-		DBGV("Follow up message is not from current parent \n");
-		*/
+		DBGV("Follow up message is not from current parent\n");
 		return 0;
 	}
 
@@ -310,15 +296,11 @@ int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 		return -1;
 
 	if (ppi->is_from_self) {
-		/* FIXME diag
-		DBGV("HandleAnnounce : Ignore message from self \n");
-		*/
+		DBGV("HandleAnnounce : Ignore message from self\n");
 		return 0;
 	}
 
-	/* FIXME diag
-	 * DBGV("Announce message from another foreign master");
-	 */
+	DBGV("Announce message from another foreign master\n");
 
 	st_com_add_foreign(ppi, buf);
 

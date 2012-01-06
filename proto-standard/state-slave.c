@@ -2,6 +2,7 @@
  * FIXME: header
  */
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 #include "common-fun.h"
 
 int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
@@ -115,10 +116,8 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				hdr->logMessageInterval;
 
 		} else {
-			/* FIXME diag
-			DBGV("HandledelayResp : "
-			     "delayResp doesn't match with the delayReq. \n");
-			*/
+			DBGV("TODO: HandledelayResp : "
+			     "delayResp doesn't match delayReq.\n");
 		}
 
 		break;
@@ -196,10 +195,8 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				*/
 			}
 		} else {
-			/* FIXME diag
-			DBGV("HandlePdelayResp : Pdelayresp doesn't "
-			     "match with the PdelayReq. \n");
-			*/
+			DBGV("TODO: HandlePdelayResp : Pdelayresp doesn't "
+			     "match PdelayReq.\n");
 		}
 		break;
 
