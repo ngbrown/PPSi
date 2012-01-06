@@ -32,3 +32,6 @@ void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...)
 
 int pp_printf(const char *fmt, ...)
 	__attribute__((weak,alias("pp_diag_nop")));
+
+int pp_vprintf(const char *fmt, va_list args)
+	__attribute__((weak,alias("pp_diag_nop")));

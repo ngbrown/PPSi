@@ -23,8 +23,10 @@ extern void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...)
 /* Our printf, that is implemented internally */
 extern int pp_printf(const char *fmt, ...)
 	__attribute__((format(printf, 1, 2)));
+extern int pp_vprintf(const char *fmt, va_list args)
+	__attribute__((format(printf, 1, 0)));
 extern int pp_vsprintf(char *buf, const char *, va_list)
-        __attribute__ ((format (printf, 2, 0)));
+	__attribute__ ((format (printf, 2, 0)));
 
 
 #endif /* __PTP_DIAG_H__ */
