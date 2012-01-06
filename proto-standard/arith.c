@@ -3,19 +3,24 @@
  */
 
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 
 /* FIXME: This is a temp workaround. How to define it? */
 #define PP_INT_MAX 2147483647
 
 void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal)
 {
-	int64_t bigint_val;
+	uint64_t bigint_val;
+
+	if (bigint.msb < 0)
+		pp_printf("BUG: %s doesn't support negatives\n", __func__);
 
 	bigint_val = bigint.lsb;
 	bigint_val += ((int64_t)bigint.msb) << 32;
 
-	internal->nanoseconds = bigint_val % PP_NSEC_PER_SEC;
-	internal->seconds = bigint_val / PP_NSEC_PER_SEC;
+	/* Use __div64_32 from library, to avoid libgcc on small targets */
+	internal->nanoseconds = __div64_32(&bigint_val, PP_NSEC_PER_SEC);
+	internal->seconds = bigint_val;
 }
 
 void from_TimeInternal(TimeInternal *internal, Timestamp *external)
