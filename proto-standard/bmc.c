@@ -1,6 +1,8 @@
 /*
- * FIXME header
+ * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
+ * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
+
 #include <pptp/pptp.h>
 #include <pptp/diag.h>
 

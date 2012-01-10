@@ -1,6 +1,7 @@
 /*
- * FIXME: header
+ * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
  */
+
 #ifndef __PTP_PROTO_H__
 #define __PTP_PROTO_H__
 

@@ -1,7 +1,8 @@
 /*
- * FIXME header
- * Structs defined in IEEE Std 1588-2008
+ * Aurelio Colosimo for CERN, 2011 -- public domain
  */
+
+/* Structs defined in IEEE Std 1588-2008 */
 
 #ifndef __PPTP_IEEE_1588_TYPES_H__
 #define __PPTP_IEEE_1588_TYPES_H__

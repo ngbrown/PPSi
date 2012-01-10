@@ -1,5 +1,5 @@
 /*
- * FIXME header
+ * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 
 /* Timer interface for GNU/Linux (and most likely other posix systems */
