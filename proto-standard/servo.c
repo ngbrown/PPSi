@@ -7,7 +7,7 @@
 
 void pp_init_clock(struct pp_instance *ppi)
 {
-	/* TODO */
+	/* TODO servo implement function*/
 }
 
 void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
@@ -15,11 +15,11 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 		      TimeInternal *correctionField)
 			/* FIXME: offset_from_master_filter: put it in ppi */
 {
-	/* TODO */
+	/* TODO servo implement function*/
 }
 
 void pp_update_clock(struct pp_instance *ppi)
 {
-	/* TODO */
+	/* TODO servo implement function*/
 }
 
