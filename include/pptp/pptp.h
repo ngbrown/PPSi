@@ -53,7 +53,8 @@ struct pp_runtime_opts {
 extern struct pp_runtime_opts default_rt_opts; /* preinited with defaults */
 
 /*
- * Communication channel
+ * Communication channel. Is the abstraction of a posix socket, so that
+ * this struct is platform independent
  */
 struct pp_channel {
 	union {
@@ -79,7 +80,8 @@ struct pp_frgn_master {
 };
 
 /*
- * Timer
+ * Timer. Struct which contains timestamp of timer start and desired interval
+ * for timer expiration computation. Both are seconds
  */
 struct pp_timer {
 	uint32_t start;
@@ -87,7 +89,8 @@ struct pp_timer {
 };
 
 /*
- * Net Path
+ * Net Path. Struct which contains the network configuration parameters and
+ * the event/general channels (sockets on most platforms, see above)
  */
 struct pp_net_path {
 	struct pp_channel evt_ch;
