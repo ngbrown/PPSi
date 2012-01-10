@@ -12,17 +12,8 @@
  */
 
 struct pp_runtime_opts default_rt_opts = {
-	.max_rst = FALSE,
-	.max_dly = FALSE,
-	.slave_only = FALSE,
 	.no_adjust = TRUE,
-	.display_stats = FALSE,
-	.csv_stats = FALSE,
-	.ethernet_mode = FALSE,
-	.e2e_mode = FALSE,
-	.ofst_first_updated = FALSE,
 	.no_rst_clk = PP_DEFAULT_NO_RESET_CLOCK,
-	.use_syslog = FALSE,
 	.ap = PP_DEFAULT_AP,
 	.ai = PP_DEFAULT_AI,
 	.s = PP_DEFAULT_DELAY_S,
@@ -33,10 +24,7 @@ struct pp_runtime_opts default_rt_opts = {
 	.prio1 = PP_DEFAULT_PRIORITY1,
 	.prio2 = PP_DEFAULT_PRIORITY2,
 	.domain_number = PP_DEFAULT_DOMAIN_NUMBER,
-	.unicast_addr = 0,
-	.iface_name = 0,
 	.ttl = 1,
-	.arch_opts = 0,
 };
 
 
