@@ -6,6 +6,14 @@
 #include <pptp/pptp.h>
 #include <pptp/diag.h>
 
+/* Flag Field bits symbolic names (table 57, pag. 151) */
+#define FFB_LI61	0x01
+#define FFB_LI59	0x02
+#define FFB_UTCV	0x04
+#define FFB_PTP		0x08
+#define FFB_TTRA	0x10
+#define FFB_FTRA	0x20
+
 /* Local clock is becoming Master. Table 13 (9.3.5) of the spec. */
 void m1(struct pp_instance *ppi)
 {
@@ -67,15 +75,14 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 	/* Timeproperties DS */
 	DSPRO(ppi)->currentUtcOffset = ann->currentUtcOffset;
 	/* "Valid" is bit 2 in second octet of flagfield */
-	DSPRO(ppi)->currentUtcOffsetValid = ((hdr->flagField[1] & 0x04) ==
-					   0x04);
+	DSPRO(ppi)->currentUtcOffsetValid = ((hdr->flagField[1] & FFB_UTCV)
+		!= 0);
 
-	DSPRO(ppi)->leap59 = ((hdr->flagField[1] & 0x02) == 0x02);
-	DSPRO(ppi)->leap61 = ((hdr->flagField[1] & 0x01) == 0x01);
-	DSPRO(ppi)->timeTraceable = ((hdr->flagField[1] & 0x10) == 0x10);
-	DSPRO(ppi)->frequencyTraceable = ((hdr->flagField[1] & 0x20)
-					   == 0x20);
-	DSPRO(ppi)->ptpTimescale = ((hdr->flagField[1] & 0x08) == 0x08);
+	DSPRO(ppi)->leap59 = ((hdr->flagField[1] & FFB_LI59) != 0);
+	DSPRO(ppi)->leap61 = ((hdr->flagField[1] & FFB_LI61) != 0);
+	DSPRO(ppi)->timeTraceable = ((hdr->flagField[1] & FFB_TTRA) != 0);
+	DSPRO(ppi)->frequencyTraceable = ((hdr->flagField[1] & FFB_FTRA) != 0);
+	DSPRO(ppi)->ptpTimescale = ((hdr->flagField[1] & FFB_PTP) != 0);
 	DSPRO(ppi)->timeSource = ann->timeSource;
 }
 

@@ -96,8 +96,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			&& (DSPOR(ppi)->portIdentity.portNumber ==
 			ppi->msg_tmp.presp.requestingPortIdentity.portNumber))
 		   ) {
-			if ((hdr->flagField[0] & 0x02) ==
-			    PP_TWO_STEP_FLAG) {
+			if ((hdr->flagField[0] & PP_TWO_STEP_FLAG) != 0) {
 				/* Two Step Clock */
 				/* Store t4 (Fig 35) */
 				ppi->pdelay_resp_receive_time.seconds =
