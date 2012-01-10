@@ -2,11 +2,9 @@
  * FIXME header
  */
 
+#include <limits.h>
 #include <pptp/pptp.h>
 #include <pptp/diag.h>
-
-/* FIXME: This is a temp workaround. How to define it? */
-#define PP_INT_MAX 2147483647
 
 void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal)
 {
@@ -35,8 +33,8 @@ void from_TimeInternal(TimeInternal *internal, Timestamp *external)
 	 * so there is no problem here.
 	 */
 
-	if ((internal->seconds & ~PP_INT_MAX) ||
-	    (internal->nanoseconds & ~PP_INT_MAX)) {
+	if ((internal->seconds & ~INT_MAX) ||
+	    (internal->nanoseconds & ~INT_MAX)) {
 		/* FIXME diag
 		 * DBG("Negative value cannot be converted into timestamp \n");
 		 */
@@ -51,7 +49,7 @@ void from_TimeInternal(TimeInternal *internal, Timestamp *external)
 void to_TimeInternal(TimeInternal *internal, Timestamp *external)
 {
 	/* Program will not run after 2038... */
-	if (external->secondsField.lsb < PP_INT_MAX) {
+	if (external->secondsField.lsb < INT_MAX) {
 		internal->seconds = external->secondsField.lsb;
 		internal->nanoseconds = external->nanosecondsField;
 	} else {
