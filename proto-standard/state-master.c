@@ -12,7 +12,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	TimeInternal correction_field;
 	TimeInternal resp_orig_tstamp;
 
-	int e = 0;
+	int e = 0; /* error var, to check errors in msg handling */
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
 	if (ppi->is_new_state) {

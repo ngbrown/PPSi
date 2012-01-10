@@ -6,7 +6,7 @@
 
 int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	int e = 0;
+	int e = 0; /* error var, to check errors in msg handling */
 
 	if (ppi->is_new_state)
 		st_com_restart_annrec_timer(ppi);

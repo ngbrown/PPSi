@@ -6,7 +6,7 @@
 
 int pp_uncalibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	int e = 0;
+	int e = 0; /* error var, to check errors in msg handling */
 	TimeInternal time; /* TODO: handle it, see handle(...) in protocol.c */
 
 	switch (ppi->msg_tmp_header.messageType) {

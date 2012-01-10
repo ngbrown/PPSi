@@ -7,7 +7,7 @@
 
 int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	int e = 0;
+	int e = 0; /* error var, to check errors in msg handling */
 	TimeInternal time; /* TODO: handle it, see handle(...) in protocol.c */
 	TimeInternal req_rec_tstamp;
 	TimeInternal correction_field;
