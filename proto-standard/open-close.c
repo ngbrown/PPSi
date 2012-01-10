@@ -27,12 +27,6 @@ struct pp_runtime_opts default_rt_opts = {
 	.ttl = 1,
 };
 
-
-struct pp_runtime_opts *pp_get_default_rt_opts()
-{
-	return &default_rt_opts;
-}
-
 int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 {
 	/* TODO: Check how to parse cmdline. We can not rely on getopt()
