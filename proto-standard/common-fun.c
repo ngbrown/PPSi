@@ -92,36 +92,38 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 		j = (j + 1) % ppi->number_foreign_records;
 	}
 
+	/* Old foreign master */
+	if (found)
+		return;
+
 	/* New foreign master */
-	if (!found) {
-		if (ppi->number_foreign_records <
-		    ppi->max_foreign_records) {
-			ppi->number_foreign_records++;
-		}
-
-		j = ppi->foreign_record_i;
-
-		/* Copy new foreign master data set from announce message */
-		pp_memcpy(ppi->frgn_master[j].port_identity.clockIdentity,
-			hdr->sourcePortIdentity.clockIdentity,
-			PP_CLOCK_IDENTITY_LENGTH);
-		ppi->frgn_master[j].port_identity.portNumber =
-			hdr->sourcePortIdentity.portNumber;
-		ppi->frgn_master[j].ann_messages = 0;
-
-		/*
-		 * header and announce field of each Foreign Master are
-		 * usefull to run Best Master Clock Algorithm
-		 */
-		msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
-
-		msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
-
-		DBGV("New foreign Master added \n");
-
-		ppi->foreign_record_i = (ppi->foreign_record_i+1) %
-			ppi->max_foreign_records;
+	if (ppi->number_foreign_records <
+	    ppi->max_foreign_records) {
+		ppi->number_foreign_records++;
 	}
+
+	j = ppi->foreign_record_i;
+
+	/* Copy new foreign master data set from announce message */
+	pp_memcpy(ppi->frgn_master[j].port_identity.clockIdentity,
+		hdr->sourcePortIdentity.clockIdentity,
+		PP_CLOCK_IDENTITY_LENGTH);
+	ppi->frgn_master[j].port_identity.portNumber =
+		hdr->sourcePortIdentity.portNumber;
+	ppi->frgn_master[j].ann_messages = 0;
+
+	/*
+	 * header and announce field of each Foreign Master are
+	 * usefull to run Best Master Clock Algorithm
+	 */
+	msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
+
+	msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
+
+	DBGV("New foreign Master added \n");
+
+	ppi->foreign_record_i = (ppi->foreign_record_i+1) %
+		ppi->max_foreign_records;
 }
 
 
