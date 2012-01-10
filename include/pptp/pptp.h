@@ -241,9 +241,8 @@ extern void msg_unpack_pdelay_resp_followup(void *buf,
 /* arith.c */
 /* FIXME: add prefix in function name? */
 extern void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal);
-extern void from_TimeInternal(TimeInternal *internal, Timestamp *external);
-extern void to_TimeInternal(TimeInternal *internal, Timestamp *external);
-extern void normalize_TimeInternal(TimeInternal *r);
+extern int from_TimeInternal(TimeInternal *internal, Timestamp *external);
+extern int to_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern void add_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 

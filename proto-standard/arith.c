@@ -21,7 +21,7 @@ void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal)
 	internal->seconds = bigint_val;
 }
 
-void from_TimeInternal(TimeInternal *internal, Timestamp *external)
+int from_TimeInternal(TimeInternal *internal, Timestamp *external)
 {
 	/*
 	 * fromInternalTime is only used to convert time given by the system
@@ -38,30 +38,32 @@ void from_TimeInternal(TimeInternal *internal, Timestamp *external)
 		/* FIXME diag
 		 * DBG("Negative value cannot be converted into timestamp \n");
 		 */
-		return;
+		return -1;
 	} else {
 		external->secondsField.lsb = internal->seconds;
 		external->nanosecondsField = internal->nanoseconds;
 		external->secondsField.msb = 0;
 	}
+	return 0;
 }
 
-void to_TimeInternal(TimeInternal *internal, Timestamp *external)
+int to_TimeInternal(TimeInternal *internal, Timestamp *external)
 {
 	/* Program will not run after 2038... */
 	if (external->secondsField.lsb < INT_MAX) {
 		internal->seconds = external->secondsField.lsb;
 		internal->nanoseconds = external->nanosecondsField;
+		return 0;
 	} else {
 		/* FIXME diag
 		DBG("Clock servo canno't be executed : "
 		    "seconds field is higher than signed integer (32bits) \n");
 		*/
-		return;
+		return -1;
 	}
 }
 
-void normalize_TimeInternal(TimeInternal *r)
+static void normalize_TimeInternal(TimeInternal *r)
 {
 	r->seconds += r->nanoseconds / PP_NSEC_PER_SEC;
 	r->nanoseconds -= r->nanoseconds / PP_NSEC_PER_SEC * PP_NSEC_PER_SEC;
