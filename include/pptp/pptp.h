@@ -175,6 +175,7 @@ struct pp_instance {
 #define DSPOR(x) ((x)->portDS)
 #define DSPRO(x) ((x)->timePropertiesDS)
 
+#define NP(x) ((x)->net_path)
 
 /* The channel for an instance must be created and possibly destroyed. */
 extern int pp_open_instance(struct pp_instance *ppi,

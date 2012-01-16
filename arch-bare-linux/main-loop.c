@@ -46,11 +46,11 @@ void bare_main_loop(struct pp_instance *ppi)
 
 	again:
 		FD_ZERO(&set);
-		FD_SET(ppi->net_path->ch[PP_NP_GEN].fd, &set);
-		FD_SET(ppi->net_path->ch[PP_NP_EVT].fd, &set);
-		maxfd = ppi->net_path->ch[PP_NP_GEN].fd;
-		if (ppi->net_path->ch[PP_NP_EVT].fd > maxfd)
-			maxfd = ppi->net_path->ch[PP_NP_EVT].fd;
+		FD_SET(NP(ppi)->ch[PP_NP_GEN].fd, &set);
+		FD_SET(NP(ppi)->ch[PP_NP_EVT].fd, &set);
+		maxfd = NP(ppi)->ch[PP_NP_GEN].fd;
+		if (NP(ppi)->ch[PP_NP_EVT].fd > maxfd)
+			maxfd = NP(ppi)->ch[PP_NP_EVT].fd;
 
 		i = sys_select(maxfd + 1, &set, NULL, NULL, &tv);
 		if (i < 0 && bare_errno != 4 /* EINTR */)

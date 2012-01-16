@@ -16,8 +16,8 @@ int spec_open_ch(struct pp_instance *ppi)
 	ep_enable(1, 1);
 	minic_init();
 
-	memcpy(ppi->net_path->ch[PP_NP_GEN].addr, fake_addr, 6);
-	memcpy(ppi->net_path->ch[PP_NP_EVT].addr, fake_addr, 6);
+	memcpy(NP(ppi)->ch[PP_NP_GEN].addr, fake_addr, 6);
+	memcpy(NP(ppi)->ch[PP_NP_EVT].addr, fake_addr, 6);
 
 	return 0;
 }
