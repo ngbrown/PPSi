@@ -93,9 +93,12 @@ struct pp_timer {
  * Net Path. Struct which contains the network configuration parameters and
  * the event/general channels (sockets on most platforms, see above)
  */
+
+#define PP_NP_GEN	0
+#define PP_NP_EVT	1
 struct pp_net_path {
-	struct pp_channel evt_ch;
-	struct pp_channel gen_ch;
+	struct pp_channel ch[2]; /* event and general channel (see above
+				  * #define's */
 	Integer32 ucast_addr;
 	Integer32 mcast_addr;
 	Integer32 peer_mcast_addr;
@@ -185,7 +188,8 @@ extern int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv);
 extern int pp_net_init(struct pp_instance *ppi);
 extern int pp_net_shutdown(struct pp_instance *ppi);
 extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len);
-extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len);
+extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
+			  int chtype); /* chtype: PP_NP_GEN || PP_NP_EVT */
 
 /* Timers */
 extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common

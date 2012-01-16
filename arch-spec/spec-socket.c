@@ -16,8 +16,8 @@ int spec_open_ch(struct pp_instance *ppi)
 	ep_enable(1, 1);
 	minic_init();
 
-	memcpy(ppi->net_path->gen_ch.addr, fake_addr, 6);
-	memcpy(ppi->net_path->evt_ch.addr, fake_addr, 6);
+	memcpy(ppi->net_path->ch[PP_NP_GEN].addr, fake_addr, 6);
+	memcpy(ppi->net_path->ch[PP_NP_EVT].addr, fake_addr, 6);
 
 	return 0;
 }
@@ -32,7 +32,7 @@ int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len)
 	return minic_rx_frame(pkt, pkt + 14, len - 14, NULL);
 }
 
-int spec_send_packet(struct pp_instance *ppi, void *pkt, int len)
+int spec_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
 {
 	static int led;
 
@@ -43,5 +43,5 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len)
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len)
 	__attribute__((alias("spec_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len)
+int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
 	__attribute__((alias("spec_send_packet")));

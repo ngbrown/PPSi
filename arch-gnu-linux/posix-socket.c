@@ -26,14 +26,15 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len)
 {
 	struct pp_channel *ch1 = NULL, *ch2 = NULL;
 
+	/* TODO: rewrite it in a better way! */
 	switch (ch_check_stat) {
 	case 0:
-		ch1 = &(ppi->net_path->evt_ch);
-		ch2 = &(ppi->net_path->gen_ch);
+		ch1 = &(ppi->net_path->ch[PP_NP_EVT]);
+		ch2 = &(ppi->net_path->ch[PP_NP_GEN]);
 		break;
 	case 1:
-		ch1 = &(ppi->net_path->gen_ch);
-		ch2 = &(ppi->net_path->evt_ch);
+		ch1 = &(ppi->net_path->ch[PP_NP_GEN]);
+		ch2 = &(ppi->net_path->ch[PP_NP_EVT]);
 		break;
 	default:
 		/* Impossible! */
@@ -50,14 +51,14 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len)
 	return -1;
 }
 
-int posix_send_packet(struct pp_instance *ppi, void *pkt, int len)
+int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
 {
-	return send(/*FIXME which socket?! ppi->ch.fd*/ -1, pkt, len, 0);
+	return send(ppi->net_path->ch[chtype].fd, pkt, len, 0);
 }
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len)
 	__attribute__((alias("posix_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len)
+int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
 	__attribute__((alias("posix_send_packet")));
 
 /* To open a channel we must bind to an interface and so on */
@@ -98,8 +99,8 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname)
 		return -1;
 	}
 	/* FIXME: what to do with hw address */
-	memcpy(ppi->net_path->gen_ch.addr, ifr.ifr_hwaddr.sa_data, 6);
-	memcpy(ppi->net_path->evt_ch.addr, ifr.ifr_hwaddr.sa_data, 6);
+	memcpy(ppi->net_path->ch[PP_NP_GEN].addr, ifr.ifr_hwaddr.sa_data, 6);
+	memcpy(ppi->net_path->ch[PP_NP_EVT].addr, ifr.ifr_hwaddr.sa_data, 6);
 
 	/* bind and setsockopt */
 	memset(&addr, 0, sizeof(addr));
@@ -112,8 +113,8 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname)
 		return -1;
 	}
 	/* FIXME: we are using the same socket for both channels by now */
-	ppi->net_path->gen_ch.fd = sock;
-	ppi->net_path->evt_ch.fd = sock;
+	ppi->net_path->ch[PP_NP_GEN].fd = sock;
+	ppi->net_path->ch[PP_NP_EVT].fd = sock;
 	return 0;
 }
 
@@ -163,14 +164,14 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 		arch_data->tv.tv_usec = (delay_ms % 1000) * 1000;
 	}
 
-	ppi->net_path->gen_ch.pkt_present = 0;
-	ppi->net_path->evt_ch.pkt_present = 0;
+	ppi->net_path->ch[PP_NP_GEN].pkt_present = 0;
+	ppi->net_path->ch[PP_NP_EVT].pkt_present = 0;
 
-	maxfd = (ppi->net_path->gen_ch.fd > ppi->net_path->evt_ch.fd) ?
-		 ppi->net_path->gen_ch.fd : ppi->net_path->evt_ch.fd;
+	maxfd = (ppi->net_path->ch[PP_NP_GEN].fd > ppi->net_path->ch[PP_NP_EVT].fd) ?
+		 ppi->net_path->ch[PP_NP_GEN].fd : ppi->net_path->ch[PP_NP_EVT].fd;
 	FD_ZERO(&set);
-	FD_SET(ppi->net_path->gen_ch.fd, &set);
-	FD_SET(ppi->net_path->evt_ch.fd, &set);
+	FD_SET(ppi->net_path->ch[PP_NP_GEN].fd, &set);
+	FD_SET(ppi->net_path->ch[PP_NP_EVT].fd, &set);
 	i = select(maxfd + 1, &set, NULL, NULL, &arch_data->tv);
 
 	if (i < 0 && errno != EINTR)
@@ -184,14 +185,14 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 	if (i == 0)
 		goto _end;
 
-	if (FD_ISSET(ppi->net_path->gen_ch.fd, &set)) {
+	if (FD_ISSET(ppi->net_path->ch[PP_NP_GEN].fd, &set)) {
 		ret++;
-		ppi->net_path->gen_ch.pkt_present = 1;
+		ppi->net_path->ch[PP_NP_GEN].pkt_present = 1;
 	}
 
-	if (FD_ISSET(ppi->net_path->evt_ch.fd, &set)) {
+	if (FD_ISSET(ppi->net_path->ch[PP_NP_EVT].fd, &set)) {
 		ret++;
-		ppi->net_path->evt_ch.pkt_present = 1;
+		ppi->net_path->ch[PP_NP_EVT].pkt_present = 1;
 	}
 
 _end:
