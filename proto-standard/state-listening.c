@@ -28,8 +28,9 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 	if (e == 0)
-		st_com_execute_slave(ppi);
-	else
+		e = st_com_execute_slave(ppi);
+
+	if (e != 0)
 		ppi->next_state = PPS_FAULTY;
 
 state_updated:

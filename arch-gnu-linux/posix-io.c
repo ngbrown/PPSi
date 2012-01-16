@@ -32,7 +32,7 @@ void *pp_memset(void *s, int c, int count)
 	return memset(s, c, count);
 }
 
-void pp_get_stamp(uint32_t *sptr)
+void pp_get_tstamp(TimeInternal *t)
 {
-	*sptr = htonl(time(NULL));
+	/*FIXME tstamp *sptr = htonl(time(NULL)); */
 }

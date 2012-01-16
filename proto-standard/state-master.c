@@ -32,19 +32,28 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto state_updated;
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_SYNC])) {
+		/* FIXME diag
 		DBGV("TODO: event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
-		/* TODO issueSync(rtOpts, ptpClock); */
+		*/
+		if (msg_issue_sync(ppi) < 0)
+			goto failure;
 	}
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_INTERVAL])) {
-		DBGV("TODO: event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
-		/* TODO issueAnnounce(rtOpts, ptpClock); */
+		/* FIXME diag
+		DBGV("event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
+		*/
+		if (msg_issue_announce(ppi) < 0)
+			goto failure;
 	}
 
 	if (!ppi->rt_opts->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ])) {
-			DBGV("TODO: event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
-			/* TODO issuePDelayReq(rtOpts,ptpClock); */
+			/* FIXME diag
+			DBGV("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
+			*/
+			if (msg_issue_pdelay_req(ppi) < 0)
+				goto failure;
 		}
 	}
 
@@ -60,8 +69,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	case PPM_DELAY_REQ:
 		msg_copy_header(&ppi->delay_req_hdr, hdr);
-		/*TODO issueDelayResp(time,&ptpClock->delayReqHeader,rtOpts,ptpClock);
-		*/
+		msg_issue_delay_resp(ppi, &time);
 		break;
 
 	case PPM_PDELAY_REQ:
@@ -78,11 +86,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			add_TimeInternal(&time, &time,
 					 &ppi->rt_opts->outbound_latency);
 
-			/* TODO issuePDelayRespFollowUp(
-				time,
-				&ptpClock->PdelayReqHeader,
-				rtOpts, ptpClock);
-			*/
+			e = msg_issue_pdelay_resp_follow_up(ppi,&time);
 			break;
 		}
 		msg_unpack_pdelay_resp(pkt, &ppi->msg_tmp.presp);
@@ -175,6 +179,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 	}
 
+failure:
 	if (e == 0) {
 		if (DSDEF(ppi)->slaveOnly ||
 			DSDEF(ppi)->clockQuality.clockClass == 255)

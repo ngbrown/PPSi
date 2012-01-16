@@ -28,9 +28,9 @@ void *pp_memcpy(void *dest, const void *src, int count)
 	return dest;
 }
 
-void pp_get_stamp(uint32_t *sptr)
+void pp_get_tstamp(TimeInternal *t)
 {
-	*sptr = htonl(sys_time(0));
+	/* FIXME tstamp *sptr = htonl(sys_time(0));*/
 }
 
 int pp_memcmp(const void *cs, const void *ct, int count)

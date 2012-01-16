@@ -220,34 +220,45 @@ extern UInteger8 bmc(struct pp_instance *ppi,
 extern void msg_pack_header(struct pp_instance *ppi, void *buf);
 extern void msg_unpack_header(struct pp_instance *ppi, void *buf);
 void *msg_copy_header(MsgHeader *dest, MsgHeader *src);
-extern void msg_pack_sync(struct pp_instance *ppi, void *buf,
-			  Timestamp *orig_tstamp);
+extern void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp);
 extern void msg_unpack_sync(void *buf, MsgSync *sync);
-extern void msg_pack_announce(struct pp_instance *ppi, void *buf);
+extern void msg_pack_announce(struct pp_instance *ppi);
 extern void msg_unpack_announce(void *buf, MsgAnnounce *ann);
-extern void msg_pack_follow_up(struct pp_instance *ppi, void *buf,
+extern void msg_pack_follow_up(struct pp_instance *ppi,
 			       Timestamp *prec_orig_tstamp);
 extern void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup);
-extern void msg_pack_pdelay_req(struct pp_instance *ppi, void *buf,
+extern void msg_pack_pdelay_req(struct pp_instance *ppi,
 				Timestamp *orig_tstamp);
 extern void msg_unpack_pdelay_req(void *buf, MsgPDelayReq *pdelay_req);
-extern void msg_pack_delay_req(struct pp_instance *ppi, void *buf,
+extern void msg_pack_delay_req(struct pp_instance *ppi,
 			       Timestamp *orig_tstamp);
 extern void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req);
-extern void msg_pack_delay_resp(struct pp_instance *ppi, void *buf,
+extern void msg_pack_delay_resp(struct pp_instance *ppi,
 				MsgHeader *hdr, Timestamp *rcv_tstamp);
 extern void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp);
-extern void msg_pack_pdelay_resp(struct pp_instance *ppi, void *buf,
+extern void msg_pack_pdelay_resp(struct pp_instance *ppi,
 				 MsgHeader *hdr, Timestamp *req_rec_tstamp);
 extern void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp);
-extern void msg_pack_pdelay_resp_followup(struct pp_instance *ppi, void *buf,
+extern void msg_pack_pdelay_resp_followup(struct pp_instance *ppi,
 					  MsgHeader *hdr,
 					  Timestamp *resp_orig_tstamp);
 extern void msg_unpack_pdelay_resp_followup(void *buf,
 	MsgPDelayRespFollowUp *presp_follow);
 
+/* each of them returns 0 if no error and -1 in case of error in send */
+extern int msg_issue_announce(struct pp_instance *ppi);
+extern int msg_issue_sync(struct pp_instance *ppi);
+extern int msg_issue_followup(struct pp_instance *ppi, TimeInternal *time);
+extern int msg_issue_delay_req(struct pp_instance *ppi);
+extern int msg_issue_pdelay_req(struct pp_instance *ppi);
+extern int msg_issue_pdelay_resp(struct pp_instance *ppi, TimeInternal *time,
+			MsgHeader *hdr);
+extern int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time);
+extern int msg_issue_pdelay_resp_follow_up(struct pp_instance *ppi,
+			TimeInternal *time);
 
-/* arith.c */
+
+/* Functions for timestamp handling (internal to protocol format conversion*/
 /* FIXME: add prefix in function name? */
 extern void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal);
 extern int from_TimeInternal(TimeInternal *internal, Timestamp *external);
@@ -255,9 +266,8 @@ extern int to_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern void add_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 
-
 /* Get a timestamp */
-extern void pp_get_stamp(uint32_t *sptr);
+extern void pp_get_tstamp(TimeInternal *t);
 
 /*
  * The state machine itself is an array of these structures.

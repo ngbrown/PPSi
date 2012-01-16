@@ -140,10 +140,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if (ppi->is_from_self)	{
 			add_TimeInternal(&time, &time,
 					&ppi->rt_opts->outbound_latency);
-			/* TODO issuePDelayRespFollowUp(time,
-						&ptpClock->PdelayReqHeader,
-						rtOpts,ptpClock);
-			*/
+			msg_issue_pdelay_resp_follow_up(ppi, &time);
 			break;
 		}
 		msg_unpack_pdelay_resp(pkt,
@@ -250,8 +247,9 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 	if (e == 0)
-		st_com_execute_slave(ppi);
-	else
+		e = st_com_execute_slave(ppi);
+
+	if (e != 0)
 		ppi->next_state = PPS_FAULTY;
 
 state_updated:

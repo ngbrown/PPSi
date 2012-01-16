@@ -3,8 +3,7 @@
  */
 
 /* Timer interface for GNU/Linux (and most likely other posix systems */
-
-#include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -44,7 +43,7 @@ extern int posix_timer_init(struct pp_instance *ppi)
 
 extern int posix_timer_start(uint32_t interval, struct pp_timer *tm)
 {
-	pp_get_stamp(&tm->start);
+	time((time_t*)&tm->start);
 	tm->interval = interval;
 
 	return 0;
@@ -67,7 +66,7 @@ extern int posix_timer_expired(struct pp_timer *tm)
 		return 0;
 	}
 
-	pp_get_stamp(&now);
+	time((time_t*)&now);
 
 	if (tm->start + tm->interval < now)
 		return 1;

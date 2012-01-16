@@ -29,7 +29,7 @@ void *pp_memcpy(void *dest, const void *src, int count)
 	return dest;
 }
 
-void pp_get_stamp(uint32_t *sptr)
+void pp_get_tstamp(uint32_t *sptr)
 {
 	*sptr = htonl(spec_time());
 }

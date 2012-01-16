@@ -86,8 +86,12 @@ void *msg_copy_header(MsgHeader *dest, MsgHeader *src)
 
 
 /* Pack Sync message into out buffer of ppi */
-void msg_pack_sync(struct pp_instance *ppi, void *buf, Timestamp *orig_tstamp)
+void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
+	void *buf;
+
+	buf = ppi->buf_out;
+
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
 	/* RAZ messageType */
@@ -126,8 +130,11 @@ void msg_unpack_sync(void *buf, MsgSync *sync)
 }
 
 /* Pack Announce message into out buffer of ppi */
-void msg_pack_announce(struct pp_instance *ppi, void *buf)
+void msg_pack_announce(struct pp_instance *ppi)
 {
+	void *buf;
+
+	buf = ppi->buf_out;
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
 	/* RAZ messageType */
@@ -186,9 +193,12 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 
 
 /* Pack Follow Up message into out buffer of ppi*/
-void msg_pack_follow_up(struct pp_instance *ppi, void *buf,
-			Timestamp *prec_orig_tstamp)
+void msg_pack_follow_up(struct pp_instance *ppi, Timestamp *prec_orig_tstamp)
 {
+	void *buf;
+
+	buf = ppi->buf_out;
+
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
 	/* RAZ messageType */
@@ -198,7 +208,7 @@ void msg_pack_follow_up(struct pp_instance *ppi, void *buf,
 	*(UInteger16 *) (buf + 2) = htons(PP_FOLLOW_UP_LENGTH);
 	*(UInteger16 *) (buf + 30) = htons(ppi->sent_seq_id[PPM_SYNC] - 1);
 
-	/* sentSyncSequenceId has already been incremented in "issueSync" */
+	/* sentSyncSequenceId has already been incremented in msg_issue_sync */
 	*(UInteger8 *) (buf + 32) = 0x02;
 
 	/* Table 23 */
@@ -231,9 +241,12 @@ void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup)
 }
 
 /* pack PdelayReq message into out buffer of ppi */
-void msg_pack_pdelay_req(struct pp_instance *ppi, void *buf,
-			 Timestamp *orig_tstamp)
+void msg_pack_pdelay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
+	void *buf;
+
+	buf = ppi->buf_out;
+
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
 	/* RAZ messageType */
@@ -261,10 +274,13 @@ void msg_pack_pdelay_req(struct pp_instance *ppi, void *buf,
 }
 
 
-/*pack DelayReq message into out buffer of ppi*/
-void msg_pack_delay_req(struct pp_instance *ppi, void *buf,
-			Timestamp *orig_tstamp)
+/* pack DelayReq message into out buffer of ppi */
+void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
+	void *buf;
+
+	buf = ppi->buf_out;
+
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
 	/* RAZ messageType */
@@ -288,10 +304,14 @@ void msg_pack_delay_req(struct pp_instance *ppi, void *buf,
 }
 
 
-/*pack delayResp message into OUT buffer of ppi*/
-void msg_pack_delay_resp(struct pp_instance *ppi, void *buf,
+/* pack DelayResp message into OUT buffer of ppi */
+void msg_pack_delay_resp(struct pp_instance *ppi,
 			 MsgHeader *hdr, Timestamp *rcv_tstamp)
 {
+	void *buf;
+
+	buf = ppi->buf_out;
+
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
 	/* RAZ messageType */
@@ -329,9 +349,13 @@ void msg_pack_delay_resp(struct pp_instance *ppi, void *buf,
 
 
 /* Pack PdelayResp message into out buffer of ppi */
-void msg_pack_pdelay_resp(struct pp_instance *ppi, void *buf, MsgHeader *hdr,
+void msg_pack_pdelay_resp(struct pp_instance *ppi, MsgHeader *hdr,
 			  Timestamp *req_rec_tstamp)
 {
+	void *buf;
+
+	buf = ppi->buf_out;
+
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
 	/* RAZ messageType */
@@ -437,10 +461,14 @@ void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp)
 }
 
 /* Pack PdelayRespFollowUp message into out buffer of ppi */
-void msg_pack_pdelay_resp_followup(struct pp_instance *ppi, void *buf,
+void msg_pack_pdelay_resp_followup(struct pp_instance *ppi,
 				   MsgHeader *hdr,
 				   Timestamp *resp_orig_tstamp)
 {
+	void *buf;
+
+	buf = ppi->buf_out;
+
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
 	/* RAZ messageType */
@@ -487,4 +515,105 @@ void msg_unpack_pdelay_resp_followup(void *buf,
 	       (buf + 44), PP_CLOCK_IDENTITY_LENGTH);
 	presp_follow->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
+}
+
+/* FIXME diag in the following macro */
+#define MSG_SEND_AND_RET(x,y)\
+	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH, PP_NP_## y) <\
+		PP_## x ##_LENGTH) {\
+		return -1;\
+	}\
+	ppi->sent_seq_id[PPM_## x]++;\
+	return 0;
+
+/* Pack and send on general multicast ip adress an Announce message */
+int msg_issue_announce(struct pp_instance *ppi)
+{
+	msg_pack_announce(ppi);
+
+	MSG_SEND_AND_RET(ANNOUNCE, GEN);
+}
+
+/* Pack and send on event multicast ip adress a Sync message */
+int msg_issue_sync(struct pp_instance *ppi)
+{
+	Timestamp orig_tstamp;
+	TimeInternal now;
+	pp_get_tstamp(&now);
+	from_TimeInternal(&now, &orig_tstamp);
+
+	msg_pack_sync(ppi,&orig_tstamp);
+
+	MSG_SEND_AND_RET(SYNC, EVT);
+}
+
+/* Pack and send on general multicast ip adress a FollowUp message */
+int msg_issue_followup(struct pp_instance *ppi, TimeInternal *time)
+{
+	Timestamp prec_orig_tstamp;
+	from_TimeInternal(time, &prec_orig_tstamp);
+
+	msg_pack_follow_up(ppi, &prec_orig_tstamp);
+
+	MSG_SEND_AND_RET(FOLLOW_UP, GEN);
+}
+
+/* Pack and send on event multicast ip adress a DelayReq message */
+int msg_issue_delay_req(struct pp_instance *ppi)
+{
+	Timestamp orig_tstamp;
+	TimeInternal now;
+	pp_get_tstamp(&now);
+	from_TimeInternal(&now, &orig_tstamp);
+
+	msg_pack_delay_req(ppi, &orig_tstamp);
+
+	MSG_SEND_AND_RET(DELAY_REQ, EVT);
+}
+
+/* Pack and send on event multicast ip adress a PDelayReq message */
+int msg_issue_pdelay_req(struct pp_instance *ppi)
+{
+	Timestamp orig_tstamp;
+	TimeInternal now;
+	pp_get_tstamp(&now);
+	from_TimeInternal(&now, &orig_tstamp);
+
+	msg_pack_pdelay_req(ppi, &orig_tstamp);
+
+	MSG_SEND_AND_RET(PDELAY_REQ, EVT);
+}
+
+/* Pack and send on event multicast ip adress a PDelayResp message */
+int msg_issue_pdelay_resp(struct pp_instance *ppi, TimeInternal *time,
+			MsgHeader *hdr)
+{
+	Timestamp req_rec_tstamp;
+	from_TimeInternal(time, &req_rec_tstamp);
+	msg_pack_pdelay_resp(ppi, hdr, &req_rec_tstamp);
+
+	MSG_SEND_AND_RET(PDELAY_RESP, EVT);
+}
+
+/* Pack and send on event multicast ip adress a DelayResp message */
+int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time)
+{
+	Timestamp rcv_tstamp;
+	from_TimeInternal(time, &rcv_tstamp);
+
+	msg_pack_delay_resp(ppi, &ppi->delay_req_hdr, &rcv_tstamp);
+
+	MSG_SEND_AND_RET(PDELAY_RESP, GEN);
+}
+
+/* Pack and send on event multicast ip adress a DelayResp message */
+int msg_issue_pdelay_resp_follow_up(struct pp_instance *ppi, TimeInternal *time)
+{
+	Timestamp resp_orig_tstamp;
+	from_TimeInternal(time, &resp_orig_tstamp);
+
+	msg_pack_pdelay_resp_followup(ppi, &ppi->pdelay_req_hdr,
+		&resp_orig_tstamp);
+
+	MSG_SEND_AND_RET(PDELAY_RESP_FOLLOW_UP, GEN);
 }

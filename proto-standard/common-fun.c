@@ -7,7 +7,7 @@
 #include <pptp/diag.h>
 #include "common-fun.h"
 
-void st_com_execute_slave(struct pp_instance *ppi)
+int st_com_execute_slave(struct pp_instance *ppi)
 {
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_RECEIPT])) {
 		DBGV("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
@@ -26,15 +26,16 @@ void st_com_execute_slave(struct pp_instance *ppi)
 	if (ppi->rt_opts->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {
 			DBGV("TODO: event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
-			/* TODO issueDelayReq(rtOpts,ptpClock); */
+			return msg_issue_delay_req(ppi);
 		}
 	} else {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ]))
 		{
 			DBGV("TODO: event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
-			/* TODO issuePDelayReq(rtOpts,ptpClock); */
+			return msg_issue_pdelay_req(ppi);
 		}
 	}
+	return 0;
 }
 
 void st_com_restart_annrec_timer(struct pp_instance *ppi)
@@ -286,9 +287,7 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 	} else {
 		msg_copy_header(&ppi->pdelay_req_hdr, hdr);
 
-		/* TODO issuePDelayResp(time, header, rtOpts,
-				ptpClock);
-		*/
+		return msg_issue_pdelay_resp(ppi, &time, hdr);
 	}
 	return 0;
 }
@@ -324,6 +323,6 @@ int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 
 	/* Add latency */
 	add_TimeInternal(time, time, &ppi->rt_opts->outbound_latency);
-	/* TODO issueFollowup(time,rtOpts,ptpClock);*/
+	msg_issue_followup(ppi, time);
 	return 0;
 }
