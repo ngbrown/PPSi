@@ -9,7 +9,6 @@
 int pp_uncalibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0; /* error var, to check errors in msg handling */
-	TimeInternal time; /* TODO: handle it, see handle(...) in protocol.c */
 
 	switch (ppi->msg_tmp_header.messageType) {
 
@@ -18,7 +17,7 @@ int pp_uncalibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_SYNC:
-		e = st_com_slave_handle_sync(ppi, pkt, plen, &time);
+		e = st_com_slave_handle_sync(ppi, pkt, plen);
 		break;
 
 	case PPM_FOLLOW_UP:

@@ -25,13 +25,13 @@ int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 				  int len);
 
 int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
-			     int len, TimeInternal *time);
+			     int len);
 
 int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
-			      int len, TimeInternal *time);
+			      int len);
 
 int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 				 int len);
 
 int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
-			     int len, TimeInternal *time);
+			     int len);

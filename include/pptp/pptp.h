@@ -134,6 +134,9 @@ struct pp_instance {
 	Octet *buf_in;	/* FIXME really useful? Probably not*/
 	TimeInternal sync_receive_time;
 	UInteger16 recv_sync_sequence_id;
+
+	TimeInternal last_rcv_time; /* used to store timestamp retreived from
+				     * received packet */
 	TimeInternal last_sync_corr_field;
 	TimeInternal last_pdelay_req_corr_field;
 	TimeInternal last_pdelay_resp_corr_field;
@@ -188,7 +191,8 @@ extern int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv);
 /* Network stuff */
 extern int pp_net_init(struct pp_instance *ppi);
 extern int pp_net_shutdown(struct pp_instance *ppi);
-extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len);
+extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len,
+			  TimeInternal *t);
 extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
 			  int chtype); /* chtype: PP_NP_GEN || PP_NP_EVT */
 
@@ -265,6 +269,7 @@ extern int from_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern int to_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern void add_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
+extern void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns);
 
 /* Get and Set system timestamp */
 extern void pp_get_tstamp(TimeInternal *t);

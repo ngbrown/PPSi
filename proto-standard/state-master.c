@@ -9,13 +9,15 @@
 
 int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	TimeInternal time; /* TODO: handle it, see handle(...) in protocol.c */
+	TimeInternal *time;
 	TimeInternal req_rec_tstamp;
 	TimeInternal correction_field;
 	TimeInternal resp_orig_tstamp;
 
 	int e = 0; /* error var, to check errors in msg handling */
 	MsgHeader *hdr = &ppi->msg_tmp_header;
+
+	time = &ppi->last_rcv_time;
 
 	if (ppi->is_new_state) {
 		pp_timer_start(1 << DSPOR(ppi)->logSyncInterval,
@@ -64,16 +66,16 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_SYNC:
-		e = st_com_master_handle_sync(ppi, pkt, plen, &time);
+		e = st_com_master_handle_sync(ppi, pkt, plen);
 		break;
 
 	case PPM_DELAY_REQ:
 		msg_copy_header(&ppi->delay_req_hdr, hdr);
-		msg_issue_delay_resp(ppi, &time);
+		msg_issue_delay_resp(ppi, time);
 		break;
 
 	case PPM_PDELAY_REQ:
-		e = st_com_handle_pdelay_req(ppi, pkt, plen, &time);
+		e = st_com_handle_pdelay_req(ppi, pkt, plen);
 		break;
 
 	case PPM_PDELAY_RESP:
@@ -83,10 +85,10 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		if (ppi->is_from_self) {
 			/*Add latency*/
-			add_TimeInternal(&time, &time,
+			add_TimeInternal(time, time,
 					 &ppi->rt_opts->outbound_latency);
 
-			e = msg_issue_pdelay_resp_follow_up(ppi,&time);
+			e = msg_issue_pdelay_resp_follow_up(ppi, time);
 			break;
 		}
 		msg_unpack_pdelay_resp(pkt, &ppi->msg_tmp.presp);
@@ -104,9 +106,9 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				/* Two Step Clock */
 				/* Store t4 (Fig 35) */
 				ppi->pdelay_resp_receive_time.seconds =
-					time.seconds;
+					time->seconds;
 				ppi->pdelay_resp_receive_time.nanoseconds =
-					time.nanoseconds;
+					time->nanoseconds;
 				/* Store t2 (Fig 35) */
 				to_TimeInternal(&req_rec_tstamp,
 					       &ppi->msg_tmp.presp.
@@ -127,9 +129,9 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				/* One step Clock */
 				/* Store t4 (Fig 35)*/
 				ppi->pdelay_resp_receive_time.seconds =
-				time.seconds;
+					time->seconds;
 				ppi->pdelay_resp_receive_time.nanoseconds =
-					time.nanoseconds;
+					time->nanoseconds;
 
 				int64_to_TimeInternal(
 					hdr->correctionfield,

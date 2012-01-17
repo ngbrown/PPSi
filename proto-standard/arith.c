@@ -93,3 +93,9 @@ void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y)
 
 	normalize_TimeInternal(r);
 }
+
+void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns)
+{
+	t->seconds = s;
+	t->nanoseconds = ns;
+}

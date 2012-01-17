@@ -18,6 +18,8 @@ void posix_main_loop(struct pp_instance *ppi)
 {
 	int delay_ms;
 
+	set_TimeInternal(&ppi->last_rcv_time, 0, 0);
+
 	/*
 	 * The main loop here is based on select. While we are not
 	 * doing anything else but the protocol, this allows extra stuff
@@ -44,7 +46,10 @@ void posix_main_loop(struct pp_instance *ppi)
 		 * We got a packet. If it's not ours, continue consuming
 		 * the pending timeout
 		 */
-		i = posix_recv_packet(ppi, packet, sizeof(packet));
+		i = posix_recv_packet(ppi, packet, sizeof(packet),
+				      &ppi->last_rcv_time);
+
+		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
 		if (i < PP_PACKET_SIZE) {
 			delay_ms = -1;

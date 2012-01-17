@@ -8,7 +8,8 @@
 #include "bare-linux.h"
 
 /* FIXME: which socket we receive and send with? */
-int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len)
+int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
+		     TimeInternal *t)
 {
 	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
 }
@@ -18,7 +19,7 @@ int bare_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
 	return sys_send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
 }
 
-int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len)
+int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
 	__attribute__((alias("bare_recv_packet")));
 int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
 	__attribute__((alias("bare_send_packet")));

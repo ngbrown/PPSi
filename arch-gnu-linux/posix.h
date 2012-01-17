@@ -15,7 +15,8 @@ extern int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms);
 
 extern int posix_open_ch(struct pp_instance *ppi, char *name);
 
-extern int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len);
+extern int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
+			     TimeInternal *t);
 extern int posix_send_packet(struct pp_instance *ppi, void *pkt, int len,
 			     int chtype);
 

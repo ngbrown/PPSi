@@ -22,7 +22,8 @@
 static int ch_check_stat = 0;
 
 /* Receive and send is *not* so trivial */
-int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len)
+int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
+	TimeInternal *t)
 {
 	struct pp_channel *ch1 = NULL, *ch2 = NULL;
 
@@ -56,7 +57,7 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
 	return send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
 }
 
-int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len)
+int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
 	__attribute__((alias("posix_recv_packet")));
 int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
 	__attribute__((alias("posix_send_packet")));

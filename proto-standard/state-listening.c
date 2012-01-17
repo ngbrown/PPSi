@@ -8,7 +8,6 @@
 
 int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	TimeInternal time; /* TODO: handle it, see handle(...) in protocol.c */
 	int e = 0; /* error var, to check errors in msg handling */
 
 	if (ppi->is_new_state)
@@ -24,7 +23,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_SYNC:
-		e = st_com_master_handle_sync(ppi, pkt, plen, &time);
+		e = st_com_master_handle_sync(ppi, pkt, plen);
 		break;
 
 	default:

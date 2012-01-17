@@ -160,8 +160,9 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 }
 
 int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
-			     int len, TimeInternal *time)
+			     int len)
 {
+	TimeInternal *time;
 	TimeInternal origin_tstamp;
 	TimeInternal correction_field;
 	MsgHeader *hdr = &ppi->msg_tmp_header;
@@ -171,6 +172,8 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 
 	if (ppi->is_from_self)
 		return 0;
+
+	time = &ppi->last_rcv_time;
 
 	if (ppi->is_from_cur_par) {
 		ppi->sync_receive_time.seconds = time->seconds;
@@ -262,8 +265,9 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 
 
 int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
-			     int len, TimeInternal *time)
+			     int len)
 {
+	TimeInternal *time;
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
 	if (len < PP_PDELAY_REQ_LENGTH)
@@ -271,6 +275,8 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 
 	if (ppi->rt_opts->e2e_mode)
 		return 0;
+
+	time = &ppi->last_rcv_time;
 
 	if (ppi->is_from_self) {
 		/* Get sending timestamp from IP stack
@@ -313,13 +319,16 @@ int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 }
 
 int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
-			      int len, TimeInternal *time)
+			      int len)
 {
+	TimeInternal *time;
 	if (len < PP_SYNC_LENGTH)
 		return -1;
 
 	if (!ppi->is_from_self)
 		return 0;
+
+	time = &ppi->last_rcv_time;
 
 	/* Add latency */
 	add_TimeInternal(time, time, &ppi->rt_opts->outbound_latency);

@@ -10,11 +10,13 @@
 int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0; /* error var, to check errors in msg handling */
-	TimeInternal time; /* TODO: handle it, see handle(...) in protocol.c */
+	TimeInternal *time;
 	TimeInternal req_rec_tstamp;
 	TimeInternal correction_field;
 	TimeInternal resp_orig_tstamp;
 	MsgHeader *hdr = &ppi->msg_tmp_header;
+
+	time = &ppi->last_rcv_time;
 
 	if (ppi->is_new_state) {
 		pp_init_clock(ppi);
@@ -50,7 +52,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_SYNC:
-		e = st_com_slave_handle_sync(ppi, pkt, plen, &time);
+		e = st_com_slave_handle_sync(ppi, pkt, plen);
 		break;
 
 	case PPM_FOLLOW_UP:
@@ -66,9 +68,9 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			 * with So_TIMESTAMP */
 
 			ppi->delay_req_send_time.seconds =
-				time.seconds;
+				time->seconds;
 			ppi->delay_req_send_time.nanoseconds =
-				time.nanoseconds;
+				time->nanoseconds;
 
 			/* Add latency */
 			add_TimeInternal(&ppi->delay_req_send_time,
@@ -125,7 +127,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_PDELAY_REQ:
-		e = st_com_handle_pdelay_req(ppi, pkt, plen, &time);
+		e = st_com_handle_pdelay_req(ppi, pkt, plen);
 		break;
 
 	case PPM_PDELAY_RESP:
@@ -160,9 +162,9 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				/* Two Step Clock */
 				/* Store t4 (Fig 35) */
 				ppi->pdelay_resp_receive_time.seconds =
-					time.seconds;
+					time->seconds;
 				ppi->pdelay_resp_receive_time.nanoseconds =
-					time.nanoseconds;
+					time->nanoseconds;
 				/* Store t2 (Fig 35) */
 				to_TimeInternal(&req_rec_tstamp,
 					       &ppi->msg_tmp.presp.
@@ -182,9 +184,9 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				/* One step Clock */
 				/* Store t4 (Fig 35) */
 				ppi->pdelay_resp_receive_time.seconds =
-					time.seconds;
+					time->seconds;
 				ppi->pdelay_resp_receive_time.nanoseconds =
-					time.nanoseconds;
+					time->nanoseconds;
 
 				int64_to_TimeInternal(hdr->correctionfield,
 					&correction_field);
