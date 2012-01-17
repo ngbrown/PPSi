@@ -31,6 +31,10 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		e = st_com_handle_pdelay_req(ppi, pkt, plen, &time);
 		break;
 
+	case PPM_SYNC:
+		e = st_com_master_handle_sync(ppi, pkt, plen, &time);
+		break;
+
 	default:
 		/* disreguard, nothing to do */
 		break;
