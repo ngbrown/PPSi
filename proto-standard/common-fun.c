@@ -287,7 +287,7 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 	} else {
 		msg_copy_header(&ppi->pdelay_req_hdr, hdr);
 
-		return msg_issue_pdelay_resp(ppi, &time, hdr);
+		return msg_issue_pdelay_resp(ppi, time, hdr);
 	}
 	return 0;
 }
