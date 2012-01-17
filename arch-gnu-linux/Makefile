@@ -21,5 +21,5 @@ all: $(TARGET)
 # were not selected yet (e.g., pp_open_instance() ).
 $(TARGET): $(TARGET).o $(LIBARCH)
 	$(CC) -Wl,-Map,$(TARGET).map2 -o $@ $(TARGET).o \
-		-L$A -larch -L$D -lstd
+		-L$A -larch -L$D -lstd -lrt
 

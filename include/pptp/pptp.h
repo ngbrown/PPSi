@@ -266,8 +266,9 @@ extern int to_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern void add_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 
-/* Get a timestamp */
+/* Get and Set system timestamp */
 extern void pp_get_tstamp(TimeInternal *t);
+extern void pp_set_tstamp(TimeInternal *t);
 
 /*
  * The state machine itself is an array of these structures.

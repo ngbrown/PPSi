@@ -3,6 +3,7 @@
  */
 #define _GNU_SOURCE /* for strnlen */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <pptp/pptp.h>
@@ -34,5 +35,23 @@ void *pp_memset(void *s, int c, int count)
 
 void pp_get_tstamp(TimeInternal *t)
 {
-	/*FIXME tstamp *sptr = htonl(time(NULL)); */
+	struct timespec tp;
+	if (clock_gettime(CLOCK_REALTIME, &tp) < 0) {
+		/* FIXME diag PERROR("clock_gettime() failed, exiting."); */
+		exit(0);
+	}
+	t->seconds = tp.tv_sec;
+	t->nanoseconds = tp.tv_nsec;
+}
+
+void pp_set_tstamp(TimeInternal *t)
+{
+	/* FIXME: what happens with timers? */
+	struct timespec tp;
+	tp.tv_sec = t->seconds;
+	tp.tv_nsec = t->nanoseconds;
+	if (clock_settime(CLOCK_REALTIME, &tp) < 0) {
+		/* FIXME diag PERROR("clock_settime() failed, exiting."); */
+		exit(0);
+	}
 }
