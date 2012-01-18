@@ -111,10 +111,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				hdr->correctionfield,
 				&correction_field);
 
-			/* TODO servo
-			updateDelay(&ptpClock->owd_filt,
-				    rtOpts,ptpClock, &correctionField);
-			*/
+			pp_update_delay(ppi, &correction_field);
 
 			ppi->log_min_delay_req_interval =
 				hdr->logMessageInterval;

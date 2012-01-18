@@ -89,6 +89,47 @@ struct pp_timer {
 	uint32_t interval;
 };
 
+
+/*
+ * Servo. Structs which contain filters for delay average computation. They
+ * are used in servo.c src, where specific function for time setting of the
+ * machine are implemented.
+ *
+ * pp_ofm_fltr: The FIR filtering of the offset from master input is a simple,
+ * two-sample average
+ *
+ * pp_owd_fltr: It is a variable cutoff/delay low-pass, infinite impulse
+ * response (IIR) filter. The one-way delay filter has the difference equation:
+ * s*y[n] - (s-1)*y[n-1] = x[n]/2 + x[n-1]/2,
+ * where increasing the stiffness (s) lowers the cutoff and increases the delay.
+ */
+struct pp_ofm_fltr {
+	Integer32 nsec_prev;
+	Integer32 y;
+};
+
+struct pp_owd_fltr {
+	Integer32 nsec_prev;
+	Integer32 y;
+	Integer32 s_exp;
+};
+
+struct pp_servo {
+	/* TODO check. Which is the difference between m_to_s_dly (which
+	 * comes from ptpd's master_to_slave_delay) and delay_ms (which comes
+	 * from ptpd's delay_MS? Seems like ptpd actually uses only delay_MS.
+	 * The same of course must be checked for their equivalents,
+	 * s_to_m_dly and delay_sm
+	 */
+	TimeInternal m_to_s_dly;
+	TimeInternal s_to_m_dly;
+	TimeInternal delay_ms;
+	TimeInternal delay_sm;
+	Integer32 obs_drift;
+	struct pp_owd_fltr owd_fltr;
+	struct pp_ofm_fltr ofm_fltr;
+};
+
 /*
  * Net Path. Struct which contains the network configuration parameters and
  * the event/general channels (sockets on most platforms, see above)
@@ -114,6 +155,7 @@ struct pp_instance {
 	void *ext_data;			/* if protocol ext needs it */
 	struct pp_runtime_opts *rt_opts;
 	struct pp_net_path *net_path;
+	struct pp_servo *servo;
 
 	/* Data sets */
 	DSDefault *defaultDS;
@@ -182,6 +224,8 @@ struct pp_instance {
 
 #define NP(x) ((x)->net_path)
 
+#define SRV(x) ((x)->servo)
+
 /* The channel for an instance must be created and possibly destroyed. */
 extern int pp_open_instance(struct pp_instance *ppi,
 			    struct pp_runtime_opts *rt_opts);
@@ -207,6 +251,8 @@ extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
 
 /* Servo */
 extern void pp_init_clock(struct pp_instance *ppi);
+extern void pp_update_delay(struct pp_instance *ppi,
+			    TimeInternal *correction_field);
 extern void pp_update_offset(struct pp_instance *ppi,
 			     TimeInternal *send_time,
 			     TimeInternal *recv_time,
