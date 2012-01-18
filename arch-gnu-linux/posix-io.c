@@ -6,7 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/timex.h>
 #include <pptp/pptp.h>
+
+#define POSIX_IO_ADJ_FREQ_MAX	512000
 
 void pp_puts(const char *s)
 {
@@ -54,4 +57,19 @@ void pp_set_tstamp(TimeInternal *t)
 		/* FIXME diag PERROR("clock_settime() failed, exiting."); */
 		exit(0);
 	}
+}
+
+int pp_adj_freq(Integer32 adj)
+{
+	struct timex t;
+
+	if (adj > POSIX_IO_ADJ_FREQ_MAX)
+		adj = POSIX_IO_ADJ_FREQ_MAX;
+	else if (adj < -POSIX_IO_ADJ_FREQ_MAX)
+		adj = -POSIX_IO_ADJ_FREQ_MAX;
+
+	t.modes = MOD_FREQUENCY;
+	t.freq = adj * ((1 << 16) / 1000);
+
+	return !adjtimex(&t);
 }

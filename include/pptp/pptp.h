@@ -275,6 +275,10 @@ extern void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns);
 extern void pp_get_tstamp(TimeInternal *t);
 extern void pp_set_tstamp(TimeInternal *t);
 
+/* Virtualization of Linux adjtimex (or BSD adjtime) system clock time
+ * adjustment. Boolean: returns 1 in case of success and 0 if failure */
+extern int pp_adj_freq(Integer32 adj);
+
 /*
  * The state machine itself is an array of these structures.
  */
