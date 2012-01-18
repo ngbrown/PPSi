@@ -140,9 +140,9 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			break;
 
 		if (ppi->is_from_self)	{
-			add_TimeInternal(&time, &time,
+			add_TimeInternal(time, time,
 					&ppi->rt_opts->outbound_latency);
-			msg_issue_pdelay_resp_follow_up(ppi, &time);
+			msg_issue_pdelay_resp_follow_up(ppi, time);
 			break;
 		}
 		msg_unpack_pdelay_resp(pkt,
