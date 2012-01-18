@@ -172,6 +172,8 @@ struct pp_instance {
 		waiting_for_follow:1;
 };
 
+#define OPTS(x) ((x)->rt_opts)
+
 #define DSDEF(x) ((x)->defaultDS)
 #define DSCUR(x) ((x)->currentDS)
 #define DSPAR(x) ((x)->parentDS)
