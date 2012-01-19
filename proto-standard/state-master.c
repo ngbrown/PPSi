@@ -136,11 +136,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				int64_to_TimeInternal(
 					hdr->correctionfield,
 					&correction_field);
-				/* TODO servo
-				updatePeerDelay(&ptpClock->owd_filt,
-						rtOpts,ptpClock,
-						&correctionField,FALSE);
-				*/
+				pp_update_peer_delay(ppi, &correction_field, 0);
 				break;
 			}
 		}
@@ -166,11 +162,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				&correction_field,
 				&ppi->last_pdelay_resp_corr_field);
 
-			/* TODO servo
-			updatePeerDelay(&ptpClock->owd_filt,
-					rtOpts, ptpClock,
-					&correctionField,TRUE);
-			*/
+			pp_update_peer_delay(ppi, &correction_field, 1);
 			break;
 		}
 

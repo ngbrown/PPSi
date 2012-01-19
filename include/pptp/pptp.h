@@ -125,6 +125,8 @@ struct pp_servo {
 	TimeInternal s_to_m_dly;
 	TimeInternal delay_ms;
 	TimeInternal delay_sm;
+	TimeInternal pdelay_ms;
+	TimeInternal pdelay_sm;
 	Integer32 obs_drift;
 	struct pp_owd_fltr owd_fltr;
 	struct pp_ofm_fltr ofm_fltr;
@@ -253,11 +255,12 @@ extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
 extern void pp_init_clock(struct pp_instance *ppi);
 extern void pp_update_delay(struct pp_instance *ppi,
 			    TimeInternal *correction_field);
+extern void pp_update_peer_delay(struct pp_instance *ppi,
+			  TimeInternal *correction_field, int two_step);
 extern void pp_update_offset(struct pp_instance *ppi,
 			     TimeInternal *send_time,
 			     TimeInternal *recv_time,
 			     TimeInternal *correctionField);
-			/* FIXME: offset_from_master_filter: put it in ppi */
 extern void pp_update_clock(struct pp_instance *ppi);
 
 
