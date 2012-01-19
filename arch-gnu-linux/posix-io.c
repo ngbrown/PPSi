@@ -9,7 +9,7 @@
 #include <sys/timex.h>
 #include <pptp/pptp.h>
 
-#define POSIX_IO_ADJ_FREQ_MAX	512000
+const Integer32 PP_ADJ_FREQ_MAX = 512000;
 
 void pp_puts(const char *s)
 {
@@ -63,10 +63,10 @@ int pp_adj_freq(Integer32 adj)
 {
 	struct timex t;
 
-	if (adj > POSIX_IO_ADJ_FREQ_MAX)
-		adj = POSIX_IO_ADJ_FREQ_MAX;
-	else if (adj < -POSIX_IO_ADJ_FREQ_MAX)
-		adj = -POSIX_IO_ADJ_FREQ_MAX;
+	if (adj > PP_ADJ_FREQ_MAX)
+		adj = PP_ADJ_FREQ_MAX;
+	else if (adj < -PP_ADJ_FREQ_MAX)
+		adj = -PP_ADJ_FREQ_MAX;
 
 	t.modes = MOD_FREQUENCY;
 	t.freq = adj * ((1 << 16) / 1000);
