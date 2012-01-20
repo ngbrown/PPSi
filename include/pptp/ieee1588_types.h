@@ -281,7 +281,7 @@ enum ENDomainNumber {
 enum ENNetworkProtocol {
 	UDP_IPV4	= 1,
 	UDP_IPV6,
-	IEE_802_3,
+	IEEE_802_3,
 	DeviceNet,
 	ControlNet,
 	PROFINET
