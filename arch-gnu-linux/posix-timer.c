@@ -23,7 +23,7 @@
  * select in the main loop must exit when a timer elapses. To be checked
  */
 
-extern int posix_timer_init(struct pp_instance *ppi)
+int posix_timer_init(struct pp_instance *ppi)
 {
 	struct pp_timer *t;
 	int i;
@@ -41,7 +41,7 @@ extern int posix_timer_init(struct pp_instance *ppi)
 }
 
 
-extern int posix_timer_start(uint32_t interval, struct pp_timer *tm)
+int posix_timer_start(uint32_t interval, struct pp_timer *tm)
 {
 	time((time_t*)&tm->start);
 	tm->interval = interval;
@@ -49,7 +49,7 @@ extern int posix_timer_start(uint32_t interval, struct pp_timer *tm)
 	return 0;
 }
 
-extern int posix_timer_stop(struct pp_timer *tm)
+int posix_timer_stop(struct pp_timer *tm)
 {
 	tm->interval = 0;
 	tm->start = 0;
@@ -57,7 +57,7 @@ extern int posix_timer_stop(struct pp_timer *tm)
 	return 0;
 }
 
-extern int posix_timer_expired(struct pp_timer *tm)
+int posix_timer_expired(struct pp_timer *tm)
 {
 	uint32_t now;
 
@@ -74,7 +74,7 @@ extern int posix_timer_expired(struct pp_timer *tm)
 	return 0;
 }
 
-extern void pp_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
+void pp_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
 {
 	int i;
 
