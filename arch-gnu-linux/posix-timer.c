@@ -74,6 +74,15 @@ extern int posix_timer_expired(struct pp_timer *tm)
 	return 0;
 }
 
+extern void pp_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
+{
+	int i;
+
+	for (i = 0; i < PP_TIMER_ARRAY_SIZE; i++) {
+		ppi->timers[i] += diff;
+	}
+}
+
 
 int pp_timer_init(struct pp_instance *ppi)
 	__attribute__((alias("posix_timer_init")));

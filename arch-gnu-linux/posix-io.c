@@ -47,16 +47,25 @@ void pp_get_tstamp(TimeInternal *t)
 	t->nanoseconds = tp.tv_nsec;
 }
 
-void pp_set_tstamp(TimeInternal *t)
+int32_t pp_set_tstamp(TimeInternal *t)
 {
-	/* FIXME: what happens with timers? */
+	struct timespec tp_orig;
 	struct timespec tp;
+
+	if (clock_gettime(CLOCK_REALTIME, &tp_orig) < 0) {
+		/* FIXME diag PERROR("clock_gettime() failed, exiting."); */
+		exit(0);
+	}
+
 	tp.tv_sec = t->seconds;
 	tp.tv_nsec = t->nanoseconds;
 	if (clock_settime(CLOCK_REALTIME, &tp) < 0) {
 		/* FIXME diag PERROR("clock_settime() failed, exiting."); */
 		exit(0);
 	}
+
+	return tp.tv_sec - tp_orig.tv_sec; /* handle only sec field, since
+					    * timer granularity is 1s */
 }
 
 int pp_adj_freq(Integer32 adj)

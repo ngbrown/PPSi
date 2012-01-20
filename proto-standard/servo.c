@@ -259,6 +259,7 @@ void pp_update_clock(struct pp_instance *ppi)
 {
 	Integer32 adj;
 	TimeInternal time_tmp;
+	uint32_t tstamp_diff;
 
 	/* FIXME diag DBGV("updateClock\n");*/
 
@@ -290,7 +291,8 @@ void pp_update_clock(struct pp_instance *ppi)
 				pp_get_tstamp(&time_tmp);
 				sub_TimeInternal(&time_tmp, &time_tmp,
 					&DSCUR(ppi)->offsetFromMaster);
-				pp_set_tstamp(&time_tmp);
+				tstamp_diff = pp_set_tstamp(&time_tmp);
+				pp_timer_adjust_all(ppi, tstamp_diff);
 				pp_init_clock(ppi);
 			} else {
 				adj = DSCUR(ppi)->offsetFromMaster.nanoseconds

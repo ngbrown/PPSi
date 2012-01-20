@@ -250,6 +250,9 @@ extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common
 extern int pp_timer_start(uint32_t interval, struct pp_timer *tm);
 extern int pp_timer_stop(struct pp_timer *tm);
 extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
+/* pp_adj_timers is called after pp_set_tstamp and must be defined for those
+ * platform who rely on system timestamp for timer expiration handling */
+extern void pp_timer_adjust_all(struct pp_instance *ppi, int32_t diff);
 
 /* Servo */
 extern void pp_init_clock(struct pp_instance *ppi);
@@ -324,7 +327,8 @@ extern void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns);
 
 /* Get and Set system timestamp */
 extern void pp_get_tstamp(TimeInternal *t);
-extern void pp_set_tstamp(TimeInternal *t);
+extern int32_t pp_set_tstamp(TimeInternal *t);
+
 
 /* Virtualization of Linux adjtimex (or BSD adjtime) system clock time
  * adjustment. Boolean: returns 1 in case of success and 0 if failure */
