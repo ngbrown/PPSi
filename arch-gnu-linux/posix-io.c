@@ -11,32 +11,32 @@
 
 const Integer32 PP_ADJ_FREQ_MAX = 512000;
 
-void pp_puts(const char *s)
+void posix_puts(const char *s)
 {
 	fputs(s, stdout);
 }
 
-int pp_strnlen(const char *s, int maxlen)
+int posix_strnlen(const char *s, int maxlen)
 {
 	return strnlen(s, maxlen);
 }
 
-void *pp_memcpy(void *d, const void *s, int count)
+void *posix_memcpy(void *d, const void *s, int count)
 {
 	return memcpy(d, s, count);
 }
 
-int pp_memcmp(const void *s1, const void *s2, int count)
+int posix_memcmp(const void *s1, const void *s2, int count)
 {
 	return memcmp(s1, s2, count);
 }
 
-void *pp_memset(void *s, int c, int count)
+void *posix_memset(void *s, int c, int count)
 {
 	return memset(s, c, count);
 }
 
-void pp_get_tstamp(TimeInternal *t)
+void posix_get_tstamp(TimeInternal *t)
 {
 	struct timespec tp;
 	if (clock_gettime(CLOCK_REALTIME, &tp) < 0) {
@@ -47,7 +47,7 @@ void pp_get_tstamp(TimeInternal *t)
 	t->nanoseconds = tp.tv_nsec;
 }
 
-int32_t pp_set_tstamp(TimeInternal *t)
+int32_t posix_set_tstamp(TimeInternal *t)
 {
 	struct timespec tp_orig;
 	struct timespec tp;
@@ -68,7 +68,7 @@ int32_t pp_set_tstamp(TimeInternal *t)
 					    * timer granularity is 1s */
 }
 
-int pp_adj_freq(Integer32 adj)
+int posix_adj_freq(Integer32 adj)
 {
 	struct timex t;
 
@@ -82,3 +82,27 @@ int pp_adj_freq(Integer32 adj)
 
 	return !adjtimex(&t);
 }
+
+void pp_puts(const char *s)
+	__attribute__((alias("posix_puts")));
+
+int pp_strnlen(const char *s, int maxlen)
+	__attribute__((alias("posix_strnlen")));
+
+void *pp_memcpy(void *d, const void *s, int count)
+	__attribute__((alias("posix_memcpy")));
+
+int pp_memcmp(const void *s1, const void *s2, int count)
+	__attribute__((alias("posix_memcmp")));
+
+void *pp_memset(void *s, int c, int count)
+	__attribute__((alias("posix_memset")));
+
+void pp_get_tstamp(TimeInternal *t)
+	__attribute__((alias("posix_get_tstamp")));
+
+int32_t pp_set_tstamp(TimeInternal *t)
+	__attribute__((alias("posix_set_tstamp")));
+
+int pp_adj_freq(Integer32 adj)
+	__attribute__((alias("posix_adj_freq")));
