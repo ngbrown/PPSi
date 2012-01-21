@@ -139,9 +139,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 					hdr_a->sourcePortIdentity.clockIdentity,
 					ppci,
 					PP_CLOCK_IDENTITY_LENGTH)) {
-					/* FIXME
-					 * DBG("Sender=Receiver : Error -1");
-					 */
+					PP_PRINTF("Sender=Receiver: Error -1");
 					return 0;
 				} else
 					return 1;
@@ -151,9 +149,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 					hdr_b->sourcePortIdentity.clockIdentity,
 					ppci,
 					PP_CLOCK_IDENTITY_LENGTH)) {
-					/* FIXME
-					 * DBG("Sender=Receiver : Error -1");
-					 */
+					PP_PRINTF("Sender=Receiver: Error -3");
 					return 0;
 				} else {
 					return -1;
@@ -163,9 +159,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 					hdr_a->sourcePortIdentity.clockIdentity,
 					hdr_b->sourcePortIdentity.clockIdentity,
 					PP_CLOCK_IDENTITY_LENGTH)) {
-					/* FIXME
-					 * DBG("Sender=Receiver : Error -2");
-					 */
+					PP_PRINTF("Sender=Receiver: Error -2");
 					return 0;
 				} else if ((pp_memcmp(
 					hdr_a->sourcePortIdentity.clockIdentity,
@@ -285,7 +279,7 @@ UInteger8 bmc_state_decision( struct pp_instance *ppi,
 	}
 
 	if (cmpres == 0) {
-		PP_PRINTF("Error in bmcDataSetComparison.\n");
+		PP_PRINTF("Error in bmc_state_decision, cmpres=0.\n");
 	}
 
 	/*  MB: Is this the return code below correct? */

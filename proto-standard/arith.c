@@ -36,9 +36,8 @@ int from_TimeInternal(TimeInternal *internal, Timestamp *external)
 
 	if ((internal->seconds & ~INT_MAX) ||
 	    (internal->nanoseconds & ~INT_MAX)) {
-		/* FIXME diag
-		 * DBG("Negative value cannot be converted into timestamp \n");
-		 */
+		PP_PRINTF("Error: Negative value cannot be converted into "
+			  "timestamp\n");
 		return -1;
 	} else {
 		external->secondsField.lsb = internal->seconds;
@@ -56,10 +55,8 @@ int to_TimeInternal(TimeInternal *internal, Timestamp *external)
 		internal->nanoseconds = external->nanosecondsField;
 		return 0;
 	} else {
-		/* FIXME diag
-		DBG("Clock servo canno't be executed : "
-		    "seconds field is higher than signed integer (32bits) \n");
-		*/
+		PP_PRINTF("to_TimeInternal: "
+		    "seconds field is higher than signed integer (32bits)\n");
 		return -1;
 	}
 }
@@ -98,4 +95,9 @@ void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns)
 {
 	t->seconds = s;
 	t->nanoseconds = ns;
+}
+
+void display_TimeInternal(const char *label, TimeInternal *t)
+{
+        PP_VPRINTF("%s: %d.%d \n", label, t->seconds, t->nanoseconds);
 }

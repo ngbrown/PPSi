@@ -33,20 +33,16 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
 		if (s_to_m_dly.seconds) {
-			/*FIXME diag
-			 * INFO("updateDelay aborted, delay greater than 1"
+			PP_PRINTF("updateDelay aborted, delay greater than 1"
 			     " second.");
-			*/
 			return;
 		}
 
 		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly) {
-			/*FIXME diag
-			INFO("updateDelay aborted, delay %d greater than "
+			PP_PRINTF("updateDelay aborted, delay %d greater than "
 			     "administratively set maximum %d\n",
-			     slave_to_master_delay.nanoseconds,
-			     rtOpts->maxDelay);
-			*/
+			     s_to_m_dly.nanoseconds,
+			     OPTS(ppi)->max_dly);
 			return;
 		}
 	}
@@ -103,9 +99,8 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 		owd_fltr->nsec_prev = DSCUR(ppi)->meanPathDelay.nanoseconds;
 		DSCUR(ppi)->meanPathDelay.nanoseconds = owd_fltr->y;
 
-		/*FIXME diag
-		 * DBGV("delay filter %d, %d\n", owd_filt->y, owd_fltr->s_exp);
-		 */
+		PP_VPRINTF("delay filter %d, %d\n",
+			   owd_fltr->y, owd_fltr->s_exp);
 	}
 }
 
@@ -115,7 +110,7 @@ void pp_update_peer_delay(struct pp_instance *ppi,
 	Integer16 s;
 	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
 
-	/* FIXME diag DBGV("updateDelay\n");*/
+	PP_VPRINTF("pp_update_peer_delay\n");
 
 	if (two_step) {
 		/* calc 'slave_to_master_delay' */
@@ -181,8 +176,7 @@ void pp_update_peer_delay(struct pp_instance *ppi,
 	owd_fltr->nsec_prev = DSPOR(ppi)->peerMeanPathDelay.nanoseconds;
 	DSPOR(ppi)->peerMeanPathDelay.nanoseconds = owd_fltr->y;
 
-	/* FIXME diag
-	 * DBGV("delay filter %d, %d\n", owd_fltr->y, owd_fltr->s_exp);*/
+	PP_VPRINTF("delay filter %d, %d\n", owd_fltr->y, owd_fltr->s_exp);
 }
 
 void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
@@ -191,27 +185,23 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 	TimeInternal m_to_s_dly;
 	struct pp_ofm_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
 
-	/* FIXME diag DBGV("updateOffset\n");*/
+	PP_VPRINTF("pp_update_offset\n");
 
 	/* calc 'master_to_slave_delay' */
 	sub_TimeInternal(&m_to_s_dly, recv_time, send_time);
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
 		if (m_to_s_dly.seconds) {
-			/* FIXME diag
-			INFO("updateDelay aborted, delay greater than 1"
-			     " second.");
-			*/
+			PP_PRINTF("pp_update_offset aborted, delay greater "
+			     "than 1 second\n");
 			return;
 		}
 
 		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly) {
-			/* FIXME diag
-			INFO("updateDelay aborted, delay %d greater than "
-			     "administratively set maximum %d\n",
-			     master_to_slave_delay.nanoseconds,
-			     rtOpts->maxDelay);
-			*/
+			PP_PRINTF("updateDelay aborted, delay %d greater than "
+				  "administratively set maximum %d\n",
+			     m_to_s_dly.nanoseconds,
+			     OPTS(ppi)->max_dly);
 			return;
 		}
 	}
@@ -248,7 +238,7 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 	ofm_fltr->nsec_prev = DSCUR(ppi)->offsetFromMaster.nanoseconds;
 	DSCUR(ppi)->offsetFromMaster.nanoseconds = ofm_fltr->y;
 
-	/* FIXME diag DBGV("offset filter %d\n", ofm_filt->y); */
+	PP_VPRINTF("offset filter %d\n", ofm_fltr->y);
 
 	/* Offset must have been computed at least one time before
 	 * computing end to end delay */
@@ -262,26 +252,22 @@ void pp_update_clock(struct pp_instance *ppi)
 	TimeInternal time_tmp;
 	uint32_t tstamp_diff;
 
-	/* FIXME diag DBGV("updateClock\n");*/
+	PP_VPRINTF("pp_update_clock\n");
 
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
 		if (DSCUR(ppi)->offsetFromMaster.seconds) {
-			/* FIXME diag
-			INFO("updateClock aborted, offset greater than 1"
-			     " second.");
+			PP_PRINTF("pp_update_clock aborted, offset greater "
+				   "than 1 second.");
 			goto display;
-			*/
 		}
 
 		if (DSCUR(ppi)->offsetFromMaster.nanoseconds >
 			OPTS(ppi)->max_rst) {
-			/* FIXME diag
-			INFO("updateClock aborted, offset %d greater than "
+			PP_PRINTF("updateClock aborted, offset %d greater than "
 			     "administratively set maximum %d\n",
-			     ptpClock->offsetFromMaster.nanoseconds,
-			     rtOpts->maxReset);
+			     DSCUR(ppi)->offsetFromMaster.nanoseconds,
+			     OPTS(ppi)->max_rst);
 			goto display;
-			*/
 		}
 	}
 
@@ -329,32 +315,33 @@ void pp_update_clock(struct pp_instance *ppi)
 			pp_adj_freq(-adj);
 	}
 
-/* FIXME diag
 display:
+	/* FIXME diag
 	if (rtOpts->displayStats)
 		displayStats(rtOpts, ptpClock);
+	*/
 
 
-	DBG("\n--Offset Correction-- \n");
-	DBG("Raw offset from master:  %10ds %11dns\n",
-	    ptpClock->master_to_slave_delay.seconds,
-	    ptpClock->master_to_slave_delay.nanoseconds);
+	PP_PRINTF("\n--Offset Correction-- \n");
+	PP_PRINTF("Raw offset from master:  %10ds %11dns\n",
+		SRV(ppi)->m_to_s_dly.seconds,
+		SRV(ppi)->m_to_s_dly.nanoseconds);
 
-	DBG("\n--Offset and Delay filtered-- \n");
+	PP_PRINTF("\n--Offset and Delay filtered-- \n");
 
-	if (!rtOpts->E2E_mode) {
-		DBG("one-way delay averaged (P2P):  %10ds %11dns\n",
-		    ptpClock->peerMeanPathDelay.seconds,
-		    ptpClock->peerMeanPathDelay.nanoseconds);
+	if (!OPTS(ppi)->e2e_mode) {
+		PP_PRINTF("one-way delay averaged (P2P):  %10ds %11dns\n",
+		    DSPOR(ppi)->peerMeanPathDelay.seconds,
+		    DSPOR(ppi)->peerMeanPathDelay.nanoseconds);
 	} else {
-		DBG("one-way delay averaged (E2E):  %10ds %11dns\n",
-		    ptpClock->meanPathDelay.seconds,
-		    ptpClock->meanPathDelay.nanoseconds);
+		PP_PRINTF("one-way delay averaged (E2E):  %10ds %11dns\n",
+		    DSCUR(ppi)->meanPathDelay.seconds,
+		    DSCUR(ppi)->meanPathDelay.nanoseconds);
 	}
 
-	DBG("offset from master:      %10ds %11dns\n",
-	    ptpClock->offsetFromMaster.seconds,
-	    ptpClock->offsetFromMaster.nanoseconds);
-	DBG("observed drift:          %10d\n", ptpClock->observed_drift);
-*/
+	PP_PRINTF("offset from master:      %10ds %11dns\n",
+	    DSCUR(ppi)->offsetFromMaster.seconds,
+	    DSCUR(ppi)->offsetFromMaster.nanoseconds);
+	PP_PRINTF("observed drift:          %10d\n", SRV(ppi)->obs_drift);
+
 }

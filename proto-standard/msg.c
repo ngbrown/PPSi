@@ -4,6 +4,66 @@
  */
 
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
+
+
+static inline void Integer64_display(const char *label, Integer64 *bigint)
+{
+	PP_VPRINTF("%s:\n", label);
+	PP_VPRINTF("LSB: %u\n", bigint->lsb);
+	PP_VPRINTF("MSB: %d\n", bigint->msb);
+}
+
+static inline void UInteger48_display(const char *label, UInteger48 *bigint)
+{
+	PP_VPRINTF("%s:\n", label);
+	PP_VPRINTF("LSB: %u\n", bigint->lsb);
+	PP_VPRINTF("MSB: %u\n", bigint->msb);
+}
+
+static inline void timestamp_display(const char *label, Timestamp *timestamp)
+{
+	PP_VPRINTF("%s:\n", label);
+	UInteger48_display("seconds", &timestamp->secondsField);
+	PP_VPRINTF("nanoseconds: %u\n", timestamp->nanosecondsField);
+}
+
+static inline void msg_display_header(MsgHeader *header)
+{
+	PP_VPRINTF("Message header: \n");
+	PP_VPRINTF("\n");
+	PP_VPRINTF("transportSpecific: %d\n", header->transportSpecific);
+	PP_VPRINTF("messageType: %d\n", header->messageType);
+	PP_VPRINTF("versionPTP: %d\n", header->versionPTP);
+	PP_VPRINTF("messageLength: %d\n", header->messageLength);
+	PP_VPRINTF("domainNumber: %d\n", header->domainNumber);
+	PP_VPRINTF("FlagField %02hhx:%02hhx\n", header->flagField[0],
+		   header->flagField[1]);
+	Integer64_display("correctionfield",&header->correctionfield);
+	/* FIXME diag portIdentity_display(&header->sourcePortIdentity); */
+	PP_VPRINTF("sequenceId: %d\n", header->sequenceId);
+	PP_VPRINTF("controlField: %d\n", header->controlField);
+	PP_VPRINTF("logMessageInterval: %d\n", header->logMessageInterval);
+	PP_VPRINTF("\n");
+}
+
+static inline void msg_display_announce(MsgAnnounce *announce)
+{
+        PP_VPRINTF("Message ANNOUNCE:\n");
+        timestamp_display("Origin Timestamp", &announce->originTimestamp);
+        PP_VPRINTF("currentUtcOffset: %d\n", announce->currentUtcOffset);
+        PP_VPRINTF("grandMasterPriority1: %d\n",
+		   announce->grandmasterPriority1);
+        PP_VPRINTF("grandMasterClockQuality:\n");
+        /* FIXME diag clockQuality_display(&announce->grandmasterClockQuality); */
+        PP_VPRINTF("grandMasterPriority2: %d\n",
+		   announce->grandmasterPriority2);
+        PP_VPRINTF("grandMasterIdentity:\n");
+        /* FIXME diag clockIdentity_display(announce->grandmasterIdentity); */
+        PP_VPRINTF("stepsRemoved: %d\n", announce->stepsRemoved);
+        PP_VPRINTF("timeSource: %d\n", announce->timeSource);
+        PP_VPRINTF("\n");
+}
 
 /* Unpack header from in buffer to msg_tmp_header field */
 void msg_unpack_header(struct pp_instance *ppi, void *buf)
@@ -50,11 +110,7 @@ void msg_unpack_header(struct pp_instance *ppi, void *buf)
 	else
 		ppi->is_from_cur_par = 0;
 
-/* FIXME: diag
-#ifdef PTPD_DBG
-	msgHeader_display(header);
-#endif
-*/
+	msg_display_header(hdr);
 }
 
 /* Pack header message into out buffer of ppi */
@@ -122,11 +178,9 @@ void msg_unpack_sync(void *buf, MsgSync *sync)
 	sync->originTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
 
-/* FIXME: diag
-#ifdef PTPD_DBG
-	msgSync_display(sync);
-#endif
-*/
+	PP_VPRINTF("Message SYNC\n");
+	timestamp_display("Origin Timestamp", &sync->originTimestamp);
+	PP_VPRINTF("\n");
 }
 
 /* Pack Announce message into out buffer of ppi */
@@ -184,11 +238,7 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 	ann->stepsRemoved = htons(*(UInteger16 *) (buf + 61));
 	ann->timeSource = *(Enumeration8 *) (buf + 63);
 
-/* FIXME: diag
-#ifdef PTPD_DBG
-	msgAnnounce_display(announce);
-#endif
-*/
+	msg_display_announce(ann);
 }
 
 
@@ -233,11 +283,10 @@ void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup)
 	flwup->preciseOriginTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
 
-/* FIXME: diag
-#ifdef PTPD_DBG
-	msgFollowUp_display(follow);
-#endif
-*/
+	PP_VPRINTF("Message FOLLOW_UP\n");
+	timestamp_display("Precise Origin Timestamp",
+			  &flwup->preciseOriginTimestamp);
+	PP_VPRINTF("\n");
 }
 
 /* pack PdelayReq message into out buffer of ppi */
@@ -346,8 +395,6 @@ void msg_pack_delay_resp(struct pp_instance *ppi,
 		htons(hdr->sourcePortIdentity.portNumber);
 }
 
-
-
 /* Pack PdelayResp message into out buffer of ppi */
 void msg_pack_pdelay_resp(struct pp_instance *ppi, MsgHeader *hdr,
 			  Timestamp *req_rec_tstamp)
@@ -383,7 +430,6 @@ void msg_pack_pdelay_resp(struct pp_instance *ppi, MsgHeader *hdr,
 
 }
 
-
 /* Unpack delayReq message from in buffer of ppi to msgtmp.req */
 void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req)
 {
@@ -393,11 +439,11 @@ void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req)
 		htonl(*(UInteger32 *) (buf + 36));
 	delay_req->originTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
-/* FIXME: diag
-#ifdef PTPD_DBG
-	msgDelayReq_display(delayreq);
-#endif
-*/
+
+	PP_VPRINTF("Message DELAY_REQ\n");
+	timestamp_display("Origin Timestamp",
+			  &delay_req->originTimestamp);
+	PP_VPRINTF("\n");
 }
 
 
@@ -411,11 +457,11 @@ void msg_unpack_pdelay_req(void *buf, MsgPDelayReq *pdelay_req)
 		htonl(*(UInteger32 *) (buf + 36));
 	pdelay_req->originTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
-/* FIXME: diag
-#ifdef PTPD_DBG
-	msgPDelayReq_display(pdelayreq);
-#endif
-*/
+
+	PP_VPRINTF("Message PDELAY_REQ\n");
+	timestamp_display("Origin Timestamp",
+			  &pdelay_req->originTimestamp);
+	PP_VPRINTF("\n");
 }
 
 /* Unpack delayResp message from IN buffer of ppi to msgtmp.presp */
@@ -432,11 +478,11 @@ void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp)
 	resp->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
 
-/* FIXME: diag
-#ifdef PTPD_DBG
-	msgDelayResp_display(resp);
-#endif
-*/
+	PP_VPRINTF("Message DELAY_RESP\n");
+	timestamp_display("Receive Timestamp",
+			  &resp->receiveTimestamp);
+	/* FIXME diag display requestingPortIdentity */
+	PP_VPRINTF("\n");
 }
 
 /* Unpack PdelayResp message from IN buffer of ppi to msgtmp.presp */
@@ -453,11 +499,11 @@ void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp)
 	presp->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
 
-/* FIXME: diag
-#ifdef PTPD_DBG
-	msgPDelayResp_display(presp);
-#endif
-*/
+	PP_VPRINTF("Message PDELAY_RESP\n");
+	timestamp_display("Request Receipt Timestamp",
+			  &presp->requestReceiptTimestamp);
+	/* FIXME diag display requestingPortIdentity */
+	PP_VPRINTF("\n");
 }
 
 /* Pack PdelayRespFollowUp message into out buffer of ppi */
@@ -515,14 +561,21 @@ void msg_unpack_pdelay_resp_followup(void *buf,
 	       (buf + 44), PP_CLOCK_IDENTITY_LENGTH);
 	presp_follow->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
+
+	PP_VPRINTF("Message PDELAY_RESP_FOLLOW_UP\n");
+	timestamp_display("Response Origin Timestamp",
+			  &presp_follow->responseOriginTimestamp);
+	/* FIXME diag display requestingPortIdentity */
+	PP_VPRINTF("\n");
 }
 
-/* FIXME diag in the following macro */
 #define MSG_SEND_AND_RET(x,y)\
 	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH, PP_NP_## y) <\
 		PP_## x ##_LENGTH) {\
+		PP_PRINTF("## x ## Message can't be sent -> FAULTY state!");\
 		return -1;\
 	}\
+	PP_VPRINTF("## x ## Message sent");\
 	ppi->sent_seq_id[PPM_## x]++;\
 	return 0;
 

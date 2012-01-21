@@ -62,7 +62,7 @@ int posix_timer_expired(struct pp_timer *tm)
 	uint32_t now;
 
 	if (tm->start == 0) {
-		/* FIXME: print a warning message */
+		PP_PRINTF("Warning: posix_timer_expired: timer not started\n");
 		return 0;
 	}
 

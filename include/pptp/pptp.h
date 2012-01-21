@@ -335,6 +335,7 @@ extern int to_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern void add_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns);
+extern void display_TimeInternal(const char *label, TimeInternal *t);
 
 /* Get and Set system timestamp */
 extern void pp_get_tstamp(TimeInternal *t);
@@ -372,8 +373,7 @@ extern pp_action pp_initializing, pp_faulty, pp_disabled, pp_listening,
 extern int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen);
 
 /*
- * FIXME
- * Whe talk raw sockets on PP_PROTO_NR.
+ * FIXME Whe talk raw sockets on PP_PROTO_NR.
  */
 #define PP_PROTO_NR	0xcccc
 

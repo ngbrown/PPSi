@@ -34,26 +34,20 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto state_updated;
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_SYNC])) {
-		/* FIXME diag
-		DBGV("TODO: event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
-		*/
+		PP_VPRINTF("event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
 		if (msg_issue_sync(ppi) < 0)
 			goto failure;
 	}
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_INTERVAL])) {
-		/* FIXME diag
-		DBGV("event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
-		*/
+		PP_VPRINTF("event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
 		if (msg_issue_announce(ppi) < 0)
 			goto failure;
 	}
 
 	if (!ppi->rt_opts->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ])) {
-			/* FIXME diag
-			DBGV("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
-			*/
+			PP_VPRINTF("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
 			if (msg_issue_pdelay_req(ppi) < 0)
 				goto failure;
 		}

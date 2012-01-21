@@ -41,8 +41,9 @@ int st_com_execute_slave(struct pp_instance *ppi)
 void st_com_restart_annrec_timer(struct pp_instance *ppi)
 {
 	/* 0 <= logAnnounceInterval <= 4, see pag. 237 of spec */
-	/* FIXME: if (logAnnounceInterval < 0), error? Or handle a right
-	 * shift?*/
+	if (DSPOR(ppi)->logAnnounceInterval < 0)
+		PP_PRINTF("Error: logAnnounceInterval < 0");
+
 	pp_timer_start((DSPOR(ppi)->announceReceiptTimeout) <<
 			DSPOR(ppi)->logAnnounceInterval,
 			ppi->timers[PP_TIMER_ANN_RECEIPT]);
@@ -180,7 +181,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 		ppi->sync_receive_time.seconds = time->seconds;
 		ppi->sync_receive_time.nanoseconds = time->nanoseconds;
 
-		/* FIXME diag check. Delete it?
+		/* FIXME diag to file? will we ever handle it?
 		if (ppi->rt_opts->recordFP)
 			fprintf(rtOpts->recordFP, "%d %llu\n",
 				header->sequenceId,
@@ -204,9 +205,10 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			int64_to_TimeInternal(
 				ppi->msg_tmp_header.correctionfield,
 				&correction_field);
-			/* FIXME diag check
-			 * timeInternal_display(&correctionfield);
-			 */
+
+			display_TimeInternal("Correction field",
+					     &correction_field);
+
 			ppi->waiting_for_follow = FALSE;
 			to_TimeInternal(&origin_tstamp,
 					&ppi->msg_tmp.sync.originTimestamp);

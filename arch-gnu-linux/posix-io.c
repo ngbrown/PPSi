@@ -8,8 +8,14 @@
 #include <time.h>
 #include <sys/timex.h>
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 
 const Integer32 PP_ADJ_FREQ_MAX = 512000;
+
+static void print_clock_gettime_err_msg(void)
+{
+	PP_PRINTF("clock_gettime() failed, exiting.");
+}
 
 void posix_puts(const char *s)
 {
@@ -40,7 +46,7 @@ void posix_get_tstamp(TimeInternal *t)
 {
 	struct timespec tp;
 	if (clock_gettime(CLOCK_REALTIME, &tp) < 0) {
-		/* FIXME diag PERROR("clock_gettime() failed, exiting."); */
+		print_clock_gettime_err_msg();
 		exit(0);
 	}
 	t->seconds = tp.tv_sec;
@@ -53,14 +59,14 @@ int32_t posix_set_tstamp(TimeInternal *t)
 	struct timespec tp;
 
 	if (clock_gettime(CLOCK_REALTIME, &tp_orig) < 0) {
-		/* FIXME diag PERROR("clock_gettime() failed, exiting."); */
+		print_clock_gettime_err_msg();
 		exit(0);
 	}
 
 	tp.tv_sec = t->seconds;
 	tp.tv_nsec = t->nanoseconds;
 	if (clock_settime(CLOCK_REALTIME, &tp) < 0) {
-		/* FIXME diag PERROR("clock_settime() failed, exiting."); */
+		print_clock_gettime_err_msg();
 		exit(0);
 	}
 
