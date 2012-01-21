@@ -18,7 +18,7 @@ void msg_unpack_header(struct pp_instance *ppi, void *buf)
 	hdr->messageLength = htons(*(UInteger16 *) (buf + 2));
 	hdr->domainNumber = (*(UInteger8 *) (buf + 4));
 
-	/* pp_memcpy(hdr->flagField, (buf + 6), FIXME:FLAG_FIELD_LENGTH); */
+	pp_memcpy(hdr->flagField, (buf + 6), PP_FLAG_FIELD_LENGTH);
 
 	pp_memcpy(&hdr->correctionfield.msb, (buf + 8), 4);
 	pp_memcpy(&hdr->correctionfield.lsb, (buf + 12), 4);
