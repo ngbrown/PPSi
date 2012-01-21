@@ -4,10 +4,11 @@
  */
 
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 
 void pp_init_clock(struct pp_instance *ppi)
 {
-	/* FIXME diag DBG("initClock\n"); */
+	PP_PRINTF("SERVO init clock\n");
 
 	/* clear vars */
 	set_TimeInternal(&SRV(ppi)->m_to_s_dly, 0, 0);

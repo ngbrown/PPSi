@@ -18,6 +18,8 @@ void posix_main_loop(struct pp_instance *ppi)
 {
 	int delay_ms;
 
+	pp_diag_verbosity = 1;
+
 	set_TimeInternal(&ppi->last_rcv_time, 0, 0);
 
 	/*

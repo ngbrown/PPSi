@@ -12,6 +12,17 @@
 #include <pptp/ieee1588_types.h>
 #include <pptp/constants.h>
 
+/* Macros for diagnostic prints. Set pp_diag_verbosity as 0 or 1 (PP_V macros
+ * disabled/enabled) */
+extern int pp_diag_verbosity;
+#define PP_FSM(ppi,seq,len) pp_diag_fsm(ppi,seq,len)
+#define PP_VFSM(ppi,seq,len) if (pp_diag_verbosity) pp_diag_fsm(ppi,seq,len)
+#define PP_VTR(ppi,f,l) if (pp_diag_verbosity) pp_diag_trace(ppi,f,l)
+#define PP_ERR(ppi,err) if pp_diag_error(ppi,err)
+#define PP_ERR2(ppi,s1,s2) if pp_diag_error_str2(ppi,s1,s2)
+#define PP_FATAL(ppi,s1,s2) if pp_diag_fatal(ppi,s1,s2)
+#define PP_PRINTF(...) pp_printf(__VA_ARGS__)
+#define PP_VPRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
 
 /*
  * Runtime options. Default values can be overridden by command line.

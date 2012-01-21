@@ -117,7 +117,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 	short comp = 0;
 	Octet *ppci;
 
-	DBGV("Data set comparison\n");
+	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
 
 	/* Identity comparison */
 	if (!pp_memcmp(ann_a->grandmasterIdentity,
@@ -266,29 +266,26 @@ UInteger8 bmc_state_decision( struct pp_instance *ppi,
 				 hdr, ann);
 
 	if (DSDEF(ppi)->clockQuality.clockClass < 128) {
-
 		if (cmpres < 0) {
 			m1(ppi);
 			return PPS_MASTER;
 		} else if (cmpres > 0) {
 			s1(ppi, hdr, ann);
 			return PPS_PASSIVE;
-		} else {
-			/* FIXME DBG("Error in bmcDataSetComparison..\n"); */
 		}
 
 	} else {
-
 		if (cmpres < 0) {
 			m1(ppi);
 			return PPS_MASTER;
 		} else if (cmpres > 0) {
 			s1(ppi, hdr, ann);
 			return PPS_SLAVE;
-		} else {
-			/* FIXME DBG("Error in bmcDataSetComparison..\n"); */
 		}
+	}
 
+	if (cmpres == 0) {
+		PP_PRINTF("Error in bmcDataSetComparison.\n");
 	}
 
 	/*  MB: Is this the return code below correct? */
@@ -317,7 +314,7 @@ UInteger8 bmc(struct pp_instance *ppi, struct pp_frgn_master *frgn_master,
 				     &frgn_master[best].ann) < 0)
 			best = i;
 
-	DBGV_ARGS("Best record : %d\n", best);
+	PP_VPRINTF("bmc, best record : %d\n", best);
 	ppi->foreign_record_best = best;
 
 	return bmc_state_decision(ppi, &frgn_master[best].hdr,

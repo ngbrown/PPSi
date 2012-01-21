@@ -117,8 +117,8 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				hdr->logMessageInterval;
 
 		} else {
-			DBGV("TODO: HandledelayResp : "
-			     "delayResp doesn't match delayReq.\n");
+			PP_VPRINTF("pp_slave : "
+			     "Delay Resp doesn't match Delay Req\n");
 		}
 
 		break;
@@ -190,8 +190,8 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				pp_update_peer_delay(ppi,& correction_field, 0);
 			}
 		} else {
-			DBGV("TODO: HandlePdelayResp : Pdelayresp doesn't "
-			     "match PdelayReq.\n");
+			PP_VPRINTF("pp_slave : PDelay Resp doesn't "
+			     "match PDelay Req.\n");
 		}
 		break;
 

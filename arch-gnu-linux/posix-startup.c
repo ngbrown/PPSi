@@ -14,6 +14,8 @@
 #include <pptp/diag.h>
 #include "posix.h"
 
+int pp_diag_verbosity = 0;
+
 int main(int argc, char **argv)
 {
 	struct pp_instance *ppi;

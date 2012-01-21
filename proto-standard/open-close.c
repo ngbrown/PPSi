@@ -33,7 +33,10 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 	/* TODO: Check how to parse cmdline. We can not rely on getopt()
 	 * function. Which are the really useful parameters?
 	 * Every parameter should be contained in ppi->rt_opts and set here
+	 * Temporarly set verbosity to 1 (for test), but it should be read
+	 * from the command line.
 	 */
+	pp_diag_verbosity = 1;
 	return 0;
 }
 

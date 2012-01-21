@@ -10,7 +10,7 @@
 int st_com_execute_slave(struct pp_instance *ppi)
 {
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_RECEIPT])) {
-		DBGV("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
+		PP_VPRINTF("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
 		ppi->number_foreign_records = 0;
 		ppi->foreign_record_i = 0;
 		if (!DSDEF(ppi)->slaveOnly &&
@@ -25,13 +25,13 @@ int st_com_execute_slave(struct pp_instance *ppi)
 
 	if (ppi->rt_opts->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {
-			DBGV("TODO: event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
+			PP_VPRINTF("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
 			return msg_issue_delay_req(ppi);
 		}
 	} else {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ]))
 		{
-			DBGV("TODO: event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
+			PP_VPRINTF("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
 			return msg_issue_pdelay_req(ppi);
 		}
 	}
@@ -52,7 +52,7 @@ void st_com_restart_annrec_timer(struct pp_instance *ppi)
 int st_com_check_record_update(struct pp_instance *ppi)
 {
 	if (ppi->record_update) {
-		DBGV("event STATE_DECISION_EVENT\n");
+		PP_VPRINTF("event STATE_DECISION_EVENT\n");
 		ppi->record_update = FALSE;
 		ppi->next_state = bmc(ppi, ppi->frgn_master, ppi->rt_opts);
 
@@ -83,7 +83,8 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 			 */
 			ppi->frgn_master[j].ann_messages++;
 			found = 1;
-			DBGV("addForeign : AnnounceMessage incremented \n");
+			PP_VPRINTF("st_com_add_foreign: ann_messages: %d\n",
+				ppi->frgn_master[j].ann_messages);
 
 			msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
 			msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
@@ -121,7 +122,7 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 
 	msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
 
-	DBGV("New foreign Master added \n");
+	PP_VPRINTF("New foreign Master added \n");
 
 	ppi->foreign_record_i = (ppi->foreign_record_i+1) %
 		ppi->max_foreign_records;
@@ -230,17 +231,17 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 		return -1;
 
 	if (!ppi->is_from_cur_par) {
-		DBGV("SequenceID doesn't match last Sync message\n");
+		PP_VPRINTF("SequenceID doesn't match last Sync message\n");
 		return 0;
 	}
 
 	if (!ppi->waiting_for_follow) {
-		DBGV("Slave was not waiting a follow up message\n");
+		PP_VPRINTF("Slave was not waiting a follow up message\n");
 		return 0;
 	}
 
 	if (ppi->recv_sync_sequence_id != hdr->sequenceId) {
-		DBGV("Follow up message is not from current parent\n");
+		PP_VPRINTF("Follow up message is not from current parent\n");
 		return 0;
 	}
 
@@ -305,11 +306,11 @@ int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 		return -1;
 
 	if (ppi->is_from_self) {
-		DBGV("HandleAnnounce : Ignore message from self\n");
+		PP_VPRINTF("master handle_announce: ignore msg from self\n");
 		return 0;
 	}
 
-	DBGV("Announce message from another foreign master\n");
+	PP_VPRINTF("Announce message from another foreign master\n");
 
 	st_com_add_foreign(ppi, buf);
 
