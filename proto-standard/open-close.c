@@ -125,7 +125,7 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 			switch (a[1]) {
 			case '?':
 				cmd_line_print_help();
-				break;
+				return 1;
 			case 'V':
 				pp_diag_verbosity = 1;
 				break;
@@ -224,7 +224,7 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				break;
 			default:
 				cmd_line_print_help();
-				break;
+				return -1;
 			}
 		}
 	 }

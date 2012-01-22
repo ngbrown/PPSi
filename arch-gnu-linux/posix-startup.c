@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
 	OPTS(ppi)->iface_name = ifname;
 
-	if (pp_parse_cmdline(ppi, argc, argv) < 0)
+	if (pp_parse_cmdline(ppi, argc, argv) != 0)
 		return -1;
 
 	posix_main_loop(ppi);
