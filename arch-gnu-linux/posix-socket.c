@@ -20,9 +20,9 @@
 #include <pptp/diag.h>
 #include "posix.h"
 
-/* Uncomment one of the following */
-#define PP_NET_UDP
-/* #define PP_NET_IEEE_802_3 */
+/* Uncomment one (and only one!) of the following */
+/* #define PP_NET_UDP */
+#define PP_NET_IEEE_802_3
 
 
 /* Receive and send is *not* so trivial */
@@ -53,7 +53,8 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 #endif /* PP_NET_UDP */
 
 #ifdef PP_NET_IEEE_802_3
-	/* TODO raw sockets */
+	/* raw sockets implementation always use gen socket */
+	return recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
 #endif /* PP_NET_IEEE_802_3 */
 
 	return -1;
@@ -78,7 +79,8 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 #endif /* PP_NET_UDP */
 
 #ifdef PP_NET_IEEE_802_3
-	/* TODO raw sockets */
+	/* raw sockets implementation always use gen socket */
+	return send(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
 #endif /* PP_NET_IEEE_802_3 */
 
 	return -1;
@@ -238,13 +240,12 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 
 #ifdef PP_NET_IEEE_802_3
 
-	/* TODO: raw socket check open channel */
 	int sock, iindex;
 	struct ifreq ifr;
 	struct sockaddr_ll addr;
 
 	/* open socket */
-	sock = socket(PF_PACKET, SOCK_RAW, PP_PROTO_NR);
+	sock = socket(PF_PACKET, SOCK_RAW, PP_ETHERTYPE);
 	if (sock < 0) {
 		pp_diag_error_str2(ppi, "socket()", strerror(errno));
 		return -1;
@@ -271,7 +272,7 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	/* bind and setsockopt */
 	memset(&addr, 0, sizeof(addr));
 	addr.sll_family = AF_PACKET;
-	addr.sll_protocol = htons(PP_PROTO_NR);
+	addr.sll_protocol = htons(PP_ETHERTYPE);
 	addr.sll_ifindex = iindex;
 	if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		pp_diag_error_str2(ppi, "bind", strerror(errno));
@@ -291,8 +292,8 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
  */
 int posix_net_init(struct pp_instance *ppi)
 {
-	int i;
 #ifdef PP_NET_UDP
+	int i;
 	PP_PRINTF("posix_net_init UDP\n");
 	for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
 		if (posix_open_ch(ppi, OPTS(ppi)->iface_name, i))
@@ -303,7 +304,11 @@ int posix_net_init(struct pp_instance *ppi)
 
 #ifdef PP_NET_IEEE_802_3
 	PP_PRINTF("posix_net_init IEEE 802.3\n");
-	/* TODO raw sockets */
+
+	/* raw sockets implementation always use gen socket */
+	if (posix_open_ch(ppi, OPTS(ppi)->iface_name, PP_NP_GEN))
+		return -1;
+	return 0;
 #endif /* PP_NET_IEEE_802_3 */
 
 	PP_PRINTF("Error: pptp Compiled with unsupported network protocol!!\n");
@@ -356,7 +361,7 @@ int posix_net_shutdown(struct pp_instance *ppi)
 #endif /* PP_NET_UDP */
 
 #ifdef PP_NET_IEEE_802_3
-	/* TODO raw sockets */
+	close(NP(ppi)->ch[PP_NP_GEN].fd);
 #endif /* PP_NET_IEEE_802_3 */
 
 	return -1;
@@ -364,7 +369,7 @@ int posix_net_shutdown(struct pp_instance *ppi)
 
 int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 {
-#ifdef PP_NET_UDP
+
 	fd_set set;
 	int i;
 	int ret = 0;
@@ -381,6 +386,7 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 	NP(ppi)->ch[PP_NP_GEN].pkt_present = 0;
 	NP(ppi)->ch[PP_NP_EVT].pkt_present = 0;
 
+#ifdef PP_NET_UDP
 	maxfd = (NP(ppi)->ch[PP_NP_GEN].fd > NP(ppi)->ch[PP_NP_EVT].fd) ?
 		 NP(ppi)->ch[PP_NP_GEN].fd : NP(ppi)->ch[PP_NP_EVT].fd;
 	FD_ZERO(&set);
@@ -414,7 +420,31 @@ _end:
 #endif /* PP_NET_UDP */
 
 #ifdef PP_NET_IEEE_802_3
-	/* TODO raw sockets */
+	maxfd = NP(ppi)->ch[PP_NP_GEN].fd;
+	FD_ZERO(&set);
+	FD_SET(NP(ppi)->ch[PP_NP_GEN].fd, &set);
+
+	i = select(maxfd + 1, &set, NULL, NULL, &arch_data->tv);
+
+	if (i < 0 && errno != EINTR)
+		exit(__LINE__);
+
+	if (i < 0) {
+		ret = i;
+		goto _end;
+	}
+
+	if (i == 0)
+		goto _end;
+
+	if (FD_ISSET(NP(ppi)->ch[PP_NP_GEN].fd, &set)) {
+		ret++;
+		NP(ppi)->ch[PP_NP_GEN].pkt_present = 1;
+	}
+
+_end:
+	return ret;
+
 #endif /* PP_NET_IEEE_802_3 */
 
 	return -1;

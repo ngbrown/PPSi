@@ -37,7 +37,7 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 	struct bare_sockaddr_ll addr;
 
 	/* open socket */
-	sock = sys_socket(PF_PACKET, SOCK_RAW, PP_PROTO_NR);
+	sock = sys_socket(PF_PACKET, SOCK_RAW, PP_ETHERTYPE);
 	if (sock < 0) {
 		pp_diag_error(ppi, bare_errno);
 		pp_diag_fatal(ppi, "socket()", "");
@@ -64,7 +64,7 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 	/* bind and setsockopt */
 	memset(&addr, 0, sizeof(addr));
 	addr.sll_family = PF_PACKET;
-	addr.sll_protocol = htons(PP_PROTO_NR);
+	addr.sll_protocol = htons(PP_ETHERTYPE);
 	addr.sll_ifindex = iindex;
 	if (sys_bind(sock, (struct bare_sockaddr *)&addr, sizeof(addr)) < 0) {
 		pp_diag_error(ppi, bare_errno);

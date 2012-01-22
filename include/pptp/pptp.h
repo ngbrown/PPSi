@@ -143,7 +143,7 @@ struct pp_servo {
 
 #define PP_NP_GEN	0
 #define PP_NP_EVT	1
-#define PP_NP_LAST	1
+#define PP_NP_LAST	2
 struct pp_net_path {
 	struct pp_channel ch[2]; /* event and general channel (see above
 				  * #define's */
@@ -364,10 +364,5 @@ extern pp_action pp_initializing, pp_faulty, pp_disabled, pp_listening,
 
 /* The engine */
 extern int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen);
-
-/*
- * FIXME Whe talk raw sockets on PP_PROTO_NR.
- */
-#define PP_PROTO_NR	0xcccc
 
 #endif /* __PTP_PROTO_H__ */

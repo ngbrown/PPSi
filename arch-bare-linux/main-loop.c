@@ -75,9 +75,8 @@ void bare_main_loop(struct pp_instance *ppi)
 				     &ppi->last_rcv_time);
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
-		/* FIXME: PP_PROTO_NR is a legacy number */
 		if (((struct bare_ethhdr *)packet)->h_proto
-		     != htons(PP_PROTO_NR))
+		     != htons(PP_ETHERTYPE))
 			goto again;
 
 		delay_ms = pp_state_machine(ppi, packet, i);

@@ -9,6 +9,9 @@
 
 #include <stdint.h>
 
+/* See F.2, pag.223 */
+#define PP_ETHERTYPE	0x88f7
+
 typedef enum {FALSE=0, TRUE} Boolean;
 typedef uint8_t		Octet;
 typedef int8_t		Integer8;

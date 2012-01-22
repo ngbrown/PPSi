@@ -43,9 +43,9 @@ void spec_main_loop(struct pp_instance *ppi)
 				pp_printf(" %02x", packet[j]);
 			pp_printf("\n");
 		}
-		/* Warning: PP_PROTO_NR is endian-agnostic by design */
+		/* Warning: PP_ETHERTYPE is endian-agnostic by design */
 		if (((struct spec_ethhdr *)packet)->h_proto !=
-		     htons(PP_PROTO_NR))
+		     htons(PP_ETHERTYPE))
 			continue;
 		delay_ms = pp_state_machine(ppi, packet, i);
 	}
