@@ -43,7 +43,9 @@ int posix_timer_init(struct pp_instance *ppi)
 
 int posix_timer_start(uint32_t interval, struct pp_timer *tm)
 {
-	time((time_t*)&tm->start);
+	time_t now;
+	now = time(NULL);
+	tm->start = (uint32_t)now;
 	tm->interval = interval;
 
 	return 0;
@@ -59,16 +61,16 @@ int posix_timer_stop(struct pp_timer *tm)
 
 int posix_timer_expired(struct pp_timer *tm)
 {
-	uint32_t now;
+	time_t now;
 
 	if (tm->start == 0) {
-		PP_PRINTF("Warning: posix_timer_expired: timer not started\n");
+		PP_PRINTF("%p Warning: posix_timer_expired: timer not started\n",tm);
 		return 0;
 	}
 
-	time((time_t*)&now);
+	now = time(NULL);
 
-	if (tm->start + tm->interval < now)
+	if (tm->start + tm->interval < (uint32_t)now)
 		return 1;
 
 	return 0;
