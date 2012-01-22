@@ -99,7 +99,7 @@ static void cmd_line_print_help(void)
 
 static void cmd_line_parse_two(char *a, int *n1, int *n2)
 {
-	int i, comma;
+	int i, comma = 0;
 	*n1 = *n2 = 0;
 	for (i = 0; a[i] != '\0'; i++) {
 		if (a[i] == ',') {
@@ -115,7 +115,7 @@ static void cmd_line_parse_two(char *a, int *n1, int *n2)
 
 int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 {
-	int i, j;
+	int i;
 	char *a; /* cmd line argument */
 	int n1, n2; /* used by cmd_line_parse_two */
 
