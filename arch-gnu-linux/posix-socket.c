@@ -66,7 +66,7 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 	struct sockaddr_in addr;
 
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(PP_GEN_PORT);
+	addr.sin_port = htons(chtype == PP_NP_GEN ? PP_GEN_PORT : PP_EVT_PORT);
 
 	if (!use_pdelay_addr)
 		addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
