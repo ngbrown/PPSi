@@ -33,7 +33,8 @@ int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	return minic_rx_frame(pkt, pkt + 14, len - 14, NULL);
 }
 
-int spec_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
+int spec_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
+	int use_pdelay_addr)
 {
 	static int led;
 
@@ -44,5 +45,6 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
 	__attribute__((alias("spec_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
+int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
+	int use_pdelay_addr)
 	__attribute__((alias("spec_send_packet")));

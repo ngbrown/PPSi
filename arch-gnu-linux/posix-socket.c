@@ -52,14 +52,27 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	return -1;
 }
 
-int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
+int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
+	int use_pdelay_addr)
 {
-	return send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
+	struct sockaddr_in addr;
+
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(PP_GENERAL_PORT);
+
+	if (!use_pdelay_addr)
+		addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
+	else
+		addr.sin_addr.s_addr = NP(ppi)->peer_mcast_addr;
+
+	return sendto(NP(ppi)->ch[chtype].fd, pkt, len, 0,
+		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 }
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
 	__attribute__((alias("posix_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
+int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
+	int use_pdelay_addr)
 	__attribute__((alias("posix_send_packet")));
 
 /* To open a channel we must bind to an interface and so on */

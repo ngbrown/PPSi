@@ -14,14 +14,16 @@ int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
 }
 
-int bare_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
+int bare_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
+	int use_pdelay_addr)
 {
 	return sys_send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
 }
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
 	__attribute__((alias("bare_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype)
+int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
+	int use_pdelay_addr)
 	__attribute__((alias("bare_send_packet")));
 
 #define PF_PACKET 17

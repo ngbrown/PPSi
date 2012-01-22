@@ -153,7 +153,7 @@ struct pp_servo {
 struct pp_net_path {
 	struct pp_channel ch[2]; /* event and general channel (see above
 				  * #define's */
-	Integer32 ucast_addr;
+	/* FIXME now unused, check it Integer32 ucast_addr;*/
 	Integer32 mcast_addr;
 	Integer32 peer_mcast_addr;
 };
@@ -253,7 +253,8 @@ extern int pp_net_shutdown(struct pp_instance *ppi);
 extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t);
 extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
-			  int chtype); /* chtype: PP_NP_GEN || PP_NP_EVT */
+			  int chtype, int use_pdelay_addr);
+			  /* chtype: PP_NP_GEN || PP_NP_EVT */
 
 /* Timers */
 extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common

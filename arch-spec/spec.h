@@ -9,7 +9,8 @@ extern int spec_open_ch(struct pp_instance *ppi);
 
 extern int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t);
-extern int spec_send_packet(struct pp_instance *ppi, void *pkt, int len);
+extern int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
+			int use_pdelay_addr);
 
 extern void spec_main_loop(struct pp_instance *ppi);
 extern void _irq_entry(void); /* unused, to make crt0.S happy */
