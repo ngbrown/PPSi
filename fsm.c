@@ -30,7 +30,6 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		/* found: handle this state */
 		ppi->next_state = state;
 		ppi->next_delay = 0;
-		ppi->is_new_state = 0;
 		pp_diag_fsm(ppi, 0 /* enter */, plen);
 		err = ip->f1(ppi, packet, plen);
 		if (!err && ip->f2)
@@ -38,6 +37,8 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		if (err)
 			pp_diag_error(ppi, err);
 		pp_diag_fsm(ppi, 1 /* leave */, 0 /* unused */);
+
+		ppi->is_new_state = 0;
 
 		/* done: accept next state and delay */
 		if (ppi->state != ppi->next_state) {
