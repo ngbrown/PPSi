@@ -53,6 +53,9 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		}
 	}
 
+	if (plen == 0)
+		goto no_incoming_msg;
+
 	switch (ppi->msg_tmp_header.messageType) {
 
 	case PPM_ANNOUNCE:
@@ -167,6 +170,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 	}
 
+no_incoming_msg:
 failure:
 	if (e == 0) {
 		if (DSDEF(ppi)->slaveOnly ||

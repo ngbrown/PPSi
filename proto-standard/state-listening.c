@@ -4,6 +4,7 @@
  */
 
 #include <pptp/pptp.h>
+#include <pptp/diag.h>
 #include "common-fun.h"
 
 int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
@@ -15,6 +16,9 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (st_com_check_record_update(ppi))
 		goto state_updated;
+
+	if (plen == 0)
+		goto no_incoming_msg;
 
 	switch (ppi->msg_tmp_header.messageType) {
 
@@ -31,6 +35,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 	}
 
+no_incoming_msg:
 	if (e == 0)
 		e = st_com_execute_slave(ppi);
 

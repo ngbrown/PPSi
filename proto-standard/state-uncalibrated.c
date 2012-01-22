@@ -10,6 +10,9 @@ int pp_uncalibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0; /* error var, to check errors in msg handling */
 
+	if (plen == 0)
+		goto no_incoming_msg;
+
 	switch (ppi->msg_tmp_header.messageType) {
 
 	case PPM_ANNOUNCE:
@@ -29,6 +32,7 @@ int pp_uncalibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 	}
 
+no_incoming_msg:
 	if (e == 0)
 		e = st_com_execute_slave(ppi);
 
