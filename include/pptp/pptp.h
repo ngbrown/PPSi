@@ -143,6 +143,7 @@ struct pp_servo {
 
 #define PP_NP_GEN	0
 #define PP_NP_EVT	1
+#define PP_NP_LAST	1
 struct pp_net_path {
 	struct pp_channel ch[2]; /* event and general channel (see above
 				  * #define's */

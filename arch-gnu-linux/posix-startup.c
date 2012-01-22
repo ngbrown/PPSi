@@ -53,10 +53,9 @@ int main(int argc, char **argv)
 	   )
 		exit(__LINE__);
 
-	if (posix_open_ch(ppi, ifname))
-		pp_diag_fatal(ppi, "open_ch", strerror(errno));
-
 	pp_open_instance(ppi, NULL);
+
+	OPTS(ppi)->iface_name = ifname;
 
 	if (pp_parse_cmdline(ppi, argc, argv) < 0)
 		return -1;

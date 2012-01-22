@@ -6,14 +6,16 @@
  * These are the functions provided by the various posix files
  */
 
+#define POSIX_ARCH(ppi) ((struct posix_arch_data*)(ppi->arch_data))
 struct posix_arch_data {
 	struct timeval tv;
+	int rcv_switch; /* flag for event / general receive order */
 };
 
 extern int posix_net_init(struct pp_instance *ppi);
 extern int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms);
 
-extern int posix_open_ch(struct pp_instance *ppi, char *name);
+extern int posix_open_ch(struct pp_instance *ppi, char *name, int chtype);
 
 extern int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			     TimeInternal *t);

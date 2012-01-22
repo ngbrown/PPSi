@@ -21,7 +21,8 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	/* Initialize default data set */
 	DSDEF(ppi)->twoStepFlag = PP_TWO_STEP_FLAG;
-	/* TODO initialize clockIdentity with MAC address */
+	pp_memcpy(DSDEF(ppi)->clockIdentity, NP(ppi)->ch[PP_NP_GEN].addr,
+		PP_CLOCK_IDENTITY_LENGTH);
 	DSDEF(ppi)->clockIdentity[3] = 0xff;
 	DSDEF(ppi)->clockIdentity[4] = 0xfe;
 	DSDEF(ppi)->numberPorts = 1;
