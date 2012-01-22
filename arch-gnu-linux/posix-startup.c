@@ -59,7 +59,8 @@ int main(int argc, char **argv)
 
 	pp_open_instance(ppi, NULL);
 
-	pp_parse_cmdline(ppi, argc, argv);
+	if (pp_parse_cmdline(ppi, argc, argv) < 0)
+		return -1;
 
 	posix_main_loop(ppi);
 	return 0; /* never reached */
