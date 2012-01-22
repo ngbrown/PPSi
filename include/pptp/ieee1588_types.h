@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-typedef enum {FALSE=0, TRUE} Boolean; /* FIXME really needed? */
+typedef enum {FALSE=0, TRUE} Boolean;
 typedef uint8_t		Octet;
 typedef int8_t		Integer8;
 typedef int16_t		Integer16;

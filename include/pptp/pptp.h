@@ -54,13 +54,6 @@ struct pp_runtime_opts {
 	UInteger8 domain_number;
 	char *iface_name;
 	void *arch_opts;
-
-	/*TODO ARCH: arch_opts, for arch-gnu-linux, might include the following:
-	 * int log_fd;
-	 * char *record_file; [PP_PATH_MAX]
-	 * FILE *record_fp;
-	 * char *file; [PP_PATH_MAX]
-	 */
 };
 extern struct pp_runtime_opts default_rt_opts; /* preinited with defaults */
 
@@ -153,7 +146,7 @@ struct pp_servo {
 struct pp_net_path {
 	struct pp_channel ch[2]; /* event and general channel (see above
 				  * #define's */
-	/* FIXME now unused, check it Integer32 ucast_addr;*/
+	/* FIXME check if useful Integer32 ucast_addr;*/
 	Integer32 mcast_addr;
 	Integer32 peer_mcast_addr;
 };
@@ -178,7 +171,6 @@ struct pp_instance {
 	DSTimeProperties *timePropertiesDS;
 	struct pp_timer *timers[PP_TIMER_ARRAY_SIZE];
 
-	/* FIXME: check the variables from now on. Now inherited from ptpd src*/
 	UInteger16 number_foreign_records;
 	Integer16  max_foreign_records;
 	Integer16  foreign_record_i;
@@ -186,7 +178,6 @@ struct pp_instance {
 	Boolean  record_update;
 	struct pp_frgn_master *frgn_master;
 	Octet *buf_out;
-	Octet *buf_in;	/* FIXME really useful? Probably not*/
 	TimeInternal sync_receive_time;
 	UInteger16 recv_sync_sequence_id;
 

@@ -12,15 +12,15 @@
 #include <pptp/diag.h>
 #include "posix.h"
 
-/* FIXME
- * In ptpd-2.1.0/src/dep/timer.c the mechanism was different.
+/* In ptpd-2.1.0/src/dep/timer.c the mechanism was different.
  * A SIGALARM timer was called once a second, increasing the counter of elapsed
  * time.
  * I find it easier to check for the timestamp when needed. The granularity of
  * this timer is the same as the ptpd solution: 1 second.
  * Should be checked if this is enough, but I guess yes.
  * Maybe a certain SIGALARM timer solution must be re-introduced, because the
- * select in the main loop must exit when a timer elapses. To be checked
+ * select in the main loop must exit when a timer elapses. To be tested and
+ * checked
  */
 
 int posix_timer_init(struct pp_instance *ppi)
