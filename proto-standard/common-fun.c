@@ -23,7 +23,7 @@ int st_com_execute_slave(struct pp_instance *ppi)
 		}
 	}
 
-	if (ppi->rt_opts->e2e_mode) {
+	if (OPTS(ppi)->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {
 			PP_VPRINTF("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
 			return msg_issue_delay_req(ppi);
@@ -55,7 +55,7 @@ int st_com_check_record_update(struct pp_instance *ppi)
 	if (ppi->record_update) {
 		PP_VPRINTF("event STATE_DECISION_EVENT\n");
 		ppi->record_update = FALSE;
-		ppi->next_state = bmc(ppi, ppi->frgn_master, ppi->rt_opts);
+		ppi->next_state = bmc(ppi, ppi->frgn_master);
 
 		if (ppi->next_state != ppi->state)
 			return 1;
@@ -182,7 +182,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 		ppi->sync_receive_time.nanoseconds = time->nanoseconds;
 
 		/* FIXME diag to file? will we ever handle it?
-		if (ppi->rt_opts->recordFP)
+		if (OPTS(ppi)->recordFP)
 			fprintf(rtOpts->recordFP, "%d %llu\n",
 				header->sequenceId,
 				((time->seconds * 1000000000ULL) +
@@ -276,7 +276,7 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 	if (len < PP_PDELAY_REQ_LENGTH)
 		return -1;
 
-	if (ppi->rt_opts->e2e_mode)
+	if (OPTS(ppi)->e2e_mode)
 		return 0;
 
 	time = &ppi->last_rcv_time;
@@ -292,7 +292,7 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 		/*Add latency*/
 		add_TimeInternal(&ppi->pdelay_req_send_time,
 			&ppi->pdelay_req_send_time,
-			&ppi->rt_opts->outbound_latency);
+			&OPTS(ppi)->outbound_latency);
 	} else {
 		msg_copy_header(&ppi->pdelay_req_hdr, hdr);
 
@@ -334,7 +334,7 @@ int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	time = &ppi->last_rcv_time;
 
 	/* Add latency */
-	add_TimeInternal(time, time, &ppi->rt_opts->outbound_latency);
+	add_TimeInternal(time, time, &OPTS(ppi)->outbound_latency);
 	msg_issue_followup(ppi, time);
 	return 0;
 }

@@ -12,8 +12,6 @@
 
 int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	struct pp_runtime_opts *rt_opts = ppi->rt_opts;
-
 	pp_net_shutdown(ppi);
 
 	if (pp_net_init(ppi) < 0)
@@ -26,13 +24,13 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	DSDEF(ppi)->clockIdentity[3] = 0xff;
 	DSDEF(ppi)->clockIdentity[4] = 0xfe;
 	DSDEF(ppi)->numberPorts = 1;
-	pp_memcpy(&DSDEF(ppi)->clockQuality, &rt_opts->clock_quality,
+	pp_memcpy(&DSDEF(ppi)->clockQuality, &OPTS(ppi)->clock_quality,
 		sizeof(ClockQuality));
-	DSDEF(ppi)->priority1 = rt_opts->prio1;
-	DSDEF(ppi)->priority2 = rt_opts->prio2;
-	DSDEF(ppi)->domainNumber = rt_opts->domain_number;
-	DSDEF(ppi)->slaveOnly = rt_opts->slave_only;
-	if (rt_opts->slave_only)
+	DSDEF(ppi)->priority1 = OPTS(ppi)->prio1;
+	DSDEF(ppi)->priority2 = OPTS(ppi)->prio2;
+	DSDEF(ppi)->domainNumber = OPTS(ppi)->domain_number;
+	DSDEF(ppi)->slaveOnly = OPTS(ppi)->slave_only;
+	if (OPTS(ppi)->slave_only)
 		ppi->defaultDS->clockQuality.clockClass = 255;
 
 	/* Initialize port data set */
@@ -42,10 +40,10 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	DSPOR(ppi)->logMinDelayReqInterval = PP_DEFAULT_DELAYREQ_INTERVAL;
 	DSPOR(ppi)->peerMeanPathDelay.seconds = 0;
 	DSPOR(ppi)->peerMeanPathDelay.nanoseconds = 0;
-	DSPOR(ppi)->logAnnounceInterval = rt_opts->announce_intvl;
+	DSPOR(ppi)->logAnnounceInterval = OPTS(ppi)->announce_intvl;
 	DSPOR(ppi)->announceReceiptTimeout =
 		PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT;
-	DSPOR(ppi)->logSyncInterval = rt_opts->sync_intvl;
+	DSPOR(ppi)->logSyncInterval = OPTS(ppi)->sync_intvl;
 	DSPOR(ppi)->delayMechanism = PP_DEFAULT_DELAY_MECHANISM;
 	DSPOR(ppi)->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
 	DSPOR(ppi)->versionNumber = PP_VERSION_PTP;

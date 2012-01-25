@@ -238,12 +238,11 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 
 /* State decision algorithm 9.3.3 Fig 26 */
 UInteger8 bmc_state_decision( struct pp_instance *ppi,
-			      MsgHeader *hdr, MsgAnnounce *ann,
-			      struct pp_runtime_opts *rt_opts)
+			      MsgHeader *hdr, MsgAnnounce *ann)
 {
 	int cmpres;
 
-	if (rt_opts->slave_only) {
+	if (OPTS(ppi)->slave_only) {
 		s1(ppi, hdr, ann);
 		return PPS_SLAVE;
 	}
@@ -289,8 +288,7 @@ UInteger8 bmc_state_decision( struct pp_instance *ppi,
 
 
 
-UInteger8 bmc(struct pp_instance *ppi, struct pp_frgn_master *frgn_master,
-	      struct pp_runtime_opts *rt_opts)
+UInteger8 bmc(struct pp_instance *ppi, struct pp_frgn_master *frgn_master)
 {
 	Integer16 i, best;
 
@@ -312,6 +310,5 @@ UInteger8 bmc(struct pp_instance *ppi, struct pp_frgn_master *frgn_master,
 	ppi->foreign_record_best = best;
 
 	return bmc_state_decision(ppi, &frgn_master[best].hdr,
-				   &frgn_master[best].ann,
-				   rt_opts);
+				   &frgn_master[best].ann);
 }

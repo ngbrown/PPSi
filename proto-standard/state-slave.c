@@ -34,7 +34,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		st_com_restart_annrec_timer(ppi);
 
-		if (ppi->rt_opts->e2e_mode)
+		if (OPTS(ppi)->e2e_mode)
 			pp_timer_start(1 << DSPOR(ppi)->logMinDelayReqInterval,
 				ppi->timers[PP_TIMER_DELAYREQ]);
 		else
@@ -78,7 +78,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			/* Add latency */
 			add_TimeInternal(&ppi->delay_req_send_time,
 					 &ppi->delay_req_send_time,
-					 &ppi->rt_opts->outbound_latency);
+					 &OPTS(ppi)->outbound_latency);
 		}
 		break;
 
@@ -89,7 +89,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if (e)
 			break;
 
-		if (!ppi->rt_opts->e2e_mode)
+		if (!OPTS(ppi)->e2e_mode)
 			break;
 
 		msg_unpack_delay_resp(pkt, &ppi->msg_tmp.resp);
@@ -131,7 +131,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_PDELAY_RESP:
-		if (ppi->rt_opts->e2e_mode)
+		if (OPTS(ppi)->e2e_mode)
 			break;
 
 		e = (plen < PP_PDELAY_RESP_LENGTH);
@@ -141,7 +141,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		if (ppi->is_from_self)	{
 			add_TimeInternal(time, time,
-					&ppi->rt_opts->outbound_latency);
+					&OPTS(ppi)->outbound_latency);
 			msg_issue_pdelay_resp_follow_up(ppi, time);
 			break;
 		}
@@ -200,7 +200,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	case PPM_PDELAY_RESP_FOLLOW_UP:
 
-		if (ppi->rt_opts->e2e_mode)
+		if (OPTS(ppi)->e2e_mode)
 			break;
 
 		e = (plen < PP_PDELAY_RESP_FOLLOW_UP_LENGTH);
@@ -254,7 +254,7 @@ state_updated:
 	if (ppi->next_state != ppi->state) {
 		pp_timer_stop(ppi->timers[PP_TIMER_ANN_RECEIPT]);
 
-		if (ppi->rt_opts->e2e_mode)
+		if (OPTS(ppi)->e2e_mode)
 			pp_timer_stop(ppi->timers[PP_TIMER_DELAYREQ]);
 		else
 			pp_timer_stop(ppi->timers[PP_TIMER_PDELAYREQ]);

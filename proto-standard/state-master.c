@@ -45,7 +45,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			goto failure;
 	}
 
-	if (!ppi->rt_opts->e2e_mode) {
+	if (!OPTS(ppi)->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ])) {
 			PP_VPRINTF("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
 			if (msg_issue_pdelay_req(ppi) < 0)
@@ -77,13 +77,13 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	case PPM_PDELAY_RESP:
 		/* Loopback Timestamp */
-		if (ppi->rt_opts->e2e_mode)
+		if (OPTS(ppi)->e2e_mode)
 			break;
 
 		if (ppi->is_from_self) {
 			/*Add latency*/
 			add_TimeInternal(time, time,
-					 &ppi->rt_opts->outbound_latency);
+					 &OPTS(ppi)->outbound_latency);
 
 			e = msg_issue_pdelay_resp_follow_up(ppi, time);
 			break;

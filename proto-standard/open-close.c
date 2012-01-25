@@ -238,9 +238,9 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 int pp_open_instance(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
 {
 	if (rt_opts)
-		ppi->rt_opts = rt_opts;
+		OPTS(ppi) = rt_opts;
 	else
-		ppi->rt_opts = &default_rt_opts;
+		OPTS(ppi) = &default_rt_opts;
 
 	ppi->state = PPS_INITIALIZING;
 
