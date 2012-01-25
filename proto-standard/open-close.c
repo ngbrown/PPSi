@@ -56,8 +56,8 @@ static struct cmd_line_opt cmd_line_list[] = {
 	{"-a NUMBER,NUMBER", "specify clock servo P and I attenuations"},
 	{"-w NUMBER", "specify one way delay filter stiffness"},
 	CMD_LINE_SEPARATOR,
-	/* FIXME cmdline check if useful
 	{"-b NAME", "bind PTP to network interface NAME"},
+	/* FIXME cmdline check if useful
 	{"-u ADDRESS", "also send uni-cast to ADDRESS\n"},
 	*/
 	/* FIXME cmdline now choosen by #define
@@ -162,6 +162,10 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 			case 'w':
 				a = argv[++i];
 				OPTS(ppi)->s = atoi(a);
+				break;
+			case 'b':
+				a = argv[++i];
+				OPTS(ppi)->iface_name = a;
 				break;
 			case 'l':
 				a = argv[++i];
