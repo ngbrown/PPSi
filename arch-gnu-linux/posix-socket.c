@@ -24,6 +24,86 @@
 /* #define PP_NET_UDP */
 #define PP_NET_IEEE_802_3
 
+/* posix_recv_msg uses recvmsg for timestamp query */
+int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
+{
+	ssize_t ret;
+	struct msghdr msg;
+	struct iovec vec[1];
+	struct sockaddr_in from_addr;
+
+	union {
+		struct cmsghdr cm;
+		char control[CMSG_SPACE(sizeof(struct timeval))];
+	} cmsg_un;
+
+	struct cmsghdr *cmsg;
+	struct timeval *tv;
+
+	vec[0].iov_base = pkt;
+	vec[0].iov_len = PP_PACKET_SIZE;
+
+	memset(&msg, 0, sizeof(msg));
+	memset(&from_addr, 0, sizeof(from_addr));
+	memset(pkt, 0, PP_PACKET_SIZE);
+	memset(&cmsg_un, 0, sizeof(cmsg_un));
+
+	msg.msg_name = (caddr_t)&from_addr;
+	msg.msg_namelen = sizeof(from_addr);
+	msg.msg_iov = vec;
+	msg.msg_iovlen = 1;
+	msg.msg_control = cmsg_un.control;
+	msg.msg_controllen = sizeof(cmsg_un.control);
+	msg.msg_flags = 0;
+
+	ret = recvmsg(fd, &msg, MSG_DONTWAIT);
+	if (ret <= 0) {
+		if (errno == EAGAIN || errno == EINTR)
+			return 0;
+
+		return ret;
+	}
+	if (msg.msg_flags & MSG_TRUNC) {
+		PP_PRINTF("Error: received truncated message\n");
+		return 0;
+	}
+	/* get time stamp of packet */
+	if (msg.msg_flags & MSG_CTRUNC) {
+		PP_PRINTF("Error: received truncated ancillary data\n");
+		return 0;
+	}
+	if (msg.msg_controllen < sizeof(cmsg_un.control)) {
+		PP_PRINTF("Error: received short ancillary data (%ld/%ld)\n",
+		    (long)msg.msg_controllen, (long)sizeof(cmsg_un.control));
+
+		return 0;
+	}
+
+	tv = 0;
+	for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL;
+	     cmsg = CMSG_NXTHDR(&msg, cmsg)) {
+		if (cmsg->cmsg_level == SOL_SOCKET &&
+		    cmsg->cmsg_type == SCM_TIMESTAMP)
+			tv = (struct timeval *)CMSG_DATA(cmsg);
+	}
+
+	if (tv) {
+		t->seconds = tv->tv_sec;
+		t->nanoseconds = tv->tv_usec * 1000;
+		PP_VPRINTF("kernel recv time stamp %us %dns\n",
+		     t->seconds, t->nanoseconds);
+	} else {
+		/*
+		 * do not try to get by with recording the time here, better
+		 * to fail because the time recorded could be well after the
+		 * message receive, which would put a big spike in the
+		 * offset signal sent to the clock servo
+		 */
+		PP_VPRINTF("no receive time stamp\n");
+		return 0;
+	}
+	return ret;
+}
 
 /* Receive and send is *not* so trivial */
 int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
@@ -44,17 +124,17 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	POSIX_ARCH(ppi)->rcv_switch = !POSIX_ARCH(ppi)->rcv_switch;
 
 	if (ch1->pkt_present)
-		return recv(ch1->fd, pkt, len, 0);
+		return posix_recv_msg(ch1->fd, pkt, len, t);
 
 	if (ch2->pkt_present)
-		return recv(ch2->fd, pkt, len, 0);
+		return posix_recv_msg(ch2->fd, pkt, len, t);
 
 	return -1;
 #endif /* PP_NET_UDP */
 
 #ifdef PP_NET_IEEE_802_3
 	/* raw sockets implementation always use gen socket */
-	return recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
+	return posix_recv_msg(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, t);
 #endif /* PP_NET_IEEE_802_3 */
 
 	return -1;
