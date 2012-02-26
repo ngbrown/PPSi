@@ -209,12 +209,12 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 		return -1;
 	}
 
+	memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
+
 	if (ioctl(sock, SIOCGIFADDR, &ifr) < 0) {
 		pp_diag_error_str2(ppi, "SIOCGIFADDR", strerror(errno));
 		return -1;
 	}
-
-	memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
 
 	iface_addr.s_addr =
 		((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;

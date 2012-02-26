@@ -12,6 +12,8 @@
 
 int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
+	unsigned char *id, *mac;
+
 	pp_net_shutdown(ppi);
 
 	if (pp_net_init(ppi) < 0)
@@ -19,10 +21,18 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	/* Initialize default data set */
 	DSDEF(ppi)->twoStepFlag = PP_TWO_STEP_FLAG;
-	pp_memcpy(DSDEF(ppi)->clockIdentity, NP(ppi)->ch[PP_NP_GEN].addr,
-		PP_CLOCK_IDENTITY_LENGTH);
-	DSDEF(ppi)->clockIdentity[3] = 0xff;
-	DSDEF(ppi)->clockIdentity[4] = 0xfe;
+	/* Clock identity comes from mac address with 0xff:0xfe intermixed */
+	id = DSDEF(ppi)->clockIdentity;
+	mac = NP(ppi)->ch[PP_NP_GEN].addr;
+	id[0] = mac[0];
+	id[1] = mac[1];
+	id[2] = mac[2];
+	id[3] = 0xff;
+	id[4] = 0xfe;
+	id[5] = mac[3];
+	id[6] = mac[4];
+	id[7] = mac[5];
+
 	DSDEF(ppi)->numberPorts = 1;
 	pp_memcpy(&DSDEF(ppi)->clockQuality, &OPTS(ppi)->clock_quality,
 		sizeof(ClockQuality));
