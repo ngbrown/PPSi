@@ -12,6 +12,10 @@
 #include <pptp/ieee1588_types.h>
 #include <pptp/constants.h>
 
+#ifndef ETH_P_1588
+#define ETH_P_1588     0x88F7
+#endif
+
 /* Macros for diagnostic prints. Set pp_diag_verbosity as 0 or 1 (PP_V macros
  * disabled/enabled) */
 extern int pp_diag_verbosity;
