@@ -38,15 +38,14 @@ struct cmd_line_opt {
 
 static struct cmd_line_opt cmd_line_list[] = {
 	{"-?", "show this page"},
-	/* FIXME cmdline check if useful
-	{"-c", "run in command line (non-daemon) mode"},
-	{"-f FILE", "send output to FILE"},
-	{"-S", "send output to syslog"},
-	{"-T", "set multicast time to live"},
-	{"-d", "display stats"},
-	{"-D", "display stats in .csv format"},
-	{"-R", "record data about sync packets in a file"},
-	*/
+	/* FIXME cmdline check if useful */
+	//{"-c", "run in command line (non-daemon) mode"},
+	//{"-f FILE", "send output to FILE"},
+	//{"-S", "send output to syslog"},
+	//{"-T", "set multicast time to live"},
+	//{"-d", "display stats"},
+	//{"-D", "display stats in .csv format"},
+	//{"-R", "record data about sync packets in a file"},
 	{"-V", "run in verbose mode"},
 	CMD_LINE_SEPARATOR,
 	{"-x", "do not reset the clock if off by more than one second"},
@@ -57,12 +56,8 @@ static struct cmd_line_opt cmd_line_list[] = {
 	{"-w NUMBER", "specify one way delay filter stiffness"},
 	CMD_LINE_SEPARATOR,
 	{"-b NAME", "bind PTP to network interface NAME"},
-	/* FIXME cmdline check if useful
-	{"-u ADDRESS", "also send uni-cast to ADDRESS\n"},
-	*/
-	/* FIXME cmdline now choosen by #define
+	//{"-u ADDRESS", "also send uni-cast to ADDRESS\n"}, -- FIXME: useful?
 	{"-e", "run in ethernet mode (level2)"},
-	*/
 	{"-h", "run in End to End mode"},
 	{"-l NUMBER,NUMBER", "specify inbound, outbound latency in nsec"},
 	CMD_LINE_SEPARATOR,
@@ -115,17 +110,24 @@ static void cmd_line_parse_two(char *a, int *n1, int *n2)
 
 int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 {
-	int i;
+	int i, err = 0;
 	char *a; /* cmd line argument */
 	int n1, n2; /* used by cmd_line_parse_two */
 
-	for (i = 0; i < argc; i++) {
+	for (i = 1; i < argc; i++) {
 		a = argv[i];
-		if ((a[0] == '-') && (a[1] != '\0')) {
+		if (a[0] != '-')
+			err = 1;
+		else if (a[1] == '?')
+			err = 1;
+		else if (a[1] && a[2])
+			err = 1;
+		if (err) {
+			cmd_line_print_help();
+			return -1;
+		}
+		if (1) { /* ARub: I don't want to reintent it all now */
 			switch (a[1]) {
-			case '?':
-				cmd_line_print_help();
-				return 1;
 			case 'V':
 				pp_diag_verbosity = 1;
 				break;
@@ -225,6 +227,9 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 			case 'h':
 				a = argv[++i];
 				OPTS(ppi)->e2e_mode = 1;
+				break;
+			case 'e':
+				OPTS(ppi)->ethernet_mode = 1;
 				break;
 			default:
 				cmd_line_print_help();
