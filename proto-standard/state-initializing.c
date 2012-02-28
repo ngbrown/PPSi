@@ -9,15 +9,19 @@
 /*
  * Initializes network and other stuff
  */
+static int pp_did_init;
+
 
 int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	unsigned char *id, *mac;
 
-	pp_net_shutdown(ppi);
+	if (pp_did_init)
+		pp_net_shutdown(ppi);
 
 	if (pp_net_init(ppi) < 0)
 		goto failure;
+	pp_did_init = 1;
 
 	/* Initialize default data set */
 	DSDEF(ppi)->twoStepFlag = PP_TWO_STEP_FLAG;
