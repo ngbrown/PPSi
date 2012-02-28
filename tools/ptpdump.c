@@ -25,16 +25,15 @@
 #define ETH_P_1588     0x88F7
 #endif
 
-int dumpstruct(FILE *dest, char *name, void *ptr, int size)
+int dumpstruct(FILE *dest, char *prefix, char *name, void *ptr, int size)
 {
 	int ret, i;
 	unsigned char *p = ptr;
 
-	ret = fprintf(dest, "DUMP: %s at %p (size %i)\n",
-		      name, ptr, size);
+	ret = fprintf(dest, "%s%s (size %i)\n", prefix, name, size);
 	for (i = 0; i < size; ) {
 		if ((i & 0xf) == 0)
-			ret += fprintf(dest, "DUMP: ");
+			ret += fprintf(dest, "%s", prefix);
 		ret += fprintf(dest, "%02x", p[i]);
 		i++;
 		ret += fprintf(dest, i & 3 ? " " : i & 0xf ? "  " : "\n");
@@ -107,8 +106,8 @@ static void dump_1port(char *s, unsigned char *p)
 	       p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]);
 }
 
-/* Helpers for each message types */
 
+/* Helpers for each message types */
 static void dump_msg_announce(struct ptp_announce *p)
 {
 	dump_1stamp("MSG-ANNOUNCE: stamp ", &p->originTimestamp);
@@ -131,11 +130,35 @@ static void dump_msg_resp_etc(char *s, struct ptp_sync_etc *p)
 	dump_1port(s, p->port);
 }
 
+/* TLV dumper, not yet white-rabbit aware */
+int dump_tlv(struct ptp_tlv *tlv, int totallen)
+{
+	/* the field includes 6 bytes of the header, ecludes 4 of them. Bah! */
+	int explen = ntohs(tlv->len) + 4;
+
+	printf("TLV: type %04x len %i oui %02x:%02x:%02x sub %02x:%02x:%02x\n",
+	       ntohs(tlv->type), explen, tlv->oui[0], tlv->oui[1], tlv->oui[2],
+	       tlv->subtype[0], tlv->subtype[1], tlv->subtype[2]);
+	if (explen > totallen) {
+		printf("TLV: too short (expected %i, total %i)\n",
+		       explen, totallen);
+		return totallen;
+	}
+
+	/* later:  if (memcmp(tlv->oui, "\x08\x00\x30", 3)) ... */
+
+	/* Now dump non-wr tlv in binary, count only payload */
+	dumpstruct(stdout, "TLV: ", "tlv-content", tlv->data,
+		   explen - sizeof(*tlv));
+	return explen;
+}
+
 /* A big function to dump the ptp information */
 static void dump_payload(void *pl, int len)
 {
 	struct ptp_header *h = pl;
 	void *msg_specific = (void *)(h + 1);
+	int donelen = 34; /* packet length before tlv */
 
 	if (h->versionPTP != 2) {
 		printf("VERSION: unsupported (%i)\n", h->versionPTP);
@@ -153,38 +176,47 @@ static void dump_payload(void *pl, int len)
 	switch(h->messageType) {
 		CASE(E, SYNC);
 		dump_msg_sync_etc("MSG-SYNC: ", msg_specific);
+		donelen = 44;
 		break;
 
 		CASE(E, DELAY_REQ);
 		dump_msg_sync_etc("MSG-DELAY_REQ: ", msg_specific);
+		donelen = 44;
 		break;
 
 		CASE(E, PDELAY_REQ);
 		dump_msg_sync_etc("MSG-PDELAY_REQ: ", msg_specific);
+		donelen = 54;
 		break;
 
 		CASE(E, PDELAY_RESP);
 		dump_msg_resp_etc("MSG-PDELAY_RESP: ", msg_specific);
+		donelen = 54;
 		break;
 
 		CASE(G, FOLLOW_UP);
 		dump_msg_sync_etc("MSG-FOLLOW_UP: ", msg_specific);
+		donelen = 44;
 		break;
 
 		CASE(G, DELAY_RESP);
 		dump_msg_resp_etc("MSG-DELAY_RESP: ", msg_specific);
+		donelen = 54;
 		break;
 
 		CASE(G, PDELAY_RESP_FOLLOW_UP);
 		dump_msg_resp_etc("MSG-PDELAY_RESP_FOLLOWUP: ", msg_specific);
+		donelen = 54;
 		break;
 
 		CASE(G, ANNOUNCE);
 		dump_msg_announce(msg_specific);
+		donelen = 64;
 		break;
 
 		CASE(G, SIGNALING);
-		/* FIXME */
+		dump_1port("MSG-SIGNALING: target-port ", msg_specific);
+		donelen = 44;
 		break;
 
 		CASE(G, MANAGEMENT);
@@ -192,8 +224,19 @@ static void dump_payload(void *pl, int len)
 		break;
 	}
 
+	/* Dump any trailing TLV */
+	while (donelen < len) {
+		int n = len - donelen;
+		if (n < sizeof(struct ptp_tlv)) {
+			printf("TLV: too short (%i - %i = %i)\n", len,
+			       donelen, n);
+			break;
+		}
+		donelen += dump_tlv(pl + donelen, n);
+	}
+
 	/* Finally, binary dump of it all */
-	dumpstruct(stdout, "payload", pl, len);
+	dumpstruct(stdout, "DUMP: ", "payload", pl, len);
 }
 
 static int dump_udppkt(void *buf, int len)

@@ -66,3 +66,11 @@ struct ptp_sync_etc { /* page 130 (150 of pdf) */
 	struct stamp	stamp;		/* 34 */
 	uint8_t		port[10];	/* 44: only for delay_resp etc */
 };
+
+struct ptp_tlv { /* page 135 (155) */
+	uint16_t	type;
+	uint16_t	len;
+	uint8_t		oui[3];
+	uint8_t		subtype[3];
+	uint8_t		data[0];
+} __attribute__((packed));
