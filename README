@@ -1,0 +1,214 @@
+
+	About This Project
+	==================
+
+pptp (Portable Precision Time Protocol) is an application which, in
+its basic operation, implements IEEE 1588 specification in a way
+that is portable to several architectures, including OS-less ones.
+Configuration is performed using environment variables, as explained later.
+
+The algorithm and computation routines regarding the basic IEEE 1588
+are derived from the PTPd project, v.2.1.0 (see AUTHORS for details
+about copyright). In addition to what available in that package,
+we support raw Ethernet frames (ETH_P_1588), according to Annex F of the
+specification. (FIXME: this is set up but not working, yet)
+
+The project, when released, includes the extension for the White
+Rabbit protocol, which aims to achieve a sub-ns accuracy over networks
+up to 10km wide, by using proper hardware and ptp extensions.  White
+Rabbit is developed at ohwr.org:
+http://www.ohwr.org/projects/white-rabbit
+
+
+	Current Status (February 2012)
+	==============================
+
+We currently have only standard PTP (IEEE 1588) with no extensions.
+Code for the White Rabbit extension is being worked on (currently WR
+devices use a different code base, which should be replaced by this one).
+
+The only working architecture is called "gnu-linux" at this point.
+
+
+	Compile-time Configuration
+	==========================
+
+The code is organized in directories and compiled as libraries.
+Each sub-directory has a name that reflects either the arch or
+the extension:
+
+    arch-gnu-linux/             The default for hosted compile
+    arch-bare-linux/            A freestanding implementation (i386 syscalls)
+    arch-spec/                  For the SPEC card, lm32 processor
+
+    proto-standard/             Standard PTP implementation
+    proto-ext-whiterabbit/      Additional code for White Rabbit
+
+    diag/                       Diagnostic code (none, partial, full)
+
+Configuration is set by make variable, that you can pre-set in the
+environment:
+
+    CROSS_COMPILE               prefix, like "arm-linux-", or empty
+    PROTO_EXT                   "whiterabbit" or empty
+    ARCH                        name of you arch (default: gnu-linux)
+    HAS_DIAG                    set to "y" or leave unset
+    HAS_FULL_DIAG               set to "y" or leave unset
+
+NOTE: The default has no diagnostics, so you most likely will want to run
+
+    make HAS_FULL_DIAG=y
+
+or just "make" after running
+
+    export HAS_FULL_DIAG=y
+
+If none of the variables are specified, the default Makefile compiles
+with standard gcc, over gnu-linux architecture, with no protocol
+extension and no diagnostic.
+
+
+	Implementation Details
+	======================
+
+The main Makefile builds directory names from $ARCH and $PROTO_EXT,
+each sub-Makefile then can augment CFLAGS with "-ffreestanding" or
+whatever is needed. Similarly, CROSS_COMPILE may be set by sub-Makefiles
+but please let the environment override it (as no custom pathnames
+should be edited before building and the pristine package can be used).
+
+The basic state machine is in ./fsm.c . It's a simple file released in
+the public domain as we'd like the idea to be reused and the code
+itself is not worth copylefting.  Please note that the pptp as a whole
+is LGPL-2.1 or later.
+
+All the rest of the package is built as libraries. The link order
+of libraries selects which object files are picked up and which are not.
+Additionally, "HAS_DIAG" and "HAS_FULL_DIAG" select by Makefile rules
+which diagnostic implementation (if any) is part of the diag library.
+
+This state-machine source has three undefined symbols: two for
+diagnostics and the "pp_state_table".  The table is picked by a
+library: either the extension being selected or the proto-standard one.
+The table includes pointers to functions, so those undefined symbols
+will select which other object files are picked up.
+
+Individual architectures can add files to the "OBJ-y" make variable,
+in order to add their own stuff (like the main() functions or crt0.S
+for freestanding stuff).  Similarly, architectures can add targets
+to the "all" target (the main Makefile only builds "pproto.o",
+leaving the final link to the chosen architecture).
+
+Since code and data space is a problem in the freestanding world (for
+example, the whole ptp may need to fit in 64kB RAM including data and
+stack), each state in the state machine of the standard protocol must
+be implemented as a separate file. This allows an extension not using
+that particular function to save the overhead of binary size -- this
+happens because the linker pulls whole object files from libraries.
+Clearly an extension may implement several functions in the same file,
+as they are known to be all used in the final binary.
+
+
+	Licensing
+	=========
+
+The code is licensed according to the GNU LGPL, version 2.1 or later.
+Some files are individually released to the public domain, when we
+think they are especially simple or generic.
+
+Both the full and the partial printf code is distributed according to
+the GPL-2, as it comes from the Linux kernel.  This means that any
+code using our diagnostics fall under the GPL requirements; you may
+compile and use the diagnostic code internally with your own
+proprietary code but you can't distribute binaries with diagnostics
+without the complete source code and associated rights. You may avoid
+the GPL requirements by using different printf implementations; if so
+we'd love to have them contributed back in the package.
+
+For binaries without diagnostic code, the LGPL applies, as detailed
+below.
+
+For licensing purposes, any `arch-name' or `timer-name' subdirectory
+"can be reasonably considered independent and separate works in
+themselves". While code in the directories provided here is all LGPL,
+you may add your own drop-in subdirectories. The LGPL requirements for
+source distribution and associated permissions won't apply to any such
+subdirectory that you may add, even if technically such code si not
+linked as a library.
+
+Currently, there is no `timer-' support, it will be added in a way
+similar to what you already see for `arch-'.
+
+	Diagnostics
+	===========
+
+Diagnostic functions may call printf().  If you select HAS_DIAG, the
+daemon is built with a minimal printf implementation.
+
+    HAS_FULL_DIAG	Selects a complete printf implementation
+    HAS_DIAG		Selects a smaller printf
+    --			By default a no-op printf is selected
+
+The complete implementation comes from an older Linux implementation
+(we pulled it from U-boot) as the kernel has currently extra stuff like
+%-rules for printing IPV4/IPV6 addresses, symbol tables and so on.
+
+The small implementation receives and parses the complete % formats
+but only obeys %c and %s; everything else is printed as 32-bit hex
+numbers. So you can use "%-10s %3i" and the output will still make some
+sense, saving some kilobytes in code. The code is derived from the full
+printf by stripping out code, so the same parsing applies for sure.
+
+With no diagnostics, the printf does nothing and only puts() is available.
+
+	Command Line
+	============
+
+The hosted architecture includes command line support:
+
+     ./pptp --help
+
+will print help about command line options (we also support the
+question-mark like the original ptp, but it's a bad choice because
+it's a shell wildcard). Actually, all multi-char options will
+print the help at this point in time, but this will be fixed.
+
+For standard operation, simply run ./pptp with no options. It will
+work like the ptpd executable, with the automatic choice of
+master/slave defined in IEEE spec (announce/timeout mechanism).
+
+NOTE: you'll need super user privileges to run the program.
+
+
+	Coding Style and Conventions
+	============================
+
+The coding style is the one inherited from Linux kernel project (see
+Documentation/CodingStyle in the kernel sources).  However,
+structures, constants and field names defined by IEEE 1588 are kept in
+the suggested "CamelCase" form. Similarly, the typedefs are left, even
+if they are really a pain to deal with.  Most of this stuff is in
+include/pptp/ieee1588_types.h file.
+
+The mostly used prefix is (pp_), the short prefix for 'Portable PTP',
+which is used for every function related to the algorithm itself (but
+not in the architecture-specific code).
+
+Some prefixes to the IEEE naming are added, in order to improve
+readability:
+
+EN means "enumeration type". For instance, Enumeration Time Source
+(defined in the spec at table 7, page 57) becomes ENTimeSource
+
+PPM_ means "portable ptp message", and is used for message types
+
+Msg means "message" and is used for message structures
+
+PPS_ means "portable ptp state" and is used for state machine's states
+definition
+
+DS means "data set", and is used for the standard Data Sets (e.g. DS
+Current is the "Current Data Set"). The concept of data sets is
+defined in the spec at chapter 8, page 63.
+
+/alessandro and aurelio
