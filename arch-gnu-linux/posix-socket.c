@@ -135,10 +135,14 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 	int use_pdelay_addr)
 {
 	struct sockaddr_in addr;
+	void *hdr;
 
 	if (OPTS(ppi)->ethernet_mode) {
+		hdr = PROTO_HDR(pkt);
+		/* TODO: fill header */
 		/* raw sockets implementation always use gen socket */
-		return send(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
+		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
+					len + NP(ppi)->proto_ofst, 0);
 	}
 
 	/* else: UDP */
@@ -358,6 +362,9 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 int posix_net_init(struct pp_instance *ppi)
 {
 	int i;
+
+	ppi->buf_out = calloc(1, PP_PACKET_SIZE + NP(ppi)->proto_ofst);
+	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
 
 	if (OPTS(ppi)->ethernet_mode) {
 		PP_PRINTF("posix_net_init IEEE 802.3\n");

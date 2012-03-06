@@ -154,7 +154,10 @@ struct pp_net_path {
 	/* FIXME check if useful Integer32 ucast_addr;*/
 	Integer32 mcast_addr;
 	Integer32 peer_mcast_addr;
+	int proto_ofst;
 };
+#define PROTO_HDR(x) ( (x) - NP(ppi)->proto_ofst);
+#define PROTO_PAYLOAD(x) ( (x) + NP(ppi)->proto_ofst);
 
 /*
  * Structure for the standard protocol

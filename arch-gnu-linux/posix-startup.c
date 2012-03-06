@@ -42,7 +42,6 @@ int main(int argc, char **argv)
 	ppi->timePropertiesDS = calloc(1, sizeof(*ppi->timePropertiesDS));
 	ppi->net_path = calloc(1, sizeof(*ppi->net_path));
 	ppi->servo = calloc(1, sizeof(*ppi->servo));
-	ppi->buf_out = calloc(1, PP_PACKET_SIZE);
 	ppi->frgn_master = calloc(1, sizeof(*ppi->frgn_master));
 	ppi->arch_data = calloc(1, sizeof(struct posix_arch_data));
 
