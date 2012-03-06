@@ -364,6 +364,9 @@ int posix_net_init(struct pp_instance *ppi)
 	int i;
 
 	ppi->buf_out = calloc(1, PP_PACKET_SIZE + NP(ppi)->proto_ofst);
+	if (!ppi->buf_out)
+		return -1;
+
 	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
 
 	if (OPTS(ppi)->ethernet_mode) {

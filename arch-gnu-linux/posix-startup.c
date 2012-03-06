@@ -47,8 +47,7 @@ int main(int argc, char **argv)
 
 	if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
 	    || (!ppi->portDS) || (!ppi->timePropertiesDS) || (!ppi->sent_seq_id)
-	    || (!ppi->net_path) || (!ppi->buf_out)
-	    || (!ppi->frgn_master) || (!ppi->arch_data)
+	    || (!ppi->net_path) || (!ppi->frgn_master) || (!ppi->arch_data)
 	   )
 		exit(__LINE__);
 
