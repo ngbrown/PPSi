@@ -3,7 +3,7 @@
  * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
 
-/* Socket interface for GNU/Linux (and most likely other posix systems */
+/* Socket interface for GNU/Linux (and most likely other posix systems) */
 
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +15,6 @@
 #include <net/if.h>
 #include <net/ethernet.h>
 #include <arpa/inet.h>
-
 
 #include <pptp/pptp.h>
 #include <pptp/diag.h>
@@ -110,7 +109,6 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	void *hdr;
 	int ret;
 
-	if (OPTS(ppi)->ethernet_mode)
 	if (OPTS(ppi)->ethernet_mode) {
 		hdr = PROTO_HDR(pkt);
 		ret = posix_recv_msg(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
@@ -151,7 +149,7 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 
 		hdr->h_proto = htons(ETH_P_1588);
 		memcpy(hdr->h_dest, "\x01\x1B\x19\x00\x00\x00", 6);
-		/* raw sockets implementation always use gen socket */
+		/* raw socket implementation always uses gen socket */
 		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, 6);
 		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
 					len + NP(ppi)->proto_ofst, 0);
@@ -219,7 +217,7 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 
 		memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
 
-		/* bind and setsockopt */
+		/* bind */
 		memset(&addr_ll, 0, sizeof(addr));
 		addr_ll.sll_family = AF_PACKET;
 		addr_ll.sll_protocol = htons(ETH_P_1588);
@@ -300,7 +298,7 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	}
 	NP(ppi)->mcast_addr = net_addr.s_addr;
 
-	/* multicast send only on specified interface */
+	/* multicast sends only on specified interface */
 	imr.imr_multiaddr.s_addr = net_addr.s_addr;
 	imr.imr_interface.s_addr = iface_addr.s_addr;
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF,
@@ -326,7 +324,7 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	}
 	NP(ppi)->peer_mcast_addr = net_addr.s_addr;
 
-	/* multicast send only on specified interface */
+	/* multicast sends only on specified interface */
 	imr.imr_multiaddr.s_addr = net_addr.s_addr;
 	imr.imr_interface.s_addr = iface_addr.s_addr;
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF,
