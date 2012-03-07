@@ -16,6 +16,8 @@
 #define ETH_P_1588     0x88F7
 #endif
 
+#define __weak __attribute__((weak))
+
 /* Macros for diagnostic prints. Set pp_diag_verbosity as 0 or 1 (PP_V macros
  * disabled/enabled) */
 extern int pp_diag_verbosity;
@@ -352,6 +354,7 @@ extern const Integer32 PP_ADJ_FREQ_MAX;
 
 struct pp_state_table_item {
 	int state;
+	char *name;
 	int (*f1)(struct pp_instance *ppi, uint8_t *packet, int plen);
 	int (*f2)(struct pp_instance *ppi, uint8_t *packet, int plen);
 };
