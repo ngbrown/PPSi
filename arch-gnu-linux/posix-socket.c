@@ -13,6 +13,7 @@
 #include <sys/ioctl.h>
 #include <netpacket/packet.h>
 #include <net/if.h>
+#include <net/ethernet.h>
 #include <arpa/inet.h>
 
 
@@ -106,9 +107,17 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	TimeInternal *t)
 {
 	struct pp_channel *ch1 = NULL, *ch2 = NULL;
+	void *hdr;
+	int ret;
 
 	if (OPTS(ppi)->ethernet_mode)
-		return posix_recv_msg(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, t);
+	if (OPTS(ppi)->ethernet_mode) {
+		hdr = PROTO_HDR(pkt);
+		ret = posix_recv_msg(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
+				      len + NP(ppi)->proto_ofst, t);
+		return ret <= 0 ? ret : ret - NP(ppi)->proto_ofst;
+		/* FIXME: check header */
+	}
 
 	/* else: UDP */
 	if (POSIX_ARCH(ppi)->rcv_switch) {
@@ -135,12 +144,15 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 	int use_pdelay_addr)
 {
 	struct sockaddr_in addr;
-	void *hdr;
+	struct ethhdr *hdr;
 
 	if (OPTS(ppi)->ethernet_mode) {
 		hdr = PROTO_HDR(pkt);
-		/* TODO: fill header */
+
+		hdr->h_proto = htons(ETH_P_1588);
+		memcpy(hdr->h_dest, "\x01\x1B\x19\x00\x00\x00", 6);
 		/* raw sockets implementation always use gen socket */
+		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, 6);
 		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
 					len + NP(ppi)->proto_ofst, 0);
 	}

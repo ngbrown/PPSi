@@ -35,6 +35,7 @@ void posix_main_loop(struct pp_instance *ppi)
 	while (1) {
 		int i;
 		unsigned char packet[1500];
+		void *payload = packet + 16; /* aligned */
 
 	again:
 
@@ -52,7 +53,7 @@ void posix_main_loop(struct pp_instance *ppi)
 		 * We got a packet. If it's not ours, continue consuming
 		 * the pending timeout
 		 */
-		i = posix_recv_packet(ppi, packet, sizeof(packet),
+		i = posix_recv_packet(ppi, payload, sizeof(packet) - 16,
 				      &ppi->last_rcv_time);
 
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
