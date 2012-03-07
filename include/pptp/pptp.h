@@ -16,6 +16,8 @@
 #define ETH_P_1588     0x88F7
 #endif
 
+#define PP_MCAST_MACADDRESS "\x01\x1B\x19\x00\x00\x00" /* we don't peer-req */
+
 #define __weak __attribute__((weak))
 
 /* Macros for diagnostic prints. Set pp_diag_verbosity as 0 or 1 (PP_V macros
