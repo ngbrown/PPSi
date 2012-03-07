@@ -148,9 +148,9 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 		hdr = PROTO_HDR(pkt);
 
 		hdr->h_proto = htons(ETH_P_1588);
-		memcpy(hdr->h_dest, "\x01\x1B\x19\x00\x00\x00", 6);
+		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
 		/* raw socket implementation always uses gen socket */
-		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, 6);
+		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
 		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
 					len + NP(ppi)->proto_ofst, 0);
 	}
@@ -187,6 +187,7 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	struct sockaddr_in addr;
 	struct sockaddr_ll addr_ll;
 	struct ip_mreq imr;
+	struct packet_mreq pmr;
 	char addr_str[INET_ADDRSTRLEN];
 
 	if (OPTS(ppi)->ethernet_mode) {
@@ -228,6 +229,15 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 			close(sock);
 			return -1;
 		}
+
+		/* accept the multicast address for raw-ethernet ptp */
+		memset(&pmr, 0, sizeof(pmr));
+		pmr.mr_ifindex = iindex;
+		pmr.mr_type = PACKET_MR_MULTICAST;
+		pmr.mr_alen = ETH_ALEN;
+		memcpy(pmr.mr_address, PP_MCAST_MACADDRESS, ETH_ALEN);
+		setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
+			   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
 		NP(ppi)->ch[chtype].fd = sock;
 		return 0;
