@@ -26,11 +26,10 @@ int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 	ssize_t ret;
 	struct msghdr msg;
 	struct iovec vec[1];
-	struct sockaddr_in from_addr;
 
 	union {
 		struct cmsghdr cm;
-		char control[CMSG_SPACE(sizeof(struct timeval))];
+		char control[512];
 	} cmsg_un;
 
 	struct cmsghdr *cmsg;
@@ -40,17 +39,13 @@ int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 	vec[0].iov_len = PP_PACKET_SIZE;
 
 	memset(&msg, 0, sizeof(msg));
-	memset(&from_addr, 0, sizeof(from_addr));
-	memset(pkt, 0, PP_PACKET_SIZE);
 	memset(&cmsg_un, 0, sizeof(cmsg_un));
 
-	msg.msg_name = (caddr_t)&from_addr;
-	msg.msg_namelen = sizeof(from_addr);
+	/* msg_name, msg_namelen == 0: not used */
 	msg.msg_iov = vec;
 	msg.msg_iovlen = 1;
 	msg.msg_control = cmsg_un.control;
 	msg.msg_controllen = sizeof(cmsg_un.control);
-	msg.msg_flags = 0;
 
 	ret = recvmsg(fd, &msg, MSG_DONTWAIT);
 	if (ret <= 0) {
@@ -68,14 +63,8 @@ int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 		PP_PRINTF("Error: received truncated ancillary data\n");
 		return 0;
 	}
-	if (msg.msg_controllen < sizeof(cmsg_un.control)) {
-		PP_PRINTF("Error: received short ancillary data (%ld/%ld)\n",
-		    (long)msg.msg_controllen, (long)sizeof(cmsg_un.control));
 
-		return 0;
-	}
-
-	tv = 0;
+	tv = NULL;
 	for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL;
 	     cmsg = CMSG_NXTHDR(&msg, cmsg)) {
 		if (cmsg->cmsg_level == SOL_SOCKET &&
