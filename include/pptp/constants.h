@@ -3,8 +3,8 @@
  * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
 
-#ifndef __PTP_CONSTANTS_H__
-#define __PTP_CONSTANTS_H__
+#ifndef __PPTP_CONSTANTS_H__
+#define __PPTP_CONSTANTS_H__
 
 /* general purpose constants */
 #define PP_NSEC_PER_SEC (1000*1000*1000)
@@ -87,4 +87,4 @@
 #define PP_PEER_MACADDRESS		"\x01\x80\xC2\x00\x00\x0E"
 
 
-#endif /* __PTP_CONSTANTS_H__ */
+#endif /* __PPTP_CONSTANTS_H__ */

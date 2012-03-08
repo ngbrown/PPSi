@@ -2,8 +2,8 @@
  * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 
-#ifndef __PTP_PROTO_H__
-#define __PTP_PROTO_H__
+#ifndef __PPTP_PPTP_H__
+#define __PPTP_PPTP_H__
 
 #include <stdint.h>
 #include <stdarg.h>
@@ -370,4 +370,4 @@ extern pp_action pp_initializing, pp_faulty, pp_disabled, pp_listening,
 /* The engine */
 extern int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen);
 
-#endif /* __PTP_PROTO_H__ */
+#endif /* __PPTP_PPTP_H__ */
