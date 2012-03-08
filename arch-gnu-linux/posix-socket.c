@@ -229,6 +229,11 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 			   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
 		NP(ppi)->ch[chtype].fd = sock;
+
+		/* make timestamps available through recvmsg() -- FIXME: hw? */
+		setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
+			   &temp, sizeof(int));
+
 		return 0;
 	}
 
