@@ -47,11 +47,24 @@ int dumpstruct(FILE *dest, char *prefix, char *name, void *ptr, int size)
 static void dump_eth(struct ethhdr *eth)
 {
 	struct timeval tv;
+	static struct timeval prev;
 	struct tm tm;
 	unsigned char *d = eth->h_dest;
 	unsigned char *s = eth->h_source;
 
 	gettimeofday(&tv, NULL);
+	if (prev.tv_sec) {
+		int i;
+		int diffms;
+
+		diffms = (tv.tv_sec - prev.tv_sec) * 1000
+			+ (signed)(tv.tv_usec + 500 - prev.tv_usec) / 1000;
+		/* empty lines, one every .25 seconds, at most 10 of them */
+		for (i = 250; i < 2500 && i < diffms; i += 250)
+			printf("\n");
+		printf("TIMEDELTA: %i ms\n", diffms);
+	}
+	prev = tv;
 	localtime_r(&tv.tv_sec, &tm);
 	printf("TIME: (%li - 0x%lx) %02i:%02i:%02i.%06li\n",
 	       tv.tv_sec, tv.tv_sec,
