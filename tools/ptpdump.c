@@ -246,8 +246,6 @@ static int dump_udppkt(void *buf, int len)
 	struct udphdr *udp = (void *)(ip + 1);
 	void *payload = (void *)(udp + 1);
 	int udpdest = ntohs(udp->dest);
-	static unsigned char prev[256];
-	static int prevlen;
 
 	if (len < ETH_HLEN + sizeof(*ip) + sizeof(*udp))
 		return -1;
@@ -256,11 +254,6 @@ static int dump_udppkt(void *buf, int len)
 
 	if (udpdest != 319 && udpdest != 320)
 		return -1;
-
-	/* for some reasons, we receive it three times, check dups */
-	if (len == prevlen && !memcmp(buf, prev, len))
-		return -1;
-	memcpy(prev, buf, len); prevlen = len;
 
 	dump_eth(eth);
 	dump_ip(ip);
@@ -320,15 +313,22 @@ int main(int argc, char **argv)
 	while(1) {
 		struct ethhdr *eth;
 		struct iphdr *ip;
-
-		unsigned char buf[10000];
+		static unsigned char prev[1500];
+		static int prevlen;
+		unsigned char buf[1500];
 
 		struct sockaddr_in from;
 		socklen_t fromlen = sizeof(from);
 		int len;
 
-		len = recvfrom(sock, buf, 10000, MSG_TRUNC,
+		len = recvfrom(sock, buf, sizeof(buf), MSG_TRUNC,
 			       (struct sockaddr *) &from, &fromlen);
+		if (len > sizeof(buf))
+			len = sizeof(buf);
+		/* for some reasons, we receive it three times, check dups */
+		if (len == prevlen && !memcmp(buf, prev, len))
+			continue;
+		memcpy(prev, buf, len); prevlen = len;
 
 		/* now only print ptp packets */
 		if (len < ETH_HLEN)
