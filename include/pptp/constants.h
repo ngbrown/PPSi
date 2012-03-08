@@ -13,6 +13,7 @@
 #define PP_DEFAULT_INBOUND_LATENCY		0	/* in nsec */
 #define PP_DEFAULT_OUTBOUND_LATENCY		0	/* in nsec */
 #define PP_DEFAULT_NO_RESET_CLOCK		0
+#define PP_DEFAULT_ETHERNET_MODE		0
 #define PP_DEFAULT_DOMAIN_NUMBER		0
 #define PP_DEFAULT_DELAY_MECHANISM		P2P
 #define PP_DEFAULT_AP				10
@@ -77,6 +78,13 @@
 #define PP_PEER_DOMAIN_ADDRESS		"224.0.0.107"
 #define PP_MM_STARTING_BOUNDARY_HOPS	0x7fff
 
+/* Raw ethernet dependent */
+#ifndef ETH_P_1588
+#define ETH_P_1588			0x88F7
+#endif
+
+#define PP_MCAST_MACADDRESS		"\x01\x1B\x19\x00\x00\x00"
+#define PP_PEER_MACADDRESS		"\x01\x80\xC2\x00\x00\x0E"
 
 
 #endif /* __PTP_CONSTANTS_H__ */
