@@ -86,5 +86,6 @@
 #define PP_MCAST_MACADDRESS		"\x01\x1B\x19\x00\x00\x00"
 #define PP_PEER_MACADDRESS		"\x01\x80\xC2\x00\x00\x0E"
 
+#include <arch/constants.h> /* architectures may override the defaults */
 
 #endif /* __PPTP_CONSTANTS_H__ */
