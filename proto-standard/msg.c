@@ -569,14 +569,28 @@ void msg_unpack_pdelay_resp_followup(void *buf,
 	PP_VPRINTF("\n");
 }
 
+static const char const * pp_msg_names[] = {
+	"sync",
+	"delay_req",
+	"pdelay_req",
+	"pdelay_resp",
+	"invalid", "invalid", "invalid", "invalid",
+	"follow_up",
+	"delay_resp",
+	"pdelay_resp_follow_up",
+	"announce",
+	"signaling",
+	"management"
+};
+
 #define MSG_SEND_AND_RET(x,y,z)\
 	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH, PP_NP_##y ,\
 		z) < PP_## x ##_LENGTH) {\
-		PP_PRINTF("%d Message can't be sent -> FAULTY state!\n",\
-			PPM_##x);\
+		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n",\
+			pp_msg_names[PPM_##x], PPM_##x);\
 		return -1;\
 	}\
-	PP_VPRINTF("%d Message sent\n", PPM_##x);\
+	PP_VPRINTF("%s(%d) Message sent\n", pp_msg_names[PPM_##x], PPM_##x);\
 	ppi->sent_seq_id[PPM_## x]++;\
 	return 0;
 
