@@ -7,7 +7,7 @@
 #include <pptp/diag.h>
 #include "common-fun.h"
 
-int st_com_execute_slave(struct pp_instance *ppi)
+int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 {
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_RECEIPT])) {
 		PP_VPRINTF("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
@@ -22,6 +22,9 @@ int st_com_execute_slave(struct pp_instance *ppi)
 			st_com_restart_annrec_timer(ppi);
 		}
 	}
+
+	if (!check_delayreq)
+		return 0;
 
 	if (OPTS(ppi)->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {

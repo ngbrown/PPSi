@@ -37,7 +37,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 no_incoming_msg:
 	if (e == 0)
-		e = st_com_execute_slave(ppi);
+		e = st_com_execute_slave(ppi, 0);
 
 	if (e != 0)
 		ppi->next_state = PPS_FAULTY;
