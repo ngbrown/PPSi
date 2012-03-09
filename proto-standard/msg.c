@@ -117,6 +117,9 @@ void msg_unpack_header(struct pp_instance *ppi, void *buf)
 void msg_pack_header(struct pp_instance *ppi, void *buf)
 {
 	Nibble transport = 0x80;
+	
+	if (OPTS(ppi)->gptp_mode)
+		transport = 0x10;
 
 	/* (spec annex D) */
 	*(UInteger8 *) (buf + 0) = transport;

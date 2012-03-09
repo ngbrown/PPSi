@@ -58,6 +58,9 @@ int main(int argc, char **argv)
 	if (pp_parse_cmdline(ppi, argc, argv) != 0)
 		return -1;
 
+	if (OPTS(ppi)->ethernet_mode)
+	    OPTS(ppi)->gptp_mode = 1;
+
 	posix_main_loop(ppi);
 	return 0; /* never reached */
 }

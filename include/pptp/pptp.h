@@ -42,6 +42,7 @@ struct pp_runtime_opts {
 			csv_stats:1,
 			ethernet_mode:1,
 			e2e_mode:1,
+			gptp_mode:1,
 			ofst_first_updated:1,
 			no_rst_clk:1,
 			use_syslog:1;

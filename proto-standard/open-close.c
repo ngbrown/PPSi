@@ -20,6 +20,7 @@ struct pp_runtime_opts default_rt_opts = {
 	.ai =			PP_DEFAULT_AI,
 	.s =			PP_DEFAULT_DELAY_S,
 	.ethernet_mode =	PP_DEFAULT_ETHERNET_MODE,
+	.gptp_mode = 		PP_DEFAULT_GPTP_MODE,
 	.max_foreign_records =	PP_DEFAULT_MAX_FOREIGN_RECORDS,
 	.cur_utc_ofst =		PP_DEFAULT_UTC_OFFSET,
 	.announce_intvl =	PP_DEFAULT_ANNOUNCE_INTERVAL,

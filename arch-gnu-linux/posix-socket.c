@@ -137,7 +137,11 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 		hdr = PROTO_HDR(pkt);
 
 		hdr->h_proto = htons(ETH_P_1588);
-		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
+		
+		if (OPTS(ppi)->gptp_mode)
+			memcpy(hdr->h_dest, PP_PEER_MACADDRESS, ETH_ALEN);
+		else
+			memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
 		/* raw socket implementation always uses gen socket */
 		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
 		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
@@ -225,6 +229,11 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 		pmr.mr_type = PACKET_MR_MULTICAST;
 		pmr.mr_alen = ETH_ALEN;
 		memcpy(pmr.mr_address, PP_MCAST_MACADDRESS, ETH_ALEN);
+		setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
+			   &pmr, sizeof(pmr)); /* lazily ignore errors */
+
+		/* also the PEER multicast address */
+		memcpy(pmr.mr_address, PP_PEER_MACADDRESS, ETH_ALEN);
 		setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
 			   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
