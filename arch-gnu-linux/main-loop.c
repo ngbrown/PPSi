@@ -56,13 +56,8 @@ void posix_main_loop(struct pp_instance *ppi)
 
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
-		if (i < PP_PACKET_SIZE) {
-			delay_ms = -1;
-			goto again;
-		}
-
-		/* Warning: PP_ETHERTYPE is endian-agnostic by design */
-		if (((struct ethhdr *)packet)->h_proto != htons(PP_ETHERTYPE)) {
+		if (i < 0) {
+			PP_PRINTF("Error: posix_recv_packet returns %d\n",i);
 			delay_ms = -1;
 			goto again;
 		}
