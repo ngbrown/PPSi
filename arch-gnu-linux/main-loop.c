@@ -56,12 +56,14 @@ void posix_main_loop(struct pp_instance *ppi)
 
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
-		if (i < 0) {
-			PP_PRINTF("Error: posix_recv_packet returns %d\n",i);
+		if (i < PP_MINIMUM_LENGTH) {
+			PP_PRINTF("Error or short packet: %d < %d\n", i,
+				PP_MINIMUM_LENGTH
+			);
 			delay_ms = -1;
 			goto again;
 		}
 
-		delay_ms = pp_state_machine(ppi, packet, i);
+		delay_ms = pp_state_machine(ppi, payload, i);
 	}
 }
