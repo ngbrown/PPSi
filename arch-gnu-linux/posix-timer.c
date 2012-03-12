@@ -71,7 +71,7 @@ int posix_timer_expired(struct pp_timer *tm)
 	now = time(NULL);
 
 	if (tm->start + tm->interval < (uint32_t)now) {
-		tm->start = 0;
+		tm->start = now;
 		return 1;
 	}
 
