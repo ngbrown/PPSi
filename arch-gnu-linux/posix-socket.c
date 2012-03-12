@@ -137,7 +137,7 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 		hdr = PROTO_HDR(pkt);
 
 		hdr->h_proto = htons(ETH_P_1588);
-		
+
 		if (OPTS(ppi)->gptp_mode)
 			memcpy(hdr->h_dest, PP_PEER_MACADDRESS, ETH_ALEN);
 		else
