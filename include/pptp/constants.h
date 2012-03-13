@@ -41,6 +41,11 @@
 						       */
 #define PP_DEFAULT_MAX_FOREIGN_RECORDS		5
 #define PP_DEFAULT_PARENTS_STATS		0
+#define PP_DEFAULT_MAX_RESET			0
+#define PP_DEFAULT_MAX_DELAY			0
+#define PP_DEFAULT_NO_ADJUST			1
+#define PP_DEFAULT_E2E_MODE			0
+#define PP_DEFAULT_TTL				1
 
 /* We use an array of timers, with these indexes */
 #define PP_TIMER_PDELAYREQ	0
