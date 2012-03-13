@@ -36,7 +36,7 @@ static inline void msg_display_header(MsgHeader *header)
 	PP_VPRINTF("versionPTP: %d\n", header->versionPTP);
 	PP_VPRINTF("messageLength: %d\n", header->messageLength);
 	PP_VPRINTF("domainNumber: %d\n", header->domainNumber);
-	PP_VPRINTF("FlagField %02hhx:%02hhx\n", header->flagField[0],
+	PP_VPRINTF("FlagField %02x:%02x\n", header->flagField[0],
 		   header->flagField[1]);
 	Integer64_display("correctionfield",&header->correctionfield);
 	/* FIXME diag portIdentity_display(&header->sourcePortIdentity); */
