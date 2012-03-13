@@ -34,6 +34,7 @@ static struct cmd_line_opt cmd_line_list[] = {
 	//{"-u ADDRESS", "also send uni-cast to ADDRESS\n"}, -- FIXME: useful?
 	{"-e", "run in ethernet mode (level2)"},
 	{"-h", "run in End to End mode"},
+	{"-G", "run in gPTP mode (implies -e)"},
 	{"-l NUMBER,NUMBER", "specify inbound, outbound latency in nsec"},
 	CMD_LINE_SEPARATOR,
 	{"-o NUMBER", "specify current UTC offset"},
@@ -201,6 +202,11 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				break;
 			case 'h':
 				a = argv[++i];
+				OPTS(ppi)->e2e_mode = 1;
+				break;
+			case 'G':
+				a = argv[++i];
+				OPTS(ppi)->gptp_mode = 1;
 				OPTS(ppi)->e2e_mode = 1;
 				break;
 			case 'e':
