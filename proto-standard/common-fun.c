@@ -104,7 +104,7 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 
 	/* New foreign master */
 	if (ppi->number_foreign_records <
-	    ppi->max_foreign_records) {
+	    OPTS(ppi)->max_foreign_records) {
 		ppi->number_foreign_records++;
 	}
 
@@ -129,7 +129,7 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 	PP_VPRINTF("New foreign Master added \n");
 
 	ppi->foreign_record_i = (ppi->foreign_record_i+1) %
-		ppi->max_foreign_records;
+		OPTS(ppi)->max_foreign_records;
 }
 
 

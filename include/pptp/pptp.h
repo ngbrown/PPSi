@@ -179,7 +179,6 @@ struct pp_instance {
 	struct pp_timer *timers[PP_TIMER_ARRAY_SIZE];
 
 	UInteger16 number_foreign_records;
-	Integer16  max_foreign_records;
 	Integer16  foreign_record_i;
 	Integer16  foreign_record_best;
 	Boolean  record_update;
