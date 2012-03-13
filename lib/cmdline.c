@@ -174,7 +174,6 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 					OPTS(ppi)->max_foreign_records = 1;
 				break;
 			case 'g':
-				a = argv[++i];
 				OPTS(ppi)->slave_only = 1;
 				break;
 			case 'v':
@@ -201,11 +200,9 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				OPTS(ppi)->prio2 = atoi(a);
 				break;
 			case 'h':
-				a = argv[++i];
 				OPTS(ppi)->e2e_mode = 1;
 				break;
 			case 'G':
-				a = argv[++i];
 				OPTS(ppi)->gptp_mode = 1;
 				OPTS(ppi)->e2e_mode = 1;
 				break;
