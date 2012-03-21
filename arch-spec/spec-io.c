@@ -5,6 +5,8 @@
 #include <hw/wb_uart.h>
 #include "spec.h"
 
+const Integer32 PP_ADJ_FREQ_MAX = 512000; //GGDD value ?
+
 void pp_puts(const char *s)
 {
 	spec_puts(s);
@@ -29,9 +31,10 @@ void *pp_memcpy(void *dest, const void *src, int count)
 	return dest;
 }
 
-void pp_get_tstamp(uint32_t *sptr)
+void pp_get_tstamp(TimeInternal *t) //uint32_t *sptr)
 {
-	*sptr = htonl(spec_time());
+	//*sptr = htonl(spec_time());
+	t->seconds = htonl(spec_time());
 }
 
 /* What follows has no prefix because it's only used by arch code */
@@ -43,6 +46,11 @@ char *strcpy(char *dest, const char *src)
 	while ((*dest++ = *src++) != '\0')
 		/* nothing */;
 	return tmp;
+}
+
+void *pp_memset(void *s, int c, int count)
+{
+	return memset(s, c, count);
 }
 
 void *memset(void *s, int c, int count)
@@ -66,3 +74,36 @@ void *memcpy(void *dest, const void *src, int count)
 
 	return dest;
 }
+
+int pp_memcmp(const void *s1, const void *s2, int count)
+{
+	unsigned char *u1 = (unsigned char*) s1;
+	unsigned char *u2 = (unsigned char*) s2;
+	while (count-- != 0) 
+	{
+		if (*u1 != *u2)
+			return (*u1 < *u2) ? -1 : +1;
+		u1++;
+		u2++;
+	}
+	return 0;
+}
+
+int32_t spec_set_tstamp(TimeInternal *t)
+{
+	//GGDD
+	return 0;
+}
+
+int spec_adj_freq(Integer32 adj)
+{
+	//GGDD
+	return 0;
+}
+
+int pp_adj_freq(Integer32 adj)
+	__attribute__((alias("spec_adj_freq")));
+
+
+int32_t pp_set_tstamp(TimeInternal *t)
+	__attribute__((alias("spec_set_tstamp")));
