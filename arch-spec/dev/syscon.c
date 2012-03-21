@@ -1,21 +1,29 @@
+#include "syscon.h"
 
-/*
- * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
- * based on code by Tomasz Wlostowski
- */
+struct s_i2c_if i2c_if[2] = { {SYSC_GPSR_FMC_SCL, SYSC_GPSR_FMC_SDA},
+                              {SYSC_GPSR_SFP_SCL, SYSC_GPSR_SFP_SDA} };
 
-#include <pptp/pptp.h>
-#include "../spec.h"
-
-
-static uint32_t timer_get_tics(void)
+/****************************
+ *        TIMER
+ ***************************/
+void timer_init(uint32_t enable)
 {
-	return *(volatile uint32_t *)BASE_TIMER;
+	if(enable)
+		syscon->TCR |= SYSC_TCR_ENABLE;
+	else
+		syscon->TCR &= ~SYSC_TCR_ENABLE;
+}
+
+uint32_t timer_get_tics()
+{
+	return syscon->TVR;
 }
 
 void spec_udelay(int usecs)
 {
 	uint32_t start, end;
+
+	timer_init(1);
 
 	start = timer_get_tics();
 	/* It looks like the counter counts millisecs */
