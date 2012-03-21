@@ -15,10 +15,14 @@ OBJ-libarch := $A/spec-startup.o \
 	$A/main-loop.o \
 	$A/spec-socket.o \
 	$A/spec-io.o \
+	$A/spec-timer.o \
 	$A/dev/uart.o \
-	$A/dev/timer.o \
+	$A/dev/syscon.o \
+	$A/dev/ep_pfilter.o \
 	$A/dev/endpoint.o \
-	$A/dev/minic.o
+	$A/dev/pps_gen.o \
+	$A/dev/minic.o \
+	lib/div64.o
 
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^
