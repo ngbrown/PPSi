@@ -1,6 +1,9 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
+#ifndef __SPEC_H
+#define __SPEC_H
+
 #include <pptp/pptp.h>
 /*
  * These are the functions provided by the various bare files
@@ -10,7 +13,7 @@ extern int spec_open_ch(struct pp_instance *ppi);
 extern int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t);
 extern int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
-			int use_pdelay_addr);
+			int chtype, int use_pdelay_addr);
 
 extern void spec_main_loop(struct pp_instance *ppi);
 extern void _irq_entry(void); /* unused, to make crt0.S happy */
@@ -51,6 +54,11 @@ extern int ep_get_psval(int32_t *psval);
 extern int ep_cal_pattern_enable();
 extern int ep_cal_pattern_disable();
 
+static inline void delay(int x)
+{
+	while(x--) asm volatile("nop");
+}
+
 /* other network lstuff, bah.... */
 
 struct spec_ethhdr {
@@ -61,13 +69,14 @@ struct spec_ethhdr {
 
 /* Low-level details (from board.h in wr-core-tools) */
 
-#define BASE_UART	0x60800
-#define BASE_GPIO	0x60400
-#define BASE_TIMER	0x61000
-#define BASE_PPSGEN	0x50000
-#define BASE_EP		0x20000
-#define BASE_MINIC	0x10000
-#define BASE_SOFTPLL	0x40000
+#define BASE_MINIC	  0x20000
+#define BASE_EP		    0x20100
+#define BASE_SOFTPLL	0x20200
+#define BASE_PPSGEN	  0x20300
+#define BASE_SYSCON   0x20400
+#define BASE_UART	    0x20500
+#define BASE_ONEWIRE  0x20600
+//#define BASE_TIMER	  0x61000
 
 #define CPU_CLOCK	62500000ULL
 
@@ -96,3 +105,4 @@ struct hw_timestamp {
 
 #define NULL 0
 
+#endif
