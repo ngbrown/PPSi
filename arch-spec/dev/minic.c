@@ -1,12 +1,9 @@
-/*
- * Copyright 2011 Tomasz Wlostowski <tomasz.wlostowski@cern.ch> for CERN
- * Modified by Alessandro Rubini for ptp-proposal/proto
- *
- * GNU LGPL 2.1 or later versions
- */
-#include <pptp/pptp.h>
+//#include <stdio.h>
+
+//#include "types.h"
 #include "../spec.h"
-//#include "pps_gen.h" /* for pps_gen_get_time() */
+#include "pps_gen.h" /* for pps_gen_get_time() */
+//#include "minic.h"
 
 #include <hw/minic_regs.h>
 
@@ -21,7 +18,7 @@
 #define RX_DESC_VALID(d) ((d) & (1<<31) ? 1 : 0)
 #define RX_DESC_ERROR(d) ((d) & (1<<30) ? 1 : 0)
 #define RX_DESC_HAS_OOB(d)  ((d) & (1<<29) ? 1 : 0)
-#define RX_DESC_SIZE(d)  (((d) & (1<<0) ? -1 : 0) + (d & 0xfffe))
+#define RX_DESC_SIZE(d)  (((d) & (1<<0) ? -1 : 0) + (d & 0xffe))
 
 #define TX_DESC_VALID (1<<31)
 #define TX_DESC_WITH_OOB (1<<30)
@@ -33,7 +30,8 @@
 
 #define ETH_HEADER_SIZE 14
 
-/* extracts the values of TS rising and falling edge ctrs from desc. header */
+// extracts the values of TS rising and falling edge counters from the descriptor header
+
 #define EXPLODE_WR_TIMESTAMP(raw, rc, fc)	\
 	rc = (raw) & 0xfffffff;			\
 	fc = (raw >> 28) & 0xf;
@@ -76,12 +74,10 @@ static void minic_new_rx_buffer()
 	minic_writel(MINIC_REG_MCR, 0);
 	minic_writel(MINIC_REG_RX_ADDR, (uint32_t) minic.rx_base);
 	minic_writel(MINIC_REG_RX_AVAIL, (minic.rx_size - MINIC_MTU) >> 2);
-	if (0) {
-		TRACE_DEV("Size : %d Avail: %d\n",
-			  (int)minic.rx_size,
-			  (int)((minic.rx_size - MINIC_MTU) >> 2));
-	}
+	// TRACE_DEV("Sizeof: %d Size : %d Avail: %d\n", minic.rx_size, (minic.rx_size - MINIC_MTU) >> 2);
 	minic_writel(MINIC_REG_MCR, MINIC_MCR_RX_EN);
+
+	//mprintf("Base : %x Avail: %d\n", minic_readl(MINIC_REG_RX_ADDR), minic_readl(MINIC_REG_RX_AVAIL));
 
 }
 
@@ -96,19 +92,28 @@ static void minic_new_tx_buffer()
 
 
 void minic_init()
-
 {
+	uint32_t lo , hi;
+
 	minic_writel(MINIC_REG_EIC_IDR, MINIC_EIC_IDR_RX);
 	minic_writel(MINIC_REG_EIC_ISR, MINIC_EIC_ISR_RX);
 	minic.rx_base = dma_rx_buf;
 	minic.rx_size = sizeof(dma_rx_buf);
+
+/* FIXME: now we have a temporary HW protection against accidentally overwriting the memory - there's some
+   very well hidden bug in Minic's RX logic which sometimes causes an overwrite of the memory outside
+   the buffer. */
+
+	lo = (uint32_t)minic.rx_base >> 2;
+	hi = ((uint32_t)minic.rx_base >> 2) + (sizeof(dma_rx_buf)>>2) - 1;
+
+	minic_writel(MINIC_REG_MPROT, MINIC_MPROT_LO_W(lo) | MINIC_MPROT_HI_W(hi));
 
 	minic.tx_base = dma_tx_buf;
 	minic.tx_size = sizeof(dma_tx_buf);
 
 	minic.tx_count = 0;
 	minic.rx_count = 0;
-
 
 	minic_new_rx_buffer();
 	minic_writel(MINIC_REG_EIC_IER, MINIC_EIC_IER_RX);
@@ -128,39 +133,21 @@ int minic_poll_rx()
 	return (isr & MINIC_EIC_ISR_RX) ? 1 : 0;//>>1;
 }
 
-int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size,
-		   struct hw_timestamp *hwts)
+int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size, struct hw_timestamp *hwts)
 {
 	uint32_t payload_size, num_words;
 	uint32_t desc_hdr;
 	uint32_t raw_ts;
 	uint32_t rx_addr_cur;
-	int n_recvd = 0;
+	int n_recvd;
 
 	if(! (minic_readl(MINIC_REG_EIC_ISR) & MINIC_EIC_ISR_RX))
 		return 0;
 
 	desc_hdr = *minic.rx_head;
 
-	if (0) {
-		TRACE_DEV("RX_FRAME_ENTER\n\nRxHead %x buffer at %x\n",
-			  (int)minic.rx_head, (int)minic.rx_base);
-	}
-
-	/*
-	 * invalid descriptor? Weird, the RX_ADDR seems to be
-	 * saying something different. Ignore the packet and purge
-	 * the RX buffer.
-	 */
-	if(!RX_DESC_VALID(desc_hdr))
+	if(!RX_DESC_VALID(desc_hdr)) /* invalid descriptor? Weird, the RX_ADDR seems to be saying something different. Ignore the packet and purge the RX buffer. */
 	{
-		/*
-		 * invalid descriptor? Weird, the RX_ADDR seems to be
-		 * saying something different. Ignore the packet and purge
-		 * the RX buffer.
-		 */
-		TRACE_DEV("weird, invalid RX descriptor (%x, head %x)\n",
-			  (int)desc_hdr, (int)minic.rx_head);
 		minic_new_rx_buffer();
 		return 0;
 	}
@@ -168,9 +155,8 @@ int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size,
 	payload_size = RX_DESC_SIZE(desc_hdr);
 	num_words = ((payload_size + 3) >> 2) + 1;
 
+//	mprintf("Payload: %d\n", payload_size);
 
-	if (0)
-		TRACE_DEV("NWords %d\n", (int)num_words);
 	/* valid packet */
 	if(!RX_DESC_ERROR(desc_hdr))
 	{
@@ -182,18 +168,13 @@ int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size,
 
 			payload_size -= RX_OOB_SIZE;
 
-			/* fixme: ugly way of doing unaligned read */
-			memcpy(&raw_ts,
-			       (uint8_t *)minic.rx_head + payload_size + 6,
-				4);
+			memcpy(&raw_ts, (uint8_t *)minic.rx_head + payload_size + 6, 4); /* fixme: ugly way of doing unaligned read */
 
 			EXPLODE_WR_TIMESTAMP(raw_ts, counter_r, counter_f);
 
-			/* was pps_gen_get_time(&utc, &counter_ppsg); */
-			utc = counter_ppsg = 0;
+			pps_gen_get_time(&utc, &counter_ppsg);
 
-			if(counter_r > 3*125000000/4
-			   && counter_ppsg < 125000000/4)
+			if(counter_r > 3*125000000/4 && counter_ppsg < 125000000/4)
 				utc--;
 
 			hwts->utc = utc & 0x7fffffff ;
@@ -205,92 +186,59 @@ int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size,
 			else
 				hwts->ahead = 0;
 
-
-
 			hwts->nsec = counter_r * 8;
-
 		}
 
 		n_recvd = (buf_size < payload_size ? buf_size : payload_size);
-		TRACE_DEV("minic_rx_frame [%d bytes] TS: %d.%d\n",
-			  n_recvd, (int)hwts->utc, (int)hwts->nsec);
 		minic.rx_count++;
 
 		memcpy(hdr, (void*)minic.rx_head + 4, ETH_HEADER_SIZE);
-		memcpy(payload, (void*)minic.rx_head + 4 + ETH_HEADER_SIZE,
-		       n_recvd - ETH_HEADER_SIZE);
+		memcpy(payload, (void*)minic.rx_head + 4 + ETH_HEADER_SIZE, n_recvd - ETH_HEADER_SIZE);
 
 		minic.rx_head += num_words;
-	} else    { // RX_DESC_ERROR
-
-//	TRACE_DEV("nwords_avant_err: %d\n", num_words);
-
+	} else {
 		minic.rx_head += num_words;
+		n_recvd = -1;
 	}
 
 	rx_addr_cur = minic_readl(MINIC_REG_RX_ADDR) & 0xffff;
 
-	if(rx_addr_cur < (uint32_t)minic.rx_head)
+	if(rx_addr_cur < (uint32_t)minic.rx_head)  /* nothing new in the buffer? */
 	{
-		/* nothing new in the buffer? */
-		if (0) {
-			TRACE_DEV("MoreData? %x, head %x\n",
-				  (int)rx_addr_cur, (int)minic.rx_head);
-		}
-
 		if(minic_readl(MINIC_REG_MCR) & MINIC_MCR_RX_FULL)
 			minic_new_rx_buffer();
 
 		minic_writel(MINIC_REG_EIC_ISR, MINIC_EIC_ISR_RX);
 	}
 
+//	mprintf("minic: num_rx %d\n", n_recvd);
 	return n_recvd;
 }
 
 
 static uint16_t tx_oob_val = 0;
 
-int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size,
-		   struct hw_timestamp *hwts)
+int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size, struct hw_timestamp *hwts)
 {
 	uint32_t d_hdr, mcr, nwords;
 	minic_new_tx_buffer();
 
 
-	TRACE_DEV("minic_tx_frame: head %x size %d\n",
-		  (int)minic.tx_head, (int)size);
-	memset((void *)minic.tx_head, 0x0, size + 16);
-	memset((void *)minic.tx_head + 4, 0, size < 60 ? 60 : size);
-	memcpy((void *)minic.tx_head + 4, hdr, ETH_HEADER_SIZE);
-	memcpy((void *)minic.tx_head + 4 + ETH_HEADER_SIZE,
-	       payload, size - ETH_HEADER_SIZE);
+	TRACE_DEV("minic_tx_frame: head %x size %d\n", minic.tx_head, size);
+	memset(minic.tx_head, 0x0, size + 16);
+	memset((void*)minic.tx_head + 4, 0, size < 60 ? 60 : size);
+	memcpy((void*)minic.tx_head + 4, hdr, ETH_HEADER_SIZE);
+	memcpy((void*)minic.tx_head + 4 + ETH_HEADER_SIZE, payload, size - ETH_HEADER_SIZE);
 
 	if(size < 60)
 		size = 60;
 
-	nwords = ((size + 1) >> 1) - 1;
+	nwords = ((size + 1) >> 1);
 
-	if (0) { /* print the packet. We know payload follows header */
-		int i = size, j;
-		uint8_t *packet = hdr;
-		pp_printf("recvd: %i\n", i);
-		for (j = 0; j < 32 && j < i; j++)
-			pp_printf(" %02x", packet[j]);
-		pp_printf("\n");
-	}
-
-
-
+	d_hdr = 0;
 
 	if(hwts)
-	{
-
-		memcpy((void *) minic.tx_head + 4 + size, &tx_oob_val,
-		       sizeof(uint16_t));
-		nwords++;
-		d_hdr = TX_DESC_WITH_OOB;
-	} else
-		d_hdr = 0;
+		d_hdr = TX_DESC_WITH_OOB | (tx_oob_val << 12);
 
 	d_hdr |= TX_DESC_VALID | nwords;
 
@@ -300,7 +248,9 @@ int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size,
 	mcr = minic_readl(MINIC_REG_MCR);
 	minic_writel(MINIC_REG_MCR, mcr | MINIC_MCR_TX_START);
 
+	while((minic_readl(MINIC_REG_MCR) & MINIC_MCR_TX_IDLE) == 0);
 
+#if 1
 	if(hwts) /* wait for the timestamp */
 	{
 		uint32_t raw_ts;
@@ -308,25 +258,18 @@ int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size,
 		uint32_t counter_r, counter_f;
 		uint32_t utc;
 		uint32_t nsec;
-		uint8_t ts_tout;
 
+		while((minic_readl(MINIC_REG_TSR0) & MINIC_TSR0_VALID) == 0);
 
-		ts_tout=0;
-		while( (minic_readl(MINIC_REG_TSFIFO_CSR)
-			& MINIC_TSFIFO_CSR_EMPTY ) && ts_tout<10)
-			ts_tout++;
-
-		raw_ts = minic_readl(MINIC_REG_TSFIFO_R0);
-		fid = (minic_readl(MINIC_REG_TSFIFO_R1) >> 5) & 0xffff;
-
+		raw_ts = minic_readl(MINIC_REG_TSR1);
+		fid = MINIC_TSR0_FID_R(minic_readl(MINIC_REG_TSR0));
 
 		if(fid != tx_oob_val)
 		{
-			TRACE_DEV("minic_tx_frame: unmatched fid %d vs %d\n",
-				  fid, tx_oob_val);
+			TRACE_DEV("minic_tx_frame: unmatched fid %d vs %d\n", fid, tx_oob_val);
 		}
 		EXPLODE_WR_TIMESTAMP(raw_ts, counter_r, counter_f);
-		utc = nsec = 0; /* was: pps_gen_get_time(&utc, &nsec); */
+		pps_gen_get_time(&utc, &nsec);
 
 		if(counter_r > 3*125000000/4 && nsec < 125000000/4)
 			utc--;
@@ -335,12 +278,11 @@ int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size,
 		hwts->ahead = 0;
 		hwts->nsec = counter_r * 8;
 
-		TRACE_DEV("minic_tx_frame [%d bytes] TS: %d.%d\n",
-			  (int)size, (int)hwts->utc, (int)hwts->nsec);
+		TRACE_DEV("minic_tx_frame [%d bytes] TS: %d.%d\n", size, hwts->utc, hwts->nsec);
 		minic.tx_count++;
 
 	}
-
+#endif
 	tx_oob_val++;
 
 	return size;
