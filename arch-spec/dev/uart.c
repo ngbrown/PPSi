@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include "../spec.h"
 
-#include <hw/wb_vuart.h>
+#include <hw/wb_uart.h>
 
 #define CALC_BAUD(baudrate) \
 	( ((( (unsigned long long)baudrate * 8ULL) << (16 - 7)) +	\
