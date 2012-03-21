@@ -4,9 +4,10 @@
 #include <pptp/pptp.h>
 #include <pptp/diag.h>
 #include "spec.h"
-#include "include/gpio.h"
+#include "include/syscon.h"
 
 static struct pp_instance ppi_static;
+int pp_diag_verbosity = 0;
 
 void pptp_main(void)
 {
@@ -17,9 +18,9 @@ void pptp_main(void)
 	pp_puts("Spec: starting. Compiled on " __DATE__ "\n");
 
 	/* leds are off and button is input */
-	gpio_dir(GPIO_PIN_BTN1, 0);
-	gpio_dir(GPIO_PIN_LED_LINK, 1);
-	gpio_dir(GPIO_PIN_LED_STATUS, 1);
+	//gpio_dir(GPIO_PIN_BTN1, 0);
+	//gpio_dir(GPIO_PIN_LED_LINK, 1);
+	//gpio_dir(GPIO_PIN_LED_STATUS, 1);
 
 	gpio_out(GPIO_PIN_LED_LINK, 0);
 	gpio_out(GPIO_PIN_LED_STATUS, 0);
