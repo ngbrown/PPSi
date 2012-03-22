@@ -91,8 +91,14 @@ int pp_memcmp(const void *s1, const void *s2, int count)
 
 int32_t spec_set_tstamp(TimeInternal *t)
 {
-	//GGDD
-	return 0;
+	TimeInternal tp_orig;
+
+	pps_gen_get_time( &tp_orig.seconds, &tp_orig.nanoseconds );
+	pps_gen_adjust_utc(t->seconds);
+	pps_gen_adjust_nsec(t->nanoseconds);
+
+	return t->seconds - tp_orig.seconds; /* handle only sec field, since
+					    * timer granularity is 1s */
 }
 
 int spec_adj_freq(Integer32 adj)
