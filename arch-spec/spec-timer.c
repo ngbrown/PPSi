@@ -1,4 +1,6 @@
 #include <pptp/pptp.h>
+#include <pps_gen.h>
+
 static struct pp_timer spec_timers[PP_TIMER_ARRAY_SIZE];
 
 int spec_timer_init(struct pp_instance *ppi)
@@ -13,7 +15,10 @@ int spec_timer_init(struct pp_instance *ppi)
 
 int spec_timer_start(uint32_t interval, struct pp_timer *tm)
 {
-	//GGDD
+	uint32_t nsec;
+
+	pps_gen_get_time( &(tm->start), &nsec);
+	tm->interval = interval;
 	return 0;
 }
 
@@ -27,7 +32,20 @@ int spec_timer_stop(struct pp_timer *tm)
 
 int spec_timer_expired(struct pp_timer *tm)
 {
-	//GGDD
+	uint32_t now, nsec;
+
+	if (tm->start == 0) {
+		PP_PRINTF("%p Warning: posix_timer_expired: timer not started\n",tm);
+		return 0;
+	}
+
+	pps_gen_get_time( &now, &nsec);
+
+	if (tm->start + tm->interval < now) {
+		tm->start = now;
+		return 1;
+	}
+
 	return 0;
 }
 
