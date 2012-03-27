@@ -4,6 +4,7 @@
 #include <pptp/pptp.h>
 #include "spec.h"
 #include "include/syscon.h"
+#include "include/minic.h"
 #include<pptp/diag.h>
 
 int spec_errno;
@@ -43,10 +44,21 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 		     int use_pdelay_addr)
 {
 	static int led;
+	struct ethhdr hdr;
+
+	if (OPTS(ppi)->gptp_mode)
+		memcpy(hdr.h_dest, PP_PEER_MACADDRESS, ETH_ALEN);
+	else
+		memcpy(hdr.h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
+
+	memcpy(hdr.h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
+	hdr.h_proto = ETH_P_1588;
+
+	pp_printf("%s: len=%d\n", __FUNCTION__, len);
 
 	led ^= 1; /* blink the other led at each tx event */
 	gpio_out(GPIO_PIN_LED_STATUS, led);
-	return minic_tx_frame(pkt, pkt + 14, len, NULL);
+	return minic_tx_frame((uint8_t*)&hdr, pkt, len, NULL);
 }
 
 int spec_net_init(struct pp_instance *ppi)
