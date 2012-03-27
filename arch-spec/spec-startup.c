@@ -9,6 +9,17 @@
 static struct pp_instance ppi_static;
 int pp_diag_verbosity = 0;
 
+/*ppi fields*/
+static UInteger16 sent_seq_id[16];
+static DSDefault  defaultDS;
+static DSCurrent  currentDS;
+static DSParent   parentDS;
+static DSPort     portDS;
+static DSTimeProperties timePropertiesDS;
+static struct pp_net_path net_path;
+static struct pp_servo servo;
+static struct pp_frgn_master frgn_master;
+
 void pptp_main(void)
 {
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
@@ -21,6 +32,17 @@ void pptp_main(void)
 	//gpio_dir(GPIO_PIN_BTN1, 0);
 	//gpio_dir(GPIO_PIN_LED_LINK, 1);
 	//gpio_dir(GPIO_PIN_LED_STATUS, 1);
+
+	ppi->sent_seq_id = sent_seq_id;
+	ppi->defaultDS   = &defaultDS;
+	ppi->currentDS   = &currentDS;
+	ppi->parentDS    = &parentDS;
+	ppi->portDS      = &portDS;
+	ppi->timePropertiesDS = &timePropertiesDS;
+	ppi->net_path    = &net_path;
+	ppi->servo       = &servo;
+	ppi->frgn_master = &frgn_master;
+	ppi->arch_data   = NULL;
 
 	gpio_out(GPIO_PIN_LED_LINK, 0);
 	gpio_out(GPIO_PIN_LED_STATUS, 0);
