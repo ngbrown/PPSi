@@ -58,7 +58,7 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 
 	led ^= 1; /* blink the other led at each tx event */
 	gpio_out(GPIO_PIN_LED_STATUS, led);
-	return minic_tx_frame((uint8_t*)&hdr, pkt, len, NULL);
+	return minic_tx_frame((uint8_t*)&hdr, pkt, len+ETH_HEADER_SIZE, NULL);
 }
 
 int spec_net_init(struct pp_instance *ppi)
