@@ -31,12 +31,18 @@ int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 		     TimeInternal *t)
 {
 	static int led;
+	struct hw_timestamp hwts;
 	int got;
 
 	led ^= 1; /* blink one led at each rx event */
 	gpio_out(GPIO_PIN_LED_LINK, led);
-	got = minic_rx_frame(pkt, pkt+ETH_HEADER_SIZE, len, NULL);
-	pp_printf("%s: got=%d\n", __FUNCTION__, got);
+	got = minic_rx_frame(pkt, pkt+ETH_HEADER_SIZE, len, &hwts);
+
+	//add phase value and linearize function for WR support
+	t->seconds = hwts.utc;
+	t->nanoseconds = hwts.nsec;
+
+	pp_printf("%s: got=%d, sec=%d, nsec=%d\n", __FUNCTION__, got, t->seconds, t->nanoseconds);
 	return got;
 }
 
