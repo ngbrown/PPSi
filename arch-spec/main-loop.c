@@ -39,8 +39,11 @@ void spec_main_loop(struct pp_instance *ppi)
 		if (0) {
 			int j;
 			pp_printf("recvd: %i\n", i);
-			for (j = 0; j < 32 && j < i; j++)
-				pp_printf(" %02x", packet[j]);
+			for (j = 0; j < i; j++) {
+				pp_printf("%02x ", packet[j]);
+				if( (j+1)%16==0 )
+					pp_printf("\n");
+			}
 			pp_printf("\n");
 		}
 		/* Warning: PP_ETHERTYPE is endian-agnostic by design */
