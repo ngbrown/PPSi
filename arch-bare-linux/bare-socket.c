@@ -3,8 +3,8 @@
  */
 
 /* Socket interface for bare Linux */
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 #include "bare-linux.h"
 
 /* FIXME: which socket we receive and send with? */

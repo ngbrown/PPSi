@@ -4,8 +4,8 @@
 	 * Alessandro Rubini for CERN, 2011 -- GNU GPL v2 or later
 	 */
 	.section .boot, "ax"
-	.extern pptp_main
+	.extern ppsi_main
 
-	call pptp_clear_bss /* In C, lazy me */
-	call pptp_main
+	call ppsi_clear_bss /* In C, lazy me */
+	call ppsi_main
 	.end

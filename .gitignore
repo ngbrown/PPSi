@@ -1,8 +1,8 @@
 *.map*
 *.o
 *.a
-pptp.bin
+ppsi.bin
 *.patch
 *~
-/pptp
+/ppsi
 

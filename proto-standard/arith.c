@@ -4,8 +4,8 @@
  */
 
 #include <limits.h>
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 
 void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal)
 {

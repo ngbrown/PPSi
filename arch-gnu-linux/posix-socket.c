@@ -16,8 +16,8 @@
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 #include "posix.h"
 
 /* posix_recv_msg uses recvmsg for timestamp query */

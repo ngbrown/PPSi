@@ -7,8 +7,8 @@ build_one () {
     echo "####################"
     echo "Build for " "$1"
     make -s -k $2
-    test -f pptp.o && size pptp.o
-    test -f pptp && size pptp
+    test -f ppsi.o && size ppsi.o
+    test -f ppsi && size ppsi
 }
 
 build_diags () {

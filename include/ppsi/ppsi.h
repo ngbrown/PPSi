@@ -2,15 +2,15 @@
  * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 
-#ifndef __PPTP_PPTP_H__
-#define __PPTP_PPTP_H__
+#ifndef __PPSI_PPSI_H__
+#define __PPSI_PPSI_H__
 
 #include <stdint.h>
 #include <stdarg.h>
 #include <arch/arch.h> /* ntohs and so on */
-#include <pptp/lib.h>
-#include <pptp/ieee1588_types.h>
-#include <pptp/constants.h>
+#include <ppsi/lib.h>
+#include <ppsi/ieee1588_types.h>
+#include <ppsi/constants.h>
 
 #define __weak __attribute__((weak))
 
@@ -370,4 +370,4 @@ extern pp_action pp_initializing, pp_faulty, pp_disabled, pp_listening,
 /* The engine */
 extern int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen);
 
-#endif /* __PPTP_PPTP_H__ */
+#endif /* __PPSI_PPSI_H__ */

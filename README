@@ -2,7 +2,7 @@
 	About This Project
 	==================
 
-pptp (Portable Precision Time Protocol) is an application which, in
+PPSi (PTP Ported to Silicon) is an application which, in
 its basic operation, implements IEEE 1588 specification in a way
 that is portable to several architectures, including OS-less ones.
 Configuration is performed using environment variables, as explained later.
@@ -79,7 +79,7 @@ should be edited before building and the pristine package can be used).
 
 The basic state machine is in ./fsm.c . It's a simple file released in
 the public domain as we'd like the idea to be reused and the code
-itself is not worth copylefting.  Please note that the pptp as a whole
+itself is not worth copylefting.  Please note that the ppsi as a whole
 is LGPL-2.1 or later.
 
 All the rest of the package is built as libraries. The link order
@@ -166,14 +166,14 @@ With no diagnostics, the printf does nothing and only puts() is available.
 
 The hosted architecture includes command line support:
 
-     ./pptp --help
+     ./ppsi --help
 
 will print help about command line options (we also support the
 question-mark like the original ptp, but it's a bad choice because
 it's a shell wildcard). Actually, all multi-char options will
 print the help at this point in time, but this will be fixed.
 
-For standard operation, simply run ./pptp with no options. It will
+For standard operation, simply run ./ppsi with no options. It will
 work like the ptpd executable, with the automatic choice of
 master/slave defined in IEEE spec (announce/timeout mechanism).
 
@@ -188,7 +188,7 @@ Documentation/CodingStyle in the kernel sources).  However,
 structures, constants and field names defined by IEEE 1588 are kept in
 the suggested "CamelCase" form. Similarly, the typedefs are left, even
 if they are really a pain to deal with.  Most of this stuff is in
-include/pptp/ieee1588_types.h file.
+include/ppsi/ieee1588_types.h file.
 
 The mostly used prefix is (pp_), the short prefix for 'Portable PTP',
 which is used for every function related to the algorithm itself (but

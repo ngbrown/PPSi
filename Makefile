@@ -14,7 +14,7 @@ OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
 # Instead of repeating "proto-daemon" over and over, bless it TARGET
-TARGET = pptp
+TARGET = ppsi
 
 # The main target is the big object file.
 all: $(TARGET).o

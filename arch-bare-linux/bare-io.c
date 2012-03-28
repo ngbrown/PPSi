@@ -1,7 +1,7 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GPL 2 or later (it includes u-boot code)
  */
-#include <pptp/pptp.h>
+#include <ppsi/ppsi.h>
 #include "bare-linux.h"
 
 void pp_puts(const char *s)

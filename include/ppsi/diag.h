@@ -1,10 +1,10 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- public domain
  */
-#ifndef __PPTP_DIAG_H__
-#define __PPTP_DIAG_H__
+#ifndef __PPSI_DIAG_H__
+#define __PPSI_DIAG_H__
 
-#include <pptp/pptp.h>
+#include <ppsi/ppsi.h>
 /*
  * The diagnostic functions (diag-yes.c and diag-no.c).
  *
@@ -34,4 +34,4 @@ extern int pp_vprintf(const char *fmt, va_list args)
 extern int pp_vsprintf(char *buf, const char *, va_list)
 	__attribute__ ((format (printf, 2, 0)));
 
-#endif /* __PPTP_DIAG_H__ */
+#endif /* __PPSI_DIAG_H__ */

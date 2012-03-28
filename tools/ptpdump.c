@@ -18,7 +18,7 @@
 #include <net/if_arp.h>
 #include <netpacket/packet.h>
 
-#include <ieee1588_types.h> /* from ../include/pptp */
+#include <ieee1588_types.h> /* from ../include/ppsi */
 #include "decent_types.h"
 
 #ifndef ETH_P_1588

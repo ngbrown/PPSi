@@ -1,4 +1,4 @@
-#include <pptp/pptp.h>
+#include <ppsi/ppsi.h>
 #include <pps_gen.h>
 
 static struct pp_timer spec_timers[PP_TIMER_ARRAY_SIZE];

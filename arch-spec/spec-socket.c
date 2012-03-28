@@ -1,11 +1,11 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
-#include <pptp/pptp.h>
+#include <ppsi/ppsi.h>
 #include "spec.h"
 #include "include/syscon.h"
 #include "include/minic.h"
-#include<pptp/diag.h>
+#include<ppsi/diag.h>
 
 int spec_errno;
 Octet buffer_out[PP_PACKET_SIZE + 14]; // 14 is ppi->proto_ofst for ethernet mode

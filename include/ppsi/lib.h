@@ -1,8 +1,8 @@
 /*
  * Alessandro Rubini and Aurelio Colosimo for CERN, 2011 -- public domain
  */
-#ifndef __PPTP_LIB_H__
-#define __PPTP_LIB_H__
+#ifndef __PPSI_LIB_H__
+#define __PPSI_LIB_H__
 #include <stdint.h>
 
 /* We base on puts and a few more functions: each arch must have it */
@@ -14,4 +14,4 @@ extern void *pp_memset(void *s, int c, int count);
 
 extern uint32_t __div64_32(uint64_t *n, uint32_t base);
 
-#endif /* __PPTP_LIB_H__ */
+#endif /* __PPSI_LIB_H__ */

@@ -5,8 +5,8 @@
  * (please note that the vsprintf is not public domain but GPL)
  */
 #include <stdarg.h>
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 
 #define PP_BUF 128		/* We prefer small targets */
 

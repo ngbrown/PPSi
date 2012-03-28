@@ -2,8 +2,8 @@
  * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 
 #define CMD_LINE_SEPARATOR {"", ""}
 
@@ -57,7 +57,7 @@ static struct cmd_line_opt cmd_line_list[] = {
 static void cmd_line_print_help(void)
 {
 	int i = 0;
-	pp_printf("\nUsage: pptp [OPTION]\n\n");
+	pp_printf("\nUsage: ppsi [OPTION]\n\n");
 
 	while (1) {
 		struct cmd_line_opt *o = &cmd_line_list[i];

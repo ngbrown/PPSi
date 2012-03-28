@@ -2,8 +2,8 @@
  * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 
 /*
  * This file deals with opening and closing an instance. The channel

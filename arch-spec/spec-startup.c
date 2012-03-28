@@ -1,8 +1,8 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 #include "spec.h"
 #include "include/syscon.h"
 
@@ -20,7 +20,7 @@ static struct pp_net_path net_path;
 static struct pp_servo servo;
 static struct pp_frgn_master frgn_master;
 
-void pptp_main(void)
+void ppsi_main(void)
 {
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
 
@@ -59,7 +59,7 @@ void pptp_main(void)
 
 /* Our crt0.S is unchanged: it wants a "main" function, and "_irq_entry" too" */
 
-int main(void) __attribute__((alias("pptp_main")));
+int main(void) __attribute__((alias("ppsi_main")));
 
 void _irq_entry(void)
 {

@@ -3,7 +3,7 @@
  * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
 
-#include <pptp/pptp.h>
+#include <ppsi/ppsi.h>
 
 int pp_disabled(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {

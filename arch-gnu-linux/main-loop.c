@@ -10,8 +10,8 @@
 #include <sys/select.h>
 #include <linux/if_ether.h>
 
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 #include "posix.h"
 
 void posix_main_loop(struct pp_instance *ppi)

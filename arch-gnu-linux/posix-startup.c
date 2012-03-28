@@ -10,8 +10,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 #include "posix.h"
 
 int pp_diag_verbosity = 0;

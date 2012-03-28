@@ -3,8 +3,8 @@
  * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
 
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 
 void pp_init_clock(struct pp_instance *ppi)
 {

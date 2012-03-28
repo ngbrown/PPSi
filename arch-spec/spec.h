@@ -4,7 +4,7 @@
 #ifndef __SPEC_H
 #define __SPEC_H
 
-#include <pptp/pptp.h>
+#include <ppsi/ppsi.h>
 /*
  * These are the functions provided by the various bare files
  */
@@ -17,7 +17,7 @@ extern int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
 
 extern void spec_main_loop(struct pp_instance *ppi);
 extern void _irq_entry(void); /* unused, to make crt0.S happy */
-extern int main(void); /* alias to pptp_main, so crt0.S is happy */
+extern int main(void); /* alias to ppsi_main, so crt0.S is happy */
 
 /* basics */
 extern void *memset(void *s, int c, int count);

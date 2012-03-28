@@ -8,8 +8,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 #include "posix.h"
 
 /* In ptpd-2.1.0/src/dep/timer.c the mechanism was different.

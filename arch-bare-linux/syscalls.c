@@ -3,7 +3,7 @@
  */
 #include <linux/unistd.h>
 
-#include <pptp/pptp.h>
+#include <ppsi/ppsi.h>
 #include "bare-linux.h"
 #include "syscalls.h"
 

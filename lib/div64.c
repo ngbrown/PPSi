@@ -1,4 +1,4 @@
-/* This file in pptp is a subset of lib/div64.c in Linux source code */
+/* This file in ppsi is a subset of lib/div64.c in Linux source code */
 
 /*
  * Copyright (C) 2003 Bernardo Innocenti <bernie@develer.com>
@@ -17,7 +17,7 @@
  * for some CPUs. __div64_32() can be overridden by linking arch-specific
  * assembly versions such as arch/ppc/lib/div64.S and arch/sh/lib/div64.S.
  */
-#include <pptp/lib.h>
+#include <ppsi/lib.h>
 
 uint32_t __div64_32(uint64_t *n, uint32_t base)
 {

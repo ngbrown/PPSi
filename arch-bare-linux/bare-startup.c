@@ -6,12 +6,12 @@
  * This is the startup thing for "freestanding" stuff under Linux.
  * It must also clear the BSS as I'm too lazy to do that in asm
  */
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 #include "bare-linux.h"
 
 
-void pptp_clear_bss(void)
+void ppsi_clear_bss(void)
 {
 	int *ptr;
 	extern int __bss_start, __bss_end;
@@ -23,7 +23,7 @@ void pptp_clear_bss(void)
 static struct pp_instance ppi_static;
 static struct pp_net_path net_path_static;
 
-void pptp_main(void)
+void ppsi_main(void)
 {
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
 

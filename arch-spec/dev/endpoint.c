@@ -3,7 +3,7 @@
  *
  * GNU LGPL 2.1 or later versions
  */
-#include <pptp/pptp.h>
+#include <ppsi/ppsi.h>
 #include "../spec.h"
 #include "syscon.h"
 #include <endpoint.h>

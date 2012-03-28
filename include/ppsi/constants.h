@@ -3,8 +3,8 @@
  * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
 
-#ifndef __PPTP_CONSTANTS_H__
-#define __PPTP_CONSTANTS_H__
+#ifndef __PPSI_CONSTANTS_H__
+#define __PPSI_CONSTANTS_H__
 
 /* general purpose constants */
 #define PP_NSEC_PER_SEC (1000*1000*1000)
@@ -96,4 +96,4 @@
 
 #include <arch/constants.h> /* architectures may override the defaults */
 
-#endif /* __PPTP_CONSTANTS_H__ */
+#endif /* __PPSI_CONSTANTS_H__ */

@@ -7,8 +7,8 @@
 #include <string.h>
 #include <time.h>
 #include <sys/timex.h>
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 
 const Integer32 PP_ADJ_FREQ_MAX = 512000;
 

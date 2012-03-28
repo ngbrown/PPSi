@@ -9,13 +9,13 @@ STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
-CFLAGS = -Wall -ggdb -I../include/pptp
+CFLAGS = -Wall -ggdb -I../include/ppsi
 
 PROGS = ptpdump
 
 all: $(PROGS)
 
-$(PROGS): $(wildcard *.h) $(wildcard ../include/pptp/*.h)
+$(PROGS): $(wildcard *.h) $(wildcard ../include/ppsi/*.h)
 
 %: %.c
 	$(CC) $(CFLAGS) $*.c $(LDFLAGS) -o $@

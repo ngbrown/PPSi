@@ -2,7 +2,7 @@
  * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 
-#include <pptp/pptp.h>
+#include <ppsi/ppsi.h>
 
 /*
  * This is the default state machine table. It is weak so an extension

@@ -6,8 +6,8 @@
 /*
  * This is the main loop for the Spec board
  */
-#include <pptp/pptp.h>
-#include <pptp/diag.h>
+#include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 #include "spec.h"
 
 void spec_main_loop(struct pp_instance *ppi)
