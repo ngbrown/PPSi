@@ -50,6 +50,6 @@ void spec_main_loop(struct pp_instance *ppi)
 		if (((struct spec_ethhdr *)packet)->h_proto !=
 		     htons(PP_ETHERTYPE))
 			continue;
-		delay_ms = pp_state_machine(ppi, packet, i);
+		delay_ms = pp_state_machine(ppi, packet+sizeof(struct spec_ethhdr), i);
 	}
 }
