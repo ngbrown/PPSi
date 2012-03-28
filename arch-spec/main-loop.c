@@ -23,13 +23,11 @@ void spec_main_loop(struct pp_instance *ppi)
 	while (1) {
 		unsigned char packet[1500];
 		/* Wait for a packet or for the timeout */
-		pp_printf("wait for packet\n");
 		while (delay_ms && !minic_poll_rx()) {
 			spec_udelay(1000);
 			delay_ms--;
 		}
 		if (!minic_poll_rx()) {
-			pp_printf("timeout\n");
 			delay_ms = pp_state_machine(ppi, NULL, 0);
 			continue;
 		}
