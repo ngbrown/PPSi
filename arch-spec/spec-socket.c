@@ -44,7 +44,7 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 		     int use_pdelay_addr)
 {
 	static int led;
-	struct ethhdr hdr;
+	struct spec_ethhdr hdr;
 
 	if (OPTS(ppi)->gptp_mode)
 		memcpy(hdr.h_dest, PP_PEER_MACADDRESS, ETH_ALEN);
