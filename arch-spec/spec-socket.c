@@ -35,7 +35,7 @@ int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 
 	led ^= 1; /* blink one led at each rx event */
 	gpio_out(GPIO_PIN_LED_LINK, led);
-	got = minic_rx_frame(pkt, pkt + 14, len - 14, NULL);
+	got = minic_rx_frame(pkt, pkt+ETH_HEADER_SIZE, len, NULL);
 	pp_printf("%s: got=%d\n", __FUNCTION__, got);
 	return got;
 }
