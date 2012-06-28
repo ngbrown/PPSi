@@ -5,6 +5,7 @@
 #define __SPEC_H
 
 #include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 /*
  * These are the functions provided by the various bare files
  */
