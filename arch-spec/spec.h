@@ -95,6 +95,7 @@ struct spec_ethhdr {
 #define TRACE_DEV pp_printf
 
 struct hw_timestamp {
+	uint8_t valid;
 	int ahead;
 	uint32_t utc;
 	uint32_t nsec;
