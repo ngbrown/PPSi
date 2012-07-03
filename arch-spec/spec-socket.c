@@ -13,7 +13,11 @@ Octet buffer_out[PP_PACKET_SIZE + 14]; // 14 is ppi->proto_ofst for ethernet mod
 /* This function should init the minic and get the mac address */
 int spec_open_ch(struct pp_instance *ppi)
 {
+#ifdef PPSI_SLAVE
 	uint8_t fake_addr[] = {0x00, 0x10, 0x20, 0x30, 0x40, 0x50};
+#else
+	uint8_t fake_addr[] = {0x99, 0x99, 0x99, 0x99, 0x99, 0x99};
+#endif
 
 	ep_init(fake_addr);
 	ep_enable(1, 0);
