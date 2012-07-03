@@ -14,6 +14,10 @@ void spec_main_loop(struct pp_instance *ppi)
 {
 	int i, delay_ms;
 
+	const int eth_ofst = sizeof(struct spec_ethhdr);
+	/*pp_diag_verbosity = 1;*/
+	/* SPEC is raw ethernet by default */
+	NP(ppi)->proto_ofst = eth_ofst;
 	/*
 	 * The main loop here is polling every ms. While we are not
 	 * doing anything else but the protocol, this allows extra stuff
@@ -39,8 +43,8 @@ void spec_main_loop(struct pp_instance *ppi)
 		if (0) {
 			int j;
 			pp_printf("recvd: %i\n", i);
-			for (j = 0; j < i; j++) {
-				pp_printf("%02x ", packet[j]);
+			for (j = 0; j < i - eth_ofst; j++) {
+				pp_printf("%02x ", packet[j + eth_ofst]);
 				if( (j+1)%16==0 )
 					pp_printf("\n");
 			}
@@ -50,6 +54,6 @@ void spec_main_loop(struct pp_instance *ppi)
 		if (((struct spec_ethhdr *)packet)->h_proto !=
 		     htons(PP_ETHERTYPE))
 			continue;
-		delay_ms = pp_state_machine(ppi, packet+sizeof(struct spec_ethhdr), i);
+		delay_ms = pp_state_machine(ppi, packet + eth_ofst, i - eth_ofst);
 	}
 }
