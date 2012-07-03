@@ -53,6 +53,10 @@ void ppsi_main(void)
 	}
 	pp_open_instance(ppi, 0 /* no opts */);
 
+#ifdef PPSI_SLAVE
+	OPTS(ppi)->slave_only = 1;
+#endif
+
 	spec_main_loop(ppi);
 }
 

@@ -36,6 +36,13 @@ ifdef PROTO_EXT
   include proto-ext-$(PROTO_EXT)/Makefile
 endif
 
+WRMODE = slave
+ifeq ($(WRMODE), master)
+CFLAGS += -DPPSI_MASTER
+else
+CFLAGS += -DPPSI_SLAVE
+endif
+
 # Include arch code, the default is hosted GNU/Linux stuff
 # we need this -I so <arch/arch.h> can be found
 ARCH ?= gnu-linux
