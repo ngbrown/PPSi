@@ -9,6 +9,7 @@
 
 int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 {
+	int ret = 0;
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_RECEIPT])) {
 		PP_VPRINTF("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
 		ppi->number_foreign_records = 0;
@@ -29,16 +30,27 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 	if (OPTS(ppi)->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {
 			PP_VPRINTF("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
-			return msg_issue_delay_req(ppi);
+
+			ret = msg_issue_delay_req(ppi);
+
+			set_TimeInternal(&ppi->delay_req_send_time,
+				ppi->last_snt_time.seconds, ppi->last_snt_time.nanoseconds);
+
+			/* Add latency */
+			add_TimeInternal(&ppi->delay_req_send_time,
+						&ppi->delay_req_send_time,
+						&OPTS(ppi)->outbound_latency);
+
+
 		}
 	} else {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ]))
 		{
 			PP_VPRINTF("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
-			return msg_issue_pdelay_req(ppi);
+			ret = msg_issue_pdelay_req(ppi);
 		}
 	}
-	return 0;
+	return ret;
 }
 
 void st_com_restart_annrec_timer(struct pp_instance *ppi)
