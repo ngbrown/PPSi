@@ -10,6 +10,7 @@
 int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	TimeInternal *time;
+	TimeInternal *time_snt;
 	TimeInternal req_rec_tstamp;
 	TimeInternal correction_field;
 	TimeInternal resp_orig_tstamp;
@@ -36,6 +37,11 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (pp_timer_expired(ppi->timers[PP_TIMER_SYNC])) {
 		PP_VPRINTF("event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
 		if (msg_issue_sync(ppi) < 0)
+			goto failure;
+
+		time_snt = &ppi->last_snt_time;
+		add_TimeInternal(time_snt, time_snt, &OPTS(ppi)->outbound_latency);
+		if (msg_issue_followup(ppi, time_snt))
 			goto failure;
 	}
 

@@ -339,17 +339,6 @@ int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			      int len)
 {
-	TimeInternal *time;
-	if (len < PP_SYNC_LENGTH)
-		return -1;
-
-	if (!ppi->is_from_self)
-		return 0;
-
-	time = &ppi->last_rcv_time;
-
-	/* Add latency */
-	add_TimeInternal(time, time, &OPTS(ppi)->outbound_latency);
-	msg_issue_followup(ppi, time);
+	/* No more used: follow up is sent right after the corresponding sync */
 	return 0;
 }
