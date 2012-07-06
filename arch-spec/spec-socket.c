@@ -69,8 +69,6 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
 	memcpy(hdr.h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
 	hdr.h_proto = ETH_P_1588;
 
-	pp_printf("%s: len=%d\n", __FUNCTION__, len);
-
 	led ^= 1; /* blink the other led at each tx event */
 	gpio_out(GPIO_PIN_LED_STATUS, led);
 	got = minic_tx_frame((uint8_t*)&hdr, pkt, len+ETH_HEADER_SIZE, &hwts);
