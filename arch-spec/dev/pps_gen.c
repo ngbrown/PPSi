@@ -26,6 +26,12 @@ void pps_gen_init()
 	PPSG->ADJ_UTCHI = 0;
 	PPSG->ADJ_NSEC = 0;
 
+#ifdef PPSI_SLAVE
+	/* Random initial time:q for slave */
+	PPSG->ADJ_UTCLO = 123456;
+	PPSG->ADJ_NSEC = 987654;
+#endif
+
 	PPSG->CR = cr | PPSG_CR_CNT_SET;
 	PPSG->CR = cr;
 }
