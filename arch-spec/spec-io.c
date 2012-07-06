@@ -92,9 +92,7 @@ int32_t spec_set_tstamp(TimeInternal *t)
 {
 	TimeInternal tp_orig;
 
-	pps_gen_get_time( &tp_orig.seconds, &tp_orig.nanoseconds );
-	pps_gen_adjust_utc(t->seconds);
-	pps_gen_adjust_nsec(t->nanoseconds);
+	pps_gen_set(t->seconds, t->nanoseconds);
 
 	return 0; /* SPEC uses a sort of monotonic tstamp for timers */
 }
