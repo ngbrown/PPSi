@@ -79,13 +79,11 @@ int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 		     t->seconds, t->nanoseconds);
 	} else {
 		/*
-		 * do not try to get by with recording the time here, better
-		 * to fail because the time recorded could be well after the
-		 * message receive, which would put a big spike in the
-		 * offset signal sent to the clock servo
+		 * get the recording time here, even though it may  put a big
+		 * spike in the offset signal sent to the clock servo
 		 */
-		PP_VPRINTF("no receive time stamp\n");
-		return 0;
+		PP_VPRINTF("no receive time stamp, getting it in user space\n");
+		pp_get_tstamp(t);
 	}
 	return ret;
 }
