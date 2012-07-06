@@ -125,8 +125,8 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	return -1;
 }
 
-int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
-	int use_pdelay_addr)
+int posix_send_packet(struct pp_instance *ppi, void *pkt, int len,
+	TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct sockaddr_in addr;
 	struct ethhdr *hdr;
@@ -155,6 +155,9 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 	else
 		addr.sin_addr.s_addr = NP(ppi)->peer_mcast_addr;
 
+	if (t)
+		pp_get_tstamp(t);
+
 	return sendto(NP(ppi)->ch[chtype].fd, pkt, len, 0,
 		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 
@@ -163,8 +166,8 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
 	__attribute__((alias("posix_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
-	int use_pdelay_addr)
+int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t,
+				   int chtype, int use_pdelay_addr)
 	__attribute__((alias("posix_send_packet")));
 
 /* To open a channel we must bind to an interface and so on */

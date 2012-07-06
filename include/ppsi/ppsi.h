@@ -189,6 +189,8 @@ struct pp_instance {
 
 	TimeInternal last_rcv_time; /* used to store timestamp retreived from
 				     * received packet */
+	TimeInternal last_snt_time; /* used to store timestamp retreived from
+				     * sent packet */
 	TimeInternal last_sync_corr_field;
 	TimeInternal last_pdelay_req_corr_field;
 	TimeInternal last_pdelay_resp_corr_field;
@@ -250,7 +252,7 @@ extern int pp_net_shutdown(struct pp_instance *ppi);
 extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t);
 extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
-			  int chtype, int use_pdelay_addr);
+			  TimeInternal *t, int chtype, int use_pdelay_addr);
 			  /* chtype: PP_NP_GEN || PP_NP_EVT */
 
 /* Timers */

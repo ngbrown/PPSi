@@ -20,6 +20,6 @@ extern int posix_open_ch(struct pp_instance *ppi, char *name, int chtype);
 extern int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			     TimeInternal *t);
 extern int posix_send_packet(struct pp_instance *ppi, void *pkt, int len,
-			     int chtype, int use_pdelay_addr);
+			     TimeInternal *t, int chtype, int use_pdelay_addr);
 
 extern void posix_main_loop(struct pp_instance *ppi);

@@ -586,8 +586,8 @@ static const char const * pp_msg_names[] = {
 };
 
 #define MSG_SEND_AND_RET(x,y,z)\
-	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH, PP_NP_##y ,\
-		z) < PP_## x ##_LENGTH) {\
+	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH,\
+		&ppi->last_snt_time, PP_NP_##y , z) < PP_## x ##_LENGTH) {\
 		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n",\
 			pp_msg_names[PPM_##x], PPM_##x);\
 		return -1;\

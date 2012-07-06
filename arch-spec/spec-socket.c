@@ -50,11 +50,13 @@ int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	return got;
 }
 
-int spec_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
-		     int use_pdelay_addr)
+int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
+			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	static int led;
 	struct spec_ethhdr hdr;
+	struct hw_timestamp hwts;
+	int got;
 
 	if (OPTS(ppi)->gptp_mode)
 		memcpy(hdr.h_dest, PP_PEER_MACADDRESS, ETH_ALEN);
@@ -68,7 +70,18 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 
 	led ^= 1; /* blink the other led at each tx event */
 	gpio_out(GPIO_PIN_LED_STATUS, led);
-	return minic_tx_frame((uint8_t*)&hdr, pkt, len+ETH_HEADER_SIZE, NULL);
+	got = minic_tx_frame((uint8_t*)&hdr, pkt, len+ETH_HEADER_SIZE, &hwts);
+
+	if (t) {
+		/* add phase value and linearize function for WR support */
+		t->seconds = hwts.utc;
+		t->nanoseconds = hwts.nsec;
+
+		PP_VPRINTF("%s: got=%d, sec=%d, nsec=%d\n", __FUNCTION__, got,
+			   t->seconds, t->nanoseconds);
+	}
+
+	return got;
 }
 
 int spec_net_init(struct pp_instance *ppi)
@@ -98,6 +111,6 @@ int pp_net_shutdown(struct pp_instance *ppi)
 	__attribute__((alias("spec_net_shutdown")));
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
 	__attribute__((alias("spec_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
-		   int use_pdelay_addr)
+int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t,
+				   int chtype, int use_pdelay_addr)
 	__attribute__((alias("spec_send_packet")));
