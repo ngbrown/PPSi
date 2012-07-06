@@ -373,7 +373,7 @@ void msg_pack_delay_resp(struct pp_instance *ppi,
 	*(UInteger8 *) (buf + 4) = hdr->domainNumber;
 	pp_memset((buf + 8), 0, 8);
 
-	/* Copy correctionField of PdelayReqMessage */
+	/* Copy correctionField of delayReqMessage */
 	*(Integer32 *) (buf + 8) = htonl(hdr->correctionfield.msb);
 	*(Integer32 *) (buf + 12) = htonl(hdr->correctionfield.lsb);
 
