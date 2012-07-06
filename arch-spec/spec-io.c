@@ -101,7 +101,7 @@ int32_t spec_set_tstamp(TimeInternal *t)
 
 int spec_adj_freq(Integer32 adj)
 {
-	//GGDD
+	pps_gen_adjust_nsec(adj);
 	return 0;
 }
 
