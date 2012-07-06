@@ -42,11 +42,14 @@ int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	gpio_out(GPIO_PIN_LED_LINK, led);
 	got = minic_rx_frame(pkt, pkt+ETH_HEADER_SIZE, len, &hwts);
 
-	//add phase value and linearize function for WR support
-	t->seconds = hwts.utc;
-	t->nanoseconds = hwts.nsec;
+	if (t) {
+		//add phase value and linearize function for WR support
+		t->seconds = hwts.utc;
+		t->nanoseconds = hwts.nsec;
 
-	pp_printf("%s: got=%d, sec=%d, nsec=%d\n", __FUNCTION__, got, t->seconds, t->nanoseconds);
+		PP_VPRINTF("%s: got=%d, sec=%d, nsec=%d\n", __FUNCTION__, got,
+			   t->seconds, t->nanoseconds);
+	}
 	return got;
 }
 
