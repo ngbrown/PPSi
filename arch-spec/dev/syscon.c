@@ -33,7 +33,7 @@ void spec_udelay(int usecs)
 		;
 }
 
-/* return a seconds count from the counter above; horrible code */
+/* return a monotonic seconds count from the counter above; horrible code */
 int spec_time(void)
 {
 	static uint32_t prev, secs;
@@ -42,7 +42,7 @@ int spec_time(void)
 
 	if (!prev) {
 		prev = tics;
-		secs = 1293836400; /* jan 1st 2011 or a random number */
+		secs = 1; /* Start from a small number! */
 		return secs;
 	}
 	rest += tics - prev;

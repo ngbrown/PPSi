@@ -17,7 +17,7 @@ int spec_timer_start(uint32_t interval, struct pp_timer *tm)
 {
 	uint32_t nsec;
 
-	pps_gen_get_time( &(tm->start), &nsec);
+	tm->start = spec_time();
 	tm->interval = interval;
 	return 0;
 }
@@ -39,7 +39,7 @@ int spec_timer_expired(struct pp_timer *tm)
 		return 0;
 	}
 
-	pps_gen_get_time( &now, &nsec);
+	now = spec_time();
 
 	if (tm->start + tm->interval < now) {
 		tm->start = now;
@@ -51,10 +51,9 @@ int spec_timer_expired(struct pp_timer *tm)
 
 void spec_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
 {
-	uint32_t i;
-
-	for(i=0; i<PP_TIMER_ARRAY_SIZE; i++)
-		ppi->timers[i]->start += diff;
+	/* No need for timer adjust in SPEC: it uses a sort of monotonic
+	 * tstamp for timers
+	*/
 }
 
 

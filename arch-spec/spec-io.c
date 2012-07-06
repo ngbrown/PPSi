@@ -96,8 +96,7 @@ int32_t spec_set_tstamp(TimeInternal *t)
 	pps_gen_adjust_utc(t->seconds);
 	pps_gen_adjust_nsec(t->nanoseconds);
 
-	return t->seconds - tp_orig.seconds; /* handle only sec field, since
-					    * timer granularity is 1s */
+	return 0; /* SPEC uses a sort of monotonic tstamp for timers */
 }
 
 int spec_adj_freq(Integer32 adj)
