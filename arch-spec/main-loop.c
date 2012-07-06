@@ -44,7 +44,7 @@ void spec_main_loop(struct pp_instance *ppi)
 		 * We got a packet. If it's not ours, continue consuming
 		 * the pending timeout
 		 */
-		i = spec_recv_packet(ppi, packet, sizeof(packet), NULL);
+		i = spec_recv_packet(ppi, packet, sizeof(_packet), &ppi->last_rcv_time);
 		if (0) {
 			int j;
 			pp_printf("recvd: %i\n", i);
