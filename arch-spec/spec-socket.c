@@ -77,8 +77,9 @@ int spec_net_init(struct pp_instance *ppi)
 	ppi->buf_out = buffer_out;
 	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
 
-	//UDP only for now
-	pp_printf("spec_net_init UDP\n");
+	ppi->buf_out+= 4 - (((int)ppi->buf_out) % 4);
+	/* FIXME Alignment */
+	pp_printf("spec_net_init ETH %x\n",ppi->buf_out);
 	spec_open_ch(ppi);
 
 	return 0;

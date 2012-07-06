@@ -28,7 +28,9 @@ void spec_main_loop(struct pp_instance *ppi)
 	 */
 	delay_ms = pp_state_machine(ppi, NULL, 0);
 	while (1) {
-		unsigned char packet[1500];
+		unsigned char _packet[1500];
+		/* FIXME Alignment */
+		unsigned char *packet = _packet + 2;
 		/* Wait for a packet or for the timeout */
 		while (delay_ms && !minic_poll_rx()) {
 			spec_udelay(1000);
