@@ -673,7 +673,7 @@ int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time)
 
 	msg_pack_delay_resp(ppi, &ppi->delay_req_hdr, &rcv_tstamp);
 
-	MSG_SEND_AND_RET(PDELAY_RESP, GEN, 0);
+	MSG_SEND_AND_RET(DELAY_RESP, GEN, 0);
 }
 
 /* Pack and send on event multicast ip adress a DelayResp message */

@@ -67,18 +67,8 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		e = (plen < PP_DELAY_REQ_LENGTH);
 
 		if (!e && ppi->is_from_self) {
-			/* Get sending timestamp from IP stack
-			 * with So_TIMESTAMP */
-
-			ppi->delay_req_send_time.seconds =
-				time->seconds;
-			ppi->delay_req_send_time.nanoseconds =
-				time->nanoseconds;
-
-			/* Add latency */
-			add_TimeInternal(&ppi->delay_req_send_time,
-					 &ppi->delay_req_send_time,
-					 &OPTS(ppi)->outbound_latency);
+			/* No more used: delay_req_send_time was taken
+			 * when sending it */
 		}
 		break;
 
