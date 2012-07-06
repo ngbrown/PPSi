@@ -18,6 +18,9 @@ void spec_main_loop(struct pp_instance *ppi)
 	/*pp_diag_verbosity = 1;*/
 	/* SPEC is raw ethernet by default */
 	NP(ppi)->proto_ofst = eth_ofst;
+
+	/* FIXME now it is end-to-end mode by default */
+	OPTS(ppi)->e2e_mode = 1;
 	/*
 	 * The main loop here is polling every ms. While we are not
 	 * doing anything else but the protocol, this allows extra stuff
