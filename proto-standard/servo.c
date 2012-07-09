@@ -313,7 +313,7 @@ void pp_update_clock(struct pp_instance *ppi)
 			pp_adj_freq(-adj);
 
 		dc++;
-		if (dc % 8 == 0) { /* Prints statistics every 8s */
+		if (dc % 2 == 0) { /* Prints statistics every 8s */
 				PP_PRINTF("ofst %d, raw ofst %d, mean-dly %d, adj %d\n",
 					DSCUR(ppi)->offsetFromMaster.nanoseconds,
 					SRV(ppi)->m_to_s_dly.nanoseconds,
