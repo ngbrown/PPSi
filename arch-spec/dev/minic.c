@@ -46,15 +46,9 @@ struct wr_minic {
   volatile uint32_t *rx_head, *rx_base; 
   uint32_t rx_avail, rx_size;
   volatile uint32_t *tx_head, *tx_base;
-  uint32_t tx_avail, tx_size;
+  uint32_t tx_size;
 
-  int synced;
-  int syncing_counters;
-  int iface_up;
-  
   int tx_count, rx_count;
-
-  uint32_t cur_rx_desc;
 };
 
 static struct wr_minic minic;
@@ -73,14 +67,14 @@ static uint8_t * minic_rx_memcpy( uint8_t *dst, uint8_t *src, uint32_t size)
 {
   uint32_t part;
   //if src is outside the circular buffer, bring it back to the beginning
-  src = (uint32_t)minic.rx_base + ((uint32_t)src - (uint32_t)minic.rx_base) % minic.rx_size;
+  src = (uint8_t *) ((uint32_t)minic.rx_base + ((uint32_t)src - (uint32_t)minic.rx_base) % minic.rx_size);
 
   if((uint32_t)src + size <= (uint32_t)minic.rx_base + minic.rx_size)
     return memcpy(dst, src, size);
 
   part = (uint32_t)minic.rx_base + minic.rx_size - (uint32_t)src;
   memcpy(dst, src, part);
-  memcpy(dst+part, minic.rx_base, size - part);
+  memcpy((void*) (dst+part), (void*)minic.rx_base, size - part);
   return dst;
 }
 
@@ -89,14 +83,14 @@ static uint8_t *minic_rx_memset( uint8_t *mem, uint8_t c, uint32_t size)
   uint32_t part;
   uint8_t *src;
   //if src is outside the circular buffer, bring it back to the beginning
-  src = (uint32_t)minic.rx_base + ((uint32_t)mem - (uint32_t)minic.rx_base) % minic.rx_size;
+  src = (uint8_t *)  ((uint32_t)minic.rx_base + ((uint32_t)mem - (uint32_t)minic.rx_base) % minic.rx_size);
 
   if((uint32_t)src + size <= (uint32_t)minic.rx_base + minic.rx_size)
     return memset(src, c, size);
 
   part = (uint32_t)minic.rx_base + minic.rx_size - (uint32_t)src;
   memset(src, c, part);
-  memset(minic.rx_base, c, size - part);
+  memset((void*)minic.rx_base, c, size - part);
 
   return src;
 }
@@ -106,7 +100,7 @@ static void minic_new_rx_buffer()
   minic_writel(MINIC_REG_MCR, 0);
   minic.rx_head = minic.rx_base;
   minic_rx_memset((uint8_t*)minic.rx_base, 0x00, minic.rx_size);
-  memset(minic.rx_base, 0x0, minic.rx_size);
+  memset((void*)minic.rx_base, 0x0, minic.rx_size);
   minic_writel(MINIC_REG_RX_ADDR, (uint32_t) minic.rx_base);
   minic_writel(MINIC_REG_RX_SIZE, minic.rx_size>>2);
   //new buffer allocated, clear any old RX interrupts
@@ -123,7 +117,6 @@ static void minic_rxbuf_free(uint32_t words)
 static void minic_new_tx_buffer()
 {
   minic.tx_head = minic.tx_base;
-  minic.tx_avail = minic.tx_size>>2;
 	
   minic_writel(MINIC_REG_TX_ADDR, (uint32_t) minic.tx_base);
 }
@@ -272,7 +265,7 @@ int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size, struct hw_time
 
 
 //  TRACE_DEV("minic_tx_frame: head %x size %d\n", minic.tx_head, size);
-  memset(minic.tx_head, 0x0, size + 16);
+  memset((void*)minic.tx_head, 0x0, size + 16);
   memset((void*)minic.tx_head + 4, 0, size < 60 ? 60 : size);
   memcpy((void*)minic.tx_head + 4, hdr, ETH_HEADER_SIZE);
   memcpy((void*)minic.tx_head + 4 + ETH_HEADER_SIZE, payload, size - ETH_HEADER_SIZE);
