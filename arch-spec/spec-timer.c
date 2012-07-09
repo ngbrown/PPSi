@@ -41,7 +41,7 @@ int spec_timer_expired(struct pp_timer *tm)
 
 	now = spec_time();
 
-	if (tm->start + tm->interval < now) {
+	if (tm->start + tm->interval <= now) {
 		tm->start = now;
 		return 1;
 	}
