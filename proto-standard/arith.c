@@ -91,6 +91,15 @@ void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y)
 	normalize_TimeInternal(r);
 }
 
+void div2_TimeInternal(TimeInternal *r)
+{
+    r->nanoseconds += r->seconds % 2 * 1000000000;
+    r->seconds /= 2;
+    r->nanoseconds /= 2;
+
+    normalize_TimeInternal(r);
+}
+
 void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns)
 {
 	t->seconds = s;

@@ -66,8 +66,7 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 				 &DSCUR(ppi)->meanPathDelay, correction_field);
 
 		/* Compute one-way delay */
-		DSCUR(ppi)->meanPathDelay.seconds /= 2;
-		DSCUR(ppi)->meanPathDelay.nanoseconds /= 2;
+		div2_TimeInternal(&DSCUR(ppi)->meanPathDelay);
 
 
 		if (DSCUR(ppi)->meanPathDelay.seconds) {
@@ -131,8 +130,7 @@ void pp_update_peer_delay(struct pp_instance *ppi,
 			&DSPOR(ppi)->peerMeanPathDelay, correction_field);
 
 		/* Compute one-way delay */
-		DSPOR(ppi)->peerMeanPathDelay.seconds /= 2;
-		DSPOR(ppi)->peerMeanPathDelay.nanoseconds /= 2;
+		div2_TimeInternal(&DSPOR(ppi)->peerMeanPathDelay);
 	} else {
 		/* One step clock */
 
@@ -145,8 +143,7 @@ void pp_update_peer_delay(struct pp_instance *ppi,
 			&DSPOR(ppi)->peerMeanPathDelay, correction_field);
 
 		/* Compute one-way delay */
-		DSPOR(ppi)->peerMeanPathDelay.seconds /= 2;
-		DSPOR(ppi)->peerMeanPathDelay.nanoseconds /= 2;
+		div2_TimeInternal(&DSPOR(ppi)->peerMeanPathDelay);
 	}
 
 	if (DSPOR(ppi)->peerMeanPathDelay.seconds) {
