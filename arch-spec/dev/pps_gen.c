@@ -54,7 +54,7 @@ void pps_gen_adjust_nsec(int32_t how_much)
 	PPSG->ADJ_UTCLO = 0;
 	PPSG->ADJ_UTCHI = 0;
 
-	PPSG->ADJ_NSEC = ( how_much / 8 );
+	PPSG->ADJ_NSEC = how_much; /* FIXME check: removed division by 8? */
 
 	PPSG->CR =  PPSG_CR_CNT_EN | PPSG_CR_PWIDTH_W(PPS_PULSE_WIDTH) | PPSG_CR_CNT_ADJ;
 #endif
