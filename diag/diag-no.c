@@ -30,6 +30,9 @@ void pp_diag_fatal(struct pp_instance *ppi, char *s1, char *s2)
 void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...)
 	__attribute__((weak,alias("pp_diag_nop")));
 
+void pp_timed_printf(char *fmt, ...)
+	__attribute__((weak,alias("pp_diag_nop")));
+
 int pp_printf(const char *fmt, ...)
 	__attribute__((weak,alias("pp_diag_nop")));
 

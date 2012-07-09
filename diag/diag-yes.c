@@ -53,3 +53,15 @@ void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...)
 	va_end(args);
 	pp_printf("MESSAGE for %p: %s", ppi, buf);
 }
+
+void pp_timed_printf(char *fmt, ...)
+{
+	va_list args;
+	char buf[128];
+	TimeInternal t;
+	pp_get_tstamp(&t);
+	va_start(args, fmt);
+	pp_vsprintf(buf, fmt, args);
+	va_end(args);
+	pp_printf("%09d.%03d %s", t.seconds, t.nanoseconds / 1000000, buf);
+}

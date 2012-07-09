@@ -24,6 +24,7 @@ extern int pp_diag_verbosity;
 #define PP_ERR2(ppi,s1,s2) if pp_diag_error_str2(ppi,s1,s2)
 #define PP_FATAL(ppi,s1,s2) if pp_diag_fatal(ppi,s1,s2)
 #define PP_PRINTF(...) pp_printf(__VA_ARGS__)
+#define PP_TPRINTF(...) pp_timed_printf(__VA_ARGS__)
 #define PP_VPRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
 
 /*
@@ -339,7 +340,7 @@ extern void display_TimeInternal(const char *label, TimeInternal *t);
 /* Get and Set system timestamp */
 extern void pp_get_tstamp(TimeInternal *t);
 extern int32_t pp_set_tstamp(TimeInternal *t);
-
+extern const char *pp_get_tstamp_str();
 
 /* Virtualization of Linux adjtimex (or BSD adjtime) system clock time
  * adjustment. Boolean: returns 1 in case of success and 0 if failure */
