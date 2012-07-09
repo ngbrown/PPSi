@@ -227,6 +227,12 @@ int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size, struct hw_
 
       hwts->nsec = counter_r * 8;
       hwts->valid = (dhdr & RXOOB_TS_INCORRECT) ? 0 : 1;
+      if (!hwts->valid) {
+        int k;
+        PP_VPRINTF("Warning: rx timestamp invalid - dhdr: ");
+        for (k = 0; k < 2; k++) PP_VPRINTF("%02x ", ((char*)&dhdr)[k]);
+        PP_VPRINTF("\n");
+      }
     }
 
     n_recvd = (buf_size < payload_size ? buf_size : payload_size);
@@ -321,6 +327,9 @@ int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size, struct hw_time
       hwts->ahead = 0;
       hwts->nsec = counter_r * 8;
 
+	if (!ts_valid) {
+		PP_PRINTF("Warning: tx timestamp invalid\n");
+	}
 //	  TRACE_DEV("minic_tx_frame [%d bytes] TS: %d.%d valid %d\n", size, hwts->utc, hwts->nsec, hwts->valid);
 	  minic.tx_count++;
 

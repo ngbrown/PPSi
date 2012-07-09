@@ -33,13 +33,13 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
 		if (s_to_m_dly.seconds) {
-			PP_PRINTF("updateDelay aborted, delay greater than 1"
-			     " second.");
+			PP_VPRINTF("pp_update_delay aborted, delay greater than 1"
+			     " second\n");
 			return;
 		}
 
 		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly) {
-			PP_PRINTF("updateDelay aborted, delay %d greater than "
+			PP_VPRINTF("pp_update_delay aborted, delay %d greater than "
 			     "administratively set maximum %d\n",
 			     s_to_m_dly.nanoseconds,
 			     OPTS(ppi)->max_dly);
@@ -254,13 +254,13 @@ void pp_update_clock(struct pp_instance *ppi)
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
 		if (DSCUR(ppi)->offsetFromMaster.seconds) {
 			PP_PRINTF("pp_update_clock aborted, offset greater "
-				   "than 1 second.");
+				   "than 1 second\n");
 			goto display;
 		}
 
 		if (DSCUR(ppi)->offsetFromMaster.nanoseconds >
 			OPTS(ppi)->max_rst) {
-			PP_PRINTF("updateClock aborted, offset %d greater than "
+			PP_VPRINTF("pp_update_clock aborted, offset %d greater than "
 			     "administratively set maximum %d\n",
 			     DSCUR(ppi)->offsetFromMaster.nanoseconds,
 			     OPTS(ppi)->max_rst);
@@ -285,6 +285,7 @@ void pp_update_clock(struct pp_instance *ppi)
 			}
 		}
 	} else {
+		static int dc = 0;
 		/* the PI controller */
 
 		/* no negative or zero attenuation */
@@ -310,6 +311,16 @@ void pp_update_clock(struct pp_instance *ppi)
 		/* apply controller output as a clock tick rate adjustment */
 		if (!OPTS(ppi)->no_adjust)
 			pp_adj_freq(-adj);
+
+		dc++;
+		if (dc % 8 == 0) { /* Prints statistics every 8s */
+				PP_PRINTF("ofst %d, raw ofst %d, mean-dly %d, adj %d\n",
+					DSCUR(ppi)->offsetFromMaster.nanoseconds,
+					SRV(ppi)->m_to_s_dly.nanoseconds,
+					DSCUR(ppi)->meanPathDelay.nanoseconds,
+					adj);
+
+		}
 	}
 
 display:
@@ -319,26 +330,26 @@ display:
 	*/
 
 
-	PP_PRINTF("\n--Offset Correction-- \n");
-	PP_PRINTF("Raw offset from master:  %10ds %11dns\n",
+	PP_VPRINTF("\n--Offset Correction-- \n");
+	PP_VPRINTF("Raw offset from master:  %10ds %11dns\n",
 		SRV(ppi)->m_to_s_dly.seconds,
 		SRV(ppi)->m_to_s_dly.nanoseconds);
 
-	PP_PRINTF("\n--Offset and Delay filtered-- \n");
+	PP_VPRINTF("\n--Offset and Delay filtered-- \n");
 
 	if (!OPTS(ppi)->e2e_mode) {
-		PP_PRINTF("one-way delay averaged (P2P):  %10ds %11dns\n",
+		PP_VPRINTF("one-way delay averaged (P2P):  %10ds %11dns\n",
 		    DSPOR(ppi)->peerMeanPathDelay.seconds,
 		    DSPOR(ppi)->peerMeanPathDelay.nanoseconds);
 	} else {
-		PP_PRINTF("one-way delay averaged (E2E):  %10ds %11dns\n",
+		PP_VPRINTF("one-way delay averaged (E2E):  %10ds %11dns\n",
 		    DSCUR(ppi)->meanPathDelay.seconds,
 		    DSCUR(ppi)->meanPathDelay.nanoseconds);
 	}
 
-	PP_PRINTF("offset from master:      %10ds %11dns\n",
+	PP_VPRINTF("offset from master:      %10ds %11dns\n",
 	    DSCUR(ppi)->offsetFromMaster.seconds,
 	    DSCUR(ppi)->offsetFromMaster.nanoseconds);
-	PP_PRINTF("observed drift:          %10d\n", SRV(ppi)->obs_drift);
+	PP_VPRINTF("observed drift:          %10d\n", SRV(ppi)->obs_drift);
 
 }

@@ -341,7 +341,7 @@ extern void div2_TimeInternal(TimeInternal *r);
 /* Get and Set system timestamp */
 extern void pp_get_tstamp(TimeInternal *t);
 extern int32_t pp_set_tstamp(TimeInternal *t);
-extern const char *pp_get_tstamp_str();
+
 
 /* Virtualization of Linux adjtimex (or BSD adjtime) system clock time
  * adjustment. Boolean: returns 1 in case of success and 0 if failure */

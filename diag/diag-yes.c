@@ -12,12 +12,12 @@ void pp_diag_fsm(struct pp_instance *ppi, char *name, int sequence, int plen)
 {
 	if (sequence == STATE_ENTER) {
 		/* enter with or without a packet len */
-		pp_printf("fsm for %p: ENTER %3i (%s), packet len %i\n",
+		pp_timed_printf("fsm for %p: ENTER %3i (%s), packet len %i\n",
 			  ppi, ppi->state, name, plen);
 		return;
 	}
 	/* leave has one \n more, so different states are separate */
-	pp_printf("fsm for %p: LEAVE %3i (%s) (next: %3i in %i ms)\n\n",
+	pp_timed_printf("fsm for %p: LEAVE %3i (%s) (next: %3i in %i ms)\n\n",
 		  ppi, ppi->state, name, ppi->next_state, ppi->next_delay);
 }
 

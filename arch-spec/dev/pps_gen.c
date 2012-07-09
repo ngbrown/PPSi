@@ -38,7 +38,6 @@ void pps_gen_init()
 
 void pps_gen_set(int32_t sec, int32_t nsec)
 {
-	TRACE_DEV("ADJ: sec %d nsec %d\n", sec, nsec);
 	PPSG->ADJ_UTCLO = sec;
 	PPSG->ADJ_UTCHI = 0;
 
@@ -46,11 +45,11 @@ void pps_gen_set(int32_t sec, int32_t nsec)
 
 	PPSG->CR =  PPSG_CR_CNT_EN | PPSG_CR_PWIDTH_W(PPS_PULSE_WIDTH) |
 				PPSG_CR_CNT_SET;
+	PP_PRINTF("UTC set %d.%d\n", sec, nsec);
 }
 
 void pps_gen_adjust_nsec(int32_t how_much)
 {
-	TRACE_DEV("ADJ: nsec %d nanoseconds\n", how_much);
 #if 1
 	PPSG->ADJ_UTCLO = 0;
 	PPSG->ADJ_UTCHI = 0;
@@ -66,7 +65,6 @@ void pps_gen_adjust_utc(int32_t how_much)
 {
 
 #if 1
-	TRACE_DEV("ADJ: utc %d seconds\n", how_much);
 	PPSG->ADJ_UTCLO = how_much;
 	PPSG->ADJ_UTCHI = 0;
 	PPSG->ADJ_NSEC = 0;

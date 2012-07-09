@@ -17,7 +17,12 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 {
 	struct pp_state_table_item *ip;
 	int state, err;
-
+#ifdef PPSI_MASTER__
+	if ((plen > 0))
+		pp_printf("RECV %02d %d.%d %s\n", plen,
+			ppi->last_rcv_time.seconds,
+			ppi->last_rcv_time.nanoseconds,pp_msg_names[packet[0] & 0x0f]);
+#endif
 	if (packet)
 		msg_unpack_header(ppi, packet);
 
@@ -30,13 +35,15 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		/* found: handle this state */
 		ppi->next_state = state;
 		ppi->next_delay = 0;
-		pp_diag_fsm(ppi, ip->name, STATE_ENTER, plen);
+		if ((pp_diag_verbosity) || (ppi->is_new_state))
+			pp_diag_fsm(ppi, ip->name, STATE_ENTER, plen);
 		err = ip->f1(ppi, packet, plen);
 		if (!err && ip->f2)
 			err = ip->f2(ppi, packet, plen);
 		if (err)
 			pp_diag_error(ppi, err);
-		pp_diag_fsm(ppi, ip->name, STATE_LEAVE, 0 /* unused */);
+		if (pp_diag_verbosity)
+			pp_diag_fsm(ppi, ip->name, STATE_LEAVE, 0 /* unused */);
 
 		ppi->is_new_state = 0;
 

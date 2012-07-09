@@ -108,5 +108,7 @@ void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns)
 
 void display_TimeInternal(const char *label, TimeInternal *t)
 {
-        PP_VPRINTF("%s: %d.%d \n", label, t->seconds, t->nanoseconds);
+	PP_VPRINTF("%s: %s%d.%09d \n", label,
+		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0)) ? "-" : " ",
+		abs(t->seconds), abs(t->nanoseconds));
 }
