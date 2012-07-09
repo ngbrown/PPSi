@@ -82,19 +82,17 @@ int pps_gen_busy()
 
 void pps_gen_get_time(uint32_t *utc, uint32_t *cntr_nsec)
 {
-	uint32_t cyc_before, cyc_after;
-	uint32_t utc_lo;
+	uint32_t nsec;
+	uint32_t utc_lo1, utc_lo2;
 
-	do {
-		cyc_before = PPSG->CNTR_NSEC & 0xfffffff;
-		utc_lo = PPSG->CNTR_UTCLO;
-		cyc_after = PPSG->CNTR_NSEC & 0xfffffff;
-	} while (cyc_after < cyc_before);
+	utc_lo1 = PPSG->CNTR_UTCLO;
+	nsec = PPSG->CNTR_NSEC & 0xfffffff;
+	utc_lo2 = PPSG->CNTR_UTCLO;
+	if (utc_lo2 != utc_lo1)
+		nsec = PPSG->CNTR_NSEC & 0xfffffff;
 
-//	delay(100000);
-
-	if(utc) *utc = utc_lo;
-	if(cntr_nsec) *cntr_nsec = cyc_after;
+	if(utc) *utc = utc_lo2;
+	if(cntr_nsec) *cntr_nsec = nsec;
 }
 
 
