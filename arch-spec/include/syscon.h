@@ -1,3 +1,4 @@
+
 #ifndef __SYSCON_H
 #define __SYSCON_H
 
@@ -36,8 +37,7 @@ extern struct s_i2c_if i2c_if[2];
 
 void timer_init(uint32_t enable);
 uint32_t timer_get_tics();
-void spec_udelay(int usec);
-int spec_time(void);
+void timer_delay(uint32_t how_long);
 
 static volatile struct SYSCON_WB *syscon = (volatile struct SYSCON_WB *) BASE_SYSCON;
 
@@ -55,6 +55,11 @@ static inline void gpio_out(int pin, int val)
 static inline int gpio_in(int pin)
 {
 	return syscon->GPSR & pin ? 1: 0;
+}
+
+static inline int sysc_get_memsize()
+{
+	return (SYSC_HWFR_MEMSIZE_R(syscon->HWFR) + 1) * 16;
 }
 
 #endif

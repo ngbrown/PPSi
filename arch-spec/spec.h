@@ -70,14 +70,15 @@ struct spec_ethhdr {
 
 /* Low-level details (from board.h in wr-core-tools) */
 
-#define BASE_MINIC	  0x20000
-#define BASE_EP		    0x20100
-#define BASE_SOFTPLL	0x20200
-#define BASE_PPSGEN	  0x20300
+#define BASE_MINIC    0x20000
+#define BASE_EP   	  0x20100
+#define BASE_SOFTPLL  0x20200
+#define BASE_PPS_GEN  0x20300
 #define BASE_SYSCON   0x20400
-#define BASE_UART	    0x20500
+#define BASE_UART 	  0x20500
 #define BASE_ONEWIRE  0x20600
-//#define BASE_TIMER	  0x61000
+
+#define FMC_EEPROM_ADR 0x50
 
 #define CPU_CLOCK	62500000ULL
 
@@ -97,7 +98,7 @@ struct spec_ethhdr {
 struct hw_timestamp {
 	uint8_t valid;
 	int ahead;
-	uint32_t utc;
+	uint64_t sec;
 	uint32_t nsec;
 	uint32_t phase;
 };
@@ -106,5 +107,10 @@ struct hw_timestamp {
 #define DMTD_MAX_PHASE 16384
 
 #define NULL 0
+
+#define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)
+
+#define REF_CLOCK_PERIOD_PS 8000
+#define REF_CLOCK_FREQ_HZ 125000000
 
 #endif

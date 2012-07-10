@@ -44,7 +44,7 @@ int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 
 	if (t) {
 		//add phase value and linearize function for WR support
-		t->seconds = hwts.utc;
+		t->seconds = hwts.sec;
 		t->nanoseconds = hwts.nsec;
 
 		PP_VPRINTF("%s: got=%d, sec=%d, nsec=%d\n", __FUNCTION__, got,
@@ -75,7 +75,7 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
 
 	if (t) {
 		/* add phase value and linearize function for WR support */
-		t->seconds = hwts.utc;
+		t->seconds = hwts.sec;
 		t->nanoseconds = hwts.nsec;
 
 		PP_VPRINTF("%s: got=%d, sec=%d, nsec=%d\n", __FUNCTION__, got,

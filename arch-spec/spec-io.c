@@ -3,6 +3,7 @@
  */
 #include <ppsi/ppsi.h>
 #include <hw/wb_uart.h>
+#include <pps_gen.h>
 #include "spec.h"
 
 const Integer32 PP_ADJ_FREQ_MAX = 512000; //GGDD value ?
@@ -92,14 +93,14 @@ int32_t spec_set_tstamp(TimeInternal *t)
 {
 	TimeInternal tp_orig;
 
-	pps_gen_set(t->seconds, t->nanoseconds);
+	pps_gen_set_time(t->seconds, t->nanoseconds);
 
 	return 0; /* SPEC uses a sort of monotonic tstamp for timers */
 }
 
 int spec_adj_freq(Integer32 adj)
 {
-	pps_gen_adjust_nsec(adj);
+	pps_gen_adjust(PPSG_ADJUST_NSEC, adj);
 	return 0;
 }
 

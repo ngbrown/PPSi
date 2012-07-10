@@ -19,7 +19,7 @@ uint32_t timer_get_tics()
 	return syscon->TVR;
 }
 
-void spec_udelay(int usecs)
+void timer_delay(uint32_t usecs)
 {
 	uint32_t start, end;
 
@@ -32,6 +32,20 @@ void spec_udelay(int usecs)
 	while ((signed)(end - timer_get_tics()) > 0)
 		;
 }
+
+/*
+void timer_delay(uint32_t how_long)
+{
+  uint32_t t_start;
+
+//  timer_init(1);
+  do
+  {
+    t_start = timer_get_tics();
+  } while(t_start > UINT32_MAX - how_long); //in case of overflow
+
+  while(t_start + how_long > timer_get_tics());
+}*/
 
 /* return a monotonic seconds count from the counter above; horrible code */
 int spec_time(void)

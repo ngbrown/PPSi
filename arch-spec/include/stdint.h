@@ -15,4 +15,6 @@ typedef signed short	int16_t;
 typedef signed long	int32_t;
 typedef signed long long int64_t;
 
+#define UINT32_MAX 4294967295U
+
 #endif /* __ARCH_SPEC_STDINT_H__ */

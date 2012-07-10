@@ -26,14 +26,16 @@ void spec_main_loop(struct pp_instance *ppi)
 	 * doing anything else but the protocol, this allows extra stuff
 	 * to fit.
 	 */
+
 	delay_ms = pp_state_machine(ppi, NULL, 0);
 	while (1) {
 		unsigned char _packet[1500];
 		/* FIXME Alignment */
 		unsigned char *packet = _packet + 2;
+
 		/* Wait for a packet or for the timeout */
 		while (delay_ms && !minic_poll_rx()) {
-			spec_udelay(1000);
+			timer_delay(1000);
 			delay_ms--;
 		}
 		if (!minic_poll_rx()) {
@@ -61,4 +63,5 @@ void spec_main_loop(struct pp_instance *ppi)
 			continue;
 		delay_ms = pp_state_machine(ppi, packet + eth_ofst, i - eth_ofst);
 	}
+	pp_printf("OUT MAIN LOOP\n");
 }

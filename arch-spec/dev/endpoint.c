@@ -106,7 +106,7 @@ int ep_enable(int enabled, int autoneg)
 /* Reset the GTP Transceiver - it's important to do the GTP phase alignment every time
    we start up the software, otherwise the calibration RX/TX deltas may not be correct */
 	pcs_write(MDIO_REG_MCR, MDIO_MCR_PDOWN); /* reset the PHY */
-	spec_udelay(200);
+	timer_delay(200);
 	pcs_write(MDIO_REG_MCR, MDIO_MCR_RESET);  /* reset the PHY */
 	pcs_write(MDIO_REG_MCR, 0);  /* reset the PHY */
 
@@ -145,32 +145,11 @@ int ep_get_deltas(uint32_t *delta_tx, uint32_t *delta_rx)
 {
 	/* fixme: these values should be stored in calibration block in the EEPROM on the FMC. Also, the TX/RX delays of a particular SFP
 	   should be added here */
-	*delta_tx = 0;
-	*delta_rx = 15000 - 7000 + 195000 + 32000 + PICOS_PER_SERIAL_BIT * MDIO_WR_SPEC_BSLIDE_R(pcs_read(MDIO_REG_WR_SPEC)) + 2800 - 9000 - 40000 + 2700;
+	*delta_tx = 46407;
+	*delta_rx = 273593 + PICOS_PER_SERIAL_BIT * MDIO_WR_SPEC_BSLIDE_R(pcs_read(MDIO_REG_WR_SPEC));
 	return 0;
 }
 
-/* Prints out the RMON statistic counters */
-void ep_show_counters()
-{
-	int i;
-	for(i=0;i<16;i++)
-		TRACE_DEV("cntr%d = %d\n", i, (int)(EP->RMON_RAM[i]));
-}
-
-int ep_get_psval(int32_t *psval)
-{
-	uint32_t val;
-
-	val = EP->DMSR;
-
-	if(val & EP_DMSR_PS_RDY)
-		*psval =  EP_DMSR_PS_VAL_R(val);
-	else
-		*psval = 0;
-
-	return val & EP_DMSR_PS_RDY ? 1 : 0;
-}
 
 int ep_cal_pattern_enable()
 {
