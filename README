@@ -20,14 +20,16 @@ Rabbit is developed at ohwr.org:
 http://www.ohwr.org/projects/white-rabbit
 
 
-	Current Status (February 2012)
+	Current Status (July 2012)
 	==============================
 
 We currently have only standard PTP (IEEE 1588) with no extensions.
 Code for the White Rabbit extension is being worked on (currently WR
 devices use a different code base, which should be replaced by this one).
 
-The only working architecture is called "gnu-linux" at this point.
+The working architectures are "gnu-linux" and "spec":
+* gnu-linux supports both UDP and IEEE 802.3 (raw ethernet) transport protocols
+* spec supports IEEE 802.3 protocol only
 
 
 	Compile-time Configuration
@@ -54,6 +56,8 @@ environment:
     ARCH                        name of you arch (default: gnu-linux)
     HAS_DIAG                    set to "y" or leave unset
     HAS_FULL_DIAG               set to "y" or leave unset
+    WRMODE (spec only)          set to "master" for m/s autodetect; set to
+                                "slave" for slave only configuration
 
 NOTE: The default has no diagnostics, so you most likely will want to run
 
