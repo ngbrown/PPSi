@@ -28,12 +28,18 @@ OBJ-y := fsm.o
 # include diagnostic objects
 include diag/Makefile
 
-# proto-standard is always included
-include proto-standard/Makefile
+# Update 2012-07-10
+# proto-standard should always be included, but in this current devel step
+# each proto is intended as a separate plugin (not properly an "extension").
+# See below (ifdef PROTO_EXT/else)
+#include proto-standard/Makefile
 
 # including the extension Makefile, if an extension is there
+PROTO_EXT ?= whiterabbit
 ifdef PROTO_EXT
   include proto-ext-$(PROTO_EXT)/Makefile
+else
+  include proto-standard/Makefile
 endif
 
 WRMODE = slave

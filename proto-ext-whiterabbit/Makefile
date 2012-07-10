@@ -1,9 +1,30 @@
-# Makefile for an extended protocol.
-# Alessandro Rubini for CERN, 2011 -- public domain
-#
-# We add to obj-y, and further undefined symbols are taken from libstd
-# (i.e., code and data from the standard protocol)
+# Hosted environment: build the final exectuable
 
-P := proto-ext-$(PROTO_EXT)
+# All files are under D: I'm lazy
+W := proto-ext-whiterabbit
 
-OBJ-y += $P/ext-wr.o
+LIBWR := $W/libwr.a
+
+LIBS += -L$W -lwr
+
+OBJ-libwr := $W/fsm-table.o \
+	$W/state-initializing.o \
+	$W/state-faulty.o \
+	$W/state-disabled.o \
+	$W/state-listening.o \
+	$W/state-pre-master.o \
+	$W/state-master.o \
+	$W/state-passive.o \
+	$W/state-uncalibrated.o \
+	$W/state-slave.o \
+	$W/common-fun.o \
+	$W/bmc.o \
+	$W/msg.o \
+	$W/arith.o \
+	$W/servo.o \
+	$W/open-close.o
+
+$(TARGET).o: $(LIBWR)
+
+$(LIBWR): $(OBJ-libwr)
+	$(AR) r $@ $^
