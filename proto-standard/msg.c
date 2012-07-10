@@ -604,7 +604,9 @@ const char const * pp_msg_names[] = {
 		return -1;\
 	}\
 	ppi->sent_seq_id[PPM_## x]++;\
-	//PP_PRINTF("SENT %02d %d.%d %s \n", PP_## x ##_LENGTH, ppi->last_snt_time.seconds, ppi->last_snt_time.nanoseconds,pp_msg_names[PPM_##x]);\
+	PP_VPRINTF("SENT %02d %d.%d %s \n", PP_## x ##_LENGTH,\
+		ppi->last_snt_time.seconds,\
+		ppi->last_snt_time.nanoseconds,pp_msg_names[PPM_##x]);\
 	return 0;
 #endif
 
