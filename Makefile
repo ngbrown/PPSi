@@ -49,9 +49,9 @@ else
 CFLAGS += -DPPSI_SLAVE
 endif
 
-# Include arch code, the default is hosted GNU/Linux stuff
+# Include arch code, the default is spec
 # we need this -I so <arch/arch.h> can be found
-ARCH ?= gnu-linux
+ARCH ?= spec
 CFLAGS += -Iarch-$(ARCH)/include
 include arch-$(ARCH)/Makefile
 
