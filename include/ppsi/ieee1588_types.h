@@ -191,8 +191,6 @@ typedef struct {
 	char		*tlv;
 } MsgManagement;
 
-
-
 /* Default Data Set */
 typedef struct {
 	/* Static */

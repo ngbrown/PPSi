@@ -260,7 +260,6 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 	msg_display_announce(ann);
 }
 
-
 /* Pack Follow Up message into out buffer of ppi*/
 void msg_pack_follow_up(struct pp_instance *ppi, Timestamp *prec_orig_tstamp)
 {
@@ -341,7 +340,6 @@ void msg_pack_pdelay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 	/* RAZ reserved octets */
 }
 
-
 /* pack DelayReq message into out buffer of ppi */
 void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
@@ -370,7 +368,6 @@ void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 	*(UInteger32 *) (buf + 36) = htonl(orig_tstamp->secondsField.lsb);
 	*(UInteger32 *) (buf + 40) = htonl(orig_tstamp->nanosecondsField);
 }
-
 
 /* pack DelayResp message into OUT buffer of ppi */
 void msg_pack_delay_resp(struct pp_instance *ppi,
@@ -464,8 +461,6 @@ void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req)
 			  &delay_req->originTimestamp);
 	PP_VPRINTF("\n");
 }
-
-
 
 /* Unpack PdelayReq message from IN buffer of ppi to msgtmp.req */
 void msg_unpack_pdelay_req(void *buf, MsgPDelayReq *pdelay_req)
