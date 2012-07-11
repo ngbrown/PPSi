@@ -22,7 +22,8 @@ OBJ-libwr := $W/fsm-table.o \
 	$W/msg.o \
 	$W/arith.o \
 	$W/servo.o \
-	$W/open-close.o
+	$W/open-close.o \
+	$W/wr_msg.o
 
 $(TARGET).o: $(LIBWR)
 

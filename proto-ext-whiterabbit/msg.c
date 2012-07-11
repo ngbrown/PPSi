@@ -5,6 +5,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include "wr_constants.h"
 
 static inline void Integer64_display(const char *label, Integer64 *bigint)
 {
@@ -62,6 +63,7 @@ static inline void msg_display_announce(MsgAnnounce *announce)
         PP_VPRINTF("stepsRemoved: %d\n", announce->stepsRemoved);
         PP_VPRINTF("timeSource: %d\n", announce->timeSource);
         PP_VPRINTF("\n");
+	/* FIXME diagnostic WR extension*/
 }
 
 /* Unpack header from in buffer to msg_tmp_header field */
@@ -186,7 +188,7 @@ void msg_unpack_sync(void *buf, MsgSync *sync)
 }
 
 /* Pack Announce message into out buffer of ppi */
-void msg_pack_announce(struct pp_instance *ppi)
+int msg_pack_announce(struct pp_instance *ppi)
 {
 	void *buf;
 
@@ -215,11 +217,20 @@ void msg_pack_announce(struct pp_instance *ppi)
 	       PP_CLOCK_IDENTITY_LENGTH);
 	*(UInteger16 *) (buf + 61) = htons(DSCUR(ppi)->stepsRemoved);
 	*(Enumeration8 *) (buf + 63) = DSPRO(ppi)->timeSource;
+
+	if (DSPOR(ppi)->wrConfig != NON_WR &&
+		DSPOR(ppi)->wrConfig != WR_S_ONLY) {
+		msg_pack_announce_wr_tlv(ppi);
+		return WR_ANNOUNCE_LENGTH;
+	}
+
+	return PP_ANNOUNCE_LENGTH;
 }
 
 /* Unpack Announce message from in buffer of ppi to msgtmp. Announce */
 void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 {
+	int msg_len;
 	ann->originTimestamp.secondsField.msb =
 		htons(*(UInteger16 *) (buf + 34));
 	ann->originTimestamp.secondsField.lsb =
@@ -239,6 +250,12 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 	       PP_CLOCK_IDENTITY_LENGTH);
 	ann->stepsRemoved = htons(*(UInteger16 *) (buf + 61));
 	ann->timeSource = *(Enumeration8 *) (buf + 63);
+
+	msg_len = htons(*(UInteger16 *) (buf + 2));
+
+	if (msg_len > PP_ANNOUNCE_LENGTH) {
+		msg_unpack_announce_wr_tlv(buf, ann);
+	}
 
 	msg_display_announce(ann);
 }
@@ -585,37 +602,28 @@ const char const * pp_msg_names[] = {
 	"management"
 };
 
-#ifdef PPSI_SLAVE
-#define MSG_SEND_AND_RET(x,y,z)\
-	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH,\
+#define MSG_SEND_AND_RET_VARLEN(x,y,z,w)\
+	if (pp_send_packet(ppi, ppi->buf_out, w,\
 		&ppi->last_snt_time, PP_NP_##y , z) < PP_## x ##_LENGTH) {\
 		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n",\
 			pp_msg_names[PPM_##x], PPM_##x);\
 		return -1;\
 	}\
-	ppi->sent_seq_id[PPM_## x]++;\
-	return 0;
-#else
-#define MSG_SEND_AND_RET(x,y,z)\
-	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH,\
-		&ppi->last_snt_time, PP_NP_##y , z) < PP_## x ##_LENGTH) {\
-		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n",\
-			pp_msg_names[PPM_##x], PPM_##x);\
-		return -1;\
-	}\
-	ppi->sent_seq_id[PPM_## x]++;\
-	PP_VPRINTF("SENT %02d %d.%d %s \n", PP_## x ##_LENGTH,\
+	PP_PRINTF("SENT %02d %d.%d %s \n", PP_## x ##_LENGTH,\
 		ppi->last_snt_time.seconds,\
 		ppi->last_snt_time.nanoseconds,pp_msg_names[PPM_##x]);\
+	ppi->sent_seq_id[PPM_## x]++;\
 	return 0;
-#endif
+
+
+#define MSG_SEND_AND_RET(x,y,z)\
+	MSG_SEND_AND_RET_VARLEN(x,y,z,PP_## x ##_LENGTH)
+
 
 /* Pack and send on general multicast ip adress an Announce message */
 int msg_issue_announce(struct pp_instance *ppi)
 {
-	msg_pack_announce(ppi);
-
-	MSG_SEND_AND_RET(ANNOUNCE, GEN, 0);
+	MSG_SEND_AND_RET_VARLEN(ANNOUNCE, GEN, 0, msg_pack_announce(ppi));
 }
 
 /* Pack and send on event multicast ip adress a Sync message */
