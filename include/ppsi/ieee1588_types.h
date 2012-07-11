@@ -42,8 +42,18 @@ typedef struct {
 } Integer64;
 
 typedef struct {
+	uint32_t	lsb;
+	uint32_t		msb;
+} UInteger64;
+
+typedef struct {
 	Integer64	scaledNanoseconds;
 } TimeInterval;
+
+/* White Rabbit extension */
+typedef struct {
+	UInteger64 scaledPicoseconds;
+} FixedDelta;
 
 typedef struct  {
 	UInteger48	secondsField;
@@ -120,6 +130,10 @@ typedef struct {
 	ClockIdentity	grandmasterIdentity;
 	UInteger16	stepsRemoved;
 	Enumeration8	timeSource;
+
+	/* White Rabbit extension begin */
+	UInteger8 wrFlags;
+	/* White Rabbit extension end */
 } MsgAnnounce;
 
 /* Sync Message (table 26, page 129) */
@@ -230,6 +244,32 @@ typedef struct {
 	Enumeration8	delayMechanism;
 	Integer8	logMinPdelayReqInterval;
 	UInteger4	versionNumber;
+
+	/* White Rabbit extension begin (see wrspec.v2-06-07-2011, page 17) */
+	Enumeration8 wrConfig;
+	Enumeration8 wrMode;
+	Boolean wrModeOn;
+	Enumeration8  wrPortState;
+	/* FIXME check doc: knownDeltaTx, knownDeltaRx, deltasKnown?) */
+	Boolean calibrated;
+	FixedDelta deltaTx;
+	FixedDelta deltaRx;
+	UInteger32 wrStateTimeout;
+	UInteger8 wrStateRetry;
+	UInteger32 calPeriod;
+	UInteger8 calRetry;
+	Enumeration8 parentWrConfig;
+	/* FIXME check doc: (parentWrMode?) */
+	Boolean parentWrModeON;
+	Boolean parentCalibrated;
+
+	/* FIXME: are they in the doc? */
+	UInteger16 otherNodeCalSendPattern;
+	UInteger32 otherNodeCalPeriod;
+	UInteger8 otherNodeCalRetry;
+	FixedDelta otherNodeDeltaTx;
+	FixedDelta otherNodeDeltaRx;
+	/* White Rabbit extension end */
 } DSPort;
 
 /* Time Properties Data Set */

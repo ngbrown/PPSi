@@ -5,6 +5,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include "wr_constants.h"
 
 /*
  * Initializes network and other stuff
@@ -61,6 +62,11 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	DSPOR(ppi)->delayMechanism = PP_DEFAULT_DELAY_MECHANISM;
 	DSPOR(ppi)->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
 	DSPOR(ppi)->versionNumber = PP_VERSION_PTP;
+
+	DSPOR(ppi)->wrConfig = WR_MODE_AUTO;
+	DSPOR(ppi)->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
+	DSPOR(ppi)->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
+	DSPOR(ppi)->calPeriod = WR_DEFAULT_CAL_PERIOD;
 
 	if (pp_timer_init(ppi))
 		goto failure;
