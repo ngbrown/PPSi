@@ -110,8 +110,10 @@ void msg_unpack_announce_wr_tlv(void *buf, MsgAnnounce *ann)
 int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 {
 	void *buf;
+	UInteger16 len = 0;
+
 	if ((DSPOR(ppi)->wrMode == NON_WR) || (wr_msg_id == ANN_SUFIX)) {
-		PP_PRINTF("BUG: Trying to send invalid wr_msg mode=%d id=%d",
+		PP_PRINTF("BUG: Trying to send invalid wr_msg mode=%x id=%x",
 			  DSPOR(ppi)->wrMode, wr_msg_id);
 		return 0;
 	}
@@ -140,7 +142,6 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 	/* wrMessageId */
 	*(UInteger16*)(buf+54) = htons(wr_msg_id);
 
-	UInteger16 len = 0;
 	switch (wr_msg_id) {
 	case CALIBRATE:
 		if(DSPOR(ppi)->calibrated) {
@@ -187,7 +188,6 @@ void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 	UInteger32 tlv_organizationID;
 	UInteger16 tlv_magicNumber;
 	UInteger16 tlv_versionNumber;
-	UInteger16 len = (UInteger16)get_be16(buf+2);
 
 	pp_memcpy(wrsig_msg->targetPortIdentity.clockIdentity,(buf+34),
 	       PP_CLOCK_IDENTITY_LENGTH);
