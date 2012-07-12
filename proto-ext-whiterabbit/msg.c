@@ -6,6 +6,7 @@
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 #include "wr-api.h"
+#include "common-fun.h"
 
 static inline void Integer64_display(const char *label, Integer64 *bigint)
 {
@@ -597,28 +598,12 @@ const char const * pp_msg_names[] = {
 	"management"
 };
 
-#define MSG_SEND_AND_RET_VARLEN(x,y,z,w)\
-	if (pp_send_packet(ppi, ppi->buf_out, w,\
-		&ppi->last_snt_time, PP_NP_##y , z) < PP_## x ##_LENGTH) {\
-		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n",\
-			pp_msg_names[PPM_##x], PPM_##x);\
-		return -1;\
-	}\
-	PP_PRINTF("SENT %02d %d.%d %s \n", PP_## x ##_LENGTH,\
-		ppi->last_snt_time.seconds,\
-		ppi->last_snt_time.nanoseconds,pp_msg_names[PPM_##x]);\
-	ppi->sent_seq_id[PPM_## x]++;\
-	return 0;
-
-
-#define MSG_SEND_AND_RET(x,y,z)\
-	MSG_SEND_AND_RET_VARLEN(x,y,z,PP_## x ##_LENGTH)
-
-
 /* Pack and send on general multicast ip adress an Announce message */
 int msg_issue_announce(struct pp_instance *ppi)
 {
-	MSG_SEND_AND_RET_VARLEN(ANNOUNCE, GEN, 0, msg_pack_announce(ppi));
+	int len;
+	len = msg_pack_announce(ppi);
+	MSG_SEND_AND_RET_VARLEN(ANNOUNCE, GEN, 0, len);
 }
 
 /* Pack and send on event multicast ip adress a Sync message */

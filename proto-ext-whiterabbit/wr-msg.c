@@ -5,7 +5,8 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "wr-constants.h"
+#include "wr-api.h"
+#include "common-fun.h"
 
 /*
  * WR way to handle little/big endianess
@@ -253,4 +254,12 @@ void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 		break;
 	}
 	/* FIXME diagnostic */
+}
+
+/* Pack and send a White Rabbit signalling message */
+int msg_issue_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
+{
+	int len;
+	len = msg_pack_wrsig(ppi, wr_msg_id);
+	MSG_SEND_AND_RET_VARLEN(SIGNALING, GEN, 0, len);
 }
