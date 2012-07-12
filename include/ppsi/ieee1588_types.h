@@ -212,6 +212,9 @@ typedef struct {
 	UInteger16	stepsRemoved;
 	TimeInternal	offsetFromMaster;
 	TimeInternal	meanPathDelay;
+	/* White Rabbit extension begin */
+	UInteger16	primarySlavePortNumber;
+	/* White Rabbit extension end */
 } DSCurrent;
 
 /* Parent Data Set */
@@ -257,6 +260,7 @@ typedef struct {
 	UInteger32 calPeriod;
 	UInteger8 calRetry;
 	Enumeration8 parentWrConfig;
+	Boolean parentIsWRnode; /* FIXME Not in the doc */
 	/* FIXME check doc: (parentWrMode?) */
 	Boolean parentWrModeOn;
 	Boolean parentCalibrated;
