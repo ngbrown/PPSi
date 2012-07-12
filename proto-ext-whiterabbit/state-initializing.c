@@ -64,7 +64,12 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	DSPOR(ppi)->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
 	DSPOR(ppi)->versionNumber = PP_VERSION_PTP;
 
-	DSPOR(ppi)->wrConfig = WR_MODE_AUTO;
+	/* FIXME: should be autodetected */
+#ifdef PPSI_SLAVE
+	DSPOR(ppi)->wrConfig = WR_S_ONLY;
+#else
+	DSPOR(ppi)->wrConfig = WR_M_ONLY;
+#endif
 	DSPOR(ppi)->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
 	DSPOR(ppi)->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
 	DSPOR(ppi)->calPeriod = WR_DEFAULT_CAL_PERIOD;
