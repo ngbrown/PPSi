@@ -5,7 +5,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "wr_constants.h"
+#include "wr-constants.h"
 
 /*
  * Initializes network and other stuff

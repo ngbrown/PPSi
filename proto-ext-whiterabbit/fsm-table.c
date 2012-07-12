@@ -3,7 +3,7 @@
  */
 
 #include <ppsi/ppsi.h>
-#include "wr_api.h"
+#include "wr-api.h"
 
 /*
  * This is the default state machine table. It is weak so an extension

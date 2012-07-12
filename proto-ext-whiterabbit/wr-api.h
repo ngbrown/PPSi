@@ -3,7 +3,7 @@
  * Based on ptp-noposix
  */
 
-#include "wr_constants.h"
+#include "wr-constants.h"
 
 /* Pack/Unkpack White rabbit message in the suffix of PTP announce message */
 void msg_pack_announce_wr_tlv(struct pp_instance *ppi);

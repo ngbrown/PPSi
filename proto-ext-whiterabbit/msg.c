@@ -5,7 +5,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "wr_constants.h"
+#include "wr-api.h"
 
 static inline void Integer64_display(const char *label, Integer64 *bigint)
 {

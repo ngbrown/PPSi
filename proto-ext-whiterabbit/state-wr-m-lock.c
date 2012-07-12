@@ -4,7 +4,7 @@
  */
 
 #include <ppsi/ppsi.h>
-#include "wr_api.h"
+#include "wr-api.h"
 
 int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
