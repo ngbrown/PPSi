@@ -31,7 +31,7 @@ OBJ-libwr := $W/fsm-table.o \
 	$W/state-wr-calibrated.o \
 	$W/state-wr-resp-calib-req.o \
 	$W/state-wr-link-on.o \
-	$W/wr_msg.o
+	$W/wr-msg.o
 
 $(TARGET).o: $(LIBWR)
 
