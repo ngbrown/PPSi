@@ -186,7 +186,7 @@ void msg_unpack_sync(void *buf, MsgSync *sync)
 }
 
 /* Pack Announce message into out buffer of ppi */
-void msg_pack_announce(struct pp_instance *ppi)
+int msg_pack_announce(struct pp_instance *ppi)
 {
 	void *buf;
 
