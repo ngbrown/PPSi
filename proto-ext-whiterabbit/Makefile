@@ -23,6 +23,14 @@ OBJ-libwr := $W/fsm-table.o \
 	$W/arith.o \
 	$W/servo.o \
 	$W/open-close.o \
+	$W/state-wr-present.o \
+	$W/state-wr-m-lock.o \
+	$W/state-wr-s-lock.o \
+	$W/state-wr-locked.o \
+	$W/state-wr-calibration.o \
+	$W/state-wr-calibrated.o \
+	$W/state-wr-resp-calib-req.o \
+	$W/state-wr-link-on.o \
 	$W/wr_msg.o
 
 $(TARGET).o: $(LIBWR)

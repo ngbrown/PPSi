@@ -109,7 +109,9 @@ enum{
  * \brief WR PTP states (new, single FSM) [White Rabbit]
  */
 enum {
-	WRS_PRESENT = 0,  WRS_S_LOCK, WRS_M_LOCK,  WRS_LOCKED,
+	/* WR states start from 16 in order not to be confused with PTP states,
+	 * since our application FSM is flat */
+	WRS_PRESENT = 16,  WRS_S_LOCK, WRS_M_LOCK,  WRS_LOCKED,
 	WRS_CALIBRATION,  WRS_CALIBRATED,  WRS_RESP_CALIB_REQ ,WRS_WR_LINK_ON,
 	/*
 	  each WR main state (except IDLE) has an associated timetout
