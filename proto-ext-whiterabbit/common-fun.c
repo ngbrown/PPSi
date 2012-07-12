@@ -6,6 +6,7 @@
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 #include "common-fun.h"
+#include "wr-api.h"
 
 int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 {
@@ -169,6 +170,12 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 		/* st_com_add_foreign takes care of announce unpacking */
 		st_com_add_foreign(ppi, buf);
 	}
+
+	if ((DSPOR(ppi)->wrConfig & WR_S_ONLY) &&
+	    (1 /* FIXME: Recommended State, see page 33*/) &&
+	    (DSPOR(ppi)->parentWrConfig & WR_M_ONLY) &&
+	    (!DSPOR(ppi)->wrMode || !DSPOR(ppi)->parentWrModeOn))
+		ppi->next_state = WRS_PRESENT;
 
 	/*Reset Timer handling Announce receipt timeout*/
 	st_com_restart_annrec_timer(ppi);
