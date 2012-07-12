@@ -162,7 +162,7 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	 */
 	ppi->record_update = TRUE;
 
-	if (!ppi->is_from_cur_par) {
+	if (ppi->is_from_cur_par) {
 		msg_unpack_announce(buf, &ppi->msg_tmp.announce);
 		s1(ppi, hdr, &ppi->msg_tmp.announce);
 	} else {
