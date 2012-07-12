@@ -258,7 +258,7 @@ typedef struct {
 	UInteger8 calRetry;
 	Enumeration8 parentWrConfig;
 	/* FIXME check doc: (parentWrMode?) */
-	Boolean parentWrModeON;
+	Boolean parentWrModeOn;
 	Boolean parentCalibrated;
 
 	/* FIXME: are they in the doc? */
