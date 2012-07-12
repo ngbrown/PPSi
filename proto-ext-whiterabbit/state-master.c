@@ -21,6 +21,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	time = &ppi->last_rcv_time;
 
 	if (ppi->is_new_state) {
+		DSPOR(ppi)->portState = PPS_MASTER;
 		pp_timer_start(1 << DSPOR(ppi)->logSyncInterval,
 			ppi->timers[PP_TIMER_SYNC]);
 

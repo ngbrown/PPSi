@@ -13,6 +13,7 @@
 
 int pp_faulty(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
+	DSPOR(ppi)->portState = PPS_FAULTY;
 	pp_printf("event FAULT_CLEARED\n");
 	ppi->next_state = PPS_INITIALIZING;
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS * 4;

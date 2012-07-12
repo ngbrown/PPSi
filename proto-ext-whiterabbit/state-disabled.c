@@ -8,6 +8,7 @@
 int pp_disabled(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	/* nothing to do */
+	DSPOR(ppi)->portState = PPS_DISABLED;
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 	return 0;
 }

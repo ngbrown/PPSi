@@ -19,6 +19,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	time = &ppi->last_rcv_time;
 
 	if (ppi->is_new_state) {
+		DSPOR(ppi)->portState = PPS_SLAVE;
 		pp_init_clock(ppi);
 
 		ppi->waiting_for_follow = FALSE;

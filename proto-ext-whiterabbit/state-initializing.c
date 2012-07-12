@@ -23,6 +23,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (pp_net_init(ppi) < 0)
 		goto failure;
 	pp_did_init = 1;
+	DSPOR(ppi)->portState = PPS_INITIALIZING;
 
 	/* Initialize default data set */
 	DSDEF(ppi)->twoStepFlag = PP_TWO_STEP_FLAG;

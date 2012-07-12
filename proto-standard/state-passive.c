@@ -11,6 +11,7 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int e = 0; /* error var, to check errors in msg handling */
 
 	if (ppi->is_new_state) {
+		DSPOR(ppi)->portState = PPS_PASSIVE;
 		pp_timer_start(1 << DSPOR(ppi)->logMinPdelayReqInterval,
 			ppi->timers[PP_TIMER_PDELAYREQ]);
 
