@@ -5,6 +5,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include "wr-api.h"
 
 /* Flag Field bits symbolic names (table 57, pag. 151) */
 #define FFB_LI61	0x01
@@ -84,6 +85,17 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 	DSPRO(ppi)->frequencyTraceable = ((hdr->flagField[1] & FFB_FTRA) != 0);
 	DSPRO(ppi)->ptpTimescale = ((hdr->flagField[1] & FFB_PTP) != 0);
 	DSPRO(ppi)->timeSource = ann->timeSource;
+
+	/* White Rabbit */
+	DSPOR(ppi)->parentIsWRnode = ((ann->wrFlags & WR_NODE_MODE) != NON_WR);
+	DSPOR(ppi)->parentWrModeOn =
+		(ann->wrFlags & WR_IS_WR_MODE) ? TRUE : FALSE;
+	DSPOR(ppi)->parentCalibrated =
+			((ann->wrFlags & WR_IS_CALIBRATED) ? 1 : 0);
+	DSPOR(ppi)->parentWrConfig = ann->wrFlags & WR_NODE_MODE;
+	DSCUR(ppi)->primarySlavePortNumber =
+		DSPOR(ppi)->portIdentity.portNumber;
+
 }
 
 
