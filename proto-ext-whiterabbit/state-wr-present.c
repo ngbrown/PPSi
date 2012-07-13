@@ -37,5 +37,7 @@ state_updated:
 		pp_timer_stop(ppi->timers[PP_TIMER_ANN_RECEIPT]);
 	}
 
+	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
+
 	return e;
 }
