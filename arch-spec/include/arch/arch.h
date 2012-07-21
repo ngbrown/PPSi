@@ -9,4 +9,5 @@
 #define ntohs htons
 #define ntohl htonl
 
+#define abs(x) ((x >= 0) ? x : -x)
 #endif /* __ARCH_H__ */
