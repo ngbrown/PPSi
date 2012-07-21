@@ -106,9 +106,13 @@ struct hw_timestamp {
 #define DMTD_AVG_SAMPLES 256
 #define DMTD_MAX_PHASE 16384
 
+#ifndef NULL
 #define NULL 0
+#endif
 
+#ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)
+#endif
 
 #define REF_CLOCK_PERIOD_PS 8000
 #define REF_CLOCK_FREQ_HZ 125000000
