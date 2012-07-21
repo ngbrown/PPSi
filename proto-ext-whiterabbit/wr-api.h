@@ -12,10 +12,11 @@
 void msg_pack_announce_wr_tlv(struct pp_instance *ppi);
 void msg_unpack_announce_wr_tlv(void *buf, MsgAnnounce *ann);
 
-/* Pack/Unkpack White rabbit message signaling msg */
+/* Pack/Unkpack/Issue White rabbit message signaling msg */
 int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id);
 void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 		      MsgSignaling *wrsig_msg, Enumeration16 *wr_msg_id);
+int msg_issue_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id);
 
 /* White rabbit state functions */
 int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen);
