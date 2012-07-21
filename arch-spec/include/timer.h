@@ -1,7 +1,7 @@
 #ifndef __TIMER_H
 #define __TIMER_H
 
-#include "types.h"
+#include <stdint.h>
 
 #define TICS_PER_SECOND 1000
 

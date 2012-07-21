@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "board.h"
+#include "../spec.h"
 #include "timer.h"
-#include "trace.h"
 #include "hw/softpll_regs.h"
 #include "hw/pps_gen_regs.h"
 
