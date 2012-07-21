@@ -23,6 +23,7 @@ OBJ-libarch := $A/spec-startup.o \
 	$A/dev/pps_gen.o \
 	$A/dev/minic.o \
 	$A/dev/softpll_ng.o \
+	$A/dev/irq.o \
 	lib/div64.o
 
 $(LIBARCH): $(OBJ-libarch)

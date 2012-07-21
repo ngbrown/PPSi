@@ -64,9 +64,3 @@ void ppsi_main(void)
 /* Our crt0.S is unchanged: it wants a "main" function, and "_irq_entry" too" */
 
 int main(void) __attribute__((alias("ppsi_main")));
-
-void _irq_entry(void)
-{
-	return;
-}
-
