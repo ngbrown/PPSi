@@ -5,7 +5,8 @@
 #include "spec.h"
 #include "include/syscon.h"
 #include "include/minic.h"
-#include<ppsi/diag.h>
+#include <ppsi/diag.h>
+#include <pps_gen.h>
 
 int spec_errno;
 Octet buffer_out[PP_PACKET_SIZE + 14]; // 14 is ppi->proto_ofst for ethernet mode
