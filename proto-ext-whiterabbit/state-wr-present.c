@@ -11,11 +11,12 @@ int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0;
 
+	MsgSignaling wrsig_msg;
+
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
 		DSPOR(ppi)->wrPortState = WRS_PRESENT;
 		DSPOR(ppi)->wrMode = WR_SLAVE;
-		ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 		pp_timer_start(DSPOR(ppi)->wrStateTimeout / 1000,
 			ppi->timers[PP_TIMER_WRS_PRESENT]);
 		st_com_restart_annrec_timer(ppi);
@@ -24,9 +25,24 @@ int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_WRS_PRESENT])) {
 		ppi->next_state = PPS_LISTENING;
+		DSPOR(ppi)->wrMode = NON_WR;
+		DSPOR(ppi)->wrPortState = WRS_IDLE;
 		goto state_updated;
 	}
 
+	if (plen == 0)
+		goto no_incoming_msg;
+
+	if (ppi->msg_tmp_header.messageType == PPM_SIGNALING) {
+
+		msg_unpack_wrsig(ppi, pkt, &wrsig_msg,
+			 &(DSPOR(ppi)->msgTmpWrMessageID));
+
+		if (DSPOR(ppi)->msgTmpWrMessageID == LOCK)
+			ppi->next_state = WRS_S_LOCK;
+	}
+
+no_incoming_msg:
 	if (e == 0)
 		st_com_execute_slave(ppi, 0);
 	else

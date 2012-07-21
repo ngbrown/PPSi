@@ -177,6 +177,19 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		break;
 
+	case PPM_SIGNALING:
+	{
+		MsgSignaling wrsig_msg;
+		msg_unpack_wrsig(ppi, pkt, &wrsig_msg,
+				 &(DSPOR(ppi)->msgTmpWrMessageID));
+
+		if ((DSPOR(ppi)->msgTmpWrMessageID == SLAVE_PRESENT) &&
+			(DSPOR(ppi)->wrConfig & WR_M_ONLY))
+			ppi->next_state = WRS_M_LOCK;
+
+		break;
+	}
+
 	default:
 		/* disreguard, nothing to do */
 		break;

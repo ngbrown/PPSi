@@ -8,11 +8,33 @@
 
 int wr_s_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	/* FIXME implementation */
+	int e = 0;
 	if (ppi->is_new_state) {
-		DSPOR(ppi)->portState = PPS_SLAVE;
+		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
 		DSPOR(ppi)->wrPortState = WRS_S_LOCK;
 		ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
+		wr_locking_enable(ppi);
+		pp_timer_start(WR_S_LOCK_TIMEOUT_MS / 1000,
+			       ppi->timers[PP_TIMER_WRS_S_LOCK]);
 	}
-	return 0;
+
+	if (pp_timer_expired(ppi->timers[PP_TIMER_WRS_S_LOCK])) {
+		ppi->next_state = PPS_FAULTY;
+		DSPOR(ppi)->wrPortState = WRS_IDLE;
+		DSPOR(ppi)->wrMode = NON_WR;
+		goto state_updated;
+	}
+
+	if (wr_locking_poll(ppi) == WR_SPLL_READY) {
+		ppi->next_state = WRS_LOCKED;
+		wr_locking_disable(ppi);
+	}
+
+state_updated:
+	if (ppi->next_state != ppi->state)
+		pp_timer_stop(ppi->timers[PP_TIMER_WRS_S_LOCK]);
+
+	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
+
+	return e;
 }
