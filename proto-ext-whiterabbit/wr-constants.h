@@ -69,6 +69,11 @@
 #define     SEND_CALIBRATION_PATTERN 	0X0001
 #define NOT_SEND_CALIBRATION_PATTERN 	0X0000
 
+/* White Rabbit softpll status values */
+#define WR_SPLL_OK	0
+#define WR_SPLL_READY	1
+#define WR_SPLL_ERROR	-1
+
 /* Indicates if a port is configured as White Rabbit, and what kind
  * (master/slave) */
 enum {

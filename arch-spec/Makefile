@@ -16,6 +16,7 @@ OBJ-libarch := $A/spec-startup.o \
 	$A/spec-socket.o \
 	$A/spec-io.o \
 	$A/spec-timer.o \
+	$A/spec-spll.o \
 	$A/dev/uart.o \
 	$A/dev/syscon.o \
 	$A/dev/ep_pfilter.o \
