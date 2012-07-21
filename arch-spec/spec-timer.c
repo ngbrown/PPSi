@@ -16,8 +16,6 @@ int spec_timer_init(struct pp_instance *ppi)
 
 int spec_timer_start(uint32_t interval, struct pp_timer *tm)
 {
-	uint32_t nsec;
-
 	tm->start = spec_time();
 	tm->interval = interval;
 	return 0;
@@ -33,7 +31,7 @@ int spec_timer_stop(struct pp_timer *tm)
 
 int spec_timer_expired(struct pp_timer *tm)
 {
-	uint32_t now, nsec;
+	uint32_t now;
 
 	if (tm->start == 0) {
 		PP_PRINTF("%p Warning: posix_timer_expired: timer not started\n",tm);
