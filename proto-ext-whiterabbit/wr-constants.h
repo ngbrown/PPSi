@@ -7,6 +7,9 @@
  * if this defined, WR uses new implementation of timeouts (not using interrupt)
  */
 
+#ifndef __WREXT_WR_CONSTANTS_H__
+#define __WREXT_WR_CONSTANTS_H__
+
 #define WR_NODE				0x80
 #define WR_IS_CALIBRATED		0x04
 #define WR_IS_WR_MODE			0x08
@@ -144,3 +147,5 @@ enum {
 	INIT,
 	RE_INIT,
 };
+
+#endif /* __WREXT_WR_CONSTANTS_H__ */

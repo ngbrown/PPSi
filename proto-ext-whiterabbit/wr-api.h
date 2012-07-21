@@ -3,6 +3,9 @@
  * Based on ptp-noposix
  */
 
+#ifndef __WREXT_WR_API_H__
+#define __WREXT_WR_API_H__
+
 #include "wr-constants.h"
 
 /* Pack/Unkpack White rabbit message in the suffix of PTP announce message */
@@ -23,3 +26,5 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen);
 int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen);
 int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen);
 int wr_link_on(struct pp_instance *ppi, unsigned char *pkt, int plen);
+
+#endif /* __WREXT_WR_API_H__ */

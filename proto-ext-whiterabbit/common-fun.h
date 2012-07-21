@@ -3,6 +3,9 @@
  * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
 
+#ifndef __WREXT_COMMON_FUN_H__
+#define __WREXT_COMMON_FUN_H__
+
 #include <ppsi/ppsi.h>
 
 /* Contains all functions common to more than one state */
@@ -52,3 +55,5 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 
 int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 			     int len);
+
+#endif /* __WREXT_COMMON_FUN_H__ */
