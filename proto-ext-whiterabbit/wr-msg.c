@@ -182,12 +182,13 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 
 /* White Rabbit: unpacking wr signaling messages */
 void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
-		      MsgSignaling *wrsig_msg, Enumeration16 *wr_msg_id)
+		      MsgSignaling *wrsig_msg, Enumeration16 *pwr_msg_id)
 {
 	UInteger16 tlv_type;
 	UInteger32 tlv_organizationID;
 	UInteger16 tlv_magicNumber;
 	UInteger16 tlv_versionNumber;
+	Enumeration16 wr_msg_id;
 
 	pp_memcpy(wrsig_msg->targetPortIdentity.clockIdentity,(buf+34),
 	       PP_CLOCK_IDENTITY_LENGTH);
@@ -225,10 +226,14 @@ void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 			"version number = 0x%x\n", tlv_versionNumber);
 		return;
 	}
-	if (wr_msg_id)
-		*wr_msg_id = htons(*(UInteger16*)(buf+54));
 
-	switch (*wr_msg_id) {
+	wr_msg_id = htons(*(UInteger16*)(buf+54));
+
+	if (pwr_msg_id) {
+		*pwr_msg_id = wr_msg_id;
+	}
+
+	switch (wr_msg_id) {
 	case CALIBRATE:
 		DSPOR(ppi)->otherNodeCalSendPattern = 0x00FF & get_be16(buf+56);
 		DSPOR(ppi)->otherNodeCalRetry = 0x00FF & (get_be16(buf+56) >> 8);
