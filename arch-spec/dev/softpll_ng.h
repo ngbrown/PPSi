@@ -2,7 +2,6 @@
 #define __SOFTPLL_NG_H
 
 #include <stdio.h>
-#include <stdlib.h>
 
 /* Modes */
 #define SPLL_MODE_GRAND_MASTER 1
