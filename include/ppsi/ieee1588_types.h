@@ -262,6 +262,7 @@ typedef struct {
 	Enumeration8 parentWrConfig;
 	Boolean parentIsWRnode; /* FIXME Not in the doc */
 	/* FIXME check doc: (parentWrMode?) */
+	Enumeration16 msgTmpWrMessageID; /* FIXME Not in the doc */
 	Boolean parentWrModeOn;
 	Boolean parentCalibrated;
 
