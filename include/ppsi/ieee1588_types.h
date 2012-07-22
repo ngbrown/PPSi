@@ -63,6 +63,10 @@ typedef struct  {
 typedef struct {
 	Integer32	seconds;
 	Integer32	nanoseconds;
+	/* White Rabbit extension begin */
+	Integer32	phase;
+	int 		correct;
+	/* White Rabbit extension end */
 } TimeInternal;
 
 typedef Octet		ClockIdentity[PP_CLOCK_IDENTITY_LENGTH];
