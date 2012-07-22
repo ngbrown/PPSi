@@ -174,7 +174,7 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	if ((DSPOR(ppi)->wrConfig & WR_S_ONLY) &&
 	    (1 /* FIXME: Recommended State, see page 33*/) &&
 	    (DSPOR(ppi)->parentWrConfig & WR_M_ONLY) &&
-	    (!DSPOR(ppi)->wrMode || !DSPOR(ppi)->parentWrModeOn))
+	    (!DSPOR(ppi)->wrModeOn || !DSPOR(ppi)->parentWrModeOn))
 		ppi->next_state = WRS_PRESENT;
 
 	/*Reset Timer handling Announce receipt timeout*/
