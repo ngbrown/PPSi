@@ -76,6 +76,14 @@
 #define WR_SPLL_READY	1
 #define WR_SPLL_ERROR	-1
 
+/* White Rabbit calibration defines */
+#define WR_HW_CALIB_TX	1
+#define WR_HW_CALIB_RX	2
+#define WR_HW_CALIB_OK	0
+#define WR_HW_CALIB_READY	1
+#define WR_HW_CALIB_ERROR	-1
+#define WR_HW_CALIB_NOT_FOUND	-3
+
 /* Indicates if a port is configured as White Rabbit, and what kind
  * (master/slave) */
 enum {
