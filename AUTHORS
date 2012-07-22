@@ -6,6 +6,9 @@ Where no otherways specified, the authors are:
 Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
 Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
 
+The whiterabbit extension is based on wrspec-pc/ptpnoposix project, internally
+developed by CERN.
+
 Many source files (mostly those regarding the algorithm itself) are based on the
 PTPd project, v.2.1.0 (see http://ptpd.sourceforge.net/), with was used
 according to the following copyright notice:

@@ -1,6 +1,6 @@
 /*
- * Aurelio Colosimo for CERN, 2012 -- GNU LGPL v2.1 or later
- * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
+ * Aurelio Colosimo for CERN, 2012 -- public domain
+ * Based on ptp-noposix project (see AUTHORS for details)
  */
 
 #include <ppsi/ppsi.h>

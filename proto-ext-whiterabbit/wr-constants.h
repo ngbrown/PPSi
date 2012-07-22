@@ -1,6 +1,6 @@
 /*
  * Aurelio Colosimo for CERN, 2012 -- GNU LGPL v2.1 or later
- * Based on ptp-noposix
+ * Based on ptp-noposix project (see AUTHORS for details)
  */
 
 /* White Rabbit stuff
