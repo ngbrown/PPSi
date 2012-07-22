@@ -9,6 +9,7 @@
 int wr_locked(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0;
+	MsgSignaling wrsig_msg;
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
@@ -24,6 +25,18 @@ int wr_locked(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		DSPOR(ppi)->wrMode = NON_WR;
 		DSPOR(ppi)->wrPortState = WRS_IDLE;
 		goto state_updated;
+	}
+
+	if (plen == 0)
+		goto no_incoming_msg;
+
+	if (ppi->msg_tmp_header.messageType == PPM_SIGNALING) {
+
+		msg_unpack_wrsig(ppi, pkt, &wrsig_msg,
+			 &(DSPOR(ppi)->msgTmpWrMessageID));
+
+		if (DSPOR(ppi)->msgTmpWrMessageID == CALIBRATE)
+			ppi->next_state = WRS_RESP_CALIB_REQ;
 	}
 
 no_incoming_msg:
