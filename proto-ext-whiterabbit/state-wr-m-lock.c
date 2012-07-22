@@ -15,7 +15,6 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		DSPOR(ppi)->portState = PPS_MASTER;
 		DSPOR(ppi)->wrPortState = WRS_M_LOCK;
 		DSPOR(ppi)->wrMode = WR_MASTER;
-		ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 		e = msg_issue_wrsig(ppi, LOCK);
 		pp_timer_start(WR_M_LOCK_TIMEOUT_MS / 1000,
 			ppi->timers[PP_TIMER_WRS_M_LOCK]);
@@ -24,7 +23,6 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (pp_timer_expired(ppi->timers[PP_TIMER_WRS_M_LOCK])) {
 		ppi->next_state = PPS_MASTER;
 		DSPOR(ppi)->wrPortState = WRS_IDLE;
-		DSPOR(ppi)->wrMode = NON_WR;
 		goto state_updated;
 	}
 
