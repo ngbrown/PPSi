@@ -280,6 +280,7 @@ typedef struct {
 	UInteger8 otherNodeCalRetry;
 	FixedDelta otherNodeDeltaTx;
 	FixedDelta otherNodeDeltaRx;
+	Boolean doRestart;
 	/* White Rabbit extension end */
 } DSPort;
 
