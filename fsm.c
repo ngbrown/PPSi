@@ -17,12 +17,13 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 {
 	struct pp_state_table_item *ip;
 	int state, err;
-#ifdef PPSI_MASTER__
-	if ((plen > 0))
-		pp_printf("RECV %02d %d.%d %s\n", plen,
-			ppi->last_rcv_time.seconds,
-			ppi->last_rcv_time.nanoseconds,pp_msg_names[packet[0] & 0x0f]);
-#endif
+
+	if (plen > 0)
+		PP_PRINTF("RECV %02d %d.%d %s\n", plen,
+			(int)ppi->last_rcv_time.seconds,
+			(int)ppi->last_rcv_time.nanoseconds,
+			pp_msg_names[packet[0] & 0x0f]);
+
 	if (packet)
 		msg_unpack_header(ppi, packet);
 

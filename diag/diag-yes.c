@@ -63,5 +63,6 @@ void pp_timed_printf(char *fmt, ...)
 	va_start(args, fmt);
 	pp_vsprintf(buf, fmt, args);
 	va_end(args);
-	pp_printf("%09d.%03d %s", t.seconds, t.nanoseconds / 1000000, buf);
+	pp_printf("%09d.%03d %s", (int)t.seconds,
+		  (int)t.nanoseconds / 1000000, buf);
 }
