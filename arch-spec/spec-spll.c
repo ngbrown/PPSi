@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <ppsi/ppsi.h>
+#include <pps_gen.h>
 #include "dev/softpll_ng.h"
 #include "../proto-ext-whiterabbit/wr-constants.h"
 
@@ -25,6 +26,37 @@ int spec_spll_locking_disable(struct pp_instance *ppi)
 	return WR_SPLL_OK;
 }
 
+int spec_spll_enable_ptracker(struct pp_instance *ppi)
+{
+	spll_enable_ptracker(0, 1);
+	return WR_SPLL_OK;
+}
+
+int spec_enable_timing_output(struct pp_instance *ppi, int enable)
+{
+	pps_gen_enable_output(enable);
+	return WR_SPLL_OK;
+}
+
+int spec_adjust_in_progress()
+{
+	return pps_gen_busy() || spll_shifter_busy(0);
+}
+
+int spec_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
+{
+	if(adjust_sec)
+		pps_gen_adjust(PPSG_ADJUST_SEC, adjust_sec);
+	if(adjust_nsec)
+		pps_gen_adjust(PPSG_ADJUST_NSEC, adjust_nsec);
+	return 0;
+}
+
+int spec_adjust_phase(int32_t phase_ps)
+{
+	spll_set_phase_shift(SPLL_ALL_CHANNELS, phase_ps);
+}
+
 int wr_locking_enable(struct pp_instance *ppi)
 	__attribute__((alias("spec_spll_locking_enable")));
 
@@ -33,3 +65,18 @@ int wr_locking_poll(struct pp_instance *ppi)
 
 int wr_locking_disable(struct pp_instance *ppi)
 	__attribute__((alias("spec_spll_locking_disable")));
+
+int wr_enable_ptracker(struct pp_instance *ppi)
+	__attribute__((alias("spec_spll_enable_ptracker")));
+
+int wr_enable_timing_output(struct pp_instance *ppi, int enable)
+	__attribute__((alias("spec_enable_timing_output")));
+
+int wr_adjust_in_progress()
+	__attribute__((alias("spec_adjust_in_progress")));
+
+int wr_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
+	__attribute__((alias("spec_adjust_counters")));
+
+int wr_adjust_phase(int32_t phase_ps)
+	__attribute__((alias("spec_adjust_phase")));
