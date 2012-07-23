@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# This script simply compiles ppsi both for master and for slave, with
+# diagnostic enabled. Just modify CROSS_COMPILE to use your own toolchain
+
+export CROSS_COMPILE=/opt/lm32/bin/lm32-elf-
+echo $CROSS_COMPILE
+make clean;make WRMODE=slave HAS_FULL_DIAG=y && mv ppsi.bin ppsi_slave.bin_
+make clean;make WRMODE=master HAS_FULL_DIAG=y && mv ppsi.bin ppsi_master.bin
+mv ppsi_slave.bin_ ppsi_slave.bin
