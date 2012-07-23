@@ -106,6 +106,17 @@ void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns)
 	t->nanoseconds = ns;
 }
 
+void assign_TimeInternal(TimeInternal *to, TimeInternal *from)
+{
+	to->seconds = from->seconds;
+	to->nanoseconds = from->nanoseconds;
+	to->phase = from->phase;
+	to->correct = from->correct;
+	to->raw_phase = from->raw_phase;
+	to->raw_nsec = from->raw_nsec;
+	to->raw_ahead = from->raw_ahead;
+}
+
 void display_TimeInternal(const char *label, TimeInternal *t)
 {
 	PP_VPRINTF("%s: %s%d.%09d \n", label,
