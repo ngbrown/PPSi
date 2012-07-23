@@ -5,13 +5,14 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "wr-constants.h"
+#include "wr-api.h"
 
 /*
  * Initializes network and other stuff
  */
 static int pp_did_init;
 
+#define LOCK_TIMEOUT_GM (60000)
 
 int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
@@ -68,16 +69,37 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 #ifdef PPSI_SLAVE
 	DSPOR(ppi)->wrConfig = WR_S_ONLY;
 #else
+
+	int lock_timeout, start_tics;
+	start_tics = timer_get_tics();
 	DSPOR(ppi)->wrConfig = WR_M_ONLY;
+	spll_init(2, 0, 1); /* SPLL_MODE_FREE_RUNNING_MASTER */
+	pps_gen_enable_output(0);
+	lock_timeout = LOCK_TIMEOUT_GM;
+
+	PP_PRINTF("Locking...");
+	while(!spll_check_lock(0) && lock_timeout)
+	{
+		timer_delay(1000);
+		if(timer_get_tics() - start_tics > lock_timeout)
+		{
+			PP_PRINTF("\nLocking timeout.\n");
+		}
+	}
+	PP_PRINTF("\nLocking end.\n");
+	pps_gen_enable_output(1);
 #endif
 	DSPOR(ppi)->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
 	DSPOR(ppi)->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
 	DSPOR(ppi)->calPeriod = WR_DEFAULT_CAL_PERIOD;
+	DSPOR(ppi)->wrModeOn = 0;
+	DSPOR(ppi)->parentWrConfig = 0;
 
 	if (pp_timer_init(ppi))
 		goto failure;
 
 	pp_init_clock(ppi);
+	wr_servo_reset();
 
 	m1(ppi);
 
