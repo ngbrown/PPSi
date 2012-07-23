@@ -5,6 +5,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include "wr-api.h"
 #include "common-fun.h"
 
 int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
@@ -21,6 +22,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_SLAVE;
 		pp_init_clock(ppi);
+		wr_servo_init(ppi);
 
 		ppi->waiting_for_follow = FALSE;
 
@@ -100,12 +102,22 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				req_rec_tstamp.seconds;
 			ppi->delay_req_receive_time.nanoseconds =
 				req_rec_tstamp.nanoseconds;
+			ppi->delay_req_receive_time.phase =
+				req_rec_tstamp.phase;
+			ppi->delay_req_receive_time.correct =
+				req_rec_tstamp.correct;
 
 			int64_to_TimeInternal(
 				hdr->correctionfield,
 				&correction_field);
 
-			pp_update_delay(ppi, &correction_field);
+			if (!DSPOR(ppi)->wrModeOn)
+				pp_update_delay(ppi, &correction_field);
+			else {
+				wr_servo_got_delay(ppi,
+					hdr->correctionfield.lsb);
+				wr_servo_update(ppi);
+			}
 
 			ppi->log_min_delay_req_interval =
 				hdr->logMessageInterval;
