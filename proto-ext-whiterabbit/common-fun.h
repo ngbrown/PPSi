@@ -18,7 +18,7 @@
 			pp_msg_names[PPM_##x], PPM_##x);\
 		return -1;\
 	}\
-	PP_PRINTF("SENT %02d %d.%d %s \n", w,\
+	PP_VPRINTF("SENT %02d %d.%d %s \n", w,\
 		ppi->last_snt_time.seconds,\
 		ppi->last_snt_time.nanoseconds,pp_msg_names[PPM_##x]);\
 	ppi->sent_seq_id[PPM_## x]++;\
