@@ -20,6 +20,57 @@ extern void spec_main_loop(struct pp_instance *ppi);
 extern void _irq_entry(void); /* unused, to make crt0.S happy */
 extern int main(void); /* alias to ppsi_main, so crt0.S is happy */
 
+/* FIXME halexp_port_state, to be renamed and moved somewhere else */
+
+typedef struct {
+  /* When non-zero: port state is valid */
+  int valid;
+
+  /* WR-PTP role of the port (Master, Slave, etc.) */
+  int mode;
+
+  /* TX and RX delays (combined, big Deltas from the link model in the spec) */
+  uint32_t delta_tx;
+  uint32_t delta_rx;
+
+  /* DDMTD raw phase value in picoseconds */
+  uint32_t phase_val;
+
+  /* When non-zero: phase_val contains a valid phase readout */
+  int phase_val_valid;
+
+  /* When non-zero: link is up */
+  int up;
+
+  /* When non-zero: TX path is calibrated (delta_tx contains valid value) */
+  int tx_calibrated;
+
+  /* When non-zero: RX path is calibrated (delta_rx contains valid value) */
+  int rx_calibrated;
+  int tx_tstamp_counter;
+  int rx_tstamp_counter;
+  int is_locked;
+  int lock_priority;
+
+  // timestamp linearization paramaters
+
+  uint32_t phase_setpoint; // DMPLL phase setpoint (picoseconds)
+
+  uint32_t clock_period; // reference lock period in picoseconds
+  uint32_t t2_phase_transition; // approximate DMTD phase value (on slave port) at which RX timestamp (T2) counter transistion occurs (picoseconds)
+
+  uint32_t t4_phase_transition; // approximate phase value (on master port) at which RX timestamp (T4) counter transistion occurs (picoseconds)
+
+  uint8_t hw_addr[6];
+  int hw_index;
+  int32_t fiber_fix_alpha;
+} hexp_port_state_t;
+
+extern int halexp_get_port_state(hexp_port_state_t *state,
+				 const char *port_name);
+
+/* End halexp_port_state */
+
 /* basics */
 extern void *memset(void *s, int c, int count);
 extern char *strcpy(char *dest, const char *src);
