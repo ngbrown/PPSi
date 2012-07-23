@@ -11,6 +11,14 @@
 int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 {
 	int ret = 0;
+
+	if (DSPOR(ppi)->doRestart) {
+		ppi->next_state = PPS_INITIALIZING;
+		st_com_restart_annrec_timer(ppi);
+		DSPOR(ppi)->doRestart = FALSE;
+		return 0;
+	}
+
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_RECEIPT])) {
 		PP_VPRINTF("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
 		ppi->number_foreign_records = 0;
@@ -34,8 +42,8 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 
 			ret = msg_issue_delay_req(ppi);
 
-			set_TimeInternal(&ppi->delay_req_send_time,
-				ppi->last_snt_time.seconds, ppi->last_snt_time.nanoseconds);
+			assign_TimeInternal(&ppi->delay_req_send_time,
+				&ppi->last_snt_time);
 
 			/* Add latency */
 			add_TimeInternal(&ppi->delay_req_send_time,
@@ -200,8 +208,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	time = &ppi->last_rcv_time;
 
 	if (ppi->is_from_cur_par) {
-		ppi->sync_receive_time.seconds = time->seconds;
-		ppi->sync_receive_time.nanoseconds = time->nanoseconds;
+		assign_TimeInternal(&ppi->sync_receive_time, time);
 
 		/* FIXME diag to file? will we ever handle it?
 		if (OPTS(ppi)->recordFP)
@@ -280,11 +287,19 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	add_TimeInternal(&correction_field, &correction_field,
 		&ppi->last_sync_corr_field);
 
-	pp_update_offset(ppi, &precise_orig_timestamp,
+	if (!DSPOR(ppi)->wrModeOn) {
+		pp_update_offset(ppi, &precise_orig_timestamp,
 			&ppi->sync_receive_time,
 			&correction_field);
-
-	pp_update_clock(ppi);
+		pp_update_clock(ppi);
+	}
+	else {
+		precise_orig_timestamp.phase = 0;
+		wr_servo_got_sync(ppi, &precise_orig_timestamp,
+				  &ppi->sync_receive_time);
+		/* TODO Check: generates unstability (Tx timestamp invalid) */
+		/* return msg_issue_delay_req(ppi); */
+	}
 	return 0;
 }
 
