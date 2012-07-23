@@ -9,6 +9,11 @@
 #include "wr-constants.h"
 #include "wr-api.h"
 
+static Integer32 phase_to_cf_units(Integer32 phase)
+{
+	return (Integer32) ((int64_t)phase * 65536LL / 1000LL);
+}
+
 int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	TimeInternal *time;
@@ -80,6 +85,9 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	case PPM_DELAY_REQ:
 		msg_copy_header(&ppi->delay_req_hdr, hdr);
+                ppi->delay_req_hdr.correctionfield.msb = 0;
+                ppi->delay_req_hdr.correctionfield.lsb =
+			phase_to_cf_units(ppi->last_rcv_time.phase);
 		msg_issue_delay_resp(ppi, time);
 		break;
 
