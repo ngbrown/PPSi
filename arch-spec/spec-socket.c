@@ -21,7 +21,7 @@ int spec_open_ch(struct pp_instance *ppi)
 #endif
 
 	ep_init(fake_addr);
-	ep_enable(1, 0);
+	ep_enable(1, 1);
 	minic_init();
 	pps_gen_init();
 
