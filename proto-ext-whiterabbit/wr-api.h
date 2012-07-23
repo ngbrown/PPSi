@@ -34,10 +34,9 @@ int wr_locking_enable(struct pp_instance *ppi);
 int wr_locking_poll(struct pp_instance *ppi);
 int wr_locking_disable(struct pp_instance *ppi);
 
-
 int wr_calibrating_disable(struct pp_instance *ppi, int txrx);
 int wr_calibrating_enable(struct pp_instance *ppi, int txrx);
-int wr_calibrating_poll(struct pp_instance *ppi, int txrx, uint64_t *delta);
+int wr_calibrating_poll(struct pp_instance *ppi, int txrx, uint32_t *delta);
 int wr_calibration_pattern_enable(struct pp_instance *ppi,
 	unsigned int calibrationPeriod, unsigned int calibrationPattern,
 	unsigned int calibrationPatternLen);

@@ -10,7 +10,7 @@
 int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0;
-	uint64_t delta;
+	uint32_t delta;
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->wrPortState = WRS_CALIBRATION;
@@ -51,9 +51,9 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if (wr_calibrating_poll(ppi, WR_HW_CALIB_TX, &delta) ==
 			WR_HW_CALIB_READY) {
 			DSPOR(ppi)->deltaTx.scaledPicoseconds.msb =
-				0xFFFFFFFF & (delta >> 16);
+				0xFFFFFFFF & (((uint64_t)delta) >> 16);
 			DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb =
-				0xFFFFFFFF & (delta << 16);
+				0xFFFFFFFF & (((uint64_t)delta) << 16);
 			PP_PRINTF("Tx=>>scaledPicoseconds.msb = 0x%x\n",
 				DSPOR(ppi)->deltaTx.scaledPicoseconds.msb);
 			PP_PRINTF("Tx=>>scaledPicoseconds.lsb = 0x%x\n",
@@ -113,7 +113,6 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			DSPOR(ppi)->wrPortState = WRS_CALIBRATION_8;
 		else
 			break;
-
 	case WRS_CALIBRATION_8:
 		/* send deltas to the other port and go to the next state */
 		e = msg_issue_wrsig(ppi, CALIBRATED);
