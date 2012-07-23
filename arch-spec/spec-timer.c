@@ -1,6 +1,7 @@
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 #include <pps_gen.h>
+#include <timer.h>
 
 static struct pp_timer spec_timers[PP_TIMER_ARRAY_SIZE];
 
@@ -55,7 +56,10 @@ void spec_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
 	*/
 }
 
-
+uint32_t spec_timer_get_msec_tics(void)
+{
+	return timer_get_tics();
+}
 
 int pp_timer_init(struct pp_instance *ppi)
 	__attribute__((alias("spec_timer_init")));
@@ -71,3 +75,6 @@ int pp_timer_expired(struct pp_timer *tm)
 
 void pp_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
 	__attribute__((alias("spec_timer_adjust_all")));
+
+uint32_t wr_timer_get_msec_tics(void)
+	__attribute__((alias("spec_timer_get_msec_tics")));
