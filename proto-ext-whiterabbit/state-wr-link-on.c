@@ -12,7 +12,7 @@ int wr_link_on(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->wrModeOn = TRUE;
-		/* TODO netEnablePhaseTracking(&ptpPortDS->netPath); */
+		wr_enable_ptracker(ppi);
 
 		if (DSPOR(ppi)->wrMode == WR_MASTER)
 			e = msg_issue_wrsig(ppi, WR_MODE_ON);
