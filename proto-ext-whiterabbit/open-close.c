@@ -4,6 +4,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include "wr-api.h"
 
 /*
  * This file deals with opening and closing an instance. The channel
@@ -42,12 +43,16 @@ struct pp_runtime_opts default_rt_opts = {
 	.ttl =			PP_DEFAULT_TTL,
 };
 
+static struct wr_data_t wr_data; /* white rabbit specific global data */
+
 int pp_open_instance(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
 {
 	if (rt_opts)
 		OPTS(ppi) = rt_opts;
 	else
 		OPTS(ppi) = &default_rt_opts;
+
+	ppi->ext_data = &wr_data;
 
 	ppi->state = PPS_INITIALIZING;
 
