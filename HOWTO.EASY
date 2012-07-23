@@ -1,0 +1,5 @@
+To compile for spec, master and slave, just type:
+
+./compile_all_spec
+
+You will get ppsi_master.bin and ppsi_slave.bin
