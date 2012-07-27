@@ -84,6 +84,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if(timer_get_tics() - start_tics > lock_timeout)
 		{
 			PP_PRINTF("\nLocking timeout.\n");
+			break;
 		}
 	}
 	PP_PRINTF("\nLocking end.\n");
