@@ -10,7 +10,7 @@
 /*
  * Initializes network and other stuff
  */
-static int pp_did_init;
+static int pp_did_init = 0;
 
 #define LOCK_TIMEOUT_GM (60000)
 
