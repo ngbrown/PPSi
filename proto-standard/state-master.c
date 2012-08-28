@@ -30,6 +30,9 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		pp_timer_start(1 << DSPOR(ppi)->logMinPdelayReqInterval,
 			ppi->timers[PP_TIMER_PDELAYREQ]);
+		/* Send an announce immediately, when becomes master */
+		if (msg_issue_announce(ppi) < 0)
+			goto failure;
 	}
 
 	if (st_com_check_record_update(ppi))

@@ -9,7 +9,7 @@
 /*
  * Initializes network and other stuff
  */
-static int pp_did_init;
+static int pp_did_init = 0;
 
 
 int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)

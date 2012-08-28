@@ -3,6 +3,9 @@
  * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
 
+#ifndef __COMMON_FUN_H
+#define __COMMON_FUN_H
+
 #include <ppsi/ppsi.h>
 
 /* Contains all functions common to more than one state */
@@ -35,3 +38,5 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 
 int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 			     int len);
+
+#endif /* __COMMON_FUN_H */
