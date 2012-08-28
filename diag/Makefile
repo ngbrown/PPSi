@@ -1,9 +1,6 @@
 # Alessandro Rubini for CERN, 2011 -- public domain
 # Diagnostics: we have tree levels: none, full and limited
 
-# set HAS_FULL_DIAG as default (mainly for debugging purpose)
-HAS_FULL_DIAG ?= y
-
 # full: use a complete printf and the diag code
 OBJ-$(HAS_FULL_DIAG) += diag/diag-yes.o diag/diag-printf.o diag/printf-full.o
 

@@ -35,7 +35,8 @@ include diag/Makefile
 #include proto-standard/Makefile
 
 # including the extension Makefile, if an extension is there
-PROTO_EXT ?= whiterabbit
+# Uncomment the following line for whiterabbit extension
+# PROTO_EXT ?= whiterabbit
 ifdef PROTO_EXT
   include proto-ext-$(PROTO_EXT)/Makefile
 else
@@ -49,9 +50,9 @@ else
 CFLAGS += -DPPSI_SLAVE
 endif
 
-# Include arch code, the default is spec
+# Include arch code, the default is hosted GNU/Linux stuff
 # we need this -I so <arch/arch.h> can be found
-ARCH ?= spec
+ARCH ?= gnu-linux
 CFLAGS += -Iarch-$(ARCH)/include
 include arch-$(ARCH)/Makefile
 
