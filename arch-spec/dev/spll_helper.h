@@ -22,7 +22,7 @@ struct spll_helper_state {
  	spll_lock_det_t ld;
 };
 	
-static void helper_init(struct spll_helper_state *s, int ref_channel)
+static void helper_init(volatile struct spll_helper_state *s, int ref_channel)
 {
 	
 	/* Phase branch PI controller */
@@ -41,7 +41,7 @@ static void helper_init(struct spll_helper_state *s, int ref_channel)
 	s->delock_count = 0;
 }
 
-static int helper_update(struct spll_helper_state *s, int tag, int source)
+static int helper_update(volatile struct spll_helper_state *s, int tag, int source)
 {
 	int err, y;
 
@@ -78,14 +78,14 @@ static int helper_update(struct spll_helper_state *s, int tag, int source)
 		s->p_setpoint += (1<<HPLL_N);
 		s->tag_d0 = tag;
 		
-		y = pi_update(&s->pi, err);
+		y = pi_update((spll_pi_t *) &s->pi, err);
 		SPLL->DAC_HPLL = y;
 
 		spll_debug(DBG_SAMPLE_ID | DBG_HELPER, s->sample_n++, 0);
 		spll_debug(DBG_Y | DBG_HELPER, y, 0);
 		spll_debug(DBG_ERR | DBG_HELPER, err, 1);
 
-		if(ld_update(&s->ld, err))
+		if(ld_update((spll_lock_det_t *) &s->ld, err))
 			return SPLL_LOCKED;
 	}
 	return SPLL_LOCKING;
@@ -93,7 +93,7 @@ static int helper_update(struct spll_helper_state *s, int tag, int source)
 
 
 
-static void helper_start(struct spll_helper_state *s)
+static void helper_start(volatile struct spll_helper_state *s)
 {
  /* Set the bias to the upper end of tuning range. This is to ensure that
  		the HPLL will always lock on positive frequency offset. */
@@ -104,8 +104,8 @@ static void helper_start(struct spll_helper_state *s)
 	s->sample_n = 0;
 	s->tag_d0 = -1;
 
-	pi_init(&s->pi);
-	ld_init(&s->ld);
+	pi_init((spll_pi_t *) &s->pi);
+	ld_init((spll_lock_det_t *)&s->ld);
 
 	spll_enable_tagger(s->ref_src, 1);
 	spll_debug(DBG_EVENT |  DBG_HELPER, DBG_EVT_START, 1);

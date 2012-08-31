@@ -1,193 +1,115 @@
-#include <stdio.h>
-#include "board.h"
+#include "onewire.h"
+#include "../sockitowm/ownet.h"
+#include "../sockitowm/findtype.h"
 
-#define   R_CSR  0x0
-#define   R_CDR  0x4
+#define DEBUG_PMAC 0
 
-#define   CSR_DAT_MSK  (1<<0)
-#define   CSR_RST_MSK  (1<<1)
-#define   CSR_OVD_MSK  (1<<2)
-#define   CSR_CYC_MSK  (1<<3)
-#define   CSR_PWR_MSK  (1<<4)
-#define   CSR_IRQ_MSK  (1<<6)
-#define   CSR_IEN_MSK  (1<<7)
-#define   CSR_SEL_OFS  8
-#define   CSR_SEL_MSK  (0xF<<8)
-#define   CSR_POWER_OFS  16
-#define   CSR_POWER_MSK  (0xFFFF<<16)
-#define   CDR_NOR_MSK  (0xFFFF<<0)
-#define   CDR_OVD_OFS  16
-#define   CDR_OVD_MSK  (0xFFFF<<16)
+uint8_t FamilySN[MAX_DEV1WIRE][8];
+uint8_t devsnum;
+uint8_t found_msk;
 
-
-#define CLK_DIV_NOR 175      //clock divider for normal mode
-#define CLK_DIV_OVD 124/2    //clock divider for overdrive mode
-
-static inline void ow_writel(uint32_t reg, uint32_t data)
+void own_scanbus(uint8_t portnum)
 {
-  *(volatile uint32_t *) (BASE_ONEWIRE + reg) = data;
+  // Find the device(s)
+  found_msk = 0;
+  devsnum = 0;
+  devsnum += FindDevices(portnum, &FamilySN[devsnum], 0x28, MAX_DEV1WIRE - devsnum); /* Temperature 28 sensor (SPEC) */
+  if(devsnum>0) found_msk |= FOUND_DS18B20;
+  devsnum += FindDevices(portnum, &FamilySN[devsnum], 0x42, MAX_DEV1WIRE - devsnum); /* Temperature 42 sensor (SCU) */
+  devsnum += FindDevices(portnum, &FamilySN[devsnum], 0x43, MAX_DEV1WIRE - devsnum); /* EEPROM */
+#if DEBUG_PMAC
+  mprintf("Found %d onewire devices\n", devsnum);
+#endif
 }
 
-static inline uint32_t ow_readl(uint32_t reg)
+int16_t own_readtemp(uint8_t portnum, int16_t *temp, int16_t *t_frac)
 {
-  return *(volatile uint32_t *)(BASE_ONEWIRE + reg);
-}
-
-void ow_init()
-{
-  //set clock dividers for normal and overdrive mode
-  ow_writel( R_CDR, ((CLK_DIV_NOR & CDR_NOR_MSK) | (( CLK_DIV_OVD << CDR_OVD_OFS) & CDR_OVD_MSK)) );
-}
-
-static uint32_t ow_reset(uint32_t port)
-{
-  uint32_t reg, data;
-  
-  data = (  (port<<CSR_SEL_OFS) & CSR_SEL_MSK) |
-             CSR_CYC_MSK | CSR_RST_MSK;   //start cycle, rst pulse request
-  ow_writel(R_CSR, data);
-  //wait until cycle done
-  while(ow_readl(R_CSR) & CSR_CYC_MSK);
-  reg = ow_readl(R_CSR);
-  return ~reg & CSR_DAT_MSK;
-}
-
-static uint32_t slot(uint32_t port, uint32_t bit)
-{
-  uint32_t data, reg;
-  
-  data = (  (port<<CSR_SEL_OFS) & CSR_SEL_MSK) | 
-            CSR_CYC_MSK | (bit & CSR_DAT_MSK);  //start cycle, write bit
-  ow_writel(R_CSR, data);
-  //wait until cycle done
-  while( ow_readl(R_CSR) & CSR_CYC_MSK );
-  reg = ow_readl(R_CSR);
-  return reg & CSR_DAT_MSK;
-}
-
-static inline uint32_t ow_read_bit(uint32_t port) { return slot(port, 0x1); }
-static inline uint32_t ow_write_bit(uint32_t port, uint32_t bit) { return slot(port, bit); }
-
-uint8_t ow_read_byte(uint32_t port) 
-{
-  uint32_t data = 0, i;
-  
-  for(i=0;i<8;i++)
-    data |= ow_read_bit(port) << i;
-  return (uint8_t)data;
-}
-
-int8_t ow_write_byte(uint32_t port, uint32_t byte)
-{
-  uint32_t  data = 0;
-  uint8_t   i;
-  uint32_t  byte_old = byte;
-  
-  for (i=0;i<8;i++)
+  if(!(found_msk & FOUND_DS18B20))
+    return -1;
+  if(ReadTemperature28(portnum, FamilySN[0], temp))
   {
-    data |= ow_write_bit(port, (byte & 0x1)) << i;
-    byte >>= 1;
+    *t_frac = 5000*(!!(*temp & 0x08)) + 2500*(!!(*temp & 0x04)) + 1250*(!!(*temp & 0x02)) +
+              625*(!!(*temp & 0x01));
+    *t_frac = *t_frac/100 + (*t_frac%100)/50;
+    *temp >>= 4;
+    return 0;
   }
-  return byte_old == data ? 0 : -1;
+  return -1;
 }
 
-int ow_write_block(int port, uint8_t *block, int len)
+/* 0 = success, -1 = error */
+int8_t get_persistent_mac(uint8_t portnum, uint8_t* mac)
 {
-  uint32_t i;
-
-  for(i=0;i<len;i++)
-    *block++ = ow_write_byte(port, *block);
-
-  return 0;
-}
-
-int ow_read_block(int port, uint8_t *block, int len)
-{
-  uint32_t i;
-
-  for(i=0;i<len;i++)
-    *block++ = ow_read_byte(port);
-
-  return 0;
-}
-
-#define    ROM_SEARCH  0xF0
-#define    ROM_READ  0x33
-#define    ROM_MATCH  0x55
-#define    ROM_SKIP  0xCC
-#define    ROM_ALARM_SEARCH  0xEC
-
-#define    CONVERT_TEMP  0x44
-#define    WRITE_SCRATCHPAD  0x4E
-#define    READ_SCRATCHPAD  0xBE
-#define    COPY_SCRATCHPAD  0x48
-#define    RECALL_EEPROM  0xB8
-#define    READ_POWER_SUPPLY  0xB4
-
-static uint8_t ds18x_id [8];
-
-
-int8_t ds18x_read_serial(uint8_t *id)
-{
+  uint8_t read_buffer[32];
   uint8_t i;
+  int8_t out;
   
-  if(!ow_reset(0))
-    return -1;
+  out = -1;
+
+  if(devsnum == 0) return out;
   
-  if(ow_write_byte(0, ROM_READ) < 0)
-    return -1;
-  for(i=0;i<8;i++)
-  {
-    *id = ow_read_byte(0);
-    id++;
+  for (i = 0; i < devsnum; ++i) {
+//#if DEBUG_PMAC
+    mprintf("Found device: %x:%x:%x:%x:%x:%x:%x:%x\n", 
+      FamilySN[i][7], FamilySN[i][6], FamilySN[i][5], FamilySN[i][4],
+      FamilySN[i][3], FamilySN[i][2], FamilySN[i][1], FamilySN[i][0]);
+//#endif
+
+    /* If there is a temperature sensor, use it for the low three MAC values */
+    if (FamilySN[i][0] == 0x28 || FamilySN[i][0] == 0x42) {
+      mac[3] = FamilySN[i][3];
+      mac[4] = FamilySN[i][2];
+      mac[5] = FamilySN[i][1];
+      out = 0;
+#if DEBUG_PMAC
+      mprintf("Using temperature ID for MAC\n");
+#endif
+    }
+    
+    /* If there is an EEPROM, read page 0 for the MAC */
+    if (FamilySN[i][0] == 0x43) {
+      owLevel(portnum, MODE_NORMAL);
+      if (ReadMem43(portnum, FamilySN[i], EEPROM_MAC_PAGE, &read_buffer) == TRUE) {
+        if (read_buffer[0] == 0 && read_buffer[1] == 0 && read_buffer[2] == 0) {
+          /* Skip the EEPROM since it has not been programmed! */
+#if DEBUG_PMAC
+          mprintf("EEPROM has not been programmed with a MAC\n");
+#endif
+        } else {
+          memcpy(mac, read_buffer, 6);
+          out = 0;
+#if DEBUG_PMAC
+          mprintf("Using EEPROM page: %x:%x:%x:%x:%x:%x\n", 
+            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+#endif
+        }
+      }
+    }
   }
   
-  return 0;
+  return out;
 }
 
-static int8_t ds18x_access(uint8_t *id)
+/* 0 = success, -1 = error */
+int8_t set_persistent_mac(uint8_t portnum, uint8_t* mac)
 {
-  int i;
-  if(!ow_reset(0))
-    return -1;
-  
-  if(ow_write_byte(0, ROM_MATCH) < 0)
-    return -1;
-  for(i=0;i<8;i++)
-    if(ow_write_byte(0, id[i]) < 0)
-  	  return -1;
+  uint8_t FamilySN[1][8];
+  uint8_t write_buffer[32];
 
-  return 0;
-}
-
-int8_t ds18x_read_temp(uint8_t *id, int *temp_r)
-{
-  int i, temp;
-  uint8_t data[9];
+  // Find the device (only the first one, we won't write MAC to all EEPROMs out there, right?)
+  if( FindDevices(portnum, &FamilySN[0], 0x43, 1) == 0) return -1;
   
-  if(ds18x_access(id) < 0)
-    return -1;
-
-  ow_write_byte(0, READ_SCRATCHPAD);
+  memset(write_buffer, 0, sizeof(write_buffer));
+  memcpy(write_buffer, mac, 6);
   
-  for(i=0;i<9;i++) data[i] = ow_read_byte(0);
+#if DEBUG_PMAC
+  mprintf("Writing to EEPROM\n");
+#endif
   
-  temp = ((int)data[1] << 8) | ((int)data[0]);
-  if(temp & 0x1000)
-    temp = -0x10000 + temp;
+  /* Write the last EEPROM with the MAC */
+  owLevel(portnum, MODE_NORMAL);
+  if (Write43(portnum, FamilySN[0], EEPROM_MAC_PAGE, &write_buffer) == TRUE)
+    return 0;
   
-  ds18x_access(id);
-  ow_write_byte(0, CONVERT_TEMP);
-  
-  if(temp_r) *temp_r = temp;
-  return 0;
-}
-
-int ds18x_init()
-{
-	ow_init();
-	if(ds18x_read_serial(ds18x_id) < 0)
-		return -1;
-
-	return ds18x_read_temp(ds18x_id, NULL);
+  return -1;
 }

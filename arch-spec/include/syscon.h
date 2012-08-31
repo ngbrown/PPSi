@@ -9,12 +9,12 @@
 
 struct SYSCON_WB
 {
-	uint32_t RSTR;  /*Syscon Reset Register*/
-	uint32_t GPSR;  /*GPIO Set/Readback Register*/
-	uint32_t GPCR;  /*GPIO Clear Register*/
-	uint32_t HWFR;  /*Hardware Feature Register*/
-	uint32_t TCR;   /*Timer Control Register*/
-	uint32_t TVR;   /*Timer Counter Value Register*/
+  uint32_t RSTR;  /*Syscon Reset Register*/  
+  uint32_t GPSR;  /*GPIO Set/Readback Register*/
+  uint32_t GPCR;  /*GPIO Clear Register*/
+  uint32_t HWFR;  /*Hardware Feature Register*/
+  uint32_t TCR;   /*Timer Control Register*/
+  uint32_t TVR;   /*Timer Counter Value Register*/
 };
 
 /*GPIO pins*/
@@ -29,8 +29,8 @@ struct SYSCON_WB
 
 struct s_i2c_if
 {
-	uint32_t scl;
-	uint32_t sda;
+  uint32_t scl;
+  uint32_t sda; 
 };
 
 extern struct s_i2c_if i2c_if[2];
@@ -39,22 +39,22 @@ void timer_init(uint32_t enable);
 uint32_t timer_get_tics();
 void timer_delay(uint32_t how_long);
 
-static volatile struct SYSCON_WB *syscon = (volatile struct SYSCON_WB *) BASE_SYSCON;
+extern volatile struct SYSCON_WB *syscon;
 
 /****************************
  *        GPIO
  ***************************/
 static inline void gpio_out(int pin, int val)
 {
-	if(val)
-		syscon->GPSR = pin;
-	else
-		syscon->GPCR = pin;
+  if(val)
+    syscon->GPSR = pin;
+  else
+    syscon->GPCR = pin;
 }
 
 static inline int gpio_in(int pin)
 {
-	return syscon->GPSR & pin ? 1: 0;
+  return syscon->GPSR & pin ? 1: 0;
 }
 
 static inline int sysc_get_memsize()

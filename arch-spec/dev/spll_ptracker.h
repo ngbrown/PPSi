@@ -11,7 +11,7 @@ struct spll_ptracker_state {
 };
 
 
-static void ptracker_init(struct spll_ptracker_state *s, int id_a, int id_b, int num_avgs)
+static void ptracker_init(volatile struct spll_ptracker_state *s, int id_a, int id_b, int num_avgs)
 {
 	s->tag_a = s->tag_b = -1;
 
@@ -25,7 +25,7 @@ static void ptracker_init(struct spll_ptracker_state *s, int id_a, int id_b, int
 	s->preserve_sign = 0;
 }
 
-static void ptracker_start(struct spll_ptracker_state *s)
+static void ptracker_start(volatile struct spll_ptracker_state *s)
 {
 	s->tag_a = s->tag_b = -1;
 	s->ready = 0;
@@ -34,6 +34,7 @@ static void ptracker_start(struct spll_ptracker_state *s)
 	s->sample_n=  0;
     s->preserve_sign = 0;
 
+	spll_resync_dmtd_counter(s->id_b);
   spll_enable_tagger(s->id_a, 1);
   spll_enable_tagger(s->id_b, 1);
 }
@@ -41,7 +42,7 @@ static void ptracker_start(struct spll_ptracker_state *s)
 #define PTRACK_WRAP_LO (1<<(HPLL_N-2))
 #define PTRACK_WRAP_HI (3*(1<<(HPLL_N-2)))
 
-static int ptracker_update(struct spll_ptracker_state *s, int tag, int source)
+static int ptracker_update(volatile struct spll_ptracker_state *s, int tag, int source)
 {
 
 	if(source == s->id_a)

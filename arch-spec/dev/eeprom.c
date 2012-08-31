@@ -10,34 +10,60 @@
  * placed also outside the FMC standardized EEPROM structure. The only requirement
  * is that it starts with 0xdeadbeef pattern. The structure of SFP section is:
  *
- * --------------------------------
- * | 0xdeadbeef (4B) | count (4B) |
- * -------------------------------------------------------------------------------
- * |   SFP(1) part number (16B)       | alpha (4B) | deltaTx (4B) | deltaRx (4B) |
- * -------------------------------------------------------------------------------
- * |   SFP(2) part number (16B)       | alpha (4B) | deltaTx (4B) | deltaRx (4B) |
- * -------------------------------------------------------------------------------
- * | (....)                           | (....)     | (....)       | (....)       |
- * -------------------------------------------------------------------------------
- * |   SFP(count) part number (16B)   | alpha (4B) | deltaTx (4B) | deltaRx (4B) |
- * -------------------------------------------------------------------------------
- * | checksum (1B) |
- * -----------------
+ * ----------------------------------------------
+ * | cal_ph_trans (4B) | SFP count (1B) |
+ * --------------------------------------------------------------------------------------------
+ * |   SFP(1) part number (16B)       | alpha (4B) | deltaTx (4B) | deltaRx (4B) | chksum(1B) |
+ * --------------------------------------------------------------------------------------------
+ * |   SFP(2) part number (16B)       | alpha (4B) | deltaTx (4B) | deltaRx (4B) | chksum(1B) |
+ * --------------------------------------------------------------------------------------------
+ * | (....)                           | (....)     | (....)       | (....)       | (...)      |
+ * --------------------------------------------------------------------------------------------
+ * |   SFP(count) part number (16B)   | alpha (4B) | deltaTx (4B) | deltaRx (4B) | chksum(1B) |
+ * --------------------------------------------------------------------------------------------
  *
  * Fields description:
+ * cal_ph_trans       - t2/t4 phase transition value (got from measure_t24p() ), contains 
+ *                      _valid_ bit (MSB) and 31 bits of cal_phase_transition value
  * count              - how many SFPs are described in the list (binary)
  * SFP(n) part number - SFP PN as read from SFP's EEPROM (e.g. AXGE-1254-0531) 
  *                      (16 ascii chars)
- * checksum           - low order 8 bits of the sum of all bytes starting from
- *                      _count_ (without 0xdeadbeef)
+ * checksum           - low order 8 bits of the sum of all bytes for the SFP(PN,alpha,dTx,dRx)
  *
  */
 
+/*
+ * The init script area consist of 2-byte size field and a set of shell commands
+ * separated with '\n' character.
+ *
+ * -------------------
+ * | bytes used (2B) |
+ * ------------------------------------------------
+ * | shell commands separated with '\n'.....      |
+ * |                                              |
+ * |                                              |
+ * ------------------------------------------------
+ */
+
+uint8_t has_eeprom = 0;
+
+uint8_t eeprom_present(uint8_t i2cif, uint8_t i2c_addr)
+{
+	has_eeprom = 1;	
+	if( !mi2c_devprobe(i2cif, i2c_addr) )
+		if( !mi2c_devprobe(i2cif, i2c_addr) )
+			has_eeprom = 0;
+
+	return 0;
+}
 
 int eeprom_read(uint8_t i2cif, uint8_t i2c_addr, uint32_t offset, uint8_t *buf, size_t size)
 {
 	int i;
 	unsigned char c;
+
+	if(!has_eeprom)
+		return -1;
 
   mi2c_start(i2cif);
   if(mi2c_put_byte(i2cif, i2c_addr << 1) < 0)
@@ -61,177 +87,260 @@ int eeprom_read(uint8_t i2cif, uint8_t i2c_addr, uint32_t offset, uint8_t *buf, 
  	return size;
 }
 
-//int eeprom_write(uint8_t i2cif, uint8_t i2c_addr, uint32_t offset, uint8_t *buf, size_t size)
-//{
-//	int i, busy;
-//
-//	for(i=0;i<size;i++)
-//	{
-//	 	mi2c_start(i2cif);
-//
-//	 	if(mi2c_put_byte(i2cif, i2c_addr << 1) < 0)
-//	 	{
-//		 	mi2c_stop(i2cif);
-//	 	 	return -1;
-//	  }
-//		mi2c_put_byte(i2cif, (offset >> 8) & 0xff);
-//		mi2c_put_byte(i2cif, offset & 0xff);
-//		mi2c_put_byte(i2cif, *buf++);
-//		offset++;
-//		mi2c_stop(i2cif);
-//
-//		do /* wait until the chip becomes ready */
-//		{
-//      mi2c_start(i2cif);
-//			busy = mi2c_put_byte(i2cif, i2c_addr << 1);
-//			mi2c_stop(i2cif);
-//		} while(busy);
-//
-//	}
-// 	return size;
-//}
-
-
-int32_t eeprom_sfp_section(uint8_t i2cif, uint8_t i2c_addr, size_t size, uint16_t *section_sz)
+int eeprom_write(uint8_t i2cif, uint8_t i2c_addr, uint32_t offset, uint8_t *buf, size_t size)
 {
-  uint8_t c, match;
-  uint16_t i;
-  uint32_t sfp_pattern = SFP_SECTION_PATTERN;
+	int i, busy;
 
-  match = 0x00;
-  *section_sz = 0x0000;
-  mi2c_start(i2cif);
-  if(mi2c_put_byte(i2cif, i2c_addr << 1) != 0)
-  {
-    mi2c_stop(i2cif);
-    return -1;
-  }
-  mi2c_put_byte(i2cif, 0x00);
-  mi2c_put_byte(i2cif, 0x00);
-  mi2c_repeat_start(i2cif);
-  mi2c_put_byte(i2cif, (i2c_addr << 1) | 1);
-  for(i=0; i<size-1; ++i)
-  {
-    mi2c_get_byte(i2cif, &c, 0);
-    if(match==0x0f)
-    {
-      *section_sz = ((uint16_t)c ) << 8;
-      match |= 0x10;
-    }
-    else if(match==0x1f)
-    {
-      *section_sz |= ((uint16_t)c ) & 0xff;
-      match |= 0x20;
-    }
-    else if( c== (uint8_t)(sfp_pattern>>24) )
-      match = 0x01;
-    else if( c== (uint8_t)((sfp_pattern>>16)&0xff) )
-      match |= 0x02;
-    else if( c== (uint8_t)((sfp_pattern>>8)&0xff) )
-      match |= 0x04;
-    else if( c== (uint8_t)(sfp_pattern&0xff) )
-      match |= 0x08;
-    else
-      match = 0x00;
+	if(!has_eeprom)
+		return -1;
 
-    if(match == 0x3f)
-    {
-      mi2c_get_byte(i2cif, &c, 1);
-      mi2c_stop(i2cif);
-      return i+1; //first address of first SFP in the list
-    }
-  }
-  mi2c_get_byte(i2cif, &c, 1);
-  mi2c_stop(i2cif);
-  return 0;
+	for(i=0;i<size;i++)
+	{
+	 	mi2c_start(i2cif);
+
+	 	if(mi2c_put_byte(i2cif, i2c_addr << 1) < 0)
+	 	{
+		 	mi2c_stop(i2cif);
+	 	 	return -1;
+	  }
+		mi2c_put_byte(i2cif, (offset >> 8) & 0xff);
+		mi2c_put_byte(i2cif, offset & 0xff);
+		mi2c_put_byte(i2cif, *buf++);
+		offset++;
+		mi2c_stop(i2cif);
+
+		do /* wait until the chip becomes ready */
+		{
+      mi2c_start(i2cif);
+			busy = mi2c_put_byte(i2cif, i2c_addr << 1);
+			mi2c_stop(i2cif);
+		} while(busy);
+
+	}
+ 	return size;
 }
 
-int8_t eeprom_get_sfpinfo(uint8_t i2cif, uint8_t i2c_addr, uint32_t offset, struct s_sfpinfo *sfpinfo, uint16_t section_sz)
+int32_t eeprom_sfpdb_erase(uint8_t i2cif, uint8_t i2c_addr)
 {
-  uint8_t *buf;
-  uint32_t i;
-  uint8_t checksum, sum;
-  
-  buf = (uint8_t *)sfpinfo;
-  eeprom_read(i2cif, i2c_addr, offset, buf, section_sz * sizeof(struct s_sfpinfo));
+  uint8_t sfpcount = 0;
 
-  //read checksum
-  eeprom_read(i2cif, i2c_addr, offset+section_sz*sizeof(struct s_sfpinfo), &checksum, 1);
+  //just a dummy function that writes '0' to sfp count field of the SFP DB
+  if( eeprom_write(i2cif, i2c_addr, EE_BASE_SFP, &sfpcount, sizeof(sfpcount)) != sizeof(sfpcount))
+    return EE_RET_I2CERR;
+  else
+    return sfpcount;
+}
 
-  //count checksum
-  sum = (uint8_t) (section_sz>>8 & 0xff);
-  sum = (uint8_t) ((uint16_t) sum + (section_sz & 0xff)) & 0xff;
+int32_t eeprom_get_sfp(uint8_t i2cif, uint8_t i2c_addr, struct s_sfpinfo* sfp, uint8_t add, uint8_t pos)
+{
+  static uint8_t sfpcount = 0;
+  uint8_t i, chksum=0;
+  uint8_t* ptr;
 
-  for(i=0; i<section_sz*sizeof(struct s_sfpinfo); ++i)
-    sum = (uint8_t) ((uint16_t)sum + *(buf+i)) & 0xff;
-  
-  if(sum == checksum)
+  if( pos>=SFPS_MAX )
+    return EE_RET_POSERR;  //position in database outside the range
+
+  //read how many SFPs are in the database, but only in the first call (pos==0)
+  if( !pos && eeprom_read(i2cif, i2c_addr, EE_BASE_SFP, &sfpcount, sizeof(sfpcount)) != sizeof(sfpcount) )
+    return EE_RET_I2CERR;
+
+  if( add && sfpcount==SFPS_MAX )  //no more space in the database to add new SFPs
+    return EE_RET_DBFULL;
+  else if( !pos && !add && sfpcount==0 )  //there are no SFPs in the database to read
+    return sfpcount;
+
+  if(!add)
   {
-    mprintf("%s: checksum match\n", __FUNCTION__);
-    return 0;
+    if( eeprom_read(i2cif, i2c_addr, EE_BASE_SFP + sizeof(sfpcount) + pos*sizeof(struct s_sfpinfo), (uint8_t*)sfp, 
+          sizeof(struct s_sfpinfo)) != sizeof(struct s_sfpinfo) )
+      return EE_RET_I2CERR;
+
+    ptr = (uint8_t*)sfp;
+    for(i=0; i<sizeof(struct s_sfpinfo)-1; ++i) //'-1' because we do not include chksum in computation
+      chksum = (uint8_t) ((uint16_t)chksum + *(ptr++)) & 0xff;
+    if(chksum != sfp->chksum)
+      EE_RET_CORRPT;
   }
   else
   {
-    mprintf("%s: checksum error, %x | %x\n", __FUNCTION__, sum, checksum);
-    return -1;
+    /*count checksum*/
+    ptr = (uint8_t*)sfp;
+    for(i=0; i<sizeof(struct s_sfpinfo)-1; ++i) //'-1' because we do not include chksum in computation
+      chksum = (uint8_t) ((uint16_t)chksum + *(ptr++)) & 0xff;
+    sfp->chksum = chksum;
+    /*add SFP at the end of DB*/
+    eeprom_write(i2cif, i2c_addr, EE_BASE_SFP+sizeof(sfpcount) + sfpcount*sizeof(struct s_sfpinfo), (uint8_t*)sfp, sizeof(struct s_sfpinfo));
+    sfpcount++;
+    eeprom_write(i2cif, i2c_addr, EE_BASE_SFP, &sfpcount, sizeof(sfpcount));
   }
-} 
 
-int8_t access_eeprom(char *sfp_pn, int32_t *alpha, int32_t *deltaTx, int32_t *deltaRx)
+  return sfpcount;
+}
+
+int8_t eeprom_match_sfp(uint8_t i2cif, uint8_t i2c_addr, struct s_sfpinfo* sfp)
 {
-  uint16_t i;
-  uint8_t j;
-  uint16_t sfp_sz;
-  int32_t sfp_adr;
-  struct s_sfpinfo sfpinfo[SFPINFO_MAX];
+  uint8_t sfpcount = 1;
+  int8_t i, temp;
+  struct s_sfpinfo dbsfp;
 
-  mi2c_init(WRPC_FMC_I2C);
-  
-  sfp_adr = eeprom_sfp_section(WRPC_FMC_I2C, FMC_EEPROM_ADR, 64*1024, &sfp_sz);
-  if(sfp_adr == -1)
-  {
-    mprintf("FMC EEPROM not found\n");
-    return -1;
-  }
-  else if(sfp_sz > SFPINFO_MAX)
-  {
-    //Ooops, there are too many of them, print warning
-    mprintf("! Warning ! too many SFP entries (%d)\n", sfp_sz);
-    sfp_sz = SFPINFO_MAX;
-  }
-  else if(sfp_sz == 0)
-  {
-    mprintf("EEPROM: could no find SFP section, staring with defaults\n");
-    return -1;
-  }
-  mprintf("EEPROM: found SFP section at %d size %d\n", (uint32_t)sfp_adr, (uint32_t)sfp_sz);
-
-  if( eeprom_get_sfpinfo(WRPC_FMC_I2C, FMC_EEPROM_ADR, sfp_adr, sfpinfo, sfp_sz))
-  {
-    mprintf("EEPROM ERROR\n");
-    return -1;
-  }
-
-  for(i=0; i<sfp_sz; ++i)
-  {
-    for(j=0; j<16; ++j)
+  for(i=0; i<sfpcount; ++i)
+  {   
+    temp = eeprom_get_sfp(WRPC_FMC_I2C, FMC_EEPROM_ADR, &dbsfp, 0, i); 
+    if(!i) 
+    {   
+      sfpcount=temp; //only in first round valid sfpcount is returned from eeprom_get_sfp
+      if(sfpcount == 0 || sfpcount == 0xFF)
+        return 0;
+      else if(sfpcount<0) 
+        return sfpcount;
+    }   
+    if( !strncmp(dbsfp.pn, sfp->pn, 16) )
     {
-      if(sfp_pn[j] != sfpinfo[i].pn[j])
-        break;
+      sfp->dTx = dbsfp.dTx;
+      sfp->dRx = dbsfp.dRx;
+      sfp->alpha = dbsfp.alpha;
+      return 1;
     }
+  } 
 
-    if( j==16 ) //which means sfp_pn = sfpinfo[i].pn
-    {
-      mprintf("match SFP%d: pn=", i+1);
-      for(j=0; j<16; ++j)
-        mprintf("%c", sfpinfo[i].pn[j]);
-      //mprintf(" alpha=%x deltaTx=%x deltaRx=%x\n", sfpinfo[i].alpha, sfpinfo[i].deltaTx, sfpinfo[i].deltaRx);
+  return 0;
+}
 
-      *alpha   = sfpinfo[i].alpha;
-      *deltaTx = sfpinfo[i].deltaTx;
-      *deltaRx = sfpinfo[i].deltaRx;
-    }
+int8_t eeprom_phtrans(uint8_t i2cif, uint8_t i2c_addr, uint32_t *val, uint8_t write)
+{
+  if(write)
+  {
+    *val |= (1<<31);
+    if( eeprom_write(i2cif, i2c_addr, EE_BASE_CAL, (uint8_t*)val, sizeof(val) ) != sizeof(val) )
+      return EE_RET_I2CERR;
+    else
+      return 1;
+  }
+  else
+  {
+    if( eeprom_read(i2cif, i2c_addr, EE_BASE_CAL, (uint8_t*)val, sizeof(val) ) != sizeof(val) )
+      return EE_RET_I2CERR;
+
+    if( !(*val&(1<<31)) )
+      return 0;
+
+    *val &= 0x7fffffff;  //return ph_trans value without validity bit
+    return 1;
+  }
+}
+
+int8_t eeprom_init_erase(uint8_t i2cif, uint8_t i2c_addr)
+{
+  uint16_t used = 0;
+
+  if( eeprom_write(i2cif, i2c_addr, EE_BASE_INIT, (uint8_t*)&used, sizeof(used)) != sizeof(used))
+    return EE_RET_I2CERR;
+  else
+    return used;
+}
+
+int8_t eeprom_init_purge(uint8_t i2cif, uint8_t i2c_addr)
+{
+  uint16_t used = 0xffff, i;
+  uint16_t pattern = 0xff;
+
+  if( eeprom_read(i2cif, i2c_addr, EE_BASE_INIT, (uint8_t*)&used, sizeof(used)) != sizeof(used) )
+		return EE_RET_I2CERR;
+
+  if(used==0xffff) used=0;
+  for(i=0; i<used; ++i)
+    eeprom_write(i2cif, i2c_addr, EE_BASE_INIT+sizeof(used)+i, (uint8_t*)&pattern, 1);
+  used = 0xffff;
+  eeprom_write(i2cif, i2c_addr, EE_BASE_INIT, (uint8_t*)&used, 2);
+
+  return used;
+}
+
+/* 
+ * Appends a new shell command at the end of boot script
+ */
+int8_t eeprom_init_add(uint8_t i2cif, uint8_t i2c_addr, const char *args[])
+{
+  uint8_t i=1;
+  char separator = ' ';
+  uint16_t used, readback;
+
+  if( eeprom_read(i2cif, i2c_addr, EE_BASE_INIT, (uint8_t*)&used, sizeof(used)) != sizeof(used) )
+    return EE_RET_I2CERR;
+
+  if( used==0xffff ) used=0;  //this means the memory is blank
+
+  while(args[i]!='\0')
+  {
+    if( eeprom_write(i2cif, i2c_addr, EE_BASE_INIT+sizeof(used)+used, (uint8_t*)args[i], strlen(args[i])) != strlen(args[i]))
+      return EE_RET_I2CERR;
+    used += strlen(args[i]);
+    if( eeprom_write(i2cif, i2c_addr, EE_BASE_INIT+sizeof(used)+used, &separator, sizeof(separator)) != sizeof(separator) )
+      return EE_RET_I2CERR;
+    ++used;
+    ++i;
+  }
+  //the end of the command, replace last separator with '\n'
+  separator = '\n';
+  if( eeprom_write(i2cif, i2c_addr, EE_BASE_INIT+sizeof(used)+used-1, &separator, sizeof(separator)) != sizeof(separator) )
+    return EE_RET_I2CERR;
+  //and finally update the size of the script
+  if( eeprom_write(i2cif, i2c_addr, EE_BASE_INIT, (uint8_t*)&used, sizeof(used)) != sizeof(used) )
+    return EE_RET_I2CERR;
+
+  if( eeprom_read(i2cif, i2c_addr, EE_BASE_INIT, (uint8_t*)&readback, sizeof(readback)) != sizeof(readback) )
+    return EE_RET_I2CERR;
+
+  return 0;
+}
+
+int32_t eeprom_init_show(uint8_t i2cif, uint8_t i2c_addr)
+{
+  uint16_t used, i;
+  char byte;
+
+  if( eeprom_read(i2cif, i2c_addr, EE_BASE_INIT, (uint8_t*)&used, sizeof(used)) != sizeof(used) )
+    return EE_RET_I2CERR;
+
+  if(used==0 || used==0xffff) 
+  {
+    used = 0;  //this means the memory is blank
+    mprintf("Empty init script...\n");
+  }
+
+  //just read and print to the screen char after char
+  for(i=0; i<used; ++i)
+  {
+    if( eeprom_read(i2cif, i2c_addr, EE_BASE_INIT+sizeof(used)+i, &byte, sizeof(byte)) != sizeof(byte) )
+      return EE_RET_I2CERR;
+    mprintf("%c", byte);
   }
 
   return 0;
+}
+
+int8_t eeprom_init_readcmd(uint8_t i2cif, uint8_t i2c_addr, char* buf, uint8_t bufsize, uint8_t next)
+{
+  static uint16_t ptr;
+  static uint16_t used = 0;
+  uint8_t i=0;
+
+  if(next == 0) 
+  {
+    if( eeprom_read(i2cif, i2c_addr, EE_BASE_INIT, (uint8_t*)&used, sizeof(used)) != sizeof(used) )
+      return EE_RET_I2CERR;
+    ptr = sizeof(used);
+  }
+
+  if(ptr-sizeof(used) >= used)
+    return 0;
+
+  do
+  {
+    if(ptr-sizeof(used) > bufsize) return EE_RET_CORRPT;
+    if( eeprom_read(i2cif, i2c_addr, EE_BASE_INIT+(ptr++), &buf[i], sizeof(char)) != sizeof(char) )
+      return EE_RET_I2CERR;
+  }while(buf[i++]!='\n');
+
+  return i;
 }

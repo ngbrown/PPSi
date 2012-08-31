@@ -30,7 +30,7 @@ struct spll_main_state {
 };
 
 
-static void mpll_init(struct spll_main_state *s, int id_ref, int id_out)
+static void mpll_init(volatile struct spll_main_state *s, int id_ref, int id_out)
 {
 	/* Frequency branch PI controller */
 	s->pi.y_min = 5;
@@ -49,11 +49,11 @@ static void mpll_init(struct spll_main_state *s, int id_ref, int id_out)
 	s->id_out = id_out;
 	s->dac_index = id_out - n_chan_ref;
 	
-	pi_init(&s->pi);
-	ld_init(&s->ld);
+	pi_init((spll_pi_t *) &s->pi);
+	ld_init((spll_lock_det_t *) &s->ld);
 }
 
-static void mpll_start(struct spll_main_state *s)
+static void mpll_start(volatile struct spll_main_state *s)
 {
 	s->adder_ref = s->adder_out = 0;
 	s->tag_ref = -1;
@@ -68,21 +68,21 @@ static void mpll_start(struct spll_main_state *s)
 	s->phase_shift_current = 0;
 	s->sample_n=  0;
 
-	pi_init(&s->pi);
-	ld_init(&s->ld);
+	pi_init((spll_pi_t *) &s->pi);
+	ld_init((spll_lock_det_t *) &s->ld);
 
 	spll_enable_tagger(s->id_ref, 1);
 	spll_enable_tagger(s->id_out, 1);
 	spll_debug(DBG_EVENT | DBG_MAIN, DBG_EVT_START, 1);
 }
 
-static void mpll_stop(struct spll_main_state *s)
+static void mpll_stop(volatile struct spll_main_state *s)
 {
 	spll_enable_tagger(s->id_out, 0);
 }
 
 
-static int mpll_update(struct spll_main_state *s, int tag, int source)
+static int mpll_update(volatile struct spll_main_state *s, int tag, int source)
 {
 	int err, y, tmp;
 
@@ -170,7 +170,7 @@ static int mpll_update(struct spll_main_state *s, int tag, int source)
 
 #endif
 
-        y = pi_update(&s->pi, err);
+    y = pi_update((spll_pi_t *) &s->pi, err);
 		SPLL->DAC_MAIN = SPLL_DAC_MAIN_VALUE_W(y) | SPLL_DAC_MAIN_DAC_SEL_W(s->dac_index);
 
 		spll_debug(DBG_MAIN | DBG_REF, s->tag_ref + s->adder_ref, 0);
@@ -182,7 +182,7 @@ static int mpll_update(struct spll_main_state *s, int tag, int source)
 		s->tag_out = -1;
 		s->tag_ref = -1;
 
-        if(s->adder_ref > 2*MPLL_TAG_WRAPAROUND && s->adder_out > 2*MPLL_TAG_WRAPAROUND)
+    if(s->adder_ref > 2*MPLL_TAG_WRAPAROUND && s->adder_out > 2*MPLL_TAG_WRAPAROUND)
 		{
 			s->adder_ref -= MPLL_TAG_WRAPAROUND;
 			s->adder_out -= MPLL_TAG_WRAPAROUND;
@@ -199,7 +199,7 @@ static int mpll_update(struct spll_main_state *s, int tag, int source)
                 s->adder_ref--;
             }
         }
-   	if(ld_update(&s->ld, err))
+   	if(ld_update((spll_lock_det_t *) &s->ld, err))
    		return SPLL_LOCKED;
 
   }
@@ -207,12 +207,12 @@ static int mpll_update(struct spll_main_state *s, int tag, int source)
 	return SPLL_LOCKING;
 }
 
-static int mpll_set_phase_shift(struct spll_main_state *s, int desired_shift)
+static int mpll_set_phase_shift(volatile struct spll_main_state *s, int desired_shift)
 {
 	s->phase_shift_target = desired_shift;
 }
 
-static int mpll_shifter_busy(struct spll_main_state *s)
+static int mpll_shifter_busy(volatile struct spll_main_state *s)
 {
 	return s->phase_shift_target != s->phase_shift_current;
 }

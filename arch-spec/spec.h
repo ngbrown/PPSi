@@ -1,11 +1,13 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
+ * Aurelio Colosimo for CERN, 2012 -- GNU LGPL v2.1 or later
  */
 #ifndef __SPEC_H
 #define __SPEC_H
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include <hw/memlayout.h>
 /*
  * These are the functions provided by the various bare files
  */
@@ -119,18 +121,6 @@ struct spec_ethhdr {
 	uint16_t	h_proto;
 } __attribute__((packed));
 
-/* Low-level details (from board.h in wr-core-tools) */
-
-#define BASE_MINIC    0x20000
-#define BASE_EP   	  0x20100
-#define BASE_SOFTPLL  0x20200
-#define BASE_PPS_GEN  0x20300
-#define BASE_SYSCON   0x20400
-#define BASE_UART 	  0x20500
-#define BASE_ONEWIRE  0x20600
-
-#define FMC_EEPROM_ADR 0x50
-
 #define CPU_CLOCK	62500000ULL
 
 #define UART_BAUDRATE	115200ULL /* not a real UART */
@@ -143,8 +133,9 @@ struct spec_ethhdr {
 #define GPIO_PIN_BTN1		5
 #define GPIO_PIN_BTN2		6
 
-/* hacks to use code imported from other places (wr-core-software) */
+/* hacks to use code imported from other places (wrpc-software) */
 #define TRACE_DEV pp_printf
+#define mprintf pp_printf
 
 struct hw_timestamp {
 	uint8_t valid;

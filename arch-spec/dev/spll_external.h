@@ -55,7 +55,7 @@ struct spll_external_state {
  	spll_lock_det_t ld;
 };
 
-static void external_init( struct spll_external_state *s, int ext_ref, int realign_clocks)
+static void external_init(volatile struct spll_external_state *s, int ext_ref, int realign_clocks)
 {
 
 	s->pi.y_min = 5;
@@ -78,10 +78,10 @@ static void external_init( struct spll_external_state *s, int ext_ref, int reali
 	s->realign_clocks = realign_clocks;
 	s->realign_state = (realign_clocks ? REALIGN_STAGE1 : REALIGN_DISABLED);
 
-	pi_init(&s->pi);
-	ld_init(&s->ld);
-	lowpass_init(&s->lp_short, 4000);
-	lowpass_init(&s->lp_long, 300);
+	pi_init((spll_pi_t *) &s->pi);
+	ld_init((spll_lock_det_t *) &s->ld);
+	lowpass_init((spll_lowpass_t *) &s->lp_short, 4000);
+	lowpass_init((spll_lowpass_t *) &s->lp_long, 300);
 }
 
 static inline void realign_fsm( struct spll_external_state *s)

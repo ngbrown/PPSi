@@ -9,12 +9,13 @@
 
 #include "irq.h"
 
+/* Temporary definition */
+#define TRACE PP_PRINTF
+
 volatile int irq_count = 0;
 
-static volatile struct SPLL_WB *SPLL = (volatile struct SPLL_WB *) BASE_SOFTPLL;
-static volatile struct PPSG_WB *PPSG = (volatile struct PPSG_WB *) BASE_PPS_GEN;
-
-#define TRACE(...) TRACE_DEV(__VA_ARGS__)
+static volatile struct SPLL_WB *SPLL;
+static volatile struct PPSG_WB *PPSG;
 
 /* The includes below contain code (not only declarations) to enable the compiler
    to inline functions where necessary and save some CPU cycles */
@@ -76,9 +77,6 @@ void _irq_entry()
 	struct softpll_state *s = (struct softpll_state *) &softpll;
 
 /* check if there are more tags in the FIFO */
-
-//    softpll.seq_state = SEQ_WAIT_CLEAR_DACS;
-  
 	while(! (SPLL->TRR_CSR & SPLL_TRR_CSR_EMPTY))
 	{
 		trr = SPLL->TRR_R0;
@@ -91,10 +89,13 @@ void _irq_entry()
             case SEQ_CLEAR_DACS:
                 SPLL->DAC_HPLL = 65535;
                 SPLL->DAC_MAIN = softpll.default_dac_main;
-//                SPLL->OCER |= 1;
+                SPLL->OCER |= 1;
                 softpll.seq_state = SEQ_WAIT_CLEAR_DACS;
                 softpll.dac_timeout = timer_get_tics();
+   			    if(softpll.mode == SPLL_MODE_SLAVE) 
+					spll_resync_dmtd_counter(softpll.mpll.id_ref);
                 break;
+
 
             case SEQ_WAIT_CLEAR_DACS:
                 if(timer_get_tics() - softpll.dac_timeout > TICS_PER_SECOND/20)
@@ -156,15 +157,10 @@ void _irq_entry()
 			case SEQ_READY:
 				if(!softpll.helper.ld.locked)
 				{
-//					SPLL->OCER = 0;
-//					SPLL->RCER = 0;
 					softpll.seq_state = SEQ_CLEAR_DACS;
 					softpll.delock_count++;
 				} else if (softpll.mode == SPLL_MODE_GRAND_MASTER && !external_locked((struct spll_external_state *) &s->ext))
 				{
-//					SPLL->OCER = 0;
-//					SPLL->RCER = 0;
-//					SPLL->ECCR = 0;
 					softpll.seq_state = SEQ_START_EXT;
 					softpll.delock_count++;
 				} else if (softpll.mode == SPLL_MODE_SLAVE && !softpll.mpll.ld.locked)
@@ -204,15 +200,8 @@ void _irq_entry()
 				for(i=0;i<n_chan_ref; i++)
 					if(ptracker_mask & (1<<i))
 						ptracker_update((struct spll_ptracker_state *) &s->ptrackers[i], tag, src);
-
-
 				break;
-
-
-
 		}
-
-
 	}
 
 	irq_count++;
@@ -231,6 +220,9 @@ void spll_init(int mode, int slave_ref_channel, int align_pps)
 	char mode_str[20];
 	volatile int dummy;
 	int i;
+	
+	SPLL = (volatile struct SPLL_WB *) BASE_SOFTPLL;
+	PPSG = (volatile struct PPSG_WB *) BASE_PPS_GEN;
 
 	disable_irq();
 
@@ -240,12 +232,9 @@ void spll_init(int mode, int slave_ref_channel, int align_pps)
 	softpll.mode = mode;
 	softpll.default_dac_main = 0;
 	softpll.delock_count = 0;
-//	softpll.occr_prev = 0;
 
 	SPLL->DAC_HPLL = 0;
 	SPLL->DAC_MAIN = 0;
-
-	//timer_delay(100000);
 
 	SPLL->CSR= 0 ;
 	SPLL->OCER = 0;
@@ -254,7 +243,6 @@ void spll_init(int mode, int slave_ref_channel, int align_pps)
 	SPLL->RCGER = 0;
 	SPLL->DCCR = 0;
 	SPLL->OCCR = 0;
-	
 	SPLL->DEGLITCH_THR = 1000;
 
 	PPSG->ESCR = 0;
@@ -282,7 +270,6 @@ void spll_init(int mode, int slave_ref_channel, int align_pps)
 				mpll_init(&softpll.aux[i], slave_ref_channel, n_chan_ref + i + 1);
 				softpll.aux_fsm[i].state = AUX_DISABLED;
 			}
-
 			break;
 
 		case SPLL_MODE_FREE_RUNNING_MASTER:
@@ -291,7 +278,6 @@ void spll_init(int mode, int slave_ref_channel, int align_pps)
 			softpll.seq_state = SEQ_CLEAR_DACS;
 			softpll.default_dac_main = 32000;
 			helper_init(&softpll.helper, n_chan_ref + slave_ref_channel);
-
 
 			mpll_init(&softpll.mpll, slave_ref_channel, n_chan_ref);
 
@@ -308,6 +294,9 @@ void spll_init(int mode, int slave_ref_channel, int align_pps)
 			strcpy(mode_str, "Slave");
 
 			softpll.seq_state = SEQ_CLEAR_DACS;
+			spll_resync_dmtd_counter(slave_ref_channel);
+			while(!spll_check_dmtd_resync(slave_ref_channel));
+			
 			helper_init(&softpll.helper, slave_ref_channel);
 			mpll_init(&softpll.mpll, slave_ref_channel, n_chan_ref);
 
@@ -334,7 +323,7 @@ void spll_init(int mode, int slave_ref_channel, int align_pps)
 	dummy = SPLL->PER_HPLL;
 
 	SPLL->EIC_IER = 1;
-  SPLL->OCER |= 1;
+	SPLL->OCER |= 1;
 
 	enable_irq();
 
@@ -373,7 +362,7 @@ void spll_start_channel(int channel)
 void spll_stop_channel(int channel)
 {
 	if(!channel)
-		return -1;
+		return;
 
 	mpll_stop(&softpll.aux[channel-1]);
 }
@@ -487,8 +476,9 @@ void spll_enable_ptracker(int ref_channel, int enable)
 
 int spll_get_delock_count()
 {
- 	return softpll.delock_count;
+	return softpll.delock_count;
 }
+
 
 int spll_update_aux_clocks()
 {
@@ -497,7 +487,7 @@ int spll_update_aux_clocks()
 	
 	for(i=0;i<n_chan_out-1;i++)
 	{
-		struct spll_aux_state *s = &softpll.aux_fsm[i];
+		volatile struct spll_aux_state *s = &softpll.aux_fsm[i];
 		
 		if((! (occr_aux_en & (1<<(i+1))) && s->state != AUX_DISABLED)) 
 		{
@@ -513,6 +503,7 @@ int spll_update_aux_clocks()
 	 	 	{
 	 	 		TRACE("[aux] enabled channel %d\n", i);
 	 	 		s->state = AUX_LOCK_PLL;
+				
 	 	 		spll_start_channel(i+1);
 	 	 	}
 	 	 	break;

@@ -23,7 +23,7 @@ static struct pp_frgn_master frgn_master;
 void ppsi_main(void)
 {
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
-
+	sdb_find_devices();
 	spec_uart_init();
 
 	pp_puts("Spec: starting. Compiled on " __DATE__ "\n");
