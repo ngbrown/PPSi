@@ -20,16 +20,24 @@ Rabbit is developed at ohwr.org:
 http://www.ohwr.org/projects/white-rabbit
 
 
-	Current Status (July 2012)
+	Current Status (September 2012)
 	==============================
 
-We currently have only standard PTP (IEEE 1588) with no extensions.
-Code for the White Rabbit extension is being worked on (currently WR
-devices use a different code base, which should be replaced by this one).
+We currently support arch/extension/net protocol according to the following
+table:
+__________________________________________________________
+          |       PTP PROTOCOL   | NET TRANSPORT PROTOCOL |
+          |   IEEE1588 |  WR-EXT |   UDP  | IEEE802.3     |
+          |            |         |        |               |
+spec      |       X    |    X    |        |     X         |
+gnu-linux |       X    |         |    X   |     X         |
+__________|____________|_________|________|_______________|
 
-The working architectures are "gnu-linux" and "spec":
-* gnu-linux supports both UDP and IEEE 802.3 (raw ethernet) transport protocols
-* spec supports IEEE 802.3 protocol only
+In other words, the working architectures are "gnu-linux" and "spec":
+* gnu-linux supports both UDP and IEEE 802.3 (raw ethernet) transport protocols,
+  but ptp standard protocol only
+* spec supports IEEE 802.3 protocol only, and ptp or white rabbit extension
+  protocol
 
 
 	Compile-time Configuration
