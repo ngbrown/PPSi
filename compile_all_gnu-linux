@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# This script simply compiles ppsi both for master and for slave, with
+# diagnostic enabled.
+
+make clean;make WRMODE=slave HAS_FULL_DIAG=y && ARCH=gnu-linux && mv ppsi ppsi_slave
+make clean;make WRMODE=master HAS_FULL_DIAG=y && ARCH=gnu-linux && mv ppsi ppsi_master

@@ -1,5 +1,7 @@
 To compile for spec, master and slave, just type:
-
 ./compile_all_spec
-
 You will get ppsi_master.bin and ppsi_slave.bin
+
+To compile for a gnu-linux architecture (e.g. x86), just type:
+./compile_all_spec
+You will get ppsi_master and ppsi_slave executable
