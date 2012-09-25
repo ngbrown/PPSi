@@ -34,7 +34,11 @@ void *pp_memcpy(void *dest, const void *src, int count)
 
 void pp_get_tstamp(TimeInternal *t) //uint32_t *sptr)
 {
-	pps_gen_get_time(&t->seconds, &t->nanoseconds );
+	uint64_t sec;
+	uint32_t nsec;
+	pps_gen_get_time(&sec, &nsec);
+	t->seconds = (int32_t)sec;
+	t->nanoseconds = (int32_t)nsec;
 }
 
 /* What follows has no prefix because it's only used by arch code */
