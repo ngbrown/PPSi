@@ -61,11 +61,14 @@ static inline uint32_t minic_readl(uint32_t reg)
   return *(volatile uint32_t *)(BASE_MINIC + reg);
 }
 
+/*
+ * uint32_t size - in bytes
+ */
 static uint8_t * minic_rx_memcpy( uint8_t *dst, uint8_t *src, uint32_t size)
 {
   uint32_t part;
   //if src is outside the circular buffer, bring it back to the beginning
-  src = (uint8_t *) ((uint32_t)minic.rx_base + ((uint32_t)src - (uint32_t)minic.rx_base) % minic.rx_size);
+  src = (uint8_t *) ((uint32_t)minic.rx_base + ((uint32_t)src - (uint32_t)minic.rx_base) % (minic.rx_size<<2));
 
   if((uint32_t)src + size <= (uint32_t)minic.rx_base + (minic.rx_size<<2))
     return memcpy(dst, src, size);
@@ -76,6 +79,9 @@ static uint8_t * minic_rx_memcpy( uint8_t *dst, uint8_t *src, uint32_t size)
   return dst;
 }
 
+/*
+ * uint32_t size - in bytes
+ */
 static uint8_t *minic_rx_memset( uint8_t *mem, uint8_t c, uint32_t size)
 {
   uint32_t part;
@@ -177,8 +183,6 @@ int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size, struct hw_
   if(! (minic_readl(MINIC_REG_EIC_ISR) & MINIC_EIC_ISR_RX))
     return 0;
 
-  //TRACE_DEV("minic: got sthx \n");
-
   desc_hdr = *minic.rx_head;
 
   if(!RX_DESC_VALID(desc_hdr)) /* invalid descriptor? Weird, the RX_ADDR seems to be saying something different. Ignore the packet and purge the RX buffer. */
@@ -251,7 +255,7 @@ int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size, struct hw_
   minic_rxbuf_free(num_words);
   minic.rx_head = (uint32_t *)((uint32_t)minic.rx_base + ((uint32_t)minic.rx_head+(num_words<<2) - (uint32_t)minic.rx_base) % (minic.rx_size<<2));
 
-  cur_avail = minic_readl(MINIC_REG_RX_AVAIL);
+  cur_avail = minic_readl(MINIC_REG_RX_AVAIL) & 0xFFFFFF; /* 24-bit field */
 
   /*empty buffer->no more received packets, or packet reception in progress but not done*/
 	if( !RX_DESC_VALID(*minic.rx_head))
@@ -266,17 +270,14 @@ int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size, struct hw_
 }
 
 
-static uint16_t tx_oob_val = 0;
 
 int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size, struct hw_timestamp *hwts)
 {
   uint32_t d_hdr, mcr, nwords;
   uint8_t ts_valid;
-  int i;
+  int i = 0;
   minic_new_tx_buffer();
 
-
-//  TRACE_DEV("minic_tx_frame: head %x size %d\n", minic.tx_head, size);
   memset((void*)minic.tx_head, 0x0, size + 16);
   memset((void*)minic.tx_head + 4, 0, size < 60 ? 60 : size);
   memcpy((void*)minic.tx_head + 4, hdr, ETH_HEADER_SIZE);
@@ -290,7 +291,7 @@ int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size, struct hw_time
 	d_hdr = 0;
 
   if(hwts)
-    d_hdr = TX_DESC_WITH_OOB | (tx_oob_val << 12);
+    d_hdr = TX_DESC_WITH_OOB | (WRPC_FID<<12);
 
   d_hdr |= TX_DESC_VALID | nwords;
   
@@ -325,10 +326,11 @@ int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size, struct hw_time
       raw_ts = minic_readl(MINIC_REG_TSR1);
       fid = MINIC_TSR0_FID_R(minic_readl(MINIC_REG_TSR0));
 
-		if(fid != tx_oob_val)
-		{
-		 	TRACE_DEV("minic_tx_frame: unmatched fid %d vs %d\n", fid, tx_oob_val);
-		}
+			if(fid != WRPC_FID)
+			{
+			 	TRACE_DEV("minic_tx_frame: unmatched fid %d vs %d\n", fid, WRPC_FID);
+			}
+
       EXPLODE_WR_TIMESTAMP(raw_ts, counter_r, counter_f);
       pps_gen_get_time(&sec, &nsec);
 
@@ -346,8 +348,6 @@ int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size, struct hw_time
 //	  TRACE_DEV("minic_tx_frame [%d bytes] TS: %d.%d valid %d\n", size, hwts->utc, hwts->nsec, hwts->valid);
 	  minic.tx_count++;
     }
-
-  tx_oob_val++;
 
   return size;
 }
