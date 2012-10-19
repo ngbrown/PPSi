@@ -84,7 +84,6 @@ extern void spec_udelay(int usecs);
 extern int spec_errno;
 
 /* Dev stuff */
-extern void spec_uart_init(void);
 extern void spec_putc(int c);
 extern void spec_puts(const char *s);
 extern int spec_testc(void);
