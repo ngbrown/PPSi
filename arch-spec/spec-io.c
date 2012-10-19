@@ -10,7 +10,7 @@ const Integer32 PP_ADJ_FREQ_MAX = 512000; //GGDD value ?
 
 void pp_puts(const char *s)
 {
-	puts(s);
+	/* FIXME puts(s);*/
 }
 
 int pp_strnlen(const char *s, int maxlen)
