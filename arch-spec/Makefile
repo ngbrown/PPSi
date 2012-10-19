@@ -48,7 +48,7 @@ all: $(TARGET) $(TARGET).bin
 # were not selected yet (e.g., pp_open_instance() ).
 $(TARGET): $(TARGET).o $A/crt0.o $(LIBARCH)
 	$(CC) -Wl,-Map,$(TARGET).map2 $(ARCH_LDFLAGS) -o $@ $A/crt0.o \
-		$(TARGET).o $(OBJ-specdev) -L$A -larch -L$D -lstd -L$W -lwr
+		$(TARGET).o $(OBJ-specdev) -L$A -larch -L$W -lwr
 
 $(TARGET).bin: $(TARGET)
 	$(OBJCOPY) -O binary $^ $@
