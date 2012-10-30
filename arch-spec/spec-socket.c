@@ -168,13 +168,12 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
 
 int spec_net_init(struct pp_instance *ppi)
 {
-	uint32_t i;
 	ppi->buf_out = buffer_out;
 	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
 
 	ppi->buf_out+= 4 - (((int)ppi->buf_out) % 4);
 	/* FIXME Alignment */
-	pp_printf("spec_net_init ETH %x\n",ppi->buf_out);
+	pp_printf("spec_net_init ETH %x\n", (uint32_t)ppi->buf_out);
 	spec_open_ch(ppi);
 
 	return 0;
