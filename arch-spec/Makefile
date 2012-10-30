@@ -13,6 +13,9 @@ WRPCSW_ROOT = ..
 # wrpc-sw
 PTPNOPOSIX_ROOT = $(WRPCSW_ROOT)/ptp-noposix
 
+CFLAGS += -I$(WRPCSW_ROOT)/include -I$(PTPNOPOSIX_ROOT)/softpll \
+	-I$(WRPCSW_ROOT)/boards/spec
+
 # All files are under A (short for ARCH): I'm lazy
 A := arch-$(ARCH)
 
@@ -28,7 +31,7 @@ OBJ-libarch := $A/spec-startup.o \
 	$A/spec-halexp.o \
 	lib/div64.o
 
-OBJ-specdev := $(WRPCSW_ROOT)/dev/uart.o \
+specdev-objects := $(WRPCSW_ROOT)/dev/uart.o \
 	$(WRPCSW_ROOT)/dev/syscon.o \
 	$(WRPCSW_ROOT)/dev/ep_pfilter.o \
 	$(WRPCSW_ROOT)/dev/endpoint.o \
@@ -48,7 +51,7 @@ all: $(TARGET) $(TARGET).bin
 # were not selected yet (e.g., pp_open_instance() ).
 $(TARGET): $(TARGET).o $A/crt0.o $(LIBARCH)
 	$(CC) -Wl,-Map,$(TARGET).map2 $(ARCH_LDFLAGS) -o $@ $A/crt0.o \
-		$(TARGET).o $(OBJ-specdev) -L$A -larch -L$W -lwr
+		$(TARGET).o $(specdev-objects) -L$A -larch $(LIBS)
 
 $(TARGET).bin: $(TARGET)
 	$(OBJCOPY) -O binary $^ $@

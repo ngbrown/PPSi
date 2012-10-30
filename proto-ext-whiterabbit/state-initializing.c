@@ -5,6 +5,8 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include <softpll_ng.h>
+#include <syscon.h>
 #include "wr-api.h"
 
 /*
@@ -74,7 +76,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	start_tics = timer_get_tics();
 	DSPOR(ppi)->wrConfig = WR_M_ONLY;
 	spll_init(2, 0, 1); /* SPLL_MODE_FREE_RUNNING_MASTER */
-	pps_gen_enable_output(0);
+	shw_pps_gen_enable_output(0);
 	lock_timeout = LOCK_TIMEOUT_GM;
 
 	PP_PRINTF("Locking...");
@@ -88,7 +90,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		}
 	}
 	PP_PRINTF("\nLocking end.\n");
-	pps_gen_enable_output(1);
+	shw_pps_gen_enable_output(1);
 #endif
 	DSPOR(ppi)->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
 	DSPOR(ppi)->wrStateRetry = WR_DEFAULT_STATE_REPEAT;

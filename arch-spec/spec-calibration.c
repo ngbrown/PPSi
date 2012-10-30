@@ -4,7 +4,7 @@
 
 #include <endpoint.h>
 #include <ppsi/ppsi.h>
-#include "dev/softpll_ng.h"
+#include <softpll_ng.h>
 #include "spec.h"
 #include "../proto-ext-whiterabbit/wr-constants.h"
 

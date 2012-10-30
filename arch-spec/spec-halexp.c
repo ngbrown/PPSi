@@ -2,13 +2,8 @@
  * Aurelio Colosimo for CERN, 2012 -- GNU LGPL v2.1 or later
  */
 #include <ppsi/ppsi.h>
+#include <softpll_ng.h>
 #include "spec.h"
-/*
-#include "include/syscon.h"
-#include "include/minic.h"
-#include <ppsi/diag.h>
-#include <pps_gen.h>
-*/
 
 /* Calibration data (should be read from EEPROM, if available) */
 #ifdef PPSI_MASTER

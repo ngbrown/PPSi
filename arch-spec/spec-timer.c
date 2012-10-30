@@ -1,7 +1,7 @@
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 #include <pps_gen.h>
-#include <timer.h>
+#include <syscon.h>
 
 static struct pp_timer spec_timers[PP_TIMER_ARRAY_SIZE];
 

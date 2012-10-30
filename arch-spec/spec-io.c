@@ -36,7 +36,7 @@ void pp_get_tstamp(TimeInternal *t) //uint32_t *sptr)
 {
 	uint64_t sec;
 	uint32_t nsec;
-	pps_gen_get_time(&sec, &nsec);
+	shw_pps_gen_get_time(&sec, &nsec);
 	t->seconds = (int32_t)sec;
 	t->nanoseconds = (int32_t)nsec;
 }
@@ -95,16 +95,14 @@ int pp_memcmp(const void *s1, const void *s2, int count)
 
 int32_t spec_set_tstamp(TimeInternal *t)
 {
-	TimeInternal tp_orig;
-
-	pps_gen_set_time(t->seconds, t->nanoseconds);
+	shw_pps_gen_set_time(t->seconds, t->nanoseconds);
 
 	return 0; /* SPEC uses a sort of monotonic tstamp for timers */
 }
 
 int spec_adj_freq(Integer32 adj)
 {
-	pps_gen_adjust(PPSG_ADJUST_NSEC, adj);
+	shw_pps_gen_adjust(PPSG_ADJUST_NSEC, adj);
 	return 0;
 }
 

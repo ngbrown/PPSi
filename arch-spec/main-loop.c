@@ -8,7 +8,7 @@
  */
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include <timer.h>
+#include <syscon.h>
 #include "spec.h"
 
 void spec_main_loop(struct pp_instance *ppi)

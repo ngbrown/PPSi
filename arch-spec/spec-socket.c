@@ -3,11 +3,12 @@
  */
 #include <ppsi/ppsi.h>
 #include "spec.h"
-#include "include/syscon.h"
-#include "include/minic.h"
+#include <syscon.h>
+#include <pps_gen.h>
+#include <minic.h>
 #include <ppsi/diag.h>
 #include <pps_gen.h>
-#include "dev/softpll_ng.h"
+#include <softpll_ng.h>
 
 int spec_errno;
 Octet buffer_out[PP_PACKET_SIZE + 14]; // 14 is ppi->proto_ofst for ethernet mode
@@ -35,7 +36,7 @@ int spec_open_ch(struct pp_instance *ppi)
 	ep_init(fake_addr);
 	ep_enable(1, 1);
 	minic_init();
-	pps_gen_init();
+	shw_pps_gen_init();
 
 	memcpy(NP(ppi)->ch[PP_NP_GEN].addr, fake_addr, 6);
 	memcpy(NP(ppi)->ch[PP_NP_EVT].addr, fake_addr, 6);

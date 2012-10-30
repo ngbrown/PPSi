@@ -1,10 +1,12 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
+#include <syscon.h>
+#include <uart.h>
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 #include "spec.h"
-#include "include/syscon.h"
+
 
 static struct pp_instance ppi_static;
 int pp_diag_verbosity = 0;

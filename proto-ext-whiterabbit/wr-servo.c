@@ -183,7 +183,7 @@ static int got_sync = 0;
 
 void wr_servo_reset()
 {
-//    pps_gen_enable_output(0); /* fixme: unportable */
+//    shw_pps_gen_enable_output(0); /* fixme: unportable */
 	cur_servo_state.valid = 0;
 	servo_state_valid = 0;
 //    ptpd_netif_enable_timing_output(0);
@@ -459,7 +459,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 		if(tracking_enabled)
 		{
-//         	pps_gen_enable_output(1);
+//         	shw_pps_gen_enable_output(1);
 			// just follow the changes of deltaMS
 			s->cur_setpoint += (s->delta_ms - s->delta_ms_prev);
 

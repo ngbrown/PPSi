@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <ppsi/ppsi.h>
 #include <pps_gen.h>
-#include "dev/softpll_ng.h"
+#include <softpll_ng.h>
 #include "../proto-ext-whiterabbit/wr-constants.h"
 
 int spec_spll_locking_enable(struct pp_instance *ppi)
@@ -34,21 +34,21 @@ int spec_spll_enable_ptracker(struct pp_instance *ppi)
 
 int spec_enable_timing_output(struct pp_instance *ppi, int enable)
 {
-	pps_gen_enable_output(enable);
+	shw_pps_gen_enable_output(enable);
 	return WR_SPLL_OK;
 }
 
 int spec_adjust_in_progress()
 {
-	return pps_gen_busy() || spll_shifter_busy(0);
+	return shw_pps_gen_busy() || spll_shifter_busy(0);
 }
 
 int spec_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
 {
 	if(adjust_sec)
-		pps_gen_adjust(PPSG_ADJUST_SEC, adjust_sec);
+		shw_pps_gen_adjust(PPSG_ADJUST_SEC, adjust_sec);
 	if(adjust_nsec)
-		pps_gen_adjust(PPSG_ADJUST_NSEC, adjust_nsec);
+		shw_pps_gen_adjust(PPSG_ADJUST_NSEC, adjust_nsec);
 	return 0;
 }
 

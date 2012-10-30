@@ -92,11 +92,6 @@ extern int spec_getc(void);
 extern void minic_init(void);
 extern int minic_poll_rx(void);
 struct hw_timestamp;
-extern int minic_rx_frame(uint8_t *hdr, uint8_t *payload, uint32_t buf_size,
-			  struct hw_timestamp *hwts /* unused */);
-extern int minic_tx_frame(uint8_t *hdr, uint8_t *payload, uint32_t size,
-			  struct hw_timestamp *hwts /* unused */);
-
 
 extern void ep_init(uint8_t mac_addr[]);
 extern void get_mac_addr(uint8_t dev_addr[]);
@@ -135,14 +130,6 @@ struct spec_ethhdr {
 /* hacks to use code imported from other places (wrpc-software) */
 #define TRACE_DEV pp_printf
 #define mprintf pp_printf
-
-struct hw_timestamp {
-	uint8_t valid;
-	int ahead;
-	uint64_t sec;
-	uint32_t nsec;
-	uint32_t phase;
-};
 
 #define DMTD_AVG_SAMPLES 256
 #define DMTD_MAX_PHASE 16384
