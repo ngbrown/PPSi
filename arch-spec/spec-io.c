@@ -114,3 +114,6 @@ int pp_adj_freq(Integer32 adj)
 
 int32_t pp_set_tstamp(TimeInternal *t)
 	__attribute__((alias("spec_set_tstamp")));
+
+char *pp_strcpy(char *dest, const char *src)
+	__attribute__((alias("strcpy")));
