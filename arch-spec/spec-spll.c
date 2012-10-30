@@ -55,6 +55,7 @@ int spec_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
 int spec_adjust_phase(int32_t phase_ps)
 {
 	spll_set_phase_shift(SPLL_ALL_CHANNELS, phase_ps);
+	return WR_SPLL_OK;
 }
 
 int wr_locking_enable(struct pp_instance *ppi)
