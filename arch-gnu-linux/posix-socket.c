@@ -276,7 +276,7 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 
 	if (ioctl(sock, SIOCGIFADDR, &ifr) < 0) {
 		pp_diag_error_str2(ppi, "SIOCGIFADDR", strerror(errno));
-		PP_PRINTF(ppi, "Tip: did you  run ppsi as super user?\n");
+		PP_PRINTF("Tip: did you  run ppsi as super user?\n");
 		return -1;
 	}
 
