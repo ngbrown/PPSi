@@ -5,6 +5,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include <pps_gen.h>
 #include <softpll_ng.h>
 #include <syscon.h>
 #include "wr-api.h"
