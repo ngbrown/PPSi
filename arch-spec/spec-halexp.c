@@ -5,15 +5,10 @@
 #include <softpll_ng.h>
 #include "spec.h"
 
-/* Calibration data (should be read from EEPROM, if available) */
-#ifdef PPSI_MASTER
-int32_t sfp_alpha = -73622176;
-#else
-int32_t sfp_alpha = 73622176;
-#endif
-int32_t sfp_deltaTx = 0;
-int32_t sfp_deltaRx = 0;
-uint32_t cal_phase_transition = 595; /* 7000 */
+extern int32_t sfp_alpha;
+extern int32_t sfp_deltaTx;
+extern int32_t sfp_deltaRx;
+extern uint32_t cal_phase_transition;
 
 static int read_phase_val(hexp_port_state_t *state)
 {

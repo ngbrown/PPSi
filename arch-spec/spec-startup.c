@@ -22,6 +22,16 @@ static struct pp_net_path net_path;
 static struct pp_servo servo;
 static struct pp_frgn_master frgn_master;
 
+/* Calibration data (should be read from EEPROM, if available) */
+#ifdef PPSI_MASTER
+int32_t sfp_alpha = -73622176;
+#else
+int32_t sfp_alpha = 73622176;
+#endif
+int32_t sfp_deltaTx = 0;
+int32_t sfp_deltaRx = 0;
+uint32_t cal_phase_transition = 595; /* 7000 */
+
 void ppsi_main(void)
 {
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
