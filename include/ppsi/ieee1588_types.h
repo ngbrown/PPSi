@@ -281,6 +281,7 @@ typedef struct {
 	FixedDelta otherNodeDeltaTx;
 	FixedDelta otherNodeDeltaRx;
 	Boolean doRestart;
+	Boolean linkUP;
 	/* White Rabbit extension end */
 } DSPort;
 
