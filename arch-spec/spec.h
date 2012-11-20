@@ -128,8 +128,12 @@ struct spec_ethhdr {
 #define GPIO_PIN_BTN2		6
 
 /* hacks to use code imported from other places (wrpc-software) */
+#ifndef TRACE_DEV
 #define TRACE_DEV pp_printf
+#endif
+#ifndef mprintf
 #define mprintf pp_printf
+#endif
 
 #define DMTD_AVG_SAMPLES 256
 #define DMTD_MAX_PHASE 16384
