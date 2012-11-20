@@ -85,6 +85,26 @@ struct wr_servo_state_t {
 	int missed_iters;
 };
 
+/* FIXME: what is the difference with the above? */
+typedef struct{
+	int valid;
+	char slave_servo_state[32];
+	char sync_source[32];
+	int tracking_enabled;
+	int64_t mu;
+	int64_t delay_ms;
+	int64_t delta_tx_m;
+	int64_t delta_rx_m;
+	int64_t delta_tx_s;
+	int64_t delta_rx_s;
+	int64_t fiber_asymmetry;
+	int64_t total_asymmetry;
+	int64_t cur_offset;
+	int64_t cur_setpoint;
+	int64_t cur_skew;
+	int64_t update_count;
+}  ptpdexp_sync_state_t ;
+
 /* All data used as extension ppsi-wr must be put here */
 struct wr_data_t {
 	struct wr_servo_state_t servo_state;

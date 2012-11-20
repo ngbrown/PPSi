@@ -23,30 +23,10 @@ const char *servo_state_str[] = {
 	[WR_WAIT_OFFSET_STABLE] = "OFFSET_STABLE",
 };
 
-typedef struct {
-	int valid;
-	char slave_servo_state[32];
-	char sync_source[32];
-	int tracking_enabled;
-	int64_t mu;
-	int64_t delay_ms;
-	int64_t delta_tx_m;
-	int64_t delta_rx_m;
-	int64_t delta_tx_s;
-	int64_t delta_rx_s;
-	int64_t fiber_asymmetry;
-	int64_t total_asymmetry;
-	int64_t cur_offset;
-	int64_t cur_setpoint;
-	int64_t cur_skew;
-	int64_t update_count;
-} ptpdexp_sync_state_t ;
+int servo_state_valid = 0; /* FIXME: why? */
+ptpdexp_sync_state_t cur_servo_state; /* FIXME: why? */
 
-
-int servo_state_valid = 0;
-ptpdexp_sync_state_t cur_servo_state;
-
-static int tracking_enabled = 1;
+static int tracking_enabled = 1; /* FIXME: why? */
 
 void wr_servo_enable_tracking(int enable)
 {
