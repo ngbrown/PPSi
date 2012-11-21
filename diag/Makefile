@@ -2,7 +2,10 @@
 # Diagnostics: we have tree levels: none, full and limited
 
 # full: use a complete printf and the diag code
-OBJ-$(HAS_FULL_DIAG) += diag/diag-yes.o diag/diag-printf.o diag/printf-full.o
+OBJ-$(HAS_FULL_DIAG) += diag/diag-yes.o
+ifdef INTERNAL_PRINTF
+OBJ-$(HAS_FULL_DIAG) += diag/diag-printf.o diag/printf-full.o
+endif
 
 # limited: use a minimal printf (can't coexist with FULL_DIAG)
 ifndef HAS_FULL_DIAG
