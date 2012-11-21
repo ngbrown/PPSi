@@ -14,7 +14,7 @@ WRPCSW_ROOT = ..
 PTPNOPOSIX_ROOT = $(WRPCSW_ROOT)/ptp-noposix
 
 CFLAGS += -I$(WRPCSW_ROOT)/include -I$(PTPNOPOSIX_ROOT)/softpll \
-	-I$(WRPCSW_ROOT)/boards/spec
+	-I$(WRPCSW_ROOT)/boards/spec 	-ffunction-sections	-fdata-sections
 
 # All files are under A (short for ARCH): I'm lazy
 A := arch-$(ARCH)
