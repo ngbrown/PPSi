@@ -21,9 +21,7 @@ A := arch-$(ARCH)
 
 LIBARCH := $A/libarch.a
 
-OBJ-libarch := $A/spec-startup.o \
-	$A/main-loop.o \
-	$A/spec-socket.o \
+OBJ-libarch := $A/spec-socket.o \
 	$A/spec-io.o \
 	$A/spec-timer.o \
 	$A/spec-spll.o \
@@ -45,13 +43,15 @@ specdev-objects := $(WRPCSW_ROOT)/dev/uart.o \
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^
 
-all: $(TARGET) $(TARGET).bin
+all: $(TARGET).o $(LIBARCH)
+ppsi-bin: $(TARGET) $(TARGET).bin
 
 # to build the target, we need -lstd again, in case we call functions that
 # were not selected yet (e.g., pp_open_instance() ).
-$(TARGET): $(TARGET).o $A/crt0.o $(LIBARCH)
+$(TARGET): $(TARGET).o $A/crt0.o $(LIBARCH) $A/main-loop.o $A/spec-startup.o
 	$(CC) -Wl,-Map,$(TARGET).map2 $(ARCH_LDFLAGS) -o $@ $A/crt0.o \
-		$(TARGET).o $(specdev-objects) -L$A -larch $(LIBS)
+		$(TARGET).o $(specdev-objects) $A/main-loop.o $A/spec-startup.o \
+		-L$A -larch $(LIBS)
 
 $(TARGET).bin: $(TARGET)
 	$(OBJCOPY) -O binary $^ $@
