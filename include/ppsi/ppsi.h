@@ -23,9 +23,9 @@ extern int pp_diag_verbosity;
 #define PP_ERR(ppi,err) if pp_diag_error(ppi,err)
 #define PP_ERR2(ppi,s1,s2) if pp_diag_error_str2(ppi,s1,s2)
 #define PP_FATAL(ppi,s1,s2) if pp_diag_fatal(ppi,s1,s2)
-#define PP_PRINTF(...) pp_printf(__VA_ARGS__)
+#define PP_PRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
 #define PP_TPRINTF(...) pp_timed_printf(__VA_ARGS__)
-#define PP_VPRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
+#define PP_VPRINTF(...) if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
 
 /*
  * Runtime options. Default values can be overridden by command line.
