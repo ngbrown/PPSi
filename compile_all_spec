@@ -5,6 +5,6 @@
 
 export CROSS_COMPILE=/opt/lm32/bin/lm32-elf-
 echo $CROSS_COMPILE
-make clean;make WRMODE=slave HAS_FULL_DIAG=y ARCH=spec PROTO_EXT=whiterabbit && mv ppsi.bin ppsi_slave.bin_
-make clean;make WRMODE=master HAS_FULL_DIAG=y ARCH=spec PROTO_EXT=whiterabbit && mv ppsi.bin ppsi_master.bin
+make clean;make WRMODE=slave HAS_FULL_DIAG=y ARCH=spec INTERNAL_PRINTF=y PROTO_EXT=whiterabbit ppsi-bin && mv ppsi.bin ppsi_slave.bin_
+make clean;make WRMODE=master HAS_FULL_DIAG=y ARCH=spec INTERNAL_PRINTF=y PROTO_EXT=whiterabbit ppsi-bin && mv ppsi.bin ppsi_master.bin
 mv ppsi_slave.bin_ ppsi_slave.bin
