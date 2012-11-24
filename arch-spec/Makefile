@@ -37,6 +37,7 @@ specdev-objects := $(WRPCSW_ROOT)/dev/uart.o \
 	$(WRPCSW_ROOT)/dev/minic.o \
 	$(WRPCSW_ROOT)/arch/lm32/irq.o \
 	$(WRPCSW_ROOT)/dev/sdb.o \
+	$(WRPCSW_ROOT)/lib/net.o \
 	$(PTPNOPOSIX_ROOT)/softpll/softpll_ng.o \
 
 $(LIBARCH): $(OBJ-libarch)
