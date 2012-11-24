@@ -10,27 +10,34 @@
 
 static inline void Integer64_display(const char *label, Integer64 *bigint)
 {
+#ifdef VERB_LOG_MSGS
 	PP_VPRINTF("%s:\n", label);
 	PP_VPRINTF("LSB: %u\n", bigint->lsb);
 	PP_VPRINTF("MSB: %d\n", bigint->msb);
+#endif
 }
 
 static inline void UInteger48_display(const char *label, UInteger48 *bigint)
 {
+#ifdef VERB_LOG_MSGS
 	PP_VPRINTF("%s:\n", label);
 	PP_VPRINTF("LSB: %u\n", bigint->lsb);
 	PP_VPRINTF("MSB: %u\n", bigint->msb);
+#endif
 }
 
 static inline void timestamp_display(const char *label, Timestamp *timestamp)
 {
+#ifdef VERB_LOG_MSGS
 	PP_VPRINTF("%s:\n", label);
 	UInteger48_display("seconds", &timestamp->secondsField);
 	PP_VPRINTF("nanoseconds: %u\n", timestamp->nanosecondsField);
+#endif
 }
 
 static inline void msg_display_header(MsgHeader *header)
 {
+#ifdef VERB_LOG_MSGS
 	PP_VPRINTF("Message header: \n");
 	PP_VPRINTF("\n");
 	PP_VPRINTF("transportSpecific: %d\n", header->transportSpecific);
@@ -46,10 +53,12 @@ static inline void msg_display_header(MsgHeader *header)
 	PP_VPRINTF("controlField: %d\n", header->controlField);
 	PP_VPRINTF("logMessageInterval: %d\n", header->logMessageInterval);
 	PP_VPRINTF("\n");
+#endif
 }
 
 static inline void msg_display_announce(MsgAnnounce *announce)
 {
+#ifdef VERB_LOG_MSGS
         PP_VPRINTF("Message ANNOUNCE:\n");
         timestamp_display("Origin Timestamp", &announce->originTimestamp);
         PP_VPRINTF("currentUtcOffset: %d\n", announce->currentUtcOffset);
@@ -65,6 +74,7 @@ static inline void msg_display_announce(MsgAnnounce *announce)
         PP_VPRINTF("timeSource: %d\n", announce->timeSource);
         PP_VPRINTF("\n");
 	/* FIXME diagnostic WR extension*/
+#endif
 }
 
 /* Unpack header from in buffer to msg_tmp_header field */

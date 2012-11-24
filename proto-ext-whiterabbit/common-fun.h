@@ -11,6 +11,7 @@
 /* Contains all functions common to more than one state */
 
 /* The following macros are used both by msg.c and by wr-msg.c */
+#ifdef VERB_LOG_MSGS
 #define MSG_SEND_AND_RET_VARLEN(x,y,z,w)\
 	if (pp_send_packet(ppi, ppi->buf_out, w,\
 		&ppi->last_snt_time, PP_NP_##y , z) < w) {\
@@ -23,6 +24,15 @@
 		ppi->last_snt_time.nanoseconds,pp_msg_names[PPM_##x]);\
 	ppi->sent_seq_id[PPM_## x]++;\
 	return 0;
+#else
+#define MSG_SEND_AND_RET_VARLEN(x,y,z,w)\
+	if (pp_send_packet(ppi, ppi->buf_out, w,\
+		&ppi->last_snt_time, PP_NP_##y , z) < w) {\
+		return -1;\
+	}\
+	ppi->sent_seq_id[PPM_## x]++;\
+	return 0;
+#endif
 
 #define MSG_SEND_AND_RET(x,y,z)\
 	MSG_SEND_AND_RET_VARLEN(x,y,z,PP_## x ##_LENGTH)

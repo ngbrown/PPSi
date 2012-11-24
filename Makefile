@@ -53,6 +53,11 @@ else ifeq ($(WRMODE), slave)
 CFLAGS += -DPPSI_SLAVE
 endif
 
+# VERB_LOG_MSGS: uncomment if you want very verbose msg when log verbosity=2.
+# As default, they are not even compiled, in order to save space in the final
+# binary executable
+# VERB_LOG_MSGS=y
+
 # Include arch code, the default is hosted GNU/Linux stuff
 # we need this -I so <arch/arch.h> can be found
 ARCH ?= gnu-linux
