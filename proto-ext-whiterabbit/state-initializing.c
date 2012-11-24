@@ -68,10 +68,6 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	DSPOR(ppi)->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
 	DSPOR(ppi)->versionNumber = PP_VERSION_PTP;
 
-	/* FIXME: should be autodetected */
-#ifdef PPSI_SLAVE
-	DSPOR(ppi)->wrConfig = WR_S_ONLY;
-#else
 
 	int lock_timeout, start_tics;
 	start_tics = timer_get_tics();
@@ -92,7 +88,6 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 	PP_PRINTF("\nLocking end.\n");
 	shw_pps_gen_enable_output(1);
-#endif
 	DSPOR(ppi)->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
 	DSPOR(ppi)->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
 	DSPOR(ppi)->calPeriod = WR_DEFAULT_CAL_PERIOD;
@@ -109,7 +104,10 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	msg_pack_header(ppi, ppi->buf_out);
 
-	ppi->next_state = PPS_LISTENING;
+	if (!OPTS(ppi)->master_only)
+		ppi->next_state = PPS_LISTENING;
+	else
+		ppi->next_state = PPS_MASTER;
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 	return 0;
 

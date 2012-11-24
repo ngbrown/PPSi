@@ -43,10 +43,13 @@ else
   include proto-standard/Makefile
 endif
 
-WRMODE = slave
+# WRMODE - Update 2012-11-24
+# obsolete compilation parameter. No used when ppsi is compiled inside wrpc-sw.
+# Still used only by ppsi standalone main. In this case, set WRMODE=master|slave
+WRMODE = none
 ifeq ($(WRMODE), master)
 CFLAGS += -DPPSI_MASTER
-else
+else ifeq ($(WRMODE), slave)
 CFLAGS += -DPPSI_SLAVE
 endif
 

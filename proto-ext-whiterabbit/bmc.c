@@ -254,6 +254,11 @@ UInteger8 bmc_state_decision( struct pp_instance *ppi,
 {
 	int cmpres;
 
+	if (OPTS(ppi)->master_only) {
+		m1(ppi);
+		return PPS_MASTER;
+	}
+
 	if (OPTS(ppi)->slave_only) {
 		s1(ppi, hdr, ann);
 		return PPS_SLAVE;

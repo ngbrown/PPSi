@@ -38,6 +38,7 @@ struct pp_runtime_opts {
 	Integer32 ttl;
 	char *unicast_addr;
 	UInteger32	slave_only:1,
+			master_only:1,
 			no_adjust:1,
 			display_stats:1,
 			csv_stats:1,

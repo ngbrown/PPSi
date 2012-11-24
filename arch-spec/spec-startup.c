@@ -5,6 +5,7 @@
 #include <uart.h>
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include "../proto-ext-whiterabbit/wr-api.h" /* FIXME: ugly */
 #include "spec.h"
 
 
@@ -67,6 +68,7 @@ void ppsi_main(void)
 
 #ifdef PPSI_SLAVE
 	OPTS(ppi)->slave_only = 1;
+	DSPOR(ppi)->wrConfig = WR_S_ONLY;
 #endif
 
 	spec_main_loop(ppi);
