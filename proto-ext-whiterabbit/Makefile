@@ -12,9 +12,7 @@ OBJ-libwr := $W/fsm-table.o \
 	$W/state-faulty.o \
 	$W/state-disabled.o \
 	$W/state-listening.o \
-	$W/state-pre-master.o \
 	$W/state-master.o \
-	$W/state-passive.o \
 	$W/state-uncalibrated.o \
 	$W/state-slave.o \
 	$W/common-fun.o \
