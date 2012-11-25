@@ -67,27 +67,6 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	DSPOR(ppi)->delayMechanism = PP_DEFAULT_DELAY_MECHANISM;
 	DSPOR(ppi)->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
 	DSPOR(ppi)->versionNumber = PP_VERSION_PTP;
-
-
-	int lock_timeout, start_tics;
-	start_tics = timer_get_tics();
-	DSPOR(ppi)->wrConfig = WR_M_ONLY;
-	spll_init(2, 0, 1); /* SPLL_MODE_FREE_RUNNING_MASTER */
-	shw_pps_gen_enable_output(0);
-	lock_timeout = LOCK_TIMEOUT_GM;
-
-	PP_PRINTF("Locking...");
-	while(!spll_check_lock(0) && lock_timeout)
-	{
-		timer_delay(1000);
-		if(timer_get_tics() - start_tics > lock_timeout)
-		{
-			PP_PRINTF("\nLocking timeout.\n");
-			break;
-		}
-	}
-	PP_PRINTF("\nLocking end.\n");
-	shw_pps_gen_enable_output(1);
 	DSPOR(ppi)->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
 	DSPOR(ppi)->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
 	DSPOR(ppi)->calPeriod = WR_DEFAULT_CAL_PERIOD;
@@ -98,7 +77,6 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto failure;
 
 	pp_init_clock(ppi);
-	wr_servo_reset();
 
 	m1(ppi);
 
