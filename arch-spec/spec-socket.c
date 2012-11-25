@@ -106,7 +106,8 @@ int spec_net_init(struct pp_instance *ppi)
 
 int spec_net_shutdown(struct pp_instance *ppi)
 {
-	//GGDD
+	ptpd_netif_close_socket(
+		(wr_socket_t *)NP(ppi)->ch[PP_NP_EVT].custom);
 	return 0;
 }
 
