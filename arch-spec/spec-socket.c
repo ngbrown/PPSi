@@ -75,9 +75,7 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
 	addr.ethertype = ETH_P_1588;
 	memcpy(&addr.mac, PP_MCAST_MACADDRESS, sizeof(mac_addr_t));
 
-	pp_timed_printf("before ptpd_netif_sendto %d\n", len);
 	snt = ptpd_netif_sendto(sock, &addr, pkt, len, &wr_ts);
-	pp_timed_printf("after ptpd_netif_sendto %d\n", len);
 
 	if (t) {
 		t->seconds = wr_ts.sec;
