@@ -26,7 +26,6 @@ OBJ-libarch := $A/spec-socket.o \
 	$A/spec-timer.o \
 	$A/spec-spll.o \
 	$A/spec-calibration.o \
-	$A/spec-halexp.o \
 	lib/div64.o
 
 specdev-objects := $(WRPCSW_ROOT)/dev/uart.o \
@@ -38,7 +37,9 @@ specdev-objects := $(WRPCSW_ROOT)/dev/uart.o \
 	$(WRPCSW_ROOT)/arch/lm32/irq.o \
 	$(WRPCSW_ROOT)/dev/sdb.o \
 	$(WRPCSW_ROOT)/lib/net.o \
+	$(WRPCSW_ROOT)/wrc_ptp_ppsi.o \
 	$(PTPNOPOSIX_ROOT)/softpll/softpll_ng.o \
+	$(PTPNOPOSIX_ROOT)/libposix/freestanding-wrapper.o \
 
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^

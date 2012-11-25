@@ -10,7 +10,6 @@
 
 
 static struct pp_instance ppi_static;
-int pp_diag_verbosity = 0;
 
 /*ppi fields*/
 static UInteger16 sent_seq_id[16];
