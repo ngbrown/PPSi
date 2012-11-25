@@ -66,8 +66,9 @@ int spec_calibrating_poll(struct pp_instance *ppi, int txrx, uint32_t *delta)
 {
 	uint32_t delta_rx = 0, delta_tx = 0;
 
-	/* FIXME: why delta is 64bit whereas ep_get_deltas accepts 32bit? */
-	ep_get_deltas( &delta_tx, &delta_rx);
+	/* FIXME: why delta was 64bit whereas ep_get_deltas accepts 32bit? */
+	spec_read_calibration_data(OPTS(ppi)->iface_name,
+		&delta_tx, &delta_rx, NULL, NULL);
 
 	if (txrx == WR_HW_CALIB_TX)
 		*delta = delta_tx;
