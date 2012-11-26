@@ -34,6 +34,8 @@ int spec_open_ch(struct pp_instance *ppi)
 	ptpd_netif_get_hw_addr(sock, &mac);
 	memcpy(NP(ppi)->ch[PP_NP_EVT].addr, &mac, sizeof(mac_addr_t));
 	NP(ppi)->ch[PP_NP_EVT].custom = sock;
+	memcpy(NP(ppi)->ch[PP_NP_GEN].addr, &mac, sizeof(mac_addr_t));
+	NP(ppi)->ch[PP_NP_GEN].custom = sock;
 
 	return 0;
 }
@@ -71,6 +73,17 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
 	wr_timestamp_t wr_ts;
 	wr_sockaddr_t addr;
 	sock = (wr_socket_t *)NP(ppi)->ch[PP_NP_EVT].custom;
+
+	if (pp_diag_verbosity > 1) {
+		int j;
+		pp_printf("sent: %i\n", len);
+		for (j = 0; j < len; j++) {
+			pp_printf("%02x ", ((char*)pkt)[j]);
+			if( (j+1)%16==0 )
+				pp_printf("\n");
+		}
+		pp_printf("\n");
+	}
 
 	addr.ethertype = ETH_P_1588;
 	memcpy(&addr.mac, PP_MCAST_MACADDRESS, sizeof(mac_addr_t));
