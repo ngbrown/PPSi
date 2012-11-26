@@ -2,7 +2,7 @@
  * Alessandro Rubini for CERN, 2011 -- public domain
  */
 #include <ppsi/ppsi.h>
-#include <hw/wb_uart.h>
+#include <uart.h>
 #include <pps_gen.h>
 #include "spec.h"
 

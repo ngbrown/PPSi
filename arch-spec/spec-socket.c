@@ -14,8 +14,6 @@
 int spec_errno;
 Octet buffer_out[PP_PACKET_SIZE + 14]; // 14 is ppi->proto_ofst for ethernet mode
 
-static struct spec_socket_data_t spec_socket_data;
-
 /* This function should init the minic and get the mac address */
 int spec_open_ch(struct pp_instance *ppi)
 {

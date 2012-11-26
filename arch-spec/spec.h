@@ -87,20 +87,6 @@ extern int spec_errno;
 extern void spec_putc(int c);
 extern void spec_puts(const char *s);
 extern int spec_testc(void);
-extern int spec_getc(void);
-
-extern void minic_init(void);
-extern int minic_poll_rx(void);
-struct hw_timestamp;
-
-extern void ep_init(uint8_t mac_addr[]);
-extern void get_mac_addr(uint8_t dev_addr[]);
-extern int ep_enable(int enabled, int autoneg);
-extern int ep_link_up();
-extern int ep_get_deltas(uint32_t *delta_tx, uint32_t *delta_rx);
-extern int ep_get_psval(int32_t *psval);
-extern int ep_cal_pattern_enable();
-extern int ep_cal_pattern_disable();
 
 static inline void delay(int x)
 {
