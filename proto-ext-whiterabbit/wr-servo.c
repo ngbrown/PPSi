@@ -360,7 +360,6 @@ int wr_servo_update(struct pp_instance *ppi)
 	switch(s->state)
 	{
         case WR_WAIT_SYNC_IDLE:
-		pp_strcpy(cur_servo_state.slave_servo_state, "SYNC_IDLE");
 		if(!wr_adjust_in_progress())
 		{
 		   s->state = s->next_state;
