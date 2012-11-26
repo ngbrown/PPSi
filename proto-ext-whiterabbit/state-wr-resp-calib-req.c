@@ -14,7 +14,8 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->wrPortState = WRS_RESP_CALIB_REQ;
 		ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
-		wr_calibration_pattern_enable(ppi, 0, 0, 0);
+		if (DSPOR(ppi)->otherNodeCalSendPattern)
+			wr_calibration_pattern_enable(ppi, 0, 0, 0);
 		pp_timer_start(WR_M_LOCK_TIMEOUT_MS / 1000,
 			ppi->timers[PP_TIMER_WRS_RESP_CALIB_REQ]);
 
