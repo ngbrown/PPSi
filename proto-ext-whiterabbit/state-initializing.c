@@ -72,6 +72,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	DSPOR(ppi)->calPeriod = WR_DEFAULT_CAL_PERIOD;
 	DSPOR(ppi)->wrModeOn = 0;
 	DSPOR(ppi)->parentWrConfig = 0;
+	DSPOR(ppi)->calibrated = !WR_DEFAULT_PHY_CALIBRATION_REQUIRED;
 
 	if (pp_timer_init(ppi))
 		goto failure;
