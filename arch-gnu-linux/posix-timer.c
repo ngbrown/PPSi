@@ -41,36 +41,40 @@ int posix_timer_init(struct pp_instance *ppi)
 }
 
 
-int posix_timer_start(uint32_t interval, struct pp_timer *tm)
+int posix_timer_start(uint32_t interval_ms, struct pp_timer *tm)
 {
-	time_t now;
-	now = time(NULL);
-	tm->start = (uint32_t)now;
-	tm->interval = interval;
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC_RAW, &now);
+	tm->start = ((uint64_t)(now->tv_sec)) * 1000 +
+			(now->tv_nsec / 1000000);
+	tm->interval_ms = interval_ms;
 
 	return 0;
 }
 
 int posix_timer_stop(struct pp_timer *tm)
 {
-	tm->interval = 0;
+	tm->interval_ms = 0;
 	tm->start = 0;
-
 	return 0;
 }
 
 int posix_timer_expired(struct pp_timer *tm)
 {
-	time_t now;
+	struct timespec now;
+	uint64_t now_ms;
 
 	if (tm->start == 0) {
 		PP_PRINTF("%p Warning: posix_timer_expired: timer not started\n",tm);
 		return 0;
 	}
 
-	now = time(NULL);
+	clock_gettime(CLOCK_MONOTONIC_RAW, &now);
 
-	if (tm->start + tm->interval < (uint32_t)now) {
+	now_ms = ((uint64_t)(now->tv_sec)) * 1000 +
+			(now->tv_nsec / 1000000);
+
+	if (now_ms > tm->start + tm->interval) {
 		tm->start = now;
 		return 1;
 	}
@@ -80,18 +84,14 @@ int posix_timer_expired(struct pp_timer *tm)
 
 void posix_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
 {
-	int i;
-
-	for (i = 0; i < PP_TIMER_ARRAY_SIZE; i++) {
-		ppi->timers[i]->start += diff;
-	}
+	/* Do nothing, clock_gettime uses MONOTONIC_RAW tstamps */
 }
 
 
 int pp_timer_init(struct pp_instance *ppi)
 	__attribute__((alias("posix_timer_init")));
 
-int pp_timer_start(uint32_t interval, struct pp_timer *tm)
+int pp_timer_start(uint32_t interval_ms, struct pp_timer *tm)
 	__attribute__((alias("posix_timer_start")));
 
 int pp_timer_stop(struct pp_timer *tm)

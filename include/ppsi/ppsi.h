@@ -94,8 +94,8 @@ struct pp_frgn_master {
  * for timer expiration computation. Both are seconds
  */
 struct pp_timer {
-	uint32_t start;
-	uint32_t interval;
+	uint64_t start;
+	uint32_t interval_ms;
 };
 
 
@@ -260,7 +260,7 @@ extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
 /* Timers */
 extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common
 						      structure */
-extern int pp_timer_start(uint32_t interval, struct pp_timer *tm);
+extern int pp_timer_start(uint32_t interval_ms, struct pp_timer *tm);
 extern int pp_timer_stop(struct pp_timer *tm);
 extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
 /* pp_adj_timers is called after pp_set_tstamp and must be defined for those

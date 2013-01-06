@@ -36,7 +36,7 @@ void spec_main_loop(struct pp_instance *ppi)
 
 		/* Wait for a packet or for the timeout */
 		while (delay_ms && !minic_poll_rx()) {
-			timer_delay(1000);
+			timer_delay(1);
 			delay_ms--;
 		}
 		if (!minic_poll_rx()) {

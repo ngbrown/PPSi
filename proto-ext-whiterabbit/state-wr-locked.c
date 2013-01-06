@@ -14,7 +14,7 @@ int wr_locked(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
 		DSPOR(ppi)->wrPortState = WRS_LOCKED;
-		pp_timer_start(DSPOR(ppi)->wrStateTimeout / 1000,
+		pp_timer_start(DSPOR(ppi)->wrStateTimeout,
 			ppi->timers[PP_TIMER_WRS_LOCKED]);
 
 		e = msg_issue_wrsig(ppi, LOCKED);
@@ -47,7 +47,7 @@ state_updated:
 	if (ppi->next_state != ppi->state)
 		pp_timer_stop(ppi->timers[PP_TIMER_WRS_LOCKED]);
 
-	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
+	ppi->next_delay = DSPOR(ppi)->wrStateTimeout;
 
 	return e;
 }

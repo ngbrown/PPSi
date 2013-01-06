@@ -17,7 +17,7 @@ int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
 		DSPOR(ppi)->wrPortState = WRS_PRESENT;
 		DSPOR(ppi)->wrMode = WR_SLAVE;
-		pp_timer_start(DSPOR(ppi)->wrStateTimeout / 1000,
+		pp_timer_start(DSPOR(ppi)->wrStateTimeout,
 			ppi->timers[PP_TIMER_WRS_PRESENT]);
 		st_com_restart_annrec_timer(ppi);
 		e = msg_issue_wrsig(ppi, SLAVE_PRESENT);
@@ -54,7 +54,7 @@ state_updated:
 		pp_timer_stop(ppi->timers[PP_TIMER_ANN_RECEIPT]);
 	}
 
-	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
+	ppi->next_delay = DSPOR(ppi)->wrStateTimeout;
 
 	return e;
 }

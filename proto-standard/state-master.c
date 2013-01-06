@@ -22,13 +22,14 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_MASTER;
-		pp_timer_start(1 << DSPOR(ppi)->logSyncInterval,
+		pp_timer_start((1 << DSPOR(ppi)->logSyncInterval) * 1000,
 			ppi->timers[PP_TIMER_SYNC]);
 
-		pp_timer_start(1 << DSPOR(ppi)->logAnnounceInterval,
+		pp_timer_start((1 << DSPOR(ppi)->logAnnounceInterval) * 1000,
 			ppi->timers[PP_TIMER_ANN_INTERVAL]);
 
-		pp_timer_start(1 << DSPOR(ppi)->logMinPdelayReqInterval,
+		pp_timer_start(
+			(1 << DSPOR(ppi)->logMinPdelayReqInterval) * 1000,
 			ppi->timers[PP_TIMER_PDELAYREQ]);
 		/* Send an announce immediately, when becomes master */
 		if (msg_issue_announce(ppi) < 0)

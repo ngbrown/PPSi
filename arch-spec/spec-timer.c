@@ -2,6 +2,7 @@
 #include <ppsi/diag.h>
 #include <pps_gen.h>
 #include <syscon.h>
+#include <ptpd_netif.h>
 
 static struct pp_timer spec_timers[PP_TIMER_ARRAY_SIZE];
 
@@ -15,16 +16,16 @@ int spec_timer_init(struct pp_instance *ppi)
 	return 0;
 }
 
-int spec_timer_start(uint32_t interval, struct pp_timer *tm)
+int spec_timer_start(uint32_t interval_ms, struct pp_timer *tm)
 {
-	tm->start = spec_time();
-	tm->interval = interval;
+	tm->start = ptpd_netif_get_msec_tics();
+	tm->interval_ms = interval_ms;
 	return 0;
 }
 
 int spec_timer_stop(struct pp_timer *tm)
 {
-	tm->interval = 0;
+	tm->interval_ms = 0;
 	tm->start = 0;
 
 	return 0;
@@ -39,9 +40,9 @@ int spec_timer_expired(struct pp_timer *tm)
 		return 0;
 	}
 
-	now = spec_time();
+	now = ptpd_netif_get_msec_tics();
 
-	if (tm->start + tm->interval <= now) {
+	if (now > tm->start + tm->interval_ms) {
 		tm->start = now;
 		return 1;
 	}
@@ -64,7 +65,7 @@ uint32_t spec_timer_get_msec_tics(void)
 int pp_timer_init(struct pp_instance *ppi)
 	__attribute__((alias("spec_timer_init")));
 
-int pp_timer_start(uint32_t interval, struct pp_timer *tm)
+int pp_timer_start(uint32_t interval_ms, struct pp_timer *tm)
 	__attribute__((alias("spec_timer_start")));
 
 int pp_timer_stop(struct pp_timer *tm)

@@ -59,8 +59,8 @@ void st_com_restart_annrec_timer(struct pp_instance *ppi)
 	if (DSPOR(ppi)->logAnnounceInterval < 0)
 		PP_PRINTF("Error: logAnnounceInterval < 0");
 
-	pp_timer_start((DSPOR(ppi)->announceReceiptTimeout) <<
-			DSPOR(ppi)->logAnnounceInterval,
+	pp_timer_start(((DSPOR(ppi)->announceReceiptTimeout) <<
+			DSPOR(ppi)->logAnnounceInterval) * 1000,
 			ppi->timers[PP_TIMER_ANN_RECEIPT]);
 }
 

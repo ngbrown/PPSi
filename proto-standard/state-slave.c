@@ -36,11 +36,13 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		st_com_restart_annrec_timer(ppi);
 
 		if (OPTS(ppi)->e2e_mode)
-			pp_timer_start(1 << DSPOR(ppi)->logMinDelayReqInterval,
-				ppi->timers[PP_TIMER_DELAYREQ]);
+			pp_timer_start(
+			   (1 << DSPOR(ppi)->logMinDelayReqInterval) * 1000,
+			   ppi->timers[PP_TIMER_DELAYREQ]);
 		else
-			pp_timer_start(1 << DSPOR(ppi)->logMinPdelayReqInterval,
-				ppi->timers[PP_TIMER_PDELAYREQ]);
+			pp_timer_start(
+			   (1 << DSPOR(ppi)->logMinPdelayReqInterval) * 1000,
+			   ppi->timers[PP_TIMER_PDELAYREQ]);
 	}
 
 	if (st_com_check_record_update(ppi))

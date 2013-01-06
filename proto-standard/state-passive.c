@@ -12,7 +12,8 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_PASSIVE;
-		pp_timer_start(1 << DSPOR(ppi)->logMinPdelayReqInterval,
+		pp_timer_start(
+			(1 << DSPOR(ppi)->logMinPdelayReqInterval) * 1000,
 			ppi->timers[PP_TIMER_PDELAYREQ]);
 
 		st_com_restart_annrec_timer(ppi);
