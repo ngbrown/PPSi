@@ -156,6 +156,7 @@ struct pp_net_path {
 	Integer32 mcast_addr;
 	Integer32 peer_mcast_addr;
 	int proto_ofst;
+	int inited;
 };
 #define PROTO_HDR(x) ( (x) - NP(ppi)->proto_ofst);
 #define PROTO_PAYLOAD(x) ( (x) + NP(ppi)->proto_ofst);

@@ -13,7 +13,6 @@
 /*
  * Initializes network and other stuff
  */
-static int pp_did_init = 0;
 
 #define LOCK_TIMEOUT_GM (60000)
 
@@ -21,12 +20,14 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	unsigned char *id, *mac;
 
-	if (pp_did_init)
+	if (NP(ppi)->inited)
 		pp_net_shutdown(ppi);
 
 	if (pp_net_init(ppi) < 0)
 		goto failure;
-	pp_did_init = 1;
+
+	NP(ppi)->inited = 1;
+
 	DSPOR(ppi)->portState = PPS_INITIALIZING;
 
 	/* Initialize default data set */
