@@ -12,7 +12,7 @@ void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal)
 	uint64_t bigint_val;
 
 	if (bigint.msb < 0)
-		pp_printf("BUG: %s doesn't support negatives\n", __func__);
+		PP_PRINTF("BUG: %s doesn't support negatives\n", __func__);
 
 	bigint_val = bigint.lsb;
 	bigint_val += ((int64_t)bigint.msb) << 32;

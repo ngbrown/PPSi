@@ -36,7 +36,7 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		/* found: handle this state */
 		ppi->next_state = state;
 		ppi->next_delay = 0;
-		if ((pp_diag_verbosity) || (ppi->is_new_state))
+		if (pp_diag_verbosity)
 			pp_diag_fsm(ppi, ip->name, STATE_ENTER, plen);
 		err = ip->f1(ppi, packet, plen);
 		if (!err && ip->f2)

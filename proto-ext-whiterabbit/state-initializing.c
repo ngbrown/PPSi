@@ -92,7 +92,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	return 0;
 
 failure:
-	pp_printf("Failed to initialize network\n");
+	PP_PRINTF("Failed to initialize network\n");
 	ppi->next_state = PPS_FAULTY;
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 	return 0;

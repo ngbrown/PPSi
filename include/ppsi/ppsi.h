@@ -16,16 +16,40 @@
 
 /* Macros for diagnostic prints. Set pp_diag_verbosity as 0 or 1 (PP_V macros
  * disabled/enabled) */
-extern int pp_diag_verbosity;
+
 #define PP_FSM(ppi,seq,len) pp_diag_fsm(ppi,seq,len)
-#define PP_VFSM(ppi,seq,len) if (pp_diag_verbosity) pp_diag_fsm(ppi,seq,len)
-#define PP_VTR(ppi,f,l) if (pp_diag_verbosity) pp_diag_trace(ppi,f,l)
 #define PP_ERR(ppi,err) if pp_diag_error(ppi,err)
 #define PP_ERR2(ppi,s1,s2) if pp_diag_error_str2(ppi,s1,s2)
 #define PP_FATAL(ppi,s1,s2) if pp_diag_fatal(ppi,s1,s2)
+
+#ifdef CONFIG_PPSI_RUNTIME_VERBOSITY
+extern int pp_diag_verbosity;
+
+#define PP_VFSM(ppi,seq,len) if (pp_diag_verbosity) pp_diag_fsm(ppi,seq,len)
+#define PP_VTR(ppi,f,l) if (pp_diag_verbosity) pp_diag_trace(ppi,f,l)
 #define PP_PRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
 #define PP_TPRINTF(...) pp_timed_printf(__VA_ARGS__)
 #define PP_VPRINTF(...) if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
+
+#else
+
+extern const int pp_diag_verbosity;
+
+  #if CONFIG_PPSI_VERBOSITY > 0
+  #define PP_VFSM(ppi,seq,len) if (pp_diag_verbosity) pp_diag_fsm(ppi,seq,len)
+  #define PP_VTR(ppi,f,l) if (pp_diag_verbosity) pp_diag_trace(ppi,f,l)
+  #define PP_PRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
+  #define PP_TPRINTF(...) pp_timed_printf(__VA_ARGS__)
+  #define PP_VPRINTF(...) if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
+  #else
+  #define PP_VFSM(ppi,seq,len)
+  #define PP_VTR(ppi,f,l)
+  #define PP_PRINTF(...)
+  #define PP_TPRINTF(...)
+  #define PP_VPRINTF(...)
+  #endif /* CONFIG_PPSI_VERBOSITY > 0 */
+
+#endif /* CONFIG_PPSI_RUNTIME_VERBOSITY */
 
 /*
  * Runtime options. Default values can be overridden by command line.
