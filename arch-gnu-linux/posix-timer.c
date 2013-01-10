@@ -45,8 +45,8 @@ int posix_timer_start(uint32_t interval_ms, struct pp_timer *tm)
 {
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC_RAW, &now);
-	tm->start = ((uint64_t)(now->tv_sec)) * 1000 +
-			(now->tv_nsec / 1000000);
+	tm->start = ((uint64_t)(now.tv_sec)) * 1000 +
+			(now.tv_nsec / 1000000);
 	tm->interval_ms = interval_ms;
 
 	return 0;
@@ -71,11 +71,11 @@ int posix_timer_expired(struct pp_timer *tm)
 
 	clock_gettime(CLOCK_MONOTONIC_RAW, &now);
 
-	now_ms = ((uint64_t)(now->tv_sec)) * 1000 +
-			(now->tv_nsec / 1000000);
+	now_ms = ((uint64_t)(now.tv_sec)) * 1000 +
+			(now.tv_nsec / 1000000);
 
-	if (now_ms > tm->start + tm->interval) {
-		tm->start = now;
+	if (now_ms > tm->start + tm->interval_ms) {
+		tm->start = now_ms;
 		return 1;
 	}
 

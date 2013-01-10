@@ -2,6 +2,7 @@
  * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 
+#define CONFIG_PPSI_RUNTIME_VERBOSITY 1
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 
