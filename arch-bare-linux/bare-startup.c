@@ -22,19 +22,20 @@ void ppsi_clear_bss(void)
 
 static struct pp_instance ppi_static;
 static struct pp_net_path net_path_static;
+int pp_diag_verbosity = 0;
 
 void ppsi_main(void)
 {
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
 
-	pp_puts("bare: starting. Compiled on " __DATE__ "\n");
+	PP_PRINTF("bare: starting. Compiled on %s\n", __DATE__);
 
 	ppi->net_path = &net_path_static;
 	if (bare_open_ch(ppi, "eth0")) {
 		pp_diag_error(ppi, bare_errno);
 		pp_diag_fatal(ppi, "open_ch", "");
 	}
-	pp_open_instance(ppi, 0);
+	pp_open_instance(ppi, NULL);
 
 	bare_main_loop(ppi);
 }
