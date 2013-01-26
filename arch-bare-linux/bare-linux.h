@@ -31,6 +31,11 @@ extern int sys_socket(int domain, int type, int proto);
 extern int sys_bind(int fd, const struct bare_sockaddr *addr, int addrlen);
 extern int sys_recv(int fd, void *pkt, int plen, int flags);
 extern int sys_send(int fd, void *pkt, int plen, int flags);
+extern int sys_shutdown(int fd, int flags);
+
+extern int sys_gettimeofday(void *tv, void *z);
+extern int sys_settimeofday(void *tv, void *z);
+extern int sys_adjtimex(void *tv);
 
 extern int bare_errno;
 

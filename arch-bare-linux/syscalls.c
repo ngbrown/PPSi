@@ -24,6 +24,9 @@ _syscall1(int, time, void *, tz)
 _syscall3(int, ioctl, int, fd, int, cmd, void *, arg)
 _syscall1(int, select, struct sel_arg_struct *, as)
 static _syscall2(int, socketcall, int, call, unsigned long *, args)
+_syscall2(int, gettimeofday, void *, tv, void *,z);
+_syscall2(int, settimeofday, void *, tv, void *,z);
+_syscall1(int, adjtimex, void *, tv);
 
 /*
  * In the bare arch I'd better use sys_ prefixed names
@@ -47,6 +50,19 @@ int sys_select(int max, void *in, void *out, void *exc, void *tout)
 	as.tvp = tout;
 	return select(&as);
 }
+int sys_gettimeofday(void *tv, void *z)
+{
+	return gettimeofday(tv, z);
+}
+int sys_settimeofday(void *tv, void *z)
+{
+	return settimeofday(tv, z);
+}
+int sys_adjtimex(void *tv)
+{
+	return adjtimex(tv);
+}
+
 
 /* i386 has the socketcall thing. Bah! */
 #define SYS_SOCKET	1		/* sys_socket(2)		*/
@@ -107,4 +123,11 @@ int sys_send(int fd, void *pkt, int plen, int flags)
 	args[2] = plen;
 	args[3] = flags;
 	return socketcall(SYS_SEND, args);
+}
+
+int sys_shutdown(int fd, int flags)
+{
+	args[0] = fd;
+	args[1] = flags;
+	return socketcall(SYS_SHUTDOWN, args);
 }
