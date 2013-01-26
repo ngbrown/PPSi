@@ -11,6 +11,7 @@ LIBARCH := $A/libarch.a
 OBJ-libarch := $A/bare-startup.o \
 	$A/main-loop.o \
 	$A/bare-socket.o \
+	$A/bare-timer.o \
 	$A/bare-io.o \
 	$A/syscalls.o \
 	lib/div64.o
