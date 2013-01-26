@@ -7,6 +7,9 @@
 #include <ppsi/diag.h>
 #include "bare-linux.h"
 
+/* 14 is ppi->proto_ofst for ethernet mode */
+Octet buffer_out[PP_PACKET_SIZE + 14];
+
 /* FIXME: which socket we receive and send with? */
 int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 		     TimeInternal *t)
@@ -22,9 +25,13 @@ int bare_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
 	__attribute__((alias("bare_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
-	int use_pdelay_addr)
+int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, 
+		   TimeInternal *t, int chtype, int use_pdelay_addr)
 	__attribute__((alias("bare_send_packet")));
+
+#define SHUT_RD		0
+#define SHUT_WR 	1
+#define SHUT_RDWR 	2
 
 #define PF_PACKET 17
 #define SOCK_RAW 3
@@ -75,3 +82,30 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 	NP(ppi)->ch[PP_NP_EVT].fd = sock;
 	return 0;
 }
+
+int bare_net_init(struct pp_instance *ppi)
+{
+	ppi->buf_out = buffer_out;
+	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
+
+	if (OPTS(ppi)->ethernet_mode) {
+                PP_PRINTF("bare_net_init IEEE 802.3\n");
+
+                /* raw sockets implementation always use gen socket */
+                return bare_open_ch(ppi, OPTS(ppi)->iface_name);
+        }
+
+        /* else: UDP */
+        PP_PRINTF("bare_net_init UDP\n");
+
+        return 0;
+}
+int pp_net_init(struct pp_instance *ppi)
+	__attribute__((alias("bare_net_init")));
+
+int bare_net_shutdown(struct pp_instance *ppi)
+{
+	return sys_shutdown(NP(ppi)->ch[PP_NP_GEN].fd, SHUT_RDWR);
+}
+int pp_net_shutdown(struct pp_instance *ppi)
+	__attribute__((alias("bare_net_shutdown")));
