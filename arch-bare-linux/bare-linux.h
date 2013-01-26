@@ -77,3 +77,12 @@ struct bare_ethhdr {
 	unsigned char	h_source[6];
 	uint16_t	h_proto;
 } __attribute__((packed));
+
+struct bare_timeval {
+	unsigned long tv_sec;
+	unsigned long tv_usec;
+};
+
+#ifndef NULL
+#define NULL 0
+#endif

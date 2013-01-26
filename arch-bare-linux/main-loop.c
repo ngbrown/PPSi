@@ -17,13 +17,6 @@ struct bare_fd_set {
 #define FD_ZERO(p)	memset(p, 0, sizeof(p))
 #define FD_SET(bit, p)	((p)->bits[0] |= (1 << (bit)))
 
-struct bare_timeval {
-	unsigned long tv_sec;
-	unsigned long tv_usec;
-};
-
-#define NULL 0
-
 void bare_main_loop(struct pp_instance *ppi)
 {
 	int delay_ms;
