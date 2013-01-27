@@ -1,32 +1,69 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- public domain
  */
+
+int bare_errno;
+
+/* This function from uClibc::libc/sysdeps/linux/x86_6/__syscall_error.c */
+
+/* Wrapper for setting errno.
+ *
+ * Copyright (C) 2000-2006 Erik Andersen <andersen@uclibc.org>
+ *
+ * Licensed under the LGPL v2.1, see the file COPYING.LIB in this tarball.
+ */
+
+#include <errno.h>
+#include <features.h>
+
+/* This routine is jumped to by all the syscall handlers, to stash
+ * an error number into errno.  */
+int __syscall_error(void)
+{
+	register int err_no __asm__ ("%rcx");
+	__asm__ ("mov %rax, %rcx\n\t"
+	         "neg %rcx");
+	bare_errno = err_no; /* changed for ptp-proposal/proto */
+	return -1;
+}
+
+/* end of copy from libc/sysdeps/linux/x86_6/__syscall_error.c */
+
 #include <linux/unistd.h>
 
 #include <ppsi/ppsi.h>
 #include "bare-linux.h"
-#include "syscalls.h"
-
-int bare_errno;
-
-struct sel_arg_struct {
-	unsigned long n;
-	void *inp, *outp, *exp;
-	void *tvp;
-};
 
 /*
- * The following lines use defines from Torvalds (linux-2.4.0: see syscalls.h)
+ * We depends on syscall.S that does the register passing
+ * Usage: long syscall (syscall_number, arg1, arg2, arg3, arg4, arg5, arg6)
  */
-_syscall3(int, write, int, fd, const void *, buf, int, count)
-_syscall1(int, exit, int, exitcode)
-_syscall1(int, time, void *, tz)
-_syscall3(int, ioctl, int, fd, int, cmd, void *, arg)
-_syscall1(int, select, struct sel_arg_struct *, as)
-static _syscall2(int, socketcall, int, call, unsigned long *, args)
-_syscall2(int, gettimeofday, void *, tv, void *,z);
-_syscall2(int, settimeofday, void *, tv, void *,z);
-_syscall1(int, adjtimex, void *, tv);
+extern long syscall(uint64_t n, uint64_t arg1, uint64_t arg2, uint64_t arg3,
+		    uint64_t arg4, uint64_t arg5, uint64_t arg6);
+
+int write(int fd, const void * buf, int count)
+{
+	return syscall(__NR_write, (uint64_t)fd, (uint64_t)buf, (uint64_t)count,
+		       0, 0, 0);
+}
+
+int exit(int exitcode)
+{
+	return syscall(__NR_exit, (uint64_t)exitcode, 0, 0,
+		       0, 0, 0);
+}
+
+int time(long * t)
+{
+	return syscall(__NR_time, (uint64_t)t, 0, 0,
+		       0, 0, 0);
+}
+
+int ioctl(int fd, int cmd, void * arg)
+{
+	return syscall(__NR_ioctl, (uint64_t)fd, (uint64_t)cmd, (uint64_t)arg,
+			0, 0, 0);
+}
 
 /*
  * In the bare arch I'd better use sys_ prefixed names
@@ -40,94 +77,54 @@ int sys_time(int tz)
 int sys_ioctl(int fd, int cmd, void *arg)
 	__attribute__((alias("ioctl")));
 
-static struct sel_arg_struct as; /* declared as local, it won't work */
 int sys_select(int max, void *in, void *out, void *exc, void *tout)
 {
-	as.n = max;
-	as.inp = in;
-	as.outp = out;
-	as.exp = exc;
-	as.tvp = tout;
-	return select(&as);
+	return syscall(__NR_select, (uint64_t)max, (uint64_t)in, (uint64_t)out,
+			(uint64_t) exc, (uint64_t)tout, 0);
 }
-int sys_gettimeofday(void *tv, void *z)
-{
-	return gettimeofday(tv, z);
-}
-int sys_settimeofday(void *tv, void *z)
-{
-	return settimeofday(tv, z);
-}
-int sys_adjtimex(void *tv)
-{
-	return adjtimex(tv);
-}
-
-
-/* i386 has the socketcall thing. Bah! */
-#define SYS_SOCKET	1		/* sys_socket(2)		*/
-#define SYS_BIND	2		/* sys_bind(2)			*/
-#define SYS_CONNECT	3		/* sys_connect(2)		*/
-#define SYS_LISTEN	4		/* sys_listen(2)		*/
-#define SYS_ACCEPT	5		/* sys_accept(2)		*/
-#define SYS_GETSOCKNAME 6		/* sys_getsockname(2)		*/
-#define SYS_GETPEERNAME 7		/* sys_getpeername(2)		*/
-#define SYS_SOCKETPAIR	8		/* sys_socketpair(2)		*/
-#define SYS_SEND	9		/* sys_send(2)			*/
-#define SYS_RECV	10		/* sys_recv(2)			*/
-#define SYS_SENDTO	11		/* sys_sendto(2)		*/
-#define SYS_RECVFROM	12		/* sys_recvfrom(2)		*/
-#define SYS_SHUTDOWN	13		/* sys_shutdown(2)		*/
-#define SYS_SETSOCKOPT	14		/* sys_setsockopt(2)		*/
-#define SYS_GETSOCKOPT	15		/* sys_getsockopt(2)		*/
-#define SYS_SENDMSG	16		/* sys_sendmsg(2)		*/
-#define SYS_RECVMSG	17		/* sys_recvmsg(2)		*/
-#define SYS_PACCEPT	18		/* sys_paccept(2)		*/
-
-static unsigned long args[4];
 
 int sys_socket(int domain, int type, int proto)
 {
-	/*
-	 * Strangely, this is not working for me:
-	 *     unsigned long args[3] = {domain, type, proto};
-	 * So let's use an external thing. Who knows why...
-	 */
-	args[0] = domain;
-	args[1] = type;
-	args[2] = proto;
-	return socketcall(SYS_SOCKET, args);
+	return syscall(__NR_socket, (uint64_t)domain, (uint64_t)type,
+			(uint64_t)proto, 0, 0, 0);
 }
 
 int sys_bind(int fd, const struct bare_sockaddr *addr, int addrlen)
 {
-	args[0] = fd;
-	args[1] = (unsigned long)addr;
-	args[2] = addrlen;
-	return socketcall(SYS_BIND, args);
+	return syscall(__NR_bind, (uint64_t)fd, (uint64_t)addr,
+			(uint64_t)addrlen, 0, 0, 0);
 }
 
 int sys_recv(int fd, void *pkt, int plen, int flags)
 {
-	args[0] = fd;
-	args[1] = (unsigned long)pkt;
-	args[2] = plen;
-	args[3] = flags;
-	return socketcall(SYS_RECV, args);
+	return syscall(__NR_recvfrom, (uint64_t)fd, (uint64_t)pkt,
+			(uint64_t)plen, (uint64_t)flags, 0, 0);
 }
 
 int sys_send(int fd, void *pkt, int plen, int flags)
 {
-	args[0] = fd;
-	args[1] = (unsigned long)pkt;
-	args[2] = plen;
-	args[3] = flags;
-	return socketcall(SYS_SEND, args);
+	return syscall(__NR_sendto, (uint64_t)fd, (uint64_t)pkt,
+			(uint64_t)plen, (uint64_t)flags, 0, 0);
 }
 
 int sys_shutdown(int fd, int flags)
 {
-	args[0] = fd;
-	args[1] = flags;
-	return socketcall(SYS_SHUTDOWN, args);
+	return syscall(__NR_shutdown, (uint64_t)fd, (uint64_t)flags, 
+		        0, 0, 0, 0);
+}
+
+int sys_gettimeofday(void *tv, void *z)
+{
+	return syscall(__NR_gettimeofday, (uint64_t)tv, (uint64_t)z, 
+		        0, 0, 0, 0);
+}
+int sys_settimeofday(void *tv, void *z)
+{
+	return syscall(__NR_settimeofday, (uint64_t)tv, (uint64_t)z,
+		        0, 0, 0, 0);
+}
+int sys_adjtimex(void *tv)
+{
+	return syscall(__NR_adjtimex, (uint64_t)tv, 0, 
+		        0, 0, 0, 0);
 }
