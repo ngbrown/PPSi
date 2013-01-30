@@ -14,13 +14,34 @@ Octet buffer_out[PP_PACKET_SIZE + 14];
 int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 		     TimeInternal *t)
 {
-	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
+	if (t)
+		pp_get_tstamp(t);
+
+	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd,
+			pkt - NP(ppi)->proto_ofst, len, 0);
 }
 
 int bare_send_packet(struct pp_instance *ppi, void *pkt, int len, 
 		     TimeInternal *t, int chtype, int use_pdelay_addr)
 {
-	return sys_send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
+	struct bare_ethhdr *hdr;
+	hdr = PROTO_HDR(pkt);
+	hdr->h_proto = htons(ETH_P_1588);
+
+	if (OPTS(ppi)->gptp_mode) {
+		memcpy(hdr->h_dest, PP_PEER_MACADDRESS, 6);
+	} else {
+		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, 6);
+	}
+
+	/* raw socket implementation always uses gen socket */
+	memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, 6);
+
+	if (t)
+		pp_get_tstamp(t);
+
+	return sys_send(NP(ppi)->ch[chtype].fd, hdr,
+					len + NP(ppi)->proto_ofst, 0);
 }
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
