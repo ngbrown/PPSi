@@ -41,7 +41,7 @@ void bare_get_tstamp(TimeInternal *t)
 	}
 
 	t->seconds = tv.tv_sec;
-	t->nanoseconds = (tv.tv_usec % 1000) * 1000;
+	t->nanoseconds = tv.tv_usec * 1000;
 }
 
 int32_t bare_set_tstamp(TimeInternal *t)
