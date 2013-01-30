@@ -15,16 +15,19 @@ int bare_timer_init(struct pp_instance *ppi)
 	return 0;
 }
 
-int bare_timer_start(uint32_t interval, struct pp_timer *tm)
+int bare_timer_start(uint32_t interval_ms, struct pp_timer *tm)
 {
-	tm->start = (uint32_t)sys_time(0);
-	tm->interval = interval;
+  	struct bare_timeval now;
+	sys_clock_gettime(CLOCK_MONOTONIC, &now);
+	tm->start = ((uint64_t)(now.tv_sec)) * 1000 +
+	  		       (now.tv_nsec / 1000000);
+	tm->interval_ms = interval_ms;
 	return 0;
 }
 
 int bare_timer_stop(struct pp_timer *tm)
 {
-	tm->interval = 0;
+	tm->interval_ms= 0;
 	tm->start = 0;
 
 	return 0;
@@ -32,17 +35,20 @@ int bare_timer_stop(struct pp_timer *tm)
 
 int bare_timer_expired(struct pp_timer *tm)
 {
-	uint32_t now;
+	struct bare_timeval now;
+	uint64_t now_ms;
 
 	if (tm->start == 0) {
 		PP_PRINTF("%p Warning: bare_timer_expired: timer not started\n",tm);
 		return 0;
 	}
 
-	now = (uint32_t)sys_time(0);
+	sys_clock_gettime(CLOCK_MONOTONIC, &now);
+        now_ms = ((uint64_t)(now.tv_sec)) * 1000 +
+			    (now.tv_nsec / 1000000);
 
-	if (tm->start + tm->interval <= (uint32_t)now) {
-		tm->start = (uint32_t)now;
+	if (now_ms > tm->start + tm->interval_ms) {
+		tm->start = now_ms;
 		return 1;
 	}
 
@@ -51,17 +57,19 @@ int bare_timer_expired(struct pp_timer *tm)
 
 void bare_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
 {
+  /*
 	int i;
 
 	for (i = 0; i < PP_TIMER_ARRAY_SIZE; i++) {
 		ppi->timers[i]->start += diff;
 	}
+  */
 }
 
 int pp_timer_init(struct pp_instance *ppi)
 	__attribute__((alias("bare_timer_init")));
 
-int pp_timer_start(uint32_t interval, struct pp_timer *tm)
+int pp_timer_start(uint32_t interval_ms, struct pp_timer *tm)
 	__attribute__((alias("bare_timer_start")));
 
 int pp_timer_stop(struct pp_timer *tm)

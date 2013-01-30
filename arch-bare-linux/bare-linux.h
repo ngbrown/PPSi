@@ -36,6 +36,7 @@ extern int sys_shutdown(int fd, int flags);
 extern int sys_gettimeofday(void *tv, void *z);
 extern int sys_settimeofday(void *tv, void *z);
 extern int sys_adjtimex(void *tv);
+extern int sys_clock_gettime(int clock, void *t);
 
 extern int bare_errno;
 
@@ -81,6 +82,7 @@ struct bare_ethhdr {
 struct bare_timeval {
 	unsigned long tv_sec;
 	unsigned long tv_usec;
+  	unsigned long tv_nsec;
 };
 
 #ifndef NULL

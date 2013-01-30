@@ -27,6 +27,7 @@ static _syscall2(int, socketcall, int, call, unsigned long *, args)
 _syscall2(int, gettimeofday, void *, tv, void *,z);
 _syscall2(int, settimeofday, void *, tv, void *,z);
 _syscall1(int, adjtimex, void *, tv);
+_syscall2(int, clock_gettime, int, clock, void *, t);
 
 /*
  * In the bare arch I'd better use sys_ prefixed names
@@ -61,6 +62,10 @@ int sys_settimeofday(void *tv, void *z)
 int sys_adjtimex(void *tv)
 {
 	return adjtimex(tv);
+}
+int sys_clock_gettime(int clock, void *t)
+{
+	return clock_gettime(clock, t);
 }
 
 
