@@ -22,6 +22,7 @@ void bare_main_loop(struct pp_instance *ppi)
 	int delay_ms;
 
 	set_TimeInternal(&ppi->last_rcv_time, 0, 0);
+	NP(ppi)->proto_ofst = 14;
 
 	/*
 	 * The main loop here is based on select. While we are not
@@ -34,6 +35,7 @@ void bare_main_loop(struct pp_instance *ppi)
 		int i, maxfd;
 		struct bare_timeval tv;
 		unsigned char packet[1500];
+		void *payload = packet + 16; /* aligned */
 
 		/* Wait for a packet or for the timeout */
 		tv.tv_sec = delay_ms / 1000;
@@ -64,7 +66,7 @@ void bare_main_loop(struct pp_instance *ppi)
 		 *
 		 * FIXME: we don't know which socket to receive from
 		 */
-		i = bare_recv_packet(ppi, packet, sizeof(packet),
+		i = bare_recv_packet(ppi, payload, sizeof(packet) - 16,
 				     &ppi->last_rcv_time);
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
