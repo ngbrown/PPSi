@@ -128,3 +128,8 @@ int sys_adjtimex(void *tv)
 	return syscall(__NR_adjtimex, (uint64_t)tv, 0, 
 		        0, 0, 0, 0);
 }
+int sys_clock_gettime(int clock, void *t)
+{
+	return syscall(__NR_clock_gettime, (uint64_t)clock, (uint64_t)t, 
+		        0, 0, 0, 0);
+}
