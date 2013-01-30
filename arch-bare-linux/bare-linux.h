@@ -10,7 +10,7 @@ extern int bare_open_ch(struct pp_instance *ppi, char *name);
 extern int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t);
 extern int bare_send_packet(struct pp_instance *ppi, void *pkt, int len,
-			int chtype, int use_pdelay_addr);
+			    TimeInternal *t, int chtype, int use_pdelay_addr);
 
 extern void bare_main_loop(struct pp_instance *ppi);
 
