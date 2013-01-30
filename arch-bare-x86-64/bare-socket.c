@@ -17,8 +17,8 @@ int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
 }
 
-int bare_send_packet(struct pp_instance *ppi, void *pkt, int len, int chtype,
-	int use_pdelay_addr)
+int bare_send_packet(struct pp_instance *ppi, void *pkt, int len, 
+		     TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	return sys_send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
 }
