@@ -28,6 +28,7 @@ _syscall2(int, gettimeofday, void *, tv, void *,z);
 _syscall2(int, settimeofday, void *, tv, void *,z);
 _syscall1(int, adjtimex, void *, tv);
 _syscall2(int, clock_gettime, int, clock, void *, t);
+_syscall1(int, close, int, fd);
 
 /*
  * In the bare arch I'd better use sys_ prefixed names
@@ -40,6 +41,8 @@ int sys_time(int tz)
 	__attribute__((alias("time")));
 int sys_ioctl(int fd, int cmd, void *arg)
 	__attribute__((alias("ioctl")));
+int sys_close(int fd)
+	__attribute__((alias("close")));
 
 static struct sel_arg_struct as; /* declared as local, it won't work */
 int sys_select(int max, void *in, void *out, void *exc, void *tout)
@@ -89,7 +92,7 @@ int sys_clock_gettime(int clock, void *t)
 #define SYS_RECVMSG	17		/* sys_recvmsg(2)		*/
 #define SYS_PACCEPT	18		/* sys_paccept(2)		*/
 
-static unsigned long args[4];
+static unsigned long args[5];
 
 int sys_socket(int domain, int type, int proto)
 {
@@ -135,4 +138,14 @@ int sys_shutdown(int fd, int flags)
 	args[0] = fd;
 	args[1] = flags;
 	return socketcall(SYS_SHUTDOWN, args);
+}
+
+int sys_setsockopt(int fd, int level, int optname, const void *optval, int optlen)
+{
+	args[0] = fd;
+	args[1] = level;
+	args[2] = optname;
+	args[3] = (unsigned long)optval;
+	args[4] = optlen;
+	return socketcall(SYS_SETSOCKOPT, args);
 }
