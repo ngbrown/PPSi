@@ -32,7 +32,9 @@ extern int sys_bind(int fd, const struct bare_sockaddr *addr, int addrlen);
 extern int sys_recv(int fd, void *pkt, int plen, int flags);
 extern int sys_send(int fd, void *pkt, int plen, int flags);
 extern int sys_shutdown(int fd, int flags);
-
+extern int sys_close(int fd);
+extern int sys_setsockopt(int fd, int level, int optname, const void *optval,
+			  int optlen);
 extern int sys_gettimeofday(void *tv, void *z);
 extern int sys_settimeofday(void *tv, void *z);
 extern int sys_adjtimex(void *tv);

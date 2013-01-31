@@ -107,6 +107,19 @@ int sys_send(int fd, void *pkt, int plen, int flags)
 			(uint64_t)plen, (uint64_t)flags, 0, 0);
 }
 
+int sys_setsockopt(int fd, int level, int optname, const void *optval,  
+								int optlen)
+{
+	return syscall(__NR_setsockopt, (uint64_t)fd, (uint64_t)level,
+			(uint64_t)optname, (uint64_t)optval, optlen, 0);
+}
+
+int sys_close(int fd)
+{
+	return syscall(__NR_close, (uint64_t)fd, 0,
+		        0, 0, 0, 0);
+}
+
 int sys_shutdown(int fd, int flags)
 {
 	return syscall(__NR_shutdown, (uint64_t)fd, (uint64_t)flags, 
