@@ -70,7 +70,8 @@ void bare_main_loop(struct pp_instance *ppi)
 				     &ppi->last_rcv_time);
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
-		if (((struct bare_ethhdr *)packet)->h_proto
+		/* we passed payload but it filled the ether header too */
+		if (((struct bare_ethhdr *)(packet + 2))->h_proto
 		     != htons(PP_ETHERTYPE))
 			goto again;
 
