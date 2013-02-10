@@ -23,6 +23,7 @@
 #define PP_FATAL(ppi,s1,s2) if pp_diag_fatal(ppi,s1,s2)
 
 #ifdef CONFIG_PPSI_RUNTIME_VERBOSITY
+#define CONST_VERBOSITY /* nothing: use "int pp_diag_verbosity" */
 extern int pp_diag_verbosity;
 
 #define PP_VFSM(ppi,seq,len) if (pp_diag_verbosity) pp_diag_fsm(ppi,seq,len)
@@ -33,7 +34,7 @@ extern int pp_diag_verbosity;
 
 #else
 
-extern const int pp_diag_verbosity;
+#define CONST_VERBOSITY const /* use "const int pp_diag_verbosity */
 
   #if CONFIG_PPSI_VERBOSITY > 0
   #define PP_VFSM(ppi,seq,len) if (pp_diag_verbosity) pp_diag_fsm(ppi,seq,len)
@@ -50,6 +51,8 @@ extern const int pp_diag_verbosity;
   #endif /* CONFIG_PPSI_VERBOSITY > 0 */
 
 #endif /* CONFIG_PPSI_RUNTIME_VERBOSITY */
+
+extern CONST_VERBOSITY int pp_diag_verbosity;
 
 /*
  * Runtime options. Default values can be overridden by command line.

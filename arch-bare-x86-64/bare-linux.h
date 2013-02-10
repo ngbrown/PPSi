@@ -34,7 +34,7 @@ extern int sys_send(int fd, void *pkt, int plen, int flags);
 extern int sys_shutdown(int fd, int flags);
 extern int sys_close(int fd);
 extern int sys_setsockopt(int fd, int level, int optname, const void *optval,
-                          int optlen);
+			  int optlen);
 extern int sys_gettimeofday(void *tv, void *z);
 extern int sys_settimeofday(void *tv, void *z);
 extern int sys_adjtimex(void *tv);
@@ -78,14 +78,14 @@ struct bare_sockaddr_ll {
 #define SOL_SOCKET      1
 
 /* from uapi/linux/if_ether.h */
-#define ETH_ALEN        6       /* Octets in one ethernet addr */
+#define ETH_ALEN 	6 	/* Octets in one ethernet addr */
 
 /* start copy from linux/socket.h */
 
 /* Setsockoptions(2) level. Thanks to BSD these must match IPPROTO_xxx */
 #define SOL_IP          0
-/* #define SOL_ICMP     1       No-no-no! Due to Linux :-) we cannot use        
-   SOL_ICMP=1 */
+/* #define SOL_ICMP     1	No-no-no! Due to Linux :-) we cannot use 
+   								SOL_ICMP=1 */
 #define SOL_TCP         6
 #define SOL_UDP         17
 #define SOL_IPV6        41
@@ -176,7 +176,7 @@ struct bare_ethhdr {
 struct bare_timeval {
 	unsigned long tv_sec;
 	unsigned long tv_usec;
-  	unsigned long tv_nsec;
+	unsigned long tv_nsec;
 };
 
 #ifndef NULL
@@ -242,10 +242,10 @@ struct bare_timex {
 };
 
 
-/*                                                                                 
- * Copy from <linux/time.h>                                                        
- *                                                                                 
- * The IDs of the various system clocks (for POSIX.1b interval timers):            
+/*
+ * Copy from <linux/time.h>
+ *
+ * The IDs of the various system clocks (for POSIX.1b interval timers):
  */
 #define CLOCK_REALTIME                  0
 #define CLOCK_MONOTONIC                 1

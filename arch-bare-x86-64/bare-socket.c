@@ -17,7 +17,7 @@ int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	if (t)
 		pp_get_tstamp(t);
 
-	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd,
+	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, 
 			pkt - NP(ppi)->proto_ofst, len, 0);
 }
 
@@ -40,7 +40,7 @@ int bare_send_packet(struct pp_instance *ppi, void *pkt, int len,
 	if (t)
 		pp_get_tstamp(t);
 
-	return sys_send(NP(ppi)->ch[chtype].fd, hdr,
+	return sys_send(NP(ppi)->ch[chtype].fd, hdr, 
 					len + NP(ppi)->proto_ofst, 0);
 }
 
@@ -60,7 +60,7 @@ int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
 /* To open a channel we must bind to an interface and so on */
 int bare_open_ch(struct pp_instance *ppi, char *ifname)
 {
-	int sock = -1;
+  	int sock = -1;
 	int temp, iindex;
 	struct bare_ifreq ifr;
 	struct bare_sockaddr_ll addr_ll;
@@ -68,13 +68,13 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 
 	if (OPTS(ppi)->ethernet_mode) {
 		/* open socket */
-		sock = sys_socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
+	  	sock = sys_socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
 		if (sock < 0) {
 			pp_diag_error(ppi, bare_errno);
-			pp_diag_fatal(ppi, "socket()", "");
+		  	pp_diag_fatal(ppi, "socket()", "");
 			sys_close(sock);
 			return -1;
-		}	
+		}
 
 		/* hw interface information */
 		memset(&ifr, 0, sizeof(ifr));
@@ -82,14 +82,14 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		if (sys_ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
 			pp_diag_error(ppi, bare_errno);
 			pp_diag_fatal(ppi, "ioctl(GIFINDEX)", "");
-			sys_close(sock);
+		  	sys_close(sock);
 			return -1;
 		}
 
 		iindex = ifr.ifr_ifru.index;
 		if (sys_ioctl(sock, SIOCGIFHWADDR, &ifr) < 0) {
 			pp_diag_error(ppi, bare_errno);
-			pp_diag_fatal(ppi, "ioctl(GIFHWADDR)", "");
+		  	pp_diag_fatal(ppi, "ioctl(GIFHWADDR)", "");
 			sys_close(sock);
 			return -1;
 		}
@@ -97,19 +97,19 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		memcpy(NP(ppi)->ch[PP_NP_GEN].addr,
 		       			ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
 		memcpy(NP(ppi)->ch[PP_NP_EVT].addr,
-		       			ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
-
+	       				ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
+	
 		/* bind */
 		memset(&addr_ll, 0, sizeof(addr_ll));
 		addr_ll.sll_family = PF_PACKET;
 		addr_ll.sll_protocol = htons(ETH_P_1588);
 		addr_ll.sll_ifindex = iindex;
-		if (sys_bind(sock, (struct bare_sockaddr *)&addr_ll,
-			     				sizeof(addr_ll)) < 0) {
+		if (sys_bind(sock, (struct bare_sockaddr *)&addr_ll, 
+							sizeof(addr_ll)) < 0) {
 			pp_diag_error(ppi, bare_errno);
-			pp_diag_fatal(ppi, "bind", "");
+		  	pp_diag_fatal(ppi, "bind", "");
 			sys_close(sock);
-			return -1;
+			return -1;    
 		}
 
 		/* accept the multicast address for raw-ethernet ptp */
@@ -119,22 +119,22 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		pmr.mr_alen = ETH_ALEN;
 		memcpy(pmr.mr_address, PP_MCAST_MACADDRESS, ETH_ALEN);
 		sys_setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
-			       &pmr, sizeof(pmr)); /* lazily ignore errors */
+			   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
 		/* also the PEER multicast address */
 		memcpy(pmr.mr_address, PP_PEER_MACADDRESS, ETH_ALEN);
 		sys_setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
-			       &pmr, sizeof(pmr)); /* lazily ignore errors */
+			   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
 		NP(ppi)->ch[PP_NP_GEN].fd = sock;
 		NP(ppi)->ch[PP_NP_EVT].fd = sock;
 
 		/* make timestamps available through recvmsg() -- FIXME: hw? */
-                sys_setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
+		sys_setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
                            &temp, sizeof(int));
 
 		return 0;
-	} 
+	}
 	return -1;
 }
 

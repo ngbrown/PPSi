@@ -66,7 +66,7 @@ void bare_main_loop(struct pp_instance *ppi)
 		 *
 		 * FIXME: we don't know which socket to receive from
 		 */
-		i = bare_recv_packet(ppi, payload, sizeof(packet),
+		i = bare_recv_packet(ppi, payload, sizeof(packet) - 16,
 				     &ppi->last_rcv_time);
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
