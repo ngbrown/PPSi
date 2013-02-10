@@ -22,7 +22,7 @@ void ppsi_clear_bss(void)
 
 static struct pp_instance ppi_static;
 static struct pp_net_path net_path_static;
-int pp_diag_verbosity = 0;
+CONST_VERBOSITY int pp_diag_verbosity = 0;
 
 /* ppi fields */
 static UInteger16 sent_seq_id[16];
