@@ -1,0 +1,62 @@
+#!/bin/sh
+
+export INTERNAL_PRINTF=y; #FIXME: clean up this internal_printf
+
+# This trivially compiles all known-good configurations
+
+build_one () {
+    make -s clean
+    echo "####################"
+    echo "Build for " "$1"
+    make -s -j3 CC="$CC" LD="$LD" -k $2
+    test -f ppsi.o && size ppsi.o
+    test -f ppsi && size ppsi
+}
+
+build_diags () {
+    build_one "arch \"$ARCH\", ext \"$PROTO_EXT\", no diag"
+    build_one "arch \"$ARCH\", ext \"$PROTO_EXT\", mini diag" HAS_DIAG=y
+    build_one "arch \"$ARCH\", ext \"$PROTO_EXT\", full diag" HAS_FULL_DIAG=y
+}
+
+build_ext () {
+    unset PROTO_EXT
+    build_diags
+    # s/false/true/ below when WR can be built from ppsi (not from wrpc-sw)
+    if false; then
+	export PROTO_EXT=whiterabbit
+	build_diags
+    fi
+}
+
+# Built the default target, natively
+for var in HAS_DIAG HAS_FULL_DIAG CROSS_COMPILE ARCH CC LD; do
+    unset $var
+done
+export CC="gcc"
+export LD="ld"
+
+build_ext
+
+# Finally, loop over all archs, using our local names for compilers
+# (we are not building for arch-spec, but we keep ready for it)
+PREFIX_bare_linux=""
+PREFIX_bare_x86_64=""
+PREFIX_spec="/opt/gcc-lm32/bin/lm32-elf-"
+
+CC_bare_linux="gcc -m32"
+CC_bare_x86_64="gcc -m64"
+CC_spec="${PREFIX_spec}gcc"
+
+LD_bare_linux="ld -m elf_i386"
+LD_bare_x86_64="ld -m elf_x86_64"
+LD_spec="${PREFIX_spec}ld"
+
+for a in bare-linux bare-x86-64; do
+    export ARCH=$a
+    ARCH_=""
+    eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
+    eval export CC="\${CC_$(echo $ARCH | sed 's/-/_/g')}"
+    eval export LD="\${LD_$(echo $ARCH | sed 's/-/_/g')}"
+    build_ext
+done
