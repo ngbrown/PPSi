@@ -5,7 +5,7 @@
 /* Socket interface for bare Linux */
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "bare-linux.h"
+#include "bare-x86-64.h"
 
 /* 14 is ppi->proto_ofst for ethernet mode */
 Octet buffer_out[PP_PACKET_SIZE + 14];

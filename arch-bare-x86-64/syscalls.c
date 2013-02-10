@@ -32,7 +32,7 @@ int __syscall_error(void)
 #include <linux/unistd.h>
 
 #include <ppsi/ppsi.h>
-#include "bare-linux.h"
+#include "bare-x86-64.h"
 
 /*
  * We depends on syscall.S that does the register passing

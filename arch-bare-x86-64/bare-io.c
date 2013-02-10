@@ -3,7 +3,7 @@
  */
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "bare-linux.h"
+#include "bare-x86-64.h"
 
 const Integer32 PP_ADJ_FREQ_MAX = 512000;
 

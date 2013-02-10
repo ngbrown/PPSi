@@ -7,7 +7,7 @@
  * This is the main loop for "freestanding" stuff under Linux.
  */
 #include <ppsi/ppsi.h>
-#include "bare-linux.h"
+#include "bare-x86-64.h"
 
 /* Define other hackish stuff */
 struct bare_fd_set {
