@@ -4,7 +4,7 @@
 #include <linux/unistd.h>
 
 #include <ppsi/ppsi.h>
-#include "bare-linux.h"
+#include "bare-i386.h"
 #include "syscalls.h"
 
 int bare_errno;

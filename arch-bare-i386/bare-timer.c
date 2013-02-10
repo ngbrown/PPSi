@@ -1,6 +1,6 @@
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "bare-linux.h"
+#include "bare-i386.h"
 #include <unistd.h>
 
 static struct pp_timer bare_timers[PP_TIMER_ARRAY_SIZE];

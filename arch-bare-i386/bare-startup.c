@@ -8,7 +8,7 @@
  */
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "bare-linux.h"
+#include "bare-i386.h"
 
 
 void ppsi_clear_bss(void)
