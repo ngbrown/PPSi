@@ -11,7 +11,7 @@ OBJDUMP         = $(CROSS_COMPILE)objdump
 
 CFLAGS = -Wall -ggdb -I../include/ppsi
 
-PROGS = ptpdump adjtime
+PROGS = ptpdump adjtime jmptime
 
 all: $(PROGS)
 
