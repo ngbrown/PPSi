@@ -22,7 +22,7 @@ int __syscall_error(void)
 {
 	register int err_no __asm__ ("%rcx");
 	__asm__ ("mov %rax, %rcx\n\t"
-	         "neg %rcx");
+		 "neg %rcx");
 	bare_errno = err_no; /* changed for ptp-proposal/proto */
 	return -1;
 }
@@ -41,7 +41,7 @@ int __syscall_error(void)
 extern long syscall(uint64_t n, uint64_t arg1, uint64_t arg2, uint64_t arg3,
 		    uint64_t arg4, uint64_t arg5, uint64_t arg6);
 
-int write(int fd, const void * buf, int count)
+int write(int fd, const void *buf, int count)
 {
 	return syscall(__NR_write, (uint64_t)fd, (uint64_t)buf, (uint64_t)count,
 		       0, 0, 0);
@@ -53,13 +53,13 @@ int exit(int exitcode)
 		       0, 0, 0);
 }
 
-int time(long * t)
+int time(long *t)
 {
 	return syscall(__NR_time, (uint64_t)t, 0, 0,
 		       0, 0, 0);
 }
 
-int ioctl(int fd, int cmd, void * arg)
+int ioctl(int fd, int cmd, void *arg)
 {
 	return syscall(__NR_ioctl, (uint64_t)fd, (uint64_t)cmd, (uint64_t)arg,
 			0, 0, 0);
@@ -107,7 +107,7 @@ int sys_send(int fd, void *pkt, int plen, int flags)
 			(uint64_t)plen, (uint64_t)flags, 0, 0);
 }
 
-int sys_setsockopt(int fd, int level, int optname, const void *optval,  
+int sys_setsockopt(int fd, int level, int optname, const void *optval,
 								int optlen)
 {
 	return syscall(__NR_setsockopt, (uint64_t)fd, (uint64_t)level,
@@ -117,32 +117,32 @@ int sys_setsockopt(int fd, int level, int optname, const void *optval,
 int sys_close(int fd)
 {
 	return syscall(__NR_close, (uint64_t)fd, 0,
-		        0, 0, 0, 0);
+			0, 0, 0, 0);
 }
 
 int sys_shutdown(int fd, int flags)
 {
-	return syscall(__NR_shutdown, (uint64_t)fd, (uint64_t)flags, 
-		        0, 0, 0, 0);
+	return syscall(__NR_shutdown, (uint64_t)fd, (uint64_t)flags,
+			0, 0, 0, 0);
 }
 
 int sys_gettimeofday(void *tv, void *z)
 {
-	return syscall(__NR_gettimeofday, (uint64_t)tv, (uint64_t)z, 
-		        0, 0, 0, 0);
+	return syscall(__NR_gettimeofday, (uint64_t)tv, (uint64_t)z,
+			0, 0, 0, 0);
 }
 int sys_settimeofday(void *tv, void *z)
 {
 	return syscall(__NR_settimeofday, (uint64_t)tv, (uint64_t)z,
-		        0, 0, 0, 0);
+			0, 0, 0, 0);
 }
 int sys_adjtimex(void *tv)
 {
-	return syscall(__NR_adjtimex, (uint64_t)tv, 0, 
-		        0, 0, 0, 0);
+	return syscall(__NR_adjtimex, (uint64_t)tv, 0,
+			0, 0, 0, 0);
 }
 int sys_clock_gettime(int clock, void *t)
 {
-	return syscall(__NR_clock_gettime, (uint64_t)clock, (uint64_t)t, 
-		        0, 0, 0, 0);
+	return syscall(__NR_clock_gettime, (uint64_t)clock, (uint64_t)t,
+			0, 0, 0, 0);
 }

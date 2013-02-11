@@ -71,7 +71,7 @@ int pp_memcmp(const void *cs, const void *ct, int count)
 	const unsigned char *su1, *su2;
 	int res = 0;
 
-	for( su1 = cs, su2 = ct; 0 < count; ++su1, ++su2, count--)
+	for (su1 = cs, su2 = ct; 0 < count; ++su1, ++su2, count--)
 		if ((res = *su1 - *su2) != 0)
 			break;
 	return res;
@@ -108,21 +108,21 @@ int bare_adj_freq(Integer32 adj)
 {
 	struct bare_timex t;
 
-        if (adj > PP_ADJ_FREQ_MAX)
-                adj = PP_ADJ_FREQ_MAX;
-        else if (adj < -PP_ADJ_FREQ_MAX)
-                adj = -PP_ADJ_FREQ_MAX;
+	if (adj > PP_ADJ_FREQ_MAX)
+		adj = PP_ADJ_FREQ_MAX;
+	else if (adj < -PP_ADJ_FREQ_MAX)
+		adj = -PP_ADJ_FREQ_MAX;
 
-        t.modes = MOD_FREQUENCY;
-        t.freq = adj * ((1 << 16) / 1000);
+	t.modes = MOD_FREQUENCY;
+	t.freq = adj * ((1 << 16) / 1000);
 
-        return !sys_adjtimex(&t);
+	return !sys_adjtimex(&t);
 }
 
 int32_t pp_set_tstamp(TimeInternal *t)
-        __attribute__((alias("bare_set_tstamp")));
+	__attribute__((alias("bare_set_tstamp")));
 void pp_get_tstamp(TimeInternal *t)
-        __attribute__((alias("bare_get_tstamp")));
+	__attribute__((alias("bare_get_tstamp")));
 int pp_adj_freq(Integer32 adj)
-        __attribute__((alias("bare_adj_freq")));
+	__attribute__((alias("bare_adj_freq")));
 

@@ -78,14 +78,13 @@ struct bare_sockaddr_ll {
 #define SOL_SOCKET      1
 
 /* from uapi/linux/if_ether.h */
-#define ETH_ALEN 	6 	/* Octets in one ethernet addr */
+#define ETH_ALEN	6	/* Octets in one ethernet addr */
 
 /* start copy from linux/socket.h */
 
 /* Setsockoptions(2) level. Thanks to BSD these must match IPPROTO_xxx */
 #define SOL_IP          0
-/* #define SOL_ICMP     1	No-no-no! Due to Linux :-) we cannot use 
-   								SOL_ICMP=1 */
+/* #define SOL_ICMP     1       No-no-no! We cannot use SOL_ICMP=1 */
 #define SOL_TCP         6
 #define SOL_UDP         17
 #define SOL_IPV6        41
@@ -123,10 +122,10 @@ struct bare_sockaddr_ll {
 
 /* start copy from uapi/linux/if_packet.h */
 struct bare_packet_mreq {
-  int             mr_ifindex;
-  unsigned short  mr_type;
-  unsigned short  mr_alen;
-  unsigned char   mr_address[8];
+	int		mr_ifindex;
+	unsigned short	mr_type;
+	unsigned short	mr_alen;
+	unsigned char	mr_address[8];
 };
 
 #define PACKET_MR_MULTICAST     0
@@ -211,34 +210,34 @@ struct bare_timeval {
 #define MOD_TIMECONST   ADJ_TIMECONST
 
 struct bare_timex {
-  unsigned int modes;     /* mode selector */
-  long offset;            /* time offset (usec) */
-  long freq;              /* frequency offset (scaled ppm) */
-  long maxerror;          /* maximum error (usec) */
-  long esterror;          /* estimated error (usec) */
-  int status;             /* clock command/status */
-  long constant;          /* pll time constant */
-  long precision;         /* clock precision (usec) (read only) */
-  long tolerance;         /* clock frequency tolerance (ppm)
-			   * (read only)
-			   */
-  struct bare_timeval time;    /* (read only) */
-  long tick;              /* (modified) usecs between clock ticks */
+	unsigned int modes;	/* mode selector */
+	long offset;		/* time offset (usec) */
+	long freq;		/* frequency offset (scaled ppm) */
+	long maxerror;		/* maximum error (usec) */
+	long esterror;		/* estimated error (usec) */
+	int status;		/* clock command/status */
+	long constant;		/* pll time constant */
+	long precision;		/* clock precision (usec) (read only) */
+	long tolerance;		/* clock frequency tolerance (ppm)
+				 * (read only)
+				 */
+	struct bare_timeval time;	/* (RO, except for ADJ_SETOFFSET) */
+	long tick;		/* (modified) usecs between clock ticks */
 
-  long ppsfreq;           /* pps frequency (scaled ppm) (ro) */
-  long jitter;            /* pps jitter (us) (ro) */
-  int shift;              /* interval duration (s) (shift) (ro) */
-  long stabil;            /* pps stability (scaled ppm) (ro) */
-  long jitcnt;            /* jitter limit exceeded (ro) */
-  long calcnt;            /* calibration intervals (ro) */
-  long errcnt;            /* calibration errors (ro) */
-  long stbcnt;            /* stability limit exceeded (ro) */
+	long ppsfreq;           /* pps frequency (scaled ppm) (ro) */
+	long jitter;            /* pps jitter (us) (ro) */
+	int shift;              /* interval duration (s) (shift) (ro) */
+	long stabil;            /* pps stability (scaled ppm) (ro) */
+	long jitcnt;            /* jitter limit exceeded (ro) */
+	long calcnt;            /* calibration intervals (ro) */
+	long errcnt;            /* calibration errors (ro) */
+	long stbcnt;            /* stability limit exceeded (ro) */
 
-  int tai;                /* TAI offset (ro) */
+	int tai;		/* TAI offset (ro) */
 
-  int  :32; int  :32; int  :32; int  :32;
-  int  :32; int  :32; int  :32; int  :32;
-  int  :32; int  :32; int  :32;
+	int  :32; int  :32; int  :32; int  :32;
+	int  :32; int  :32; int  :32; int  :32;
+	int  :32; int  :32; int  :32;
 };
 
 
