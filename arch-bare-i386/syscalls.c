@@ -24,8 +24,8 @@ _syscall1(int, time, void *, tz)
 _syscall3(int, ioctl, int, fd, int, cmd, void *, arg)
 _syscall1(int, select, struct sel_arg_struct *, as)
 static _syscall2(int, socketcall, int, call, unsigned long *, args)
-_syscall2(int, gettimeofday, void *, tv, void *,z);
-_syscall2(int, settimeofday, void *, tv, void *,z);
+_syscall2(int, gettimeofday, void *, tv, void *, z);
+_syscall2(int, settimeofday, void *, tv, void *, z);
 _syscall1(int, adjtimex, void *, tv);
 _syscall2(int, clock_gettime, int, clock, void *, t);
 _syscall1(int, close, int, fd);
@@ -140,7 +140,8 @@ int sys_shutdown(int fd, int flags)
 	return socketcall(SYS_SHUTDOWN, args);
 }
 
-int sys_setsockopt(int fd, int level, int optname, const void *optval, int optlen)
+int sys_setsockopt(int fd, int level, int optname, const void *optval,
+		   int optlen)
 {
 	args[0] = fd;
 	args[1] = level;

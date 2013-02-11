@@ -21,18 +21,17 @@ int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			pkt - NP(ppi)->proto_ofst, len, 0);
 }
 
-int bare_send_packet(struct pp_instance *ppi, void *pkt, int len, 
+int bare_send_packet(struct pp_instance *ppi, void *pkt, int len,
 		     TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct bare_ethhdr *hdr;
 	hdr = PROTO_HDR(pkt);
 	hdr->h_proto = htons(ETH_P_1588);
 
-	if (OPTS(ppi)->gptp_mode) {
+	if (OPTS(ppi)->gptp_mode)
 		memcpy(hdr->h_dest, PP_PEER_MACADDRESS, 6);
-	} else {
+	else
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, 6);
-	}
 
 	/* raw socket implementation always uses gen socket */
 	memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, 6);
@@ -46,13 +45,13 @@ int bare_send_packet(struct pp_instance *ppi, void *pkt, int len,
 
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
 	__attribute__((alias("bare_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, 
+int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t, int chtype, int use_pdelay_addr)
 	__attribute__((alias("bare_send_packet")));
 
 #define SHUT_RD		0
-#define SHUT_WR 	1
-#define SHUT_RDWR 	2
+#define SHUT_WR		1
+#define SHUT_RDWR	2
 
 #define PF_PACKET 17
 #define SOCK_RAW 3
@@ -74,7 +73,7 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 			pp_diag_fatal(ppi, "socket()", "");
 			sys_close(sock);
 			return -1;
-		}	
+		}
 
 		/* hw interface information */
 		memset(&ifr, 0, sizeof(ifr));
@@ -95,9 +94,9 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		}
 
 		memcpy(NP(ppi)->ch[PP_NP_GEN].addr,
-		       			ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
+					ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
 		memcpy(NP(ppi)->ch[PP_NP_EVT].addr,
-		       			ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
+					ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
 
 		/* bind */
 		memset(&addr_ll, 0, sizeof(addr_ll));
@@ -105,7 +104,7 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		addr_ll.sll_protocol = htons(ETH_P_1588);
 		addr_ll.sll_ifindex = iindex;
 		if (sys_bind(sock, (struct bare_sockaddr *)&addr_ll,
-			     				sizeof(addr_ll)) < 0) {
+							sizeof(addr_ll)) < 0) {
 			pp_diag_error(ppi, bare_errno);
 			pp_diag_fatal(ppi, "bind", "");
 			sys_close(sock);
@@ -130,11 +129,11 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		NP(ppi)->ch[PP_NP_EVT].fd = sock;
 
 		/* make timestamps available through recvmsg() -- FIXME: hw? */
-                sys_setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
-                           &temp, sizeof(int));
+		sys_setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
+			   &temp, sizeof(int));
 
 		return 0;
-	} 
+	}
 	return -1;
 }
 
@@ -144,16 +143,16 @@ int bare_net_init(struct pp_instance *ppi)
 	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
 
 	if (OPTS(ppi)->ethernet_mode) {
-                PP_PRINTF("bare_net_init IEEE 802.3\n");
+		PP_PRINTF("bare_net_init IEEE 802.3\n");
 
-                /* raw sockets implementation always use gen socket */
-                return bare_open_ch(ppi, OPTS(ppi)->iface_name);
-        }
+		/* raw sockets implementation always use gen socket */
+		return bare_open_ch(ppi, OPTS(ppi)->iface_name);
+	}
 
-        /* else: UDP */
-        PP_PRINTF("bare_net_init UDP\n");
+	/* else: UDP */
+	PP_PRINTF("bare_net_init UDP\n");
 
-        return 0;
+	return 0;
 }
 int pp_net_init(struct pp_instance *ppi)
 	__attribute__((alias("bare_net_init")));

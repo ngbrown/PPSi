@@ -34,7 +34,7 @@ extern int sys_send(int fd, void *pkt, int plen, int flags);
 extern int sys_shutdown(int fd, int flags);
 extern int sys_close(int fd);
 extern int sys_setsockopt(int fd, int level, int optname, const void *optval,
-                          int optlen);
+			  int optlen);
 extern int sys_gettimeofday(void *tv, void *z);
 extern int sys_settimeofday(void *tv, void *z);
 extern int sys_adjtimex(void *tv);
@@ -84,8 +84,7 @@ struct bare_sockaddr_ll {
 
 /* Setsockoptions(2) level. Thanks to BSD these must match IPPROTO_xxx */
 #define SOL_IP          0
-/* #define SOL_ICMP     1       No-no-no! Due to Linux :-) we cannot use        
-   SOL_ICMP=1 */
+/* #define SOL_ICMP     1       No-no-no! We cannot use SOL_ICMP=1 */
 #define SOL_TCP         6
 #define SOL_UDP         17
 #define SOL_IPV6        41
@@ -123,10 +122,10 @@ struct bare_sockaddr_ll {
 
 /* start copy from uapi/linux/if_packet.h */
 struct bare_packet_mreq {
-  int             mr_ifindex;
-  unsigned short  mr_type;
-  unsigned short  mr_alen;
-  unsigned char   mr_address[8];
+	int		mr_ifindex;
+	unsigned short	mr_type;
+	unsigned short	mr_alen;
+	unsigned char	mr_address[8];
 };
 
 #define PACKET_MR_MULTICAST     0
@@ -176,7 +175,7 @@ struct bare_ethhdr {
 struct bare_timeval {
 	unsigned long tv_sec;
 	unsigned long tv_usec;
-  	unsigned long tv_nsec;
+	unsigned long tv_nsec;
 };
 
 #ifndef NULL
@@ -188,69 +187,73 @@ struct bare_timeval {
 /*
  * Mode codes (timex.mode)
  */
-#define ADJ_OFFSET              0x0001  /* time offset */
-#define ADJ_FREQUENCY           0x0002  /* frequency offset */
-#define ADJ_MAXERROR            0x0004  /* maximum time error */
-#define ADJ_ESTERROR            0x0008  /* estimated time error */
-#define ADJ_STATUS              0x0010  /* clock status */
-#define ADJ_TIMECONST           0x0020  /* pll time constant */
-#define ADJ_TAI                 0x0080  /* set TAI offset */
-#define ADJ_MICRO               0x1000  /* select microsecond resolution */
-#define ADJ_NANO                0x2000  /* select nanosecond resolution */
-#define ADJ_TICK                0x4000  /* tick value */
+#define ADJ_OFFSET		0x0001	/* time offset */
+#define ADJ_FREQUENCY		0x0002	/* frequency offset */
+#define ADJ_MAXERROR		0x0004	/* maximum time error */
+#define ADJ_ESTERROR		0x0008	/* estimated time error */
+#define ADJ_STATUS		0x0010	/* clock status */
+#define ADJ_TIMECONST		0x0020	/* pll time constant */
+#define ADJ_TAI			0x0080	/* set TAI offset */
+#define ADJ_SETOFFSET		0x0100	/* add 'time' to current time */
+#define ADJ_MICRO		0x1000	/* select microsecond resolution */
+#define ADJ_NANO		0x2000	/* select nanosecond resolution */
+#define ADJ_TICK		0x4000	/* tick value */
 
-#define ADJ_OFFSET_SINGLESHOT   0x8001  /* old-fashioned adjtime */
-#define ADJ_OFFSET_SS_READ      0xa001  /* read-only adjtime */
+#define ADJ_OFFSET_SINGLESHOT	0x8001	/* old-fashioned adjtime */
+#define ADJ_OFFSET_SS_READ	0xa001	/* read-only adjtime */
 
 /* xntp 3.4 compatibility names */
-#define MOD_OFFSET      ADJ_OFFSET
-#define MOD_FREQUENCY   ADJ_FREQUENCY
-#define MOD_MAXERROR    ADJ_MAXERROR
-#define MOD_ESTERROR    ADJ_ESTERROR
-#define MOD_STATUS      ADJ_STATUS
-#define MOD_TIMECONST   ADJ_TIMECONST
+#define MOD_OFFSET	ADJ_OFFSET
+#define MOD_FREQUENCY	ADJ_FREQUENCY
+#define MOD_MAXERROR	ADJ_MAXERROR
+#define MOD_ESTERROR	ADJ_ESTERROR
+#define MOD_STATUS	ADJ_STATUS
+#define MOD_TIMECONST	ADJ_TIMECONST
+#define MOD_TAI	ADJ_TAI
+#define MOD_MICRO	ADJ_MICRO
+#define MOD_NANO	ADJ_NANO
 
 struct bare_timex {
-  unsigned int modes;     /* mode selector */
-  long offset;            /* time offset (usec) */
-  long freq;              /* frequency offset (scaled ppm) */
-  long maxerror;          /* maximum error (usec) */
-  long esterror;          /* estimated error (usec) */
-  int status;             /* clock command/status */
-  long constant;          /* pll time constant */
-  long precision;         /* clock precision (usec) (read only) */
-  long tolerance;         /* clock frequency tolerance (ppm)
-			   * (read only)
-			   */
-  struct bare_timeval time;    /* (read only) */
-  long tick;              /* (modified) usecs between clock ticks */
+	unsigned int modes;	/* mode selector */
+	long offset;		/* time offset (usec) */
+	long freq;		/* frequency offset (scaled ppm) */
+	long maxerror;		/* maximum error (usec) */
+	long esterror;		/* estimated error (usec) */
+	int status;		/* clock command/status */
+	long constant;		/* pll time constant */
+	long precision;		/* clock precision (usec) (read only) */
+	long tolerance;		/* clock frequency tolerance (ppm)
+				 * (read only)
+				 */
+	struct bare_timeval time;	/* (RO, except for ADJ_SETOFFSET) */
+	long tick;		/* (modified) usecs between clock ticks */
 
-  long ppsfreq;           /* pps frequency (scaled ppm) (ro) */
-  long jitter;            /* pps jitter (us) (ro) */
-  int shift;              /* interval duration (s) (shift) (ro) */
-  long stabil;            /* pps stability (scaled ppm) (ro) */
-  long jitcnt;            /* jitter limit exceeded (ro) */
-  long calcnt;            /* calibration intervals (ro) */
-  long errcnt;            /* calibration errors (ro) */
-  long stbcnt;            /* stability limit exceeded (ro) */
+	long ppsfreq;           /* pps frequency (scaled ppm) (ro) */
+	long jitter;            /* pps jitter (us) (ro) */
+	int shift;              /* interval duration (s) (shift) (ro) */
+	long stabil;            /* pps stability (scaled ppm) (ro) */
+	long jitcnt;            /* jitter limit exceeded (ro) */
+	long calcnt;            /* calibration intervals (ro) */
+	long errcnt;            /* calibration errors (ro) */
+	long stbcnt;            /* stability limit exceeded (ro) */
 
-  int tai;                /* TAI offset (ro) */
+	int tai;		/* TAI offset (ro) */
 
-  int  :32; int  :32; int  :32; int  :32;
-  int  :32; int  :32; int  :32; int  :32;
-  int  :32; int  :32; int  :32;
+	int  :32; int  :32; int  :32; int  :32;
+	int  :32; int  :32; int  :32; int  :32;
+	int  :32; int  :32; int  :32;
 };
 
 
-/*                                                                                 
- * Copy from <linux/time.h>                                                        
- *                                                                                 
- * The IDs of the various system clocks (for POSIX.1b interval timers):            
+/*
+ * Copy from <linux/time.h>
+ *
+ * The IDs of the various system clocks (for POSIX.1b interval timers):
  */
-#define CLOCK_REALTIME                  0
-#define CLOCK_MONOTONIC                 1
-#define CLOCK_PROCESS_CPUTIME_ID        2
-#define CLOCK_THREAD_CPUTIME_ID         3
-#define CLOCK_MONOTONIC_RAW             4
-#define CLOCK_REALTIME_COARSE           5
-#define CLOCK_MONOTONIC_COARSE          6
+#define CLOCK_REALTIME			0
+#define CLOCK_MONOTONIC			1
+#define CLOCK_PROCESS_CPUTIME_ID	2
+#define CLOCK_THREAD_CPUTIME_ID		3
+#define CLOCK_MONOTONIC_RAW		4
+#define CLOCK_REALTIME_COARSE		5
+#define CLOCK_MONOTONIC_COARSE		6
