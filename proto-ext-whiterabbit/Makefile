@@ -1,11 +1,10 @@
-# Hosted environment: build the final exectuable
 
 # All files are under directory D: I'm lazy
 D := proto-ext-whiterabbit
 
-LIBWR := $D/libwr.a
-
-LIBS += -L$D -lwr
+# don't link as a library, but as a big object. Otherwise we loose open/close
+LIBWRO := $D/libwr.o
+LIBS += $(LIBWRO)
 
 OBJ-libwr := $D/fsm-table.o \
 	$D/state-initializing.o \
@@ -32,7 +31,7 @@ OBJ-libwr := $D/fsm-table.o \
 	$D/wr-msg.o \
 	$D/wr-servo.o
 
-$(TARGET).o: $(LIBWR)
+$(TARGET).o: $(LIBWRO)
 
-$(LIBWR): $(OBJ-libwr)
-	$(AR) r $@ $^
+$(LIBWRO): $(OBJ-libwr)
+	$(LD) -r $^ -o $@

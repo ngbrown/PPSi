@@ -1,25 +1,31 @@
 # Alessandro Rubini for CERN, 2011 -- public domain
 
-CFLAGS += -ffreestanding -Os  \
+CFLAGS += -ffreestanding -Os \
 	-ffunction-sections -fdata-sections \
-	-mmultiply-enabled -mbarrel-shift-enabled
+	-mmultiply-enabled -mbarrel-shift-enabled \
 
 ARCH_LDFLAGS = -nostdlib -static -T $(ARCH).lds
 
 # Root of wrpc-sw project
-WRPCSW_ROOT = ..
+WRPCSW_ROOT ?= ..
 
-# FIXME ptp-noposix root; used till everything common would not be put in
-# wrpc-sw
+CFLAGS += -I$(WRPCSW_ROOT)/include -I$(WRPCSW_ROOT)/softpll \
+	  -I$(WRPCSW_ROOT)/boards/spec \
+
+# FIXME ptp-noposix root; used temporarily until we clean up
 PTPNOPOSIX_ROOT = $(WRPCSW_ROOT)/ptp-noposix
 
-CFLAGS += -I$(WRPCSW_ROOT)/include -I$(PTPNOPOSIX_ROOT)/softpll \
-	-I$(WRPCSW_ROOT)/boards/spec 	-ffunction-sections	-fdata-sections
+CFLAGS += -I$(PTPNOPOSIX_ROOT)/PTPWRd/dep -I$(PTPNOPOSIX_ROOT)/PTPWRd
+
+
 
 # All files are under A (short for ARCH): I'm lazy
 A := arch-$(ARCH)
 
 LIBARCH := $A/libarch.a
+
+LIBS += -L$A -larch
+
 
 OBJ-libarch := $A/spec-socket.o \
 	$A/spec-io.o \
@@ -28,23 +34,11 @@ OBJ-libarch := $A/spec-socket.o \
 	$A/spec-calibration.o \
 	lib/div64.o
 
-specdev-objects := $(WRPCSW_ROOT)/dev/uart.o \
-	$(WRPCSW_ROOT)/dev/syscon.o \
-	$(WRPCSW_ROOT)/dev/ep_pfilter.o \
-	$(WRPCSW_ROOT)/dev/endpoint.o \
-	$(WRPCSW_ROOT)/dev/pps_gen.o \
-	$(WRPCSW_ROOT)/dev/minic.o \
-	$(WRPCSW_ROOT)/arch/lm32/irq.o \
-	$(WRPCSW_ROOT)/dev/sdb.o \
-	$(WRPCSW_ROOT)/lib/net.o \
-	$(WRPCSW_ROOT)/wrc_ptp_ppsi.o \
-	$(PTPNOPOSIX_ROOT)/softpll/softpll_ng.o \
-	$(PTPNOPOSIX_ROOT)/libposix/freestanding-wrapper.o \
-
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^
 
-all: $(TARGET).o $(LIBARCH)
+$(TARGET).o: $(LIBARCH)
+
 ppsi-bin: $(TARGET) $(TARGET).bin
 
 # to build the target, we need -lstd again, in case we call functions that
