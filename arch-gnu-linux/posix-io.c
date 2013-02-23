@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <time.h>
 #include <sys/timex.h>
 #include <ppsi/ppsi.h>
@@ -12,9 +13,11 @@
 
 const Integer32 PP_ADJ_FREQ_MAX = 512000;
 
-static void print_clock_gettime_err_msg(void)
+static void clock_fatal_error(char *context)
 {
-	PP_PRINTF("clock_gettime() failed, exiting.");
+	PP_PRINTF("failure in \"%s\": %s\n.Exiting.\n", context,
+		  strerror(errno));
+	exit(1);
 }
 
 void posix_puts(const char *s)
@@ -45,10 +48,8 @@ void *posix_memset(void *s, int c, int count)
 void posix_get_tstamp(TimeInternal *t)
 {
 	struct timespec tp;
-	if (clock_gettime(CLOCK_REALTIME, &tp) < 0) {
-		print_clock_gettime_err_msg();
-		exit(0);
-	}
+	if (clock_gettime(CLOCK_REALTIME, &tp) < 0)
+		clock_fatal_error("clock_gettime");
 	t->seconds = tp.tv_sec;
 	t->nanoseconds = tp.tv_nsec;
 }
@@ -58,17 +59,13 @@ int32_t posix_set_tstamp(TimeInternal *t)
 	struct timespec tp_orig;
 	struct timespec tp;
 
-	if (clock_gettime(CLOCK_REALTIME, &tp_orig) < 0) {
-		print_clock_gettime_err_msg();
-		exit(0);
-	}
+	if (clock_gettime(CLOCK_REALTIME, &tp_orig) < 0)
+		clock_fatal_error("clock_gettime");
 
 	tp.tv_sec = t->seconds;
 	tp.tv_nsec = t->nanoseconds;
-	if (clock_settime(CLOCK_REALTIME, &tp) < 0) {
-		print_clock_gettime_err_msg();
-		exit(0);
-	}
+	if (clock_settime(CLOCK_REALTIME, &tp) < 0)
+		clock_fatal_error("clock_settime");
 
 	return tp.tv_sec - tp_orig.tv_sec; /* handle only sec field, since
 					    * timer granularity is 1s */
