@@ -9,8 +9,8 @@ build_one () {
     echo "####################"
     echo "Build for " "$1"
     make -s -j3 CC="$CC" LD="$LD" -k $2
-    test -f ppsi.o && size ppsi.o
-    test -f ppsi && size ppsi
+    test -f ppsi.o && size ppsi.o 
+    test -f ppsi && size ppsi | tail -n 1
 }
 
 build_diags () {
@@ -22,8 +22,7 @@ build_diags () {
 build_ext () {
     unset PROTO_EXT
     build_diags
-    # s/false/true/ below when WR can be built from ppsi (not from wrpc-sw)
-    if false; then
+    if [ "$ARCH" = "spec" ]; then
 	export PROTO_EXT=whiterabbit
 	build_diags
     fi
@@ -52,7 +51,12 @@ LD_bare_i386="ld -m elf_i386"
 LD_bare_x86_64="ld -m elf_x86_64"
 LD_spec="${PREFIX_spec}ld"
 
-for a in bare-i386 bare-x86-64; do
+ARCHS="bare-i386 bare-x86-64"
+if [ "x${WRPCSW_ROOT}" != "x" ]; then
+    ARCHS="$ARCHS spec"
+fi
+
+for a in $ARCHS; do
     export ARCH=$a
     ARCH_=""
     eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
