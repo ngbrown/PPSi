@@ -13,7 +13,7 @@ STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
-# Instead of repeating "proto-daemon" over and over, bless it TARGET
+# Instead of repeating "ppsi" over and over, bless it TARGET
 TARGET = ppsi
 
 # The main target is the big object file.
