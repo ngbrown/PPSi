@@ -106,7 +106,7 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 		if (1) { /* ARub: I don't want to reintent it all now */
 			switch (a[1]) {
 			case 'V':
-				pp_diag_verbosity = 1;
+				pp_diag_verbosity++;
 				break;
 			case 'x':
 				OPTS(ppi)->no_rst_clk = 1;
