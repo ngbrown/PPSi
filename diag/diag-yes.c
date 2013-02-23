@@ -12,7 +12,7 @@ void pp_diag_fsm(struct pp_instance *ppi, char *name, int sequence, int plen)
 {
 	if (sequence == STATE_ENTER) {
 		/* enter with or without a packet len */
-		pp_timed_printf("fsm : ENTER %s, packet len %i\n",
+		pp_timed_printf("fsm: ENTER %s, packet len %i\n",
 			  name, plen);
 		return;
 	}
