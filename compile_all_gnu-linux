@@ -1,6 +1,0 @@
-#!/bin/sh
-
-# This script simply compiles ppsi both for master and for slave, with
-# diagnostic enabled.
-
-make clean;make HAS_FULL_DIAG=y ARCH=gnu-linux WRMODE=master INTERNAL_PRINTF=y
