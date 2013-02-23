@@ -1,16 +1,15 @@
 # Alessandro Rubini for CERN, 2011 -- public domain
-# Diagnostics: we have tree levels: none, full and limited
+# This changed in 2013-02, and it's incompatible with what we had
 
-# full: use a complete printf and the diag code
-OBJ-$(HAS_FULL_DIAG) += diag/diag-yes.o
-ifdef INTERNAL_PRINTF
-OBJ-$(HAS_FULL_DIAG) += diag/diag-printf.o diag/printf-full.o
+ifdef PPSI_NO_DIAG
+  OBJ-y += diag/diag-no.o
+else
+  OBJ-y += diag/diag-yes.o
 endif
 
-# limited: use a minimal printf (can't coexist with FULL_DIAG)
-ifndef HAS_FULL_DIAG
-  OBJ-$(HAS_DIAG) += diag/diag-yes.o  diag/diag-printf.o diag/printf-mini.o
+ifdef HAS_DIAG
+  SAY := $(shell echo "WARNING: ppsi doesn't use \$$HAS_DIAG any more" >&2)
 endif
-
-# no diagnostics: the diag-no.c file includes weak aliases to an empty func
-OBJ-y += diag/diag-no.o
+ifdef HAS_FULL_DIAG
+  SAY := $(shell echo "WARNING: ppsi doesn't use \$$HAS_FULL_DIAG any more" >&2)
+endif

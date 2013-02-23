@@ -66,22 +66,13 @@ environment:
     CROSS_COMPILE               prefix, like "arm-linux-", or empty
     PROTO_EXT                   "whiterabbit" or empty
     ARCH                        name of you arch (default: gnu-linux)
-    HAS_DIAG                    set to "y" or leave unset
-    HAS_FULL_DIAG               set to "y" or leave unset
+    PPSI_NO_DIAG                if set, prevents diagnostics from being there
     WRMODE (spec only)          set to "master" for m/s autodetect; set to
                                 "slave" for slave only configuration
 
-NOTE: The default has no diagnostics, so you most likely will want to run
-
-    make HAS_FULL_DIAG=y
-
-or just "make" after running
-
-    export HAS_FULL_DIAG=y
-
 If none of the variables are specified, the default Makefile compiles
 with standard gcc, over gnu-linux architecture, with no protocol
-extension and no diagnostic.
+extension and full diagnostic conde (relying on pp_printf).
 
 
 	Implementation Details
@@ -100,8 +91,9 @@ is LGPL-2.1 or later.
 
 All the rest of the package is built as libraries. The link order
 of libraries selects which object files are picked up and which are not.
-Additionally, "HAS_DIAG" and "HAS_FULL_DIAG" select by Makefile rules
-which diagnostic implementation (if any) is part of the diag library.
+Additionally, "CONFIG_PRINTF_XINT" or one of the other pp_printf
+configurations can be set to override the default (which selects the
+most complete printf implementation from the package).
 
 This state-machine source has three undefined symbols: two for
 diagnostics and the "pp_state_table".  The table is picked by a
@@ -158,24 +150,17 @@ similar to what you already see for `arch-'.
 	Diagnostics
 	===========
 
-Diagnostic functions may call printf().  If you select HAS_DIAG, the
-daemon is built with a minimal printf implementation.
+Diagnostic functions may call pp_printf().  They should not call
+printf() because it is not available when building from freestanding
+environments.  You can use the Kconfig-like environment variables
+to choose which pp_printf implementation to build. The default is
+the full function and should be good for everyone. If you have
+size problems, please check pp_printf/README about the options.
 
-    HAS_FULL_DIAG	Selects a complete printf implementation
-    HAS_DIAG		Selects a smaller printf
-    --			By default a no-op printf is selected
-
-The complete implementation comes from an older Linux implementation
-(we pulled it from U-boot) as the kernel has currently extra stuff like
-%-rules for printing IPV4/IPV6 addresses, symbol tables and so on.
-
-The small implementation receives and parses the complete % formats
-but only obeys %c and %s; everything else is printed as 32-bit hex
-numbers. So you can use "%-10s %3i" and the output will still make some
-sense, saving some kilobytes in code. The code is derived from the full
-printf by stripping out code, so the same parsing applies for sure.
-
-With no diagnostics, the printf does nothing and only puts() is available.
+ppsi up to 2013-01 had no diagnostics by default and used the
+environment variables HAS_DIAG and HAS_FULL_DIAG. They are not
+used any more and the Makefile warns about them, to ease previous
+users.
 
 	Command Line
 	============
