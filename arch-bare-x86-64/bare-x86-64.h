@@ -1,6 +1,7 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
+#include <string.h>
 
 /*
  * These are the functions provided by the various bare files
@@ -13,11 +14,6 @@ extern int bare_send_packet(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t, int chtype, int use_pdelay_addr);
 
 extern void bare_main_loop(struct pp_instance *ppi);
-
-/* basics */
-extern void *memset(void *s, int c, int count);
-extern char *strcpy(char *dest, const char *src);
-extern void *memcpy(void *dest, const void *src, int count);
 
 /* syscalls */
 struct bare_sockaddr;

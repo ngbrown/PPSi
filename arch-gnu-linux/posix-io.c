@@ -25,19 +25,9 @@ void posix_puts(const char *s)
 	fputs(s, stdout);
 }
 
-int posix_strnlen(const char *s, int maxlen)
-{
-	return strnlen(s, maxlen);
-}
-
 void *posix_memcpy(void *d, const void *s, int count)
 {
 	return memcpy(d, s, count);
-}
-
-int posix_memcmp(const void *s1, const void *s2, int count)
-{
-	return memcmp(s1, s2, count);
 }
 
 void *posix_memset(void *s, int c, int count)
@@ -88,18 +78,6 @@ int posix_adj_freq(Integer32 adj)
 
 void pp_puts(const char *s)
 	__attribute__((alias("posix_puts")));
-
-int pp_strnlen(const char *s, int maxlen)
-	__attribute__((alias("posix_strnlen")));
-
-void *pp_memcpy(void *d, const void *s, int count)
-	__attribute__((alias("posix_memcpy")));
-
-int pp_memcmp(const void *s1, const void *s2, int count)
-	__attribute__((alias("posix_memcmp")));
-
-void *pp_memset(void *s, int c, int count)
-	__attribute__((alias("posix_memset")));
 
 void pp_get_tstamp(TimeInternal *t)
 	__attribute__((alias("posix_get_tstamp")));

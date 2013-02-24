@@ -87,7 +87,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		msg_unpack_delay_resp(pkt, &ppi->msg_tmp.resp);
 
-		if ((pp_memcmp(DSPOR(ppi)->portIdentity.clockIdentity,
+		if ((memcmp(DSPOR(ppi)->portIdentity.clockIdentity,
 			ppi->msg_tmp.resp.requestingPortIdentity.clockIdentity,
 			PP_CLOCK_IDENTITY_LENGTH) == 0) &&
 			((ppi->sent_seq_id[PPM_DELAY_REQ] - 1) ==
@@ -143,7 +143,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		if (!((ppi->sent_seq_id[PPM_PDELAY_REQ] ==
 				hdr->sequenceId)
-			&& (!pp_memcmp(DSPOR(ppi)->portIdentity.clockIdentity,
+			&& (!memcmp(DSPOR(ppi)->portIdentity.clockIdentity,
 				  ppi->msg_tmp.presp.requestingPortIdentity.
 				  clockIdentity, PP_CLOCK_IDENTITY_LENGTH))
 			&& (DSPOR(ppi)->portIdentity.portNumber ==

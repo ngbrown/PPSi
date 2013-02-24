@@ -45,7 +45,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	id[7] = mac[5];
 
 	DSDEF(ppi)->numberPorts = 1;
-	pp_memcpy(&DSDEF(ppi)->clockQuality, &OPTS(ppi)->clock_quality,
+	memcpy(&DSDEF(ppi)->clockQuality, &OPTS(ppi)->clock_quality,
 		sizeof(ClockQuality));
 	DSDEF(ppi)->priority1 = OPTS(ppi)->prio1;
 	DSDEF(ppi)->priority2 = OPTS(ppi)->prio2;
@@ -55,7 +55,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		ppi->defaultDS->clockQuality.clockClass = 255;
 
 	/* Initialize port data set */
-	pp_memcpy(ppi->portDS->portIdentity.clockIdentity,
+	memcpy(ppi->portDS->portIdentity.clockIdentity,
 		ppi->defaultDS->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
 	DSPOR(ppi)->portIdentity.portNumber = 1;
 	DSPOR(ppi)->logMinDelayReqInterval = PP_DEFAULT_DELAYREQ_INTERVAL;
