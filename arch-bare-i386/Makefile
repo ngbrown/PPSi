@@ -14,6 +14,7 @@ OBJ-libarch := $A/bare-startup.o \
 	$A/bare-timer.o \
 	$A/bare-io.o \
 	$A/syscalls.o \
+	lib/libc-functions.o \
 	lib/div64.o
 
 $(LIBARCH): $(OBJ-libarch)
