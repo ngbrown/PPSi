@@ -8,7 +8,6 @@
 
 /* What follow is the old way, being phased out */
 extern void pp_puts(const char *s);
-extern char *pp_strcpy(char *dest, const char *src);
 extern void *pp_memcpy(void *d, const void *s, int count);
 extern int pp_memcmp(const void *s1, const void *s2, int count);
 extern void *pp_memset(void *s, int c, int count);

@@ -206,8 +206,7 @@ int wr_servo_init(struct pp_instance *ppi)
 			  clock->netPath.ifaceName, 16);//fixme
 	*/
 
-	pp_strcpy(cur_servo_state.slave_servo_state,
-			  "Uninitialized");
+	strcpy(cur_servo_state.slave_servo_state, "Uninitialized");
 
 	servo_state_valid = 1;
 	cur_servo_state.valid = 1;
@@ -372,8 +371,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 		if(ts_offset_hw.seconds != 0)
 		{
-			pp_strcpy(cur_servo_state.slave_servo_state,
-				  "SYNC_SEC");
+			strcpy(cur_servo_state.slave_servo_state, "SYNC_SEC");
 			wr_adjust_counters(ts_offset_hw.seconds, 0);
 			wr_adjust_phase(0);
 
@@ -385,7 +383,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	case WR_SYNC_NSEC:
-		pp_strcpy(cur_servo_state.slave_servo_state, "SYNC_NSEC");
+		strcpy(cur_servo_state.slave_servo_state, "SYNC_NSEC");
 
 		if(ts_offset_hw.nanoseconds != 0)
 		{
@@ -399,7 +397,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	case WR_SYNC_PHASE:
-		pp_strcpy(cur_servo_state.slave_servo_state, "SYNC_PHASE");
+		strcpy(cur_servo_state.slave_servo_state, "SYNC_PHASE");
 		s->cur_setpoint = ts_offset_hw.phase + ts_offset_hw.nanoseconds * 1000;
 
 		wr_adjust_phase(s->cur_setpoint);
@@ -429,7 +427,7 @@ int wr_servo_update(struct pp_instance *ppi)
     }
 
 	case WR_TRACK_PHASE:
-		pp_strcpy(cur_servo_state.slave_servo_state, "TRACK_PHASE");
+		strcpy(cur_servo_state.slave_servo_state, "TRACK_PHASE");
 		cur_servo_state.cur_setpoint = s->cur_setpoint;
 		cur_servo_state.cur_skew = s->delta_ms - s->delta_ms_prev;
 
