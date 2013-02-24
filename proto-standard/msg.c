@@ -87,13 +87,13 @@ void msg_unpack_header(struct pp_instance *ppi, void *buf)
 	hdr->messageLength = htons(*(UInteger16 *) (buf + 2));
 	hdr->domainNumber = (*(UInteger8 *) (buf + 4));
 
-	pp_memcpy(hdr->flagField, (buf + 6), PP_FLAG_FIELD_LENGTH);
+	memcpy(hdr->flagField, (buf + 6), PP_FLAG_FIELD_LENGTH);
 
-	pp_memcpy(&hdr->correctionfield.msb, (buf + 8), 4);
-	pp_memcpy(&hdr->correctionfield.lsb, (buf + 12), 4);
+	memcpy(&hdr->correctionfield.msb, (buf + 8), 4);
+	memcpy(&hdr->correctionfield.lsb, (buf + 12), 4);
 	hdr->correctionfield.msb = htonl(hdr->correctionfield.msb);
 	hdr->correctionfield.lsb = htonl(hdr->correctionfield.lsb);
-	pp_memcpy(hdr->sourcePortIdentity.clockIdentity, (buf + 20),
+	memcpy(hdr->sourcePortIdentity.clockIdentity, (buf + 20),
 	       PP_CLOCK_IDENTITY_LENGTH);
 	hdr->sourcePortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 28));
@@ -139,7 +139,7 @@ void msg_pack_header(struct pp_instance *ppi, void *buf)
 		*(UInteger8 *) (buf + 6) = PP_TWO_STEP_FLAG;
 
 	pp_memset((buf + 8), 0, 8);
-	pp_memcpy((buf + 20), DSPOR(ppi)->portIdentity.clockIdentity,
+	memcpy((buf + 20), DSPOR(ppi)->portIdentity.clockIdentity,
 	       PP_CLOCK_IDENTITY_LENGTH);
 	*(UInteger16 *) (buf + 28) =
 				htons(DSPOR(ppi)->portIdentity.portNumber);
@@ -149,7 +149,7 @@ void msg_pack_header(struct pp_instance *ppi, void *buf)
 
 void *msg_copy_header(MsgHeader *dest, MsgHeader *src)
 {
-	return pp_memcpy(dest, src, sizeof(MsgHeader));
+	return memcpy(dest, src, sizeof(MsgHeader));
 }
 
 
@@ -221,7 +221,7 @@ int msg_pack_announce(struct pp_instance *ppi)
 	*(UInteger16 *) (buf + 50) =
 		htons(DSDEF(ppi)->clockQuality.offsetScaledLogVariance);
 	*(UInteger8 *) (buf + 52) = DSPAR(ppi)->grandmasterPriority2;
-	pp_memcpy((buf + 53), DSPAR(ppi)->grandmasterIdentity,
+	memcpy((buf + 53), DSPAR(ppi)->grandmasterIdentity,
 	       PP_CLOCK_IDENTITY_LENGTH);
 	*(UInteger16 *) (buf + 61) = htons(DSCUR(ppi)->stepsRemoved);
 	*(Enumeration8 *) (buf + 63) = DSPRO(ppi)->timeSource;
@@ -247,7 +247,7 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 	ann->grandmasterClockQuality.offsetScaledLogVariance =
 		htons(*(UInteger16 *) (buf + 50));
 	ann->grandmasterPriority2 = *(UInteger8 *) (buf + 52);
-	pp_memcpy(ann->grandmasterIdentity, (buf + 53),
+	memcpy(ann->grandmasterIdentity, (buf + 53),
 	       PP_CLOCK_IDENTITY_LENGTH);
 	ann->stepsRemoved = htons(*(UInteger16 *) (buf + 61));
 	ann->timeSource = *(Enumeration8 *) (buf + 63);
@@ -400,7 +400,7 @@ void msg_pack_delay_resp(struct pp_instance *ppi,
 		htons(rcv_tstamp->secondsField.msb);
 	*(UInteger32 *) (buf + 36) = htonl(rcv_tstamp->secondsField.lsb);
 	*(UInteger32 *) (buf + 40) = htonl(rcv_tstamp->nanosecondsField);
-	pp_memcpy((buf + 44), hdr->sourcePortIdentity.clockIdentity,
+	memcpy((buf + 44), hdr->sourcePortIdentity.clockIdentity,
 		  PP_CLOCK_IDENTITY_LENGTH);
 	*(UInteger16 *) (buf + 52) =
 		htons(hdr->sourcePortIdentity.portNumber);
@@ -434,7 +434,7 @@ void msg_pack_pdelay_resp(struct pp_instance *ppi, MsgHeader *hdr,
 	*(UInteger16 *) (buf + 34) = htons(req_rec_tstamp->secondsField.msb);
 	*(UInteger32 *) (buf + 36) = htonl(req_rec_tstamp->secondsField.lsb);
 	*(UInteger32 *) (buf + 40) = htonl(req_rec_tstamp->nanosecondsField);
-	pp_memcpy((buf + 44), hdr->sourcePortIdentity.clockIdentity,
+	memcpy((buf + 44), hdr->sourcePortIdentity.clockIdentity,
 		  PP_CLOCK_IDENTITY_LENGTH);
 	*(UInteger16 *) (buf + 52) =
 		htons(hdr->sourcePortIdentity.portNumber);
@@ -482,7 +482,7 @@ void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp)
 		htonl(*(UInteger32 *) (buf + 36));
 	resp->receiveTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
-	pp_memcpy(resp->requestingPortIdentity.clockIdentity,
+	memcpy(resp->requestingPortIdentity.clockIdentity,
 	       (buf + 44), PP_CLOCK_IDENTITY_LENGTH);
 	resp->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
@@ -503,7 +503,7 @@ void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp)
 		htonl(*(UInteger32 *) (buf + 36));
 	presp->requestReceiptTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
-	pp_memcpy(presp->requestingPortIdentity.clockIdentity,
+	memcpy(presp->requestingPortIdentity.clockIdentity,
 	       (buf + 44), PP_CLOCK_IDENTITY_LENGTH);
 	presp->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
@@ -550,7 +550,7 @@ void msg_pack_pdelay_resp_followup(struct pp_instance *ppi,
 		htonl(resp_orig_tstamp->secondsField.lsb);
 	*(UInteger32 *) (buf + 40) =
 		htonl(resp_orig_tstamp->nanosecondsField);
-	pp_memcpy((buf + 44), hdr->sourcePortIdentity.clockIdentity,
+	memcpy((buf + 44), hdr->sourcePortIdentity.clockIdentity,
 	       PP_CLOCK_IDENTITY_LENGTH);
 	*(UInteger16 *) (buf + 52) =
 		htons(hdr->sourcePortIdentity.portNumber);
@@ -566,7 +566,7 @@ void msg_unpack_pdelay_resp_followup(void *buf,
 		htonl(*(UInteger32 *) (buf + 36));
 	presp_follow->responseOriginTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
-	pp_memcpy(presp_follow->requestingPortIdentity.clockIdentity,
+	memcpy(presp_follow->requestingPortIdentity.clockIdentity,
 	       (buf + 44), PP_CLOCK_IDENTITY_LENGTH);
 	presp_follow->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));

@@ -26,13 +26,13 @@ void m1(struct pp_instance *ppi)
 	DSCUR(ppi)->meanPathDelay.seconds = 0;
 
 	/* Parent data set */
-	pp_memcpy(DSPAR(ppi)->parentPortIdentity.clockIdentity,
+	memcpy(DSPAR(ppi)->parentPortIdentity.clockIdentity,
 		  DSDEF(ppi)->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
 	DSPAR(ppi)->parentPortIdentity.portNumber = 0;
 	DSPAR(ppi)->parentStats = PP_DEFAULT_PARENTS_STATS;
 	DSPAR(ppi)->observedParentClockPhaseChangeRate = 0;
 	DSPAR(ppi)->observedParentOffsetScaledLogVariance = 0;
-	pp_memcpy(DSPAR(ppi)->grandmasterIdentity, DSDEF(ppi)->clockIdentity,
+	memcpy(DSPAR(ppi)->grandmasterIdentity, DSDEF(ppi)->clockIdentity,
 		  PP_CLOCK_IDENTITY_LENGTH);
 	DSPAR(ppi)->grandmasterClockQuality.clockAccuracy =
 		DSDEF(ppi)->clockQuality.clockAccuracy;
@@ -55,13 +55,13 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 	DSCUR(ppi)->stepsRemoved = ann->stepsRemoved + 1;
 
 	/* Parent DS */
-	pp_memcpy(DSPAR(ppi)->parentPortIdentity.clockIdentity,
+	memcpy(DSPAR(ppi)->parentPortIdentity.clockIdentity,
 		hdr->sourcePortIdentity.clockIdentity,
 		PP_CLOCK_IDENTITY_LENGTH);
 	DSPAR(ppi)->parentPortIdentity.portNumber =
 		hdr->sourcePortIdentity.portNumber;
 
-	pp_memcpy(DSPAR(ppi)->grandmasterIdentity,
+	memcpy(DSPAR(ppi)->grandmasterIdentity,
 		ann->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
 
 	DSPAR(ppi)->grandmasterClockQuality.clockAccuracy =
@@ -103,7 +103,7 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 void copy_d0( struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 {
 	ann->grandmasterPriority1 = DSDEF(ppi)->priority1;
-	pp_memcpy(ann->grandmasterIdentity, DSDEF(ppi)->clockIdentity,
+	memcpy(ann->grandmasterIdentity, DSDEF(ppi)->clockIdentity,
 	       PP_CLOCK_IDENTITY_LENGTH);
 	ann->grandmasterClockQuality.clockClass =
 		DSDEF(ppi)->clockQuality.clockClass;
@@ -113,7 +113,7 @@ void copy_d0( struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 		DSDEF(ppi)->clockQuality.offsetScaledLogVariance;
 	ann->grandmasterPriority2 = DSDEF(ppi)->priority2;
 	ann->stepsRemoved = 0;
-	pp_memcpy(hdr->sourcePortIdentity.clockIdentity,
+	memcpy(hdr->sourcePortIdentity.clockIdentity,
 	       DSDEF(ppi)->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
 }
 

@@ -127,7 +127,7 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 	*(UInteger8*)(buf+32) = 0x05; //Table 23 -> all other
 
 	/* target portIdentity */
-	pp_memcpy((buf+34),DSPAR(ppi)->parentPortIdentity.clockIdentity,
+	memcpy((buf+34),DSPAR(ppi)->parentPortIdentity.clockIdentity,
 		PP_CLOCK_IDENTITY_LENGTH);
 	put_be16(buf + 42,DSPAR(ppi)->parentPortIdentity.portNumber);
 
@@ -190,7 +190,7 @@ void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 	UInteger16 tlv_versionNumber;
 	Enumeration16 wr_msg_id;
 
-	pp_memcpy(wrsig_msg->targetPortIdentity.clockIdentity,(buf+34),
+	memcpy(wrsig_msg->targetPortIdentity.clockIdentity,(buf+34),
 	       PP_CLOCK_IDENTITY_LENGTH);
 	wrsig_msg->targetPortIdentity.portNumber = (UInteger16)get_be16(buf+42);
 

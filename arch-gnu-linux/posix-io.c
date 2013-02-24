@@ -84,9 +84,6 @@ int posix_adj_freq(Integer32 adj)
 void pp_puts(const char *s)
 	__attribute__((alias("posix_puts")));
 
-void *pp_memcpy(void *d, const void *s, int count)
-	__attribute__((alias("posix_memcpy")));
-
 int pp_memcmp(const void *s1, const void *s2, int count)
 	__attribute__((alias("posix_memcmp")));
 

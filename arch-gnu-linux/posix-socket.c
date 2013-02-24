@@ -305,7 +305,7 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	}
 
 	/* Init General multicast IP address */
-	pp_memcpy(addr_str, PP_DEFAULT_DOMAIN_ADDRESS, INET_ADDRSTRLEN);
+	memcpy(addr_str, PP_DEFAULT_DOMAIN_ADDRESS, INET_ADDRSTRLEN);
 
 	if (!inet_aton(addr_str, &net_addr)) {
 		pp_diag_error_str2(ppi, "inet_aton\n", strerror(errno));
