@@ -141,7 +141,7 @@ void msg_pack_header(struct pp_instance *ppi, void *buf)
 	if (DSDEF(ppi)->twoStepFlag)
 		*(UInteger8 *) (buf + 6) = PP_TWO_STEP_FLAG;
 
-	pp_memset((buf + 8), 0, 8);
+	memset((buf + 8), 0, 8);
 	memcpy((buf + 20), DSPOR(ppi)->portIdentity.clockIdentity,
 	       PP_CLOCK_IDENTITY_LENGTH);
 	*(UInteger16 *) (buf + 28) =
@@ -175,7 +175,7 @@ void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp)
 
 	/* Table 23 */
 	*(Integer8 *) (buf + 33) = DSPOR(ppi)->logSyncInterval;
-	pp_memset((buf + 8), 0, 8);
+	memset((buf + 8), 0, 8);
 
 	/* Sync message */
 	*(UInteger16 *) (buf + 34) = htons(orig_tstamp->secondsField.msb);
@@ -216,7 +216,7 @@ int msg_pack_announce(struct pp_instance *ppi)
 	*(Integer8 *) (buf + 33) = DSPOR(ppi)->logAnnounceInterval;
 
 	/* Announce message */
-	pp_memset((buf + 34), 0, 10);
+	memset((buf + 34), 0, 10);
 	*(Integer16 *) (buf + 44) = htons(DSPRO(ppi)->currentUtcOffset);
 	*(UInteger8 *) (buf + 47) = DSPAR(ppi)->grandmasterPriority1;
 	*(UInteger8 *) (buf + 48) = DSDEF(ppi)->clockQuality.clockClass;
@@ -340,14 +340,14 @@ void msg_pack_pdelay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 	*(Integer8 *) (buf + 33) = 0x7F;
 
 	/* Table 24 */
-	pp_memset((buf + 8), 0, 8);
+	memset((buf + 8), 0, 8);
 
 	/* Pdelay_req message */
 	*(UInteger16 *) (buf + 34) = htons(orig_tstamp->secondsField.msb);
 	*(UInteger32 *) (buf + 36) = htonl(orig_tstamp->secondsField.lsb);
 	*(UInteger32 *) (buf + 40) = htonl(orig_tstamp->nanosecondsField);
 
-	pp_memset((buf + 44), 0, 10);
+	memset((buf + 44), 0, 10);
 	/* RAZ reserved octets */
 }
 
@@ -372,7 +372,7 @@ void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 	*(Integer8 *) (buf + 33) = 0x7F;
 
 	/* Table 24 */
-	pp_memset((buf + 8), 0, 8);
+	memset((buf + 8), 0, 8);
 
 	/* Pdelay_req message */
 	*(UInteger16 *) (buf + 34) = htons(orig_tstamp->secondsField.msb);
@@ -396,7 +396,7 @@ void msg_pack_delay_resp(struct pp_instance *ppi,
 	/* Table 19 */
 	*(UInteger16 *) (buf + 2) = htons(PP_DELAY_RESP_LENGTH);
 	*(UInteger8 *) (buf + 4) = hdr->domainNumber;
-	pp_memset((buf + 8), 0, 8);
+	memset((buf + 8), 0, 8);
 
 	/* Copy correctionField of delayReqMessage */
 	*(Integer32 *) (buf + 8) = htonl(hdr->correctionfield.msb);
@@ -437,7 +437,7 @@ void msg_pack_pdelay_resp(struct pp_instance *ppi, MsgHeader *hdr,
 	/* Table 19 */
 	*(UInteger16 *) (buf + 2) = htons(PP_PDELAY_RESP_LENGTH);
 	*(UInteger8 *) (buf + 4) = hdr->domainNumber;
-	pp_memset((buf + 8), 0, 8);
+	memset((buf + 8), 0, 8);
 
 	*(UInteger16 *) (buf + 30) = htons(hdr->sequenceId);
 

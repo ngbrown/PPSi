@@ -79,9 +79,6 @@ int posix_adj_freq(Integer32 adj)
 void pp_puts(const char *s)
 	__attribute__((alias("posix_puts")));
 
-void *pp_memset(void *s, int c, int count)
-	__attribute__((alias("posix_memset")));
-
 void pp_get_tstamp(TimeInternal *t)
 	__attribute__((alias("posix_get_tstamp")));
 

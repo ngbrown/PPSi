@@ -6,9 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 
-/* What follow is the old way, being phased out */
 extern void pp_puts(const char *s);
-extern void *pp_memset(void *s, int c, int count);
 
 extern uint32_t __div64_32(uint64_t *n, uint32_t base);
 
