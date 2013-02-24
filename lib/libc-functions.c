@@ -4,7 +4,7 @@
  */
 #include <ppsi/lib.h>
 
-int strnlen(const char *s, int maxlen)
+size_t strnlen(const char *s, size_t maxlen)
 {
 	int len = 0;
 	while (*(s++))
@@ -12,7 +12,7 @@ int strnlen(const char *s, int maxlen)
 	return len;
 }
 
-void *memcpy(void *dest, const void *src, int count)
+void *memcpy(void *dest, const void *src, size_t count)
 {
 	/* from u-boot-1.1.2 */
 	char *tmp = (char *) dest, *s = (char *) src;
@@ -23,7 +23,7 @@ void *memcpy(void *dest, const void *src, int count)
 	return dest;
 }
 
-int memcmp(const void *cs, const void *ct, int count)
+int memcmp(const void *cs, const void *ct, size_t count)
 {
 	/* from u-boot-1.1.2 */
 	const unsigned char *su1, *su2;
@@ -35,7 +35,7 @@ int memcmp(const void *cs, const void *ct, int count)
 	return res;
 }
 
-void *memset(void *s, int c, int count)
+void *memset(void *s, int c, size_t count)
 {
 	/* from u-boot-1.1.2 */
 	char *xs = (char *) s;

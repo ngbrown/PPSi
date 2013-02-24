@@ -4,8 +4,9 @@
 #ifndef __PPSI_LIB_H__
 #define __PPSI_LIB_H__
 #include <stdint.h>
+#include <string.h>
 
-/* We base on puts and a few more functions: each arch must have it */
+/* What follow is the old way, being phased out */
 extern void pp_puts(const char *s);
 extern int pp_strnlen(const char *s, int maxlen);
 extern char *pp_strcpy(char *dest, const char *src);

@@ -73,11 +73,6 @@ extern int halexp_get_port_state(hexp_port_state_t *state,
 
 /* End halexp_port_state */
 
-/* basics */
-extern void *memset(void *s, int c, int count);
-extern char *strcpy(char *dest, const char *src);
-extern void *memcpy(void *dest, const void *src, int count);
-
 /* syscall-lookalike */
 extern int spec_time(void);
 extern void spec_udelay(int usecs);
