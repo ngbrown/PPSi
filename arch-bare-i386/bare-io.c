@@ -9,7 +9,7 @@ const Integer32 PP_ADJ_FREQ_MAX = 512000;
 
 void pp_puts(const char *s)
 {
-	sys_write(0, s, pp_strnlen(s, 300));
+	sys_write(0, s, strnlen(s, 300));
 }
 
 void bare_get_tstamp(TimeInternal *t)

@@ -25,11 +25,6 @@ void posix_puts(const char *s)
 	fputs(s, stdout);
 }
 
-int posix_strnlen(const char *s, int maxlen)
-{
-	return strnlen(s, maxlen);
-}
-
 void *posix_memcpy(void *d, const void *s, int count)
 {
 	return memcpy(d, s, count);
@@ -88,9 +83,6 @@ int posix_adj_freq(Integer32 adj)
 
 void pp_puts(const char *s)
 	__attribute__((alias("posix_puts")));
-
-int pp_strnlen(const char *s, int maxlen)
-	__attribute__((alias("posix_strnlen")));
 
 void *pp_memcpy(void *d, const void *s, int count)
 	__attribute__((alias("posix_memcpy")));

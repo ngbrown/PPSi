@@ -57,8 +57,6 @@ char *strcpy(char *dest, const char *src)
 }
 
 /* As a first step in removing pp_memset etc, provide aliases */
-int pp_strnlen(const char *s, int maxlen)
-	__attribute__((alias("strnlen")));
 extern char *pp_strcpy(char *dest, const char *src)
 	__attribute__((alias("strcpy")));
 extern void *pp_memcpy(void *d, const void *s, int count)

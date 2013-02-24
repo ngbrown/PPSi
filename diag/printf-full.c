@@ -281,7 +281,7 @@ static char *string(char *buf, char *s, int field_width, int precision, int flag
 	if (s == 0)
 		s = "<NULL>";
 
-	len = pp_strnlen(s, precision);
+	len = strnlen(s, precision);
 
 	if (!(flags & LEFT))
 		while (len < field_width--)
