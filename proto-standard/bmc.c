@@ -120,7 +120,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
 
 	/* Identity comparison */
-	if (!pp_memcmp(ann_a->grandmasterIdentity,
+	if (!memcmp(ann_a->grandmasterIdentity,
 		       ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH)) {
 
 		/* Algorithm part2 Fig 28 */
@@ -135,7 +135,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 			ppci = DSPAR(ppi)->parentPortIdentity.clockIdentity;
 
 			if (ann_a->stepsRemoved > ann_b->stepsRemoved) {
-				if (!pp_memcmp(
+				if (!memcmp(
 					hdr_a->sourcePortIdentity.clockIdentity,
 					ppci,
 					PP_CLOCK_IDENTITY_LENGTH)) {
@@ -145,7 +145,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 					return 1;
 
 			} else if (ann_b->stepsRemoved > ann_a->stepsRemoved) {
-				if (!pp_memcmp(
+				if (!memcmp(
 					hdr_b->sourcePortIdentity.clockIdentity,
 					ppci,
 					PP_CLOCK_IDENTITY_LENGTH)) {
@@ -155,13 +155,13 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 					return -1;
 				}
 			} else { /* steps removed A == steps removed B */
-				if (!pp_memcmp(
+				if (!memcmp(
 					hdr_a->sourcePortIdentity.clockIdentity,
 					hdr_b->sourcePortIdentity.clockIdentity,
 					PP_CLOCK_IDENTITY_LENGTH)) {
 					PP_PRINTF("Sender=Receiver: Error -2");
 					return 0;
-				} else if ((pp_memcmp(
+				} else if ((memcmp(
 					hdr_a->sourcePortIdentity.clockIdentity,
 					hdr_b->sourcePortIdentity.clockIdentity,
 					PP_CLOCK_IDENTITY_LENGTH)) < 0)
@@ -178,7 +178,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 				if (ann_a->grandmasterClockQuality.clockAccuracy == ann_b->grandmasterClockQuality.clockAccuracy) {
 					if (ann_a->grandmasterClockQuality.offsetScaledLogVariance == ann_b->grandmasterClockQuality.offsetScaledLogVariance) {
 						if (ann_a->grandmasterPriority2 == ann_b->grandmasterPriority2) {
-							comp = pp_memcmp(ann_a->grandmasterIdentity, ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
+							comp = memcmp(ann_a->grandmasterIdentity, ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
 							if (comp < 0)
 								return -1;
 							else if (comp > 0)
@@ -187,7 +187,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 								return 0;
 						} else {
 						/* Priority2 are not identical */
-							comp = pp_memcmp(&ann_a->grandmasterPriority2, &ann_b->grandmasterPriority2, 1);
+							comp = memcmp(&ann_a->grandmasterPriority2, &ann_b->grandmasterPriority2, 1);
 							if (comp < 0)
 								return -1;
 							else if (comp > 0)
@@ -197,7 +197,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 						}
 					} else {
 						/* offsetScaledLogVariance are not identical */
-						comp = pp_memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
+						comp = memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
 						if (comp < 0)
 							return -1;
 						else if (comp > 0)
@@ -207,7 +207,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 					}
 
 				} else { /*  Accuracy are not identitcal */
-					comp = pp_memcmp(&ann_a->grandmasterClockQuality.clockAccuracy, &ann_b->grandmasterClockQuality.clockAccuracy, 1);
+					comp = memcmp(&ann_a->grandmasterClockQuality.clockAccuracy, &ann_b->grandmasterClockQuality.clockAccuracy, 1);
 					if (comp < 0)
 						return -1;
 					else if (comp > 0)
@@ -216,7 +216,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 						return 0;
 				}
 			} else { /* ClockClass are not identical */
-				comp = pp_memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
+				comp = memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
 				if (comp < 0)
 					return -1;
 				else if (comp > 0)
@@ -225,7 +225,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 					return 0;
 			}
 		} else { /*  Priority1 are not identical */
-			comp = pp_memcmp(&ann_a->grandmasterPriority1, &ann_b->grandmasterPriority1, 1);
+			comp = memcmp(&ann_a->grandmasterPriority1, &ann_b->grandmasterPriority1, 1);
 			if (comp < 0)
 				return -1;
 			else if (comp > 0)

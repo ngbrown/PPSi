@@ -8,7 +8,6 @@
 
 /* What follow is the old way, being phased out */
 extern void pp_puts(const char *s);
-extern int pp_memcmp(const void *s1, const void *s2, int count);
 extern void *pp_memset(void *s, int c, int count);
 
 extern uint32_t __div64_32(uint64_t *n, uint32_t base);

@@ -30,11 +30,6 @@ void *posix_memcpy(void *d, const void *s, int count)
 	return memcpy(d, s, count);
 }
 
-int posix_memcmp(const void *s1, const void *s2, int count)
-{
-	return memcmp(s1, s2, count);
-}
-
 void *posix_memset(void *s, int c, int count)
 {
 	return memset(s, c, count);
@@ -83,9 +78,6 @@ int posix_adj_freq(Integer32 adj)
 
 void pp_puts(const char *s)
 	__attribute__((alias("posix_puts")));
-
-int pp_memcmp(const void *s1, const void *s2, int count)
-	__attribute__((alias("posix_memcmp")));
 
 void *pp_memset(void *s, int c, int count)
 	__attribute__((alias("posix_memset")));

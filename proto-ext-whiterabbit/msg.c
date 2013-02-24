@@ -106,14 +106,14 @@ void msg_unpack_header(struct pp_instance *ppi, void *buf)
 
 	if (DSPOR(ppi)->portIdentity.portNumber ==
 	    ppi->msg_tmp_header.sourcePortIdentity.portNumber
-	    && !pp_memcmp(ppi->msg_tmp_header.sourcePortIdentity.clockIdentity,
+	    && !memcmp(ppi->msg_tmp_header.sourcePortIdentity.clockIdentity,
 			DSPOR(ppi)->portIdentity.clockIdentity,
 			PP_CLOCK_IDENTITY_LENGTH))
 		ppi->is_from_self = 1;
 	else
 		ppi->is_from_self = 0;
 
-	if (!pp_memcmp(DSPAR(ppi)->parentPortIdentity.clockIdentity,
+	if (!memcmp(DSPAR(ppi)->parentPortIdentity.clockIdentity,
 			hdr->sourcePortIdentity.clockIdentity,
 			PP_CLOCK_IDENTITY_LENGTH) &&
 			(DSPAR(ppi)->parentPortIdentity.portNumber ==

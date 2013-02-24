@@ -88,7 +88,7 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 
 	/* Check if foreign master is already known */
 	for (i = 0; i < ppi->number_foreign_records; i++) {
-		if (!pp_memcmp(hdr->sourcePortIdentity.clockIdentity,
+		if (!memcmp(hdr->sourcePortIdentity.clockIdentity,
 			    ppi->frgn_master[j].port_identity.
 			    clockIdentity,
 			    PP_CLOCK_IDENTITY_LENGTH) &&

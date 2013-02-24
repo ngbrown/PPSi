@@ -113,7 +113,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		if (!((ppi->sent_seq_id[PPM_PDELAY_REQ] ==
 		       hdr->sequenceId)
-			&& (!pp_memcmp(DSPOR(ppi)->portIdentity.clockIdentity,
+			&& (!memcmp(DSPOR(ppi)->portIdentity.clockIdentity,
 			       ppi->msg_tmp.presp.requestingPortIdentity.
 				       clockIdentity,
 			       PP_CLOCK_IDENTITY_LENGTH))

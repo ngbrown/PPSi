@@ -57,7 +57,5 @@ char *strcpy(char *dest, const char *src)
 }
 
 /* As a first step in removing pp_memset etc, provide aliases */
-extern int pp_memcmp(const void *s1, const void *s2, int count)
-	__attribute__((alias("memcmp")));
 extern void *pp_memset(void *s, int c, int count)
 	__attribute__((alias("memset")));
