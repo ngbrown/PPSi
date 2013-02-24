@@ -14,9 +14,10 @@ build_one () {
 }
 
 build_diags () {
-    build_one "arch \"$ARCH\", ext \"$PROTO_EXT\", no diag"
-    build_one "arch \"$ARCH\", ext \"$PROTO_EXT\", mini diag" HAS_DIAG=y
-    build_one "arch \"$ARCH\", ext \"$PROTO_EXT\", full diag" HAS_FULL_DIAG=y
+    msg="arch \"$ARCH\", ext \"$PROTO_EXT\""
+    build_one "$msg, printf none" CONFIG_PRINTF_NONE=y
+    build_one "$msg, printf xint" CONFIG_PRINTF_XINT=y
+    build_one "$msg, printf full" CONFIG_PRINTF_FULL=y
 }
 
 build_ext () {

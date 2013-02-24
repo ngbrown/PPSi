@@ -4,6 +4,13 @@
  */
 #include <ppsi/lib.h>
 
+/* Architectures declare pp_puts: map puts (used by pp_printf) to it */
+int puts(const char *s)
+{
+	pp_puts(s);
+	return 0;
+}
+
 size_t strnlen(const char *s, size_t maxlen)
 {
 	int len = 0;

@@ -12,9 +12,11 @@
 
 /* Retrieved from u-boot on 2010-02, changed some stuff (ARub) */
 #include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
 
 /* BEGIN OF HACKS */
-#include <ppsi/ppsi.h>
+#include <pp-printf.h>
 
 /* <ctype.h> */
 static inline int isdigit(int c)

@@ -25,7 +25,13 @@ CFLAGS += -Wall -O2 -ggdb -Iinclude
 # to avoid ifdef as much as possible, I use the kernel trick for OBJ variables
 OBJ-y := fsm.o
 
-# include diagnostic objects
+# include pp_printf code, by default the "full" version. Please
+# set CONFIG_PRINTF_NONE or CONFIG_PRINTF_XINT if needed.
+OBJ-y += pp_printf/pp-printf.o
+
+pp_printf/pp-printf.o: $(wildcard pp_printf/*.[ch])
+	$(MAKE) -C pp_printf pp-printf.o
+
 include diag/Makefile
 
 # Update 2012-07-10

@@ -5,30 +5,39 @@
  * (please note that the vsprintf is not public domain but GPL)
  */
 #include <stdarg.h>
-#include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
+#include <pp-printf.h>
 
-#define PP_BUF 128		/* We prefer small targets */
-
-static char print_buf[PP_BUF];
+static char print_buf[CONFIG_PRINT_BUFSIZE];
 
 int pp_vprintf(const char *fmt, va_list args)
 {
 	int ret;
 
 	ret = pp_vsprintf(print_buf, fmt, args);
-	pp_puts(print_buf);
+	puts(print_buf);
 	return ret;
 }
+
+int pp_sprintf(char *s, const char *fmt, ...)
+{
+	va_list args;
+	int ret;
+
+	va_start(args, fmt);
+	ret = pp_vsprintf(s, fmt, args);
+	va_end(args);
+	return ret;
+}
+
 
 int pp_printf(const char *fmt, ...)
 {
 	va_list args;
-	int r;
+	int ret;
 
 	va_start(args, fmt);
-	r = pp_vprintf(fmt, args);
+	ret = pp_vprintf(fmt, args);
 	va_end(args);
 
-	return r;
+	return ret;
 }
