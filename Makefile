@@ -27,10 +27,12 @@ OBJ-y := fsm.o
 
 # include pp_printf code, by default the "full" version. Please
 # set CONFIG_PRINTF_NONE or CONFIG_PRINTF_XINT if needed.
+ifndef CONFIG_NO_PRINTF
 OBJ-y += pp_printf/pp-printf.o
 
 pp_printf/pp-printf.o: $(wildcard pp_printf/*.[ch])
 	$(MAKE) -C pp_printf pp-printf.o
+endif
 
 include diag/Makefile
 
