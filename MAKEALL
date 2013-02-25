@@ -26,34 +26,32 @@ build_ext () {
     fi
 }
 
-# Built the default target, natively
 for var in HAS_DIAG HAS_FULL_DIAG CROSS_COMPILE ARCH CC LD; do
     unset $var
 done
-export CC="gcc"
-export LD="ld"
 
-build_ext
-
-# Finally, loop over all archs, using our local names for compilers
-# (we are not building for arch-spec, but we keep ready for it)
+# Variables to set up proper stuff for the various architectures
+PREFIX_gnu_linux=""
 PREFIX_bare_i386=""
 PREFIX_bare_x86_64=""
 PREFIX_spec="/opt/gcc-lm32/bin/lm32-elf-"
 
+CC_gnu_linux="gcc"
 CC_bare_i386="gcc -m32"
 CC_bare_x86_64="gcc -m64"
 CC_spec="${PREFIX_spec}gcc"
 
+LD_gnu_linux="ld"
 LD_bare_i386="ld -m elf_i386"
 LD_bare_x86_64="ld -m elf_x86_64"
 LD_spec="${PREFIX_spec}ld"
 
-ARCHS="bare-i386 bare-x86-64"
+ARCHS="gnu-linux bare-i386 bare-x86-64"
 if [ "x${WRPCSW_ROOT}" != "x" ]; then
     ARCHS="$ARCHS spec"
 fi
 
+# And finally build
 for a in $ARCHS; do
     export ARCH=$a
     eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
