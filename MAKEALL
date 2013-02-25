@@ -1,14 +1,11 @@
 #!/bin/sh
 
-export INTERNAL_PRINTF=y; #FIXME: clean up this internal_printf
-
 # This trivially compiles all known-good configurations
 
 build_one () {
     make -s clean
-    echo "####################"
-    echo "Build for " "$1"
-    make -s -j3 CC="$CC" LD="$LD" -k $2
+    echo "###### Build for " "$1"
+    make -s -j3 CC="$CC" LD="$LD" -k $2 2>&1 | grep -v ar:.creating
     test -f ppsi.o && size ppsi.o 
     test -f ppsi && size ppsi | tail -n 1
 }
@@ -59,7 +56,6 @@ fi
 
 for a in $ARCHS; do
     export ARCH=$a
-    ARCH_=""
     eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
     eval export CC="\${CC_$(echo $ARCH | sed 's/-/_/g')}"
     eval export LD="\${LD_$(echo $ARCH | sed 's/-/_/g')}"
