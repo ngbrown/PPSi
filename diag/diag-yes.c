@@ -46,23 +46,22 @@ void pp_diag_fatal(struct pp_instance *ppi, char *s1, char *s2)
 void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...)
 {
 	va_list args;
-	char buf[128];
 
+	pp_printf("MESSAGE for %p: ", ppi);
 	va_start(args, fmt);
-	pp_vsprintf(buf, fmt, args);
+	pp_vprintf(fmt, args);
 	va_end(args);
-	pp_printf("MESSAGE for %p: %s", ppi, buf);
 }
 
 void pp_timed_printf(char *fmt, ...)
 {
 	va_list args;
-	char buf[128];
 	TimeInternal t;
+
 	pp_get_tstamp(&t);
+	pp_printf("%09d.%03d ", (int)t.seconds,
+		  (int)t.nanoseconds / 1000000);
 	va_start(args, fmt);
-	pp_vsprintf(buf, fmt, args);
+	pp_vprintf(fmt, args);
 	va_end(args);
-	pp_printf("%09d.%03d %s", (int)t.seconds,
-		  (int)t.nanoseconds / 1000000, buf);
 }
