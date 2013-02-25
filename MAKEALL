@@ -6,7 +6,10 @@ build_one () {
     make -s clean
     echo "###### Build for " "$1"
     make -s -j3 CC="$CC" LD="$LD" -k $2 2>&1 | grep -v ar:.creating
-    test -f ppsi.o && size ppsi.o 
+    test -f ppsi.o && size ppsi.o
+    if $SHOW_UNDEF; then
+	nm -u ppsi.o
+    fi
     test -f ppsi && size ppsi | tail -n 1
 }
 
@@ -46,10 +49,37 @@ LD_bare_i386="ld -m elf_i386"
 LD_bare_x86_64="ld -m elf_x86_64"
 LD_spec="${PREFIX_spec}ld"
 
+# Defaults, overridden by command line, later
+SHOW_UNDEF=false
+
 ARCHS="gnu-linux bare-i386 bare-x86-64"
 if [ "x${WRPCSW_ROOT}" != "x" ]; then
     ARCHS="$ARCHS spec"
 fi
+
+# Parse command line, so we can limit the archs we build for
+while [ $# -gt 0 ]; do
+    case $1 in
+	gnu-linux)
+	    ARCHS="$1";;
+	bare-i386)
+	    ARCHS="$1";;
+	bare-x86-64)
+	    ARCHS="$1";;
+	spec)
+	    ARCHS="$1";;
+	bare)
+	    ARCHS="bare-i386 bare-x86-64";;
+	*=*)
+	    eval export $1;;
+	-u)
+	    SHOW_UNDEF=true;;
+	*)
+	    echo "$0: Unknown argument \"$1\"" >&2
+	    exit 1;;
+	esac
+    shift
+done
 
 # And finally build
 for a in $ARCHS; do
