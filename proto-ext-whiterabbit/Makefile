@@ -8,11 +8,8 @@ LIBS += $(LIBWRO)
 
 OBJ-libwr := $D/fsm-table.o \
 	$D/state-initializing.o \
-	$D/state-faulty.o \
-	$D/state-disabled.o \
 	$D/state-listening.o \
 	$D/state-master.o \
-	$D/state-uncalibrated.o \
 	$D/state-slave.o \
 	$D/common-fun.o \
 	$D/bmc.o \
