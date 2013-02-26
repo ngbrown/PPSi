@@ -31,27 +31,27 @@ typedef uint8_t		Nibble;
 
 /* FIXME: each struct must be aligned for lower memory usage */
 
-typedef struct {
+typedef struct UInteger48 {
 	uint32_t	lsb;
 	uint16_t	msb;
 } UInteger48;
 
-typedef struct {
+typedef struct Integer64 {
 	uint32_t	lsb;
 	int32_t		msb;
 } Integer64;
 
-typedef struct {
+typedef struct UInteger64 {
 	uint32_t	lsb;
 	uint32_t		msb;
 } UInteger64;
 
-typedef struct {
+typedef struct TimeInterval {
 	Integer64	scaledNanoseconds;
 } TimeInterval;
 
 /* White Rabbit extension */
-typedef struct {
+typedef struct FixedDelta {
 	UInteger64 scaledPicoseconds;
 } FixedDelta;
 
@@ -60,7 +60,7 @@ typedef struct  {
 	UInteger32	nanosecondsField;
 } Timestamp;
 
-typedef struct {
+typedef struct TimeInternal {
 	Integer32	seconds;
 	Integer32	nanoseconds;
 	/* White Rabbit extension begin */
@@ -75,35 +75,35 @@ typedef struct {
 
 typedef Octet		ClockIdentity[PP_CLOCK_IDENTITY_LENGTH];
 
-typedef struct {
+typedef struct PortIdentity {
 	ClockIdentity	clockIdentity;
 	UInteger16	portNumber;
 } PortIdentity;
 
-typedef struct {
+typedef struct PortAdress {
 	Enumeration16	networkProtocol;
 	UInteger16	adressLength;
 	Octet		*adressField;
 } PortAdress;
 
-typedef struct {
+typedef struct ClockQuality {
 	UInteger8	clockClass;
 	Enumeration8	clockAccuracy;
 	UInteger16	offsetScaledLogVariance;
 } ClockQuality;
 
-typedef struct {
+typedef struct TLV {
 	Enumeration16	tlvType;
 	UInteger16	lengthField;
 	Octet		*valueField;
 } TLV;
 
-typedef struct {
+typedef struct PTPText {
 	UInteger8	lengthField;
 	Octet		*textField;
 } PTPText;
 
-typedef struct {
+typedef struct FaultRecord {
 	UInteger16	faultRecordLength;
 	Timestamp	faultTime;
 	Enumeration8	severityCode;
@@ -114,7 +114,7 @@ typedef struct {
 
 
 /* Common Message header (table 18, page 124) */
-typedef struct {
+typedef struct MsgHeader {
 	Nibble		transportSpecific;
 	Enumeration4	messageType;
 	UInteger4	versionPTP;
@@ -129,7 +129,7 @@ typedef struct {
 } MsgHeader;
 
 /* Announce Message (table 25, page 129) */
-typedef struct {
+typedef struct MsgAnnounce {
 	Timestamp	originTimestamp;
 	Integer16	currentUtcOffset;
 	UInteger8	grandmasterPriority1;
@@ -145,53 +145,53 @@ typedef struct {
 } MsgAnnounce;
 
 /* Sync Message (table 26, page 129) */
-typedef struct {
+typedef struct MsgSync {
 	Timestamp originTimestamp;
 } MsgSync;
 
 /* DelayReq Message (table 26, page 129) */
-typedef struct {
+typedef struct MsgDelayReq {
 	Timestamp	originTimestamp;
 } MsgDelayReq;
 
 /* DelayResp Message (table 27, page 130) */
-typedef struct {
+typedef struct MsgFollowUp {
 	Timestamp	preciseOriginTimestamp;
 } MsgFollowUp;
 
 
 /* DelayResp Message (table 28, page 130) */
-typedef struct {
+typedef struct MsgDelayResp {
 	Timestamp	receiveTimestamp;
 	PortIdentity	requestingPortIdentity;
 } MsgDelayResp;
 
 /* PdelayReq Message (table 29, page 131) */
-typedef struct {
+typedef struct MsgPDelayReq {
 	Timestamp	originTimestamp;
 
 } MsgPDelayReq;
 
 /* PdelayResp Message (table 30, page 131) */
-typedef struct {
+typedef struct MsgPDelayResp {
 	Timestamp	requestReceiptTimestamp;
 	PortIdentity	requestingPortIdentity;
 } MsgPDelayResp;
 
 /* PdelayRespFollowUp Message (table 31, page 132) */
-typedef struct {
+typedef struct MsgPDelayRespFollowUp {
 	Timestamp	responseOriginTimestamp;
 	PortIdentity	requestingPortIdentity;
 } MsgPDelayRespFollowUp;
 
 /* Signaling Message (table 33, page 133) */
-typedef struct {
+typedef struct MsgSignaling {
 	PortIdentity	targetPortIdentity;
 	char		*tlv;
 } MsgSignaling;
 
 /* Management Message (table 37, page 137) */
-typedef struct {
+typedef struct MsgManagement{
 	PortIdentity	targetPortIdentity;
 	UInteger8	startingBoundaryHops;
 	UInteger8	boundaryHops;
@@ -200,7 +200,7 @@ typedef struct {
 } MsgManagement;
 
 /* Default Data Set */
-typedef struct {
+typedef struct DSDefault {
 	/* Static */
 	Boolean		twoStepFlag;
 	ClockIdentity	clockIdentity;
@@ -215,7 +215,7 @@ typedef struct {
 } DSDefault;
 
 /* Current Data Set */
-typedef struct {
+typedef struct DSCurrent {
 	/* Dynamic */
 	UInteger16	stepsRemoved;
 	TimeInternal	offsetFromMaster;
@@ -226,7 +226,7 @@ typedef struct {
 } DSCurrent;
 
 /* Parent Data Set */
-typedef struct {
+typedef struct DSParent {
 	/* Dynamic */
 	PortIdentity	parentPortIdentity;
 	Boolean		parentStats;
@@ -239,7 +239,7 @@ typedef struct {
 } DSParent;
 
 /* Port Data set */
-typedef struct {
+typedef struct DSPort {
 	/* Static */
 	PortIdentity	portIdentity;
 	/* Dynamic */
@@ -286,7 +286,7 @@ typedef struct {
 } DSPort;
 
 /* Time Properties Data Set */
-typedef struct {
+typedef struct DSTimeProperties {
 	/* Dynamic */
 	Integer16	currentUtcOffset;
 	Boolean	currentUtcOffsetValid;
