@@ -73,7 +73,10 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	msg_pack_header(ppi, ppi->buf_out);
 
-	ppi->next_state = PPS_LISTENING;
+	if (!OPTS(ppi)->master_only)
+		ppi->next_state = PPS_LISTENING;
+	else
+		ppi->next_state = PPS_MASTER;
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 	return 0;
 
