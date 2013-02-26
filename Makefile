@@ -2,6 +2,14 @@
 # Alessandro Rubini for CERN, 2011 -- public domain
 #
 
+# The default is not extension. Uncomment here or set on the command line
+# PROTO_EXT ?= whiterabbit
+
+# The default architecture is hosted GNU/Linux stuff
+ARCH ?= gnu-linux
+
+#### In theory, users should not change stuff below this line (but please read)
+
 # classic cross-compilation tool-set
 AS              = $(CROSS_COMPILE)as
 LD              = $(CROSS_COMPILE)ld
@@ -36,20 +44,12 @@ endif
 
 include diag/Makefile
 
-# Update 2012-07-10
-# proto-standard should always be included, but in this current devel step
-# each proto is intended as a separate plugin (not properly an "extension").
-# See below (ifdef PROTO_EXT/else)
-#include proto-standard/Makefile
-
-# including the extension Makefile, if an extension is there
-# Uncomment the following line for whiterabbit extension
-# PROTO_EXT ?= whiterabbit
+# proto-standard is always included, as it provides default function
+# so the extension can avoid duplication of code.
 ifdef PROTO_EXT
   include proto-ext-$(PROTO_EXT)/Makefile
-else
-  include proto-standard/Makefile
 endif
+include proto-standard/Makefile
 
 # WRMODE - Update 2012-11-24
 # obsolete compilation parameter. No used when ppsi is compiled inside wrpc-sw.
@@ -66,9 +66,8 @@ endif
 # binary executable
 # VERB_LOG_MSGS=y
 
-# Include arch code, the default is hosted GNU/Linux stuff
+# Include arch code
 # we need this -I so <arch/arch.h> can be found
-ARCH ?= gnu-linux
 CFLAGS += -Iarch-$(ARCH)/include
 include arch-$(ARCH)/Makefile
 
