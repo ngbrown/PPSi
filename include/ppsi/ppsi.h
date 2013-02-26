@@ -277,7 +277,11 @@ static inline struct DSParent *DSPAR(struct pp_instance *ppi)
 	return ppi->parentDS;
 }
 
-#define DSPOR(x) ((x)->portDS)
+static inline struct DSPort *DSPOR(struct pp_instance *ppi)
+{
+	return ppi->portDS;
+}
+
 #define DSPRO(x) ((x)->timePropertiesDS)
 
 #define NP(x) ((x)->net_path)
