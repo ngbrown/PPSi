@@ -361,7 +361,6 @@ extern int msg_issue_pdelay_resp_follow_up(struct pp_instance *ppi,
 extern void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal);
 extern int from_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern int to_TimeInternal(TimeInternal *internal, Timestamp *external);
-extern void assign_TimeInternal(TimeInternal *to, TimeInternal *from);
 extern void add_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns);

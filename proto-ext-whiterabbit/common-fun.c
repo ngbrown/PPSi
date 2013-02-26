@@ -42,8 +42,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 
 			ret = msg_issue_delay_req(ppi);
 
-			assign_TimeInternal(&ppi->delay_req_send_time,
-				&ppi->last_snt_time);
+			ppi->delay_req_send_time = ppi->last_snt_time;
 
 			/* Add latency */
 			add_TimeInternal(&ppi->delay_req_send_time,
@@ -208,7 +207,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	time = &ppi->last_rcv_time;
 
 	if (ppi->is_from_cur_par) {
-		assign_TimeInternal(&ppi->sync_receive_time, time);
+		ppi->sync_receive_time = *time;
 
 		/* FIXME diag to file? will we ever handle it?
 		if (OPTS(ppi)->recordFP)
