@@ -256,7 +256,11 @@ struct pp_instance {
 		waiting_for_follow:1;
 };
 
-#define OPTS(x) ((x)->rt_opts)
+/* We use data sets a lot, so have these helpers */
+static inline struct pp_runtime_opts *OPTS(struct pp_instance *ppi)
+{
+	return ppi->rt_opts;
+}
 
 #define DSDEF(x) ((x)->defaultDS)
 #define DSCUR(x) ((x)->currentDS)

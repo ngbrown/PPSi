@@ -49,9 +49,9 @@ static struct wr_data_t wr_data; /* white rabbit specific global data */
 int pp_open_instance(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
 {
 	if (rt_opts)
-		OPTS(ppi) = rt_opts;
+		ppi->rt_opts = rt_opts;
 	else
-		OPTS(ppi) = &default_rt_opts;
+		ppi->rt_opts = &default_rt_opts;
 
 	ppi->ext_data = &wr_data;
 

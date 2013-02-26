@@ -45,9 +45,9 @@ struct pp_runtime_opts default_rt_opts = {
 int pp_open_instance(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
 {
 	if (rt_opts)
-		OPTS(ppi) = rt_opts;
+		ppi->rt_opts = rt_opts;
 	else
-		OPTS(ppi) = &default_rt_opts;
+		ppi->rt_opts = &default_rt_opts;
 
 	ppi->state = PPS_INITIALIZING;
 
