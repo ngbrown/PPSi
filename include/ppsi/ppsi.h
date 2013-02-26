@@ -297,6 +297,21 @@ static inline struct pp_servo *SRV(struct pp_instance *ppi)
 	return ppi->servo;
 }
 
+
+/*
+ * Each extension should fill this structure that is used to augment
+ * the standard stated and avoid code duplications. Please remember
+ * that proto-standard functions are picked as a fall-back when non
+ * extension-specific code is provided. The set of hooks here is designed
+ * based on what White Rabbit does. If you add more please remember to
+ * allow NULL pointers.
+ */
+struct pp_ext_hooks {
+};
+
+extern struct pp_ext_hooks pp_hooks; /* The one for the extension we build */
+
+
 /* The channel for an instance must be created and possibly destroyed. */
 extern int pp_open_instance(struct pp_instance *ppi,
 			    struct pp_runtime_opts *rt_opts);
