@@ -16,7 +16,6 @@ OBJ-libwr := $D/fsm-table.o \
 	$D/arith.o \
 	$D/servo.o \
 	$D/hooks.o \
-	$D/open-close.o \
 	$D/state-wr-present.o \
 	$D/state-wr-m-lock.o \
 	$D/state-wr-s-lock.o \
