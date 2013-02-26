@@ -10,10 +10,12 @@
  * Initializes network and other stuff
  */
 
-
 int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	unsigned char *id, *mac;
+	struct DSDefault *def = DSDEF(ppi);
+	struct DSPort *port = DSPOR(ppi);
+	struct pp_runtime_opts *opt = OPTS(ppi);
 	int ret = 0;
 
 	if (NP(ppi)->inited)
@@ -24,12 +26,12 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	NP(ppi)->inited = 1;
 
-	DSPOR(ppi)->portState = PPS_INITIALIZING;
+	port->portState = PPS_INITIALIZING;
 
 	/* Initialize default data set */
-	DSDEF(ppi)->twoStepFlag = PP_TWO_STEP_FLAG;
+	def->twoStepFlag = PP_TWO_STEP_FLAG;
 	/* Clock identity comes from mac address with 0xff:0xfe intermixed */
-	id = DSDEF(ppi)->clockIdentity;
+	id = def->clockIdentity;
 	mac = NP(ppi)->ch[PP_NP_GEN].addr;
 	id[0] = mac[0];
 	id[1] = mac[1];
@@ -40,30 +42,29 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	id[6] = mac[4];
 	id[7] = mac[5];
 
-	DSDEF(ppi)->numberPorts = 1;
-	memcpy(&DSDEF(ppi)->clockQuality, &OPTS(ppi)->clock_quality,
+	def->numberPorts = 1;
+	memcpy(&def->clockQuality, &opt->clock_quality,
 		sizeof(ClockQuality));
-	DSDEF(ppi)->priority1 = OPTS(ppi)->prio1;
-	DSDEF(ppi)->priority2 = OPTS(ppi)->prio2;
-	DSDEF(ppi)->domainNumber = OPTS(ppi)->domain_number;
-	DSDEF(ppi)->slaveOnly = OPTS(ppi)->slave_only;
-	if (OPTS(ppi)->slave_only)
+	def->priority1 = opt->prio1;
+	def->priority2 = opt->prio2;
+	def->domainNumber = opt->domain_number;
+	def->slaveOnly = opt->slave_only;
+	if (opt->slave_only)
 		ppi->defaultDS->clockQuality.clockClass = 255;
 
 	/* Initialize port data set */
 	memcpy(ppi->portDS->portIdentity.clockIdentity,
 		ppi->defaultDS->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
-	DSPOR(ppi)->portIdentity.portNumber = 1;
-	DSPOR(ppi)->logMinDelayReqInterval = PP_DEFAULT_DELAYREQ_INTERVAL;
-	DSPOR(ppi)->peerMeanPathDelay.seconds = 0;
-	DSPOR(ppi)->peerMeanPathDelay.nanoseconds = 0;
-	DSPOR(ppi)->logAnnounceInterval = OPTS(ppi)->announce_intvl;
-	DSPOR(ppi)->announceReceiptTimeout =
-		PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT;
-	DSPOR(ppi)->logSyncInterval = OPTS(ppi)->sync_intvl;
-	DSPOR(ppi)->delayMechanism = PP_DEFAULT_DELAY_MECHANISM;
-	DSPOR(ppi)->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
-	DSPOR(ppi)->versionNumber = PP_VERSION_PTP;
+	port->portIdentity.portNumber = 1;
+	port->logMinDelayReqInterval = PP_DEFAULT_DELAYREQ_INTERVAL;
+	port->peerMeanPathDelay.seconds = 0;
+	port->peerMeanPathDelay.nanoseconds = 0;
+	port->logAnnounceInterval = opt->announce_intvl;
+	port->announceReceiptTimeout = PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT;
+	port->logSyncInterval = opt->sync_intvl;
+	port->delayMechanism = PP_DEFAULT_DELAY_MECHANISM;
+	port->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
+	port->versionNumber = PP_VERSION_PTP;
 
 	if (pp_hooks.init)
 		ret = pp_hooks.init(ppi, pkt, plen);
@@ -83,7 +84,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	msg_pack_header(ppi, ppi->buf_out);
 
-	if (!OPTS(ppi)->master_only)
+	if (!opt->master_only)
 		ppi->next_state = PPS_LISTENING;
 	else
 		ppi->next_state = PPS_MASTER;

@@ -5,12 +5,14 @@
 
 static int wr_init(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	WR_DSPOR(ppi)->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
-	WR_DSPOR(ppi)->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
-	WR_DSPOR(ppi)->calPeriod = WR_DEFAULT_CAL_PERIOD;
-	WR_DSPOR(ppi)->wrModeOn = 0;
-	WR_DSPOR(ppi)->parentWrConfig = 0;
-	WR_DSPOR(ppi)->calibrated = !WR_DEFAULT_PHY_CALIBRATION_REQUIRED;
+	struct wr_dsport *wp = WR_DSPOR(ppi);
+
+	wp->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
+	wp->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
+	wp->calPeriod = WR_DEFAULT_CAL_PERIOD;
+	wp->wrModeOn = 0;
+	wp->parentWrConfig = 0;
+	wp->calibrated = !WR_DEFAULT_PHY_CALIBRATION_REQUIRED;
 	return 0;
 }
 
