@@ -113,7 +113,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				hdr->correctionfield,
 				&correction_field);
 
-			if (!DSPOR(ppi)->wrModeOn)
+			if (!WR_DSPOR(ppi)->wrModeOn)
 				pp_update_delay(ppi, &correction_field);
 			else {
 				wr_servo_got_delay(ppi,

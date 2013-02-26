@@ -68,12 +68,12 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	DSPOR(ppi)->delayMechanism = PP_DEFAULT_DELAY_MECHANISM;
 	DSPOR(ppi)->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
 	DSPOR(ppi)->versionNumber = PP_VERSION_PTP;
-	DSPOR(ppi)->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
-	DSPOR(ppi)->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
-	DSPOR(ppi)->calPeriod = WR_DEFAULT_CAL_PERIOD;
-	DSPOR(ppi)->wrModeOn = 0;
-	DSPOR(ppi)->parentWrConfig = 0;
-	DSPOR(ppi)->calibrated = !WR_DEFAULT_PHY_CALIBRATION_REQUIRED;
+	WR_DSPOR(ppi)->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
+	WR_DSPOR(ppi)->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
+	WR_DSPOR(ppi)->calPeriod = WR_DEFAULT_CAL_PERIOD;
+	WR_DSPOR(ppi)->wrModeOn = 0;
+	WR_DSPOR(ppi)->parentWrConfig = 0;
+	WR_DSPOR(ppi)->calibrated = !WR_DEFAULT_PHY_CALIBRATION_REQUIRED;
 
 	if (pp_timer_init(ppi))
 		goto failure;

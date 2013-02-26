@@ -12,10 +12,10 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 {
 	int ret = 0;
 
-	if (DSPOR(ppi)->doRestart) {
+	if (WR_DSPOR(ppi)->doRestart) {
 		ppi->next_state = PPS_INITIALIZING;
 		st_com_restart_annrec_timer(ppi);
-		DSPOR(ppi)->doRestart = FALSE;
+		WR_DSPOR(ppi)->doRestart = FALSE;
 		return 0;
 	}
 
@@ -178,10 +178,10 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 		st_com_add_foreign(ppi, buf);
 	}
 
-	if ((DSPOR(ppi)->wrConfig & WR_S_ONLY) &&
+	if ((WR_DSPOR(ppi)->wrConfig & WR_S_ONLY) &&
 	    (1 /* FIXME: Recommended State, see page 33*/) &&
-	    (DSPOR(ppi)->parentWrConfig & WR_M_ONLY) &&
-	    (!DSPOR(ppi)->wrModeOn || !DSPOR(ppi)->parentWrModeOn))
+	    (WR_DSPOR(ppi)->parentWrConfig & WR_M_ONLY) &&
+	    (!WR_DSPOR(ppi)->wrModeOn || !WR_DSPOR(ppi)->parentWrModeOn))
 		ppi->next_state = WRS_PRESENT;
 
 	/*Reset Timer handling Announce receipt timeout*/
@@ -286,7 +286,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	add_TimeInternal(&correction_field, &correction_field,
 		&ppi->last_sync_corr_field);
 
-	if (!DSPOR(ppi)->wrModeOn) {
+	if (!WR_DSPOR(ppi)->wrModeOn) {
 		pp_update_offset(ppi, &precise_orig_timestamp,
 			&ppi->sync_receive_time,
 			&correction_field);

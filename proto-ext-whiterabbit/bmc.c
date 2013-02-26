@@ -87,12 +87,13 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 	DSPRO(ppi)->timeSource = ann->timeSource;
 
 	/* White Rabbit */
-	DSPOR(ppi)->parentIsWRnode = ((ann->wrFlags & WR_NODE_MODE) != NON_WR);
-	DSPOR(ppi)->parentWrModeOn =
+	WR_DSPOR(ppi)->parentIsWRnode =
+		((ann->wrFlags & WR_NODE_MODE) != NON_WR);
+	WR_DSPOR(ppi)->parentWrModeOn =
 		(ann->wrFlags & WR_IS_WR_MODE) ? TRUE : FALSE;
-	DSPOR(ppi)->parentCalibrated =
+	WR_DSPOR(ppi)->parentCalibrated =
 			((ann->wrFlags & WR_IS_CALIBRATED) ? 1 : 0);
-	DSPOR(ppi)->parentWrConfig = ann->wrFlags & WR_NODE_MODE;
+	WR_DSPOR(ppi)->parentWrConfig = ann->wrFlags & WR_NODE_MODE;
 	DSCUR(ppi)->primarySlavePortNumber =
 		DSPOR(ppi)->portIdentity.portNumber;
 

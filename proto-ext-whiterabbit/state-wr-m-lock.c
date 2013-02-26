@@ -13,8 +13,8 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_MASTER;
-		DSPOR(ppi)->wrPortState = WRS_M_LOCK;
-		DSPOR(ppi)->wrMode = WR_MASTER;
+		WR_DSPOR(ppi)->wrPortState = WRS_M_LOCK;
+		WR_DSPOR(ppi)->wrMode = WR_MASTER;
 		e = msg_issue_wrsig(ppi, LOCK);
 		pp_timer_start(WR_M_LOCK_TIMEOUT_MS,
 			ppi->timers[PP_TIMER_WRS_M_LOCK]);
@@ -22,7 +22,7 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_WRS_M_LOCK])) {
 		ppi->next_state = PPS_MASTER;
-		DSPOR(ppi)->wrPortState = WRS_IDLE;
+		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
 		goto state_updated;
 	}
 
@@ -32,9 +32,9 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (ppi->msg_tmp_header.messageType == PPM_SIGNALING) {
 
 		msg_unpack_wrsig(ppi, pkt, &wrsig_msg,
-			 &(DSPOR(ppi)->msgTmpWrMessageID));
+			 &(WR_DSPOR(ppi)->msgTmpWrMessageID));
 
-		if (DSPOR(ppi)->msgTmpWrMessageID == LOCKED)
+		if (WR_DSPOR(ppi)->msgTmpWrMessageID == LOCKED)
 			ppi->next_state = WRS_CALIBRATION;
 	}
 
@@ -46,7 +46,7 @@ state_updated:
 	if (ppi->next_state != ppi->state)
 		pp_timer_stop(ppi->timers[PP_TIMER_WRS_M_LOCK]);
 
-	ppi->next_delay = DSPOR(ppi)->wrStateTimeout;
+	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
 
 	return e;
 }

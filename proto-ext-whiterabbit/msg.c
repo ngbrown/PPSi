@@ -229,8 +229,8 @@ int msg_pack_announce(struct pp_instance *ppi)
 	*(UInteger16 *) (buf + 61) = htons(DSCUR(ppi)->stepsRemoved);
 	*(Enumeration8 *) (buf + 63) = DSPRO(ppi)->timeSource;
 
-	if (DSPOR(ppi)->wrConfig != NON_WR &&
-		DSPOR(ppi)->wrConfig != WR_S_ONLY) {
+	if (WR_DSPOR(ppi)->wrConfig != NON_WR &&
+		WR_DSPOR(ppi)->wrConfig != WR_S_ONLY) {
 		msg_pack_announce_wr_tlv(ppi);
 		return WR_ANNOUNCE_LENGTH;
 	}

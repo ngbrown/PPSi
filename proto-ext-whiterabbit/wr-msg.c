@@ -69,12 +69,12 @@ void msg_pack_announce_wr_tlv(struct pp_instance *ppi)
 		| WR_TLV_WR_VERSION_NUMBER)));
 	//wrMessageId
 	*(UInteger16*)(buf + 74) = htons(ANN_SUFIX);
-	wr_flags = wr_flags | DSPOR(ppi)->wrConfig;
+	wr_flags = wr_flags | WR_DSPOR(ppi)->wrConfig;
 
-	if (DSPOR(ppi)->calibrated)
+	if (WR_DSPOR(ppi)->calibrated)
 		wr_flags = WR_IS_CALIBRATED | wr_flags;
 
-	if (DSPOR(ppi)->wrModeOn)
+	if (WR_DSPOR(ppi)->wrModeOn)
 		wr_flags = WR_IS_WR_MODE | wr_flags;
 	*(UInteger16*)(buf + 76) = htons(wr_flags);
 }
@@ -112,7 +112,7 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 	void *buf;
 	UInteger16 len = 0;
 
-	if ((DSPOR(ppi)->wrMode == NON_WR) || (wr_msg_id == ANN_SUFIX)) {
+	if ((WR_DSPOR(ppi)->wrMode == NON_WR) || (wr_msg_id == ANN_SUFIX)) {
 		PP_PRINTF("BUG: Trying to send invalid wr_msg mode=%x id=%x",
 			  DSPOR(ppi)->wrMode, wr_msg_id);
 		return 0;
@@ -144,24 +144,26 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 
 	switch (wr_msg_id) {
 	case CALIBRATE:
-		if(DSPOR(ppi)->calibrated) {
-			put_be16(buf+56, (DSPOR(ppi)->calRetry << 8 | 0x0000));
+		if(WR_DSPOR(ppi)->calibrated) {
+			put_be16(buf+56,
+				 (WR_DSPOR(ppi)->calRetry << 8 | 0x0000));
 		}
 		else {
-			put_be16(buf+56, (DSPOR(ppi)->calRetry << 8 | 0x0001));
+			put_be16(buf+56,
+				 (WR_DSPOR(ppi)->calRetry << 8 | 0x0001));
 		}
-		put_be32(buf+58, DSPOR(ppi)->calPeriod);
+		put_be32(buf+58, WR_DSPOR(ppi)->calPeriod);
 		len = 20;
 		break;
 
 	case CALIBRATED: /* new fsm */
 		/* delta TX */
-		put_be32(buf+56, DSPOR(ppi)->deltaTx.scaledPicoseconds.msb);
-		put_be32(buf+60, DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb);
+		put_be32(buf+56, WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.msb);
+		put_be32(buf+60, WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb);
 
 		/* delta RX */
-		put_be32(buf+64, DSPOR(ppi)->deltaRx.scaledPicoseconds.msb);
-		put_be32(buf+68, DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb);
+		put_be32(buf+64, WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.msb);
+		put_be32(buf+68, WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb);
 		len = 24;
 
 		break;
@@ -235,22 +237,24 @@ void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 
 	switch (wr_msg_id) {
 	case CALIBRATE:
-		DSPOR(ppi)->otherNodeCalSendPattern = 0x00FF & get_be16(buf+56);
-		DSPOR(ppi)->otherNodeCalRetry = 0x00FF & (get_be16(buf+56) >> 8);
-		DSPOR(ppi)->otherNodeCalPeriod = get_be32(buf+58);
+		WR_DSPOR(ppi)->otherNodeCalSendPattern =
+			0x00FF & get_be16(buf+56);
+		WR_DSPOR(ppi)->otherNodeCalRetry =
+			0x00FF & (get_be16(buf+56) >> 8);
+		WR_DSPOR(ppi)->otherNodeCalPeriod = get_be32(buf+58);
 		break;
 
 	case CALIBRATED:
 		/* delta TX */
-		DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.msb =
+		WR_DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.msb =
 			get_be32(buf+56);
-		DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.lsb =
+		WR_DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.lsb =
 			get_be32(buf+60);
 
 		/* delta RX */
-		DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.msb =
+		WR_DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.msb =
 			get_be32(buf+64);
-		DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.lsb =
+		WR_DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.lsb =
 			get_be32(buf+68);
 		break;
 
