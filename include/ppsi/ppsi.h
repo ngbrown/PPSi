@@ -287,9 +287,15 @@ static inline struct DSTimeProperties *DSPRO(struct pp_instance *ppi)
 	return ppi->timePropertiesDS;
 }
 
-#define NP(x) ((x)->net_path)
+static inline struct pp_net_path *NP(struct pp_instance *ppi)
+{
+	return ppi->net_path;
+}
 
-#define SRV(x) ((x)->servo)
+static inline struct pp_servo *SRV(struct pp_instance *ppi)
+{
+	return ppi->servo;
+}
 
 /* The channel for an instance must be created and possibly destroyed. */
 extern int pp_open_instance(struct pp_instance *ppi,
