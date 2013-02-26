@@ -25,16 +25,6 @@ void posix_puts(const char *s)
 	fputs(s, stdout);
 }
 
-void *posix_memcpy(void *d, const void *s, int count)
-{
-	return memcpy(d, s, count);
-}
-
-void *posix_memset(void *s, int c, int count)
-{
-	return memset(s, c, count);
-}
-
 void posix_get_tstamp(TimeInternal *t)
 {
 	struct timespec tp;
