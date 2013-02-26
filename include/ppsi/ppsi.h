@@ -282,7 +282,10 @@ static inline struct DSPort *DSPOR(struct pp_instance *ppi)
 	return ppi->portDS;
 }
 
-#define DSPRO(x) ((x)->timePropertiesDS)
+static inline struct DSTimeProperties *DSPRO(struct pp_instance *ppi)
+{
+	return ppi->timePropertiesDS;
+}
 
 #define NP(x) ((x)->net_path)
 
