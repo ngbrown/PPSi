@@ -262,7 +262,11 @@ static inline struct pp_runtime_opts *OPTS(struct pp_instance *ppi)
 	return ppi->rt_opts;
 }
 
-#define DSDEF(x) ((x)->defaultDS)
+static inline struct DSDefault *DSDEF(struct pp_instance *ppi)
+{
+	return ppi->defaultDS;
+}
+
 #define DSCUR(x) ((x)->currentDS)
 #define DSPAR(x) ((x)->parentDS)
 #define DSPOR(x) ((x)->portDS)
