@@ -14,7 +14,6 @@ OBJ-libwr := $D/fsm-table.o \
 	$D/bmc.o \
 	$D/msg.o \
 	$D/arith.o \
-	$D/servo.o \
 	$D/hooks.o \
 	$D/state-wr-present.o \
 	$D/state-wr-m-lock.o \
