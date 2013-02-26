@@ -307,6 +307,7 @@ static inline struct pp_servo *SRV(struct pp_instance *ppi)
  * allow NULL pointers.
  */
 struct pp_ext_hooks {
+	int (*init)(struct pp_instance *ppi, unsigned char *pkt, int plen);
 };
 
 extern struct pp_ext_hooks pp_hooks; /* The one for the extension we build */

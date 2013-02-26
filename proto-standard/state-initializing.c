@@ -14,6 +14,7 @@
 int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	unsigned char *id, *mac;
+	int ret = 0;
 
 	if (NP(ppi)->inited)
 		pp_net_shutdown(ppi);
@@ -64,9 +65,18 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	DSPOR(ppi)->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
 	DSPOR(ppi)->versionNumber = PP_VERSION_PTP;
 
-	if (pp_timer_init(ppi))
+	if (pp_hooks.init)
+		ret = pp_hooks.init(ppi, pkt, plen);
+	if (ret) {
+		PP_PRINTF("%s: can't init extension\n");
 		goto failure;
+	}
 
+	ret = pp_timer_init(ppi);
+	if (ret) {
+		PP_PRINTF("%s: can't init timers\n");
+		goto failure;
+	}
 	pp_init_clock(ppi);
 
 	m1(ppi);
@@ -81,8 +91,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	return 0;
 
 failure:
-	PP_PRINTF("Failed to initialize network\n");
 	ppi->next_state = PPS_FAULTY;
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
-	return 0;
+	return ret;
 }
