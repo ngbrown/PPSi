@@ -272,7 +272,11 @@ static inline struct DSCurrent *DSCUR(struct pp_instance *ppi)
 	return ppi->currentDS;
 }
 
-#define DSPAR(x) ((x)->parentDS)
+static inline struct DSParent *DSPAR(struct pp_instance *ppi)
+{
+	return ppi->parentDS;
+}
+
 #define DSPOR(x) ((x)->portDS)
 #define DSPRO(x) ((x)->timePropertiesDS)
 
