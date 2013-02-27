@@ -8,6 +8,52 @@
 
 #include "wr-constants.h"
 
+/*
+ * This structure is used as extension-specific data in the DSPort
+ * (see wrspec.v2-06-07-2011, page 17)
+ */
+struct wr_dsport {
+	Enumeration8 wrConfig;
+	Enumeration8 wrMode;
+	Boolean wrModeOn;
+	Enumeration8  wrPortState;
+	/* FIXME check doc: knownDeltaTx, knownDeltaRx, deltasKnown?) */
+	Boolean calibrated;
+	FixedDelta deltaTx;
+	FixedDelta deltaRx;
+	UInteger32 wrStateTimeout;
+	UInteger8 wrStateRetry;
+	UInteger32 calPeriod;
+	UInteger8 calRetry;
+	Enumeration8 parentWrConfig;
+	Boolean parentIsWRnode; /* FIXME Not in the doc */
+	/* FIXME check doc: (parentWrMode?) */
+	Enumeration16 msgTmpWrMessageID; /* FIXME Not in the doc */
+	Boolean parentWrModeOn;
+	Boolean parentCalibrated;
+
+	/* FIXME: are they in the doc? */
+	UInteger16 otherNodeCalSendPattern;
+	UInteger32 otherNodeCalPeriod;
+	UInteger8 otherNodeCalRetry;
+	FixedDelta otherNodeDeltaTx;
+	FixedDelta otherNodeDeltaRx;
+	Boolean doRestart;
+	Boolean linkUP;
+};
+
+/* This uppercase name matches "DSPOR(ppi)" used by standard protocol */
+static inline struct wr_dsport *WR_DSPOR(struct pp_instance *ppi)
+{
+	return ppi->portDS->ext_dsport;
+}
+
+static inline Integer32 phase_to_cf_units(Integer32 phase)
+{
+	return (Integer32) ((int64_t)phase * 65536LL / 1000LL);
+}
+
+
 /* Pack/Unkpack White rabbit message in the suffix of PTP announce message */
 void msg_pack_announce_wr_tlv(struct pp_instance *ppi);
 void msg_unpack_announce_wr_tlv(void *buf, MsgAnnounce *ann);

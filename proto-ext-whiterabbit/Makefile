@@ -7,16 +7,7 @@ LIBWRO := $D/libwr.o
 LIBS += $(LIBWRO)
 
 OBJ-libwr := $D/fsm-table.o \
-	$D/state-initializing.o \
-	$D/state-listening.o \
-	$D/state-master.o \
-	$D/state-slave.o \
-	$D/common-fun.o \
-	$D/bmc.o \
-	$D/msg.o \
-	$D/arith.o \
-	$D/servo.o \
-	$D/open-close.o \
+	$D/hooks.o \
 	$D/state-wr-present.o \
 	$D/state-wr-m-lock.o \
 	$D/state-wr-s-lock.o \

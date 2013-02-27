@@ -5,6 +5,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
+#include "common-fun.h"
 
 static inline void Integer64_display(const char *label, Integer64 *bigint)
 {
@@ -71,6 +72,7 @@ static inline void msg_display_announce(MsgAnnounce *announce)
         PP_VPRINTF("stepsRemoved: %d\n", announce->stepsRemoved);
         PP_VPRINTF("timeSource: %d\n", announce->timeSource);
         PP_VPRINTF("\n");
+	/* FIXME: diagnostic for extension */
 #endif
 }
 
@@ -226,6 +228,8 @@ int msg_pack_announce(struct pp_instance *ppi)
 	*(UInteger16 *) (buf + 61) = htons(DSCUR(ppi)->stepsRemoved);
 	*(Enumeration8 *) (buf + 63) = DSPRO(ppi)->timeSource;
 
+	if (pp_hooks.pack_announce)
+		return pp_hooks.pack_announce(ppi);
 	return PP_ANNOUNCE_LENGTH;
 }
 
@@ -252,6 +256,8 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 	ann->stepsRemoved = htons(*(UInteger16 *) (buf + 61));
 	ann->timeSource = *(Enumeration8 *) (buf + 63);
 
+	if (pp_hooks.unpack_announce)
+		pp_hooks.unpack_announce(buf, ann);
 	msg_display_announce(ann);
 }
 
@@ -592,37 +598,12 @@ const char const * pp_msg_names[] = {
 	"management"
 };
 
-#ifdef PPSI_SLAVE
-#define MSG_SEND_AND_RET(x,y,z)\
-	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH,\
-		&ppi->last_snt_time, PP_NP_##y , z) < PP_## x ##_LENGTH) {\
-		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n",\
-			pp_msg_names[PPM_##x], PPM_##x);\
-		return -1;\
-	}\
-	ppi->sent_seq_id[PPM_## x]++;\
-	return 0;
-#else
-#define MSG_SEND_AND_RET(x,y,z)\
-	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH,\
-		&ppi->last_snt_time, PP_NP_##y , z) < PP_## x ##_LENGTH) {\
-		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n",\
-			pp_msg_names[PPM_##x], PPM_##x);\
-		return -1;\
-	}\
-	ppi->sent_seq_id[PPM_## x]++;\
-	PP_VPRINTF("SENT %02d %d.%d %s \n", PP_## x ##_LENGTH,\
-		ppi->last_snt_time.seconds,\
-		ppi->last_snt_time.nanoseconds,pp_msg_names[PPM_##x]);\
-	return 0;
-#endif
-
 /* Pack and send on general multicast ip adress an Announce message */
 int msg_issue_announce(struct pp_instance *ppi)
 {
-	msg_pack_announce(ppi);
-
-	MSG_SEND_AND_RET(ANNOUNCE, GEN, 0);
+	int len;
+	len = msg_pack_announce(ppi);
+	MSG_SEND_AND_RET_VARLEN(ANNOUNCE, GEN, 0, len);
 }
 
 /* Pack and send on event multicast ip adress a Sync message */

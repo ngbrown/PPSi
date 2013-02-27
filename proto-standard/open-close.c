@@ -9,8 +9,6 @@
  * This file deals with opening and closing an instance. The channel
  * must already have been created. In practices, this initializes the
  * state machine to the first state.
- *
- * A protocol extension can override none or both of these functions.
  */
 
 struct pp_runtime_opts default_rt_opts = {
@@ -51,11 +49,14 @@ int pp_open_instance(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
 
 	ppi->state = PPS_INITIALIZING;
 
+	if (pp_hooks.open)
+		return pp_hooks.open(ppi, ppi->rt_opts);
 	return 0;
 }
 
 int pp_close_instance(struct pp_instance *ppi)
 {
-	/* Nothing to do by now */
+	if (pp_hooks.open)
+		return pp_hooks.close(ppi);
 	return 0;
 }

@@ -297,6 +297,36 @@ static inline struct pp_servo *SRV(struct pp_instance *ppi)
 	return ppi->servo;
 }
 
+
+/*
+ * Each extension should fill this structure that is used to augment
+ * the standard stated and avoid code duplications. Please remember
+ * that proto-standard functions are picked as a fall-back when non
+ * extension-specific code is provided. The set of hooks here is designed
+ * based on what White Rabbit does. If you add more please remember to
+ * allow NULL pointers.
+ */
+struct pp_ext_hooks {
+	int (*init)(struct pp_instance *ppi, unsigned char *pkt, int plen);
+	int (*open)(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts);
+	int (*close)(struct pp_instance *ppi);
+	int (*listening)(struct pp_instance *ppi, unsigned char *pkt, int plen);
+	int (*master_msg)(struct pp_instance *ppi, unsigned char *pkt,
+			  int plen, int msgtype);
+	int (*new_slave)(struct pp_instance *ppi, unsigned char *pkt, int plen);
+	int (*update_delay)(struct pp_instance *ppi);
+	void (*s1)(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann);
+	int (*execute_slave)(struct pp_instance *ppi);
+	void (*handle_announce)(struct pp_instance *ppi);
+	int (*handle_followup)(struct pp_instance *ppi, TimeInternal *orig,
+			       TimeInternal *correction_field);
+	int (*pack_announce)(struct pp_instance *ppi);
+	void (*unpack_announce)(void *buf, MsgAnnounce *ann);
+};
+
+extern struct pp_ext_hooks pp_hooks; /* The one for the extension we build */
+
+
 /* The channel for an instance must be created and possibly destroyed. */
 extern int pp_open_instance(struct pp_instance *ppi,
 			    struct pp_runtime_opts *rt_opts);

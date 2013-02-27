@@ -254,35 +254,7 @@ typedef struct DSPort {
 	Integer8	logMinPdelayReqInterval;
 	UInteger4	versionNumber;
 
-	/* White Rabbit extension begin (see wrspec.v2-06-07-2011, page 17) */
-	Enumeration8 wrConfig;
-	Enumeration8 wrMode;
-	Boolean wrModeOn;
-	Enumeration8  wrPortState;
-	/* FIXME check doc: knownDeltaTx, knownDeltaRx, deltasKnown?) */
-	Boolean calibrated;
-	FixedDelta deltaTx;
-	FixedDelta deltaRx;
-	UInteger32 wrStateTimeout;
-	UInteger8 wrStateRetry;
-	UInteger32 calPeriod;
-	UInteger8 calRetry;
-	Enumeration8 parentWrConfig;
-	Boolean parentIsWRnode; /* FIXME Not in the doc */
-	/* FIXME check doc: (parentWrMode?) */
-	Enumeration16 msgTmpWrMessageID; /* FIXME Not in the doc */
-	Boolean parentWrModeOn;
-	Boolean parentCalibrated;
-
-	/* FIXME: are they in the doc? */
-	UInteger16 otherNodeCalSendPattern;
-	UInteger32 otherNodeCalPeriod;
-	UInteger8 otherNodeCalRetry;
-	FixedDelta otherNodeDeltaTx;
-	FixedDelta otherNodeDeltaRx;
-	Boolean doRestart;
-	Boolean linkUP;
-	/* White Rabbit extension end */
+	void		*ext_dsport;
 } DSPort;
 
 /* Time Properties Data Set */
@@ -323,6 +295,8 @@ enum pp_std_messages {
 	PPM_ANNOUNCE,
 	PPM_SIGNALING,
 	PPM_MANAGEMENT,
+
+	PPM_NOTHING_TO_DO	= 0x100, /* for hooks.master_msg() */
 };
 
 extern const char const * pp_msg_names[];

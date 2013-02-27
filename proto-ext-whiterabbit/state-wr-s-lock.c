@@ -11,7 +11,7 @@ int wr_s_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int e = 0;
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
-		DSPOR(ppi)->wrPortState = WRS_S_LOCK;
+		WR_DSPOR(ppi)->wrPortState = WRS_S_LOCK;
 		ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 		wr_locking_enable(ppi);
 		pp_timer_start(WR_S_LOCK_TIMEOUT_MS,
@@ -20,8 +20,8 @@ int wr_s_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_WRS_S_LOCK])) {
 		ppi->next_state = PPS_FAULTY;
-		DSPOR(ppi)->wrPortState = WRS_IDLE;
-		DSPOR(ppi)->wrMode = NON_WR;
+		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
+		WR_DSPOR(ppi)->wrMode = NON_WR;
 		goto state_updated;
 	}
 
@@ -34,7 +34,7 @@ state_updated:
 	if (ppi->next_state != ppi->state)
 		pp_timer_stop(ppi->timers[PP_TIMER_WRS_S_LOCK]);
 
-	ppi->next_delay = DSPOR(ppi)->wrStateTimeout;
+	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
 
 	return e;
 }

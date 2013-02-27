@@ -190,11 +190,11 @@ int wr_servo_init(struct pp_instance *ppi)
 	s->cur_setpoint = 0;
 	s->missed_iters = 0;
 	
-	s->delta_tx_m = ((((int32_t)DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.msb) << 16);
-	s->delta_rx_m = ((((int32_t)DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.msb) << 16);
+	s->delta_tx_m = ((((int32_t)WR_DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.msb) << 16);
+	s->delta_rx_m = ((((int32_t)WR_DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.msb) << 16);
 
-	s->delta_tx_s = ((((int32_t)DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)DSPOR(ppi)->deltaTx.scaledPicoseconds.msb) << 16);
-	s->delta_rx_s = ((((int32_t)DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)DSPOR(ppi)->deltaRx.scaledPicoseconds.msb) << 16);
+	s->delta_tx_s = ((((int32_t)WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.msb) << 16);
+	s->delta_rx_s = ((((int32_t)WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.msb) << 16);
 
 	cur_servo_state.delta_tx_m = (int64_t)s->delta_tx_m;
 	cur_servo_state.delta_rx_m = (int64_t)s->delta_rx_m;
