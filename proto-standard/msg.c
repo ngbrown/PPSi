@@ -619,7 +619,7 @@ int msg_issue_sync(struct pp_instance *ppi)
 	MSG_SEND_AND_RET(SYNC, EVT, 0);
 }
 
-/* Pack and send on general multicast ip adress a FollowUp message */
+/* Pack and send on general multicast ip address a FollowUp message */
 int msg_issue_followup(struct pp_instance *ppi, TimeInternal *time)
 {
 	Timestamp prec_orig_tstamp;
@@ -643,7 +643,7 @@ int msg_issue_delay_req(struct pp_instance *ppi)
 	MSG_SEND_AND_RET(DELAY_REQ, EVT, 0);
 }
 
-/* Pack and send on event multicast ip adress a PDelayReq message */
+/* Pack and send on event multicast ip address a PDelayReq message */
 int msg_issue_pdelay_req(struct pp_instance *ppi)
 {
 	Timestamp orig_tstamp;
@@ -656,7 +656,7 @@ int msg_issue_pdelay_req(struct pp_instance *ppi)
 	MSG_SEND_AND_RET(PDELAY_REQ, EVT, 1);
 }
 
-/* Pack and send on event multicast ip adress a PDelayResp message */
+/* Pack and send on event multicast ip address a PDelayResp message */
 int msg_issue_pdelay_resp(struct pp_instance *ppi, TimeInternal *time,
 			MsgHeader *hdr)
 {

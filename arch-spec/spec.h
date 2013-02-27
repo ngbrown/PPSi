@@ -54,7 +54,7 @@ typedef struct {
   int is_locked;
   int lock_priority;
 
-  // timestamp linearization paramaters
+  // timestamp linearization parameters
 
   uint32_t phase_setpoint; // DMPLL phase setpoint (picoseconds)
 
@@ -88,7 +88,7 @@ static inline void delay(int x)
 	while(x--) asm volatile("nop");
 }
 
-/* other network lstuff, bah.... */
+/* other network stuff, bah.... */
 
 struct spec_ethhdr {
 	unsigned char	h_dest[6];

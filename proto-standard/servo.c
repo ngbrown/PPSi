@@ -65,7 +65,7 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 		add_TimeInternal(&DSCUR(ppi)->meanPathDelay,
 				 &SRV(ppi)->delay_sm, &SRV(ppi)->delay_ms);
 
-		/* Substract correction_field */
+		/* Subtract correction_field */
 		sub_TimeInternal(&DSCUR(ppi)->meanPathDelay,
 				 &DSCUR(ppi)->meanPathDelay, correction_field);
 

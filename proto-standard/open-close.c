@@ -7,7 +7,7 @@
 
 /*
  * This file deals with opening and closing an instance. The channel
- * must already have been created. In practices, this initializes the
+ * must already have been created. In practice, this initializes the
  * state machine to the first state.
  */
 

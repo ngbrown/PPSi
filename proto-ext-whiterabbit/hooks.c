@@ -136,7 +136,7 @@ static int wr_handle_followup(struct pp_instance *ppi,
 	precise_orig_timestamp->phase = 0;
 	wr_servo_got_sync(ppi, precise_orig_timestamp,
 			  &ppi->sync_receive_time);
-	/* TODO Check: generates unstability (Tx timestamp invalid) */
+	/* TODO Check: generates instability (Tx timestamp invalid) */
 	/* return msg_issue_delay_req(ppi); */
 
 	return 1; /* the caller returns too */

@@ -110,7 +110,7 @@ void copy_d0( struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 
 
 /*
- * Data set comparison bewteen two foreign masters (9.3.4 fig 27)
+ * Data set comparison between two foreign masters (9.3.4 fig 27)
  * return similar to memcmp()
  */
 Integer8 bmc_dataset_cmp(struct pp_instance *ppi,

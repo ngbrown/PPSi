@@ -9,7 +9,7 @@
 #include "../proto-standard/common-fun.h"
 
 /*
- * WR way to handle little/big endianess
+ * WR way to handle little/big endianness
  * FIXME: check whether htons would be ok
  */
 /* put 16 bit word in big endianess (from little endianess) */
@@ -27,7 +27,7 @@ static inline void put_be32(void *ptr, UInteger32 x)
   *(unsigned char *)(ptr++) = (x) & 0xff;
 }
 
-/* gets 32 bit word from big endianess (to little endianess) */
+/* gets 32 bit word from big endianness (to little endianness) */
 static inline UInteger32 get_be32(void *ptr)
 {
   UInteger32 res = 0x0;

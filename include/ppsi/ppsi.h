@@ -300,7 +300,7 @@ static inline struct pp_servo *SRV(struct pp_instance *ppi)
 
 /*
  * Each extension should fill this structure that is used to augment
- * the standard stated and avoid code duplications. Please remember
+ * the standard states and avoid code duplications. Please remember
  * that proto-standard functions are picked as a fall-back when non
  * extension-specific code is provided. The set of hooks here is designed
  * based on what White Rabbit does. If you add more please remember to

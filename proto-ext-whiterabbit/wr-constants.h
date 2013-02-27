@@ -118,7 +118,7 @@ enum {
 	 * since our application FSM is flat */
 	WRS_PRESENT = 16,  WRS_S_LOCK, WRS_M_LOCK,  WRS_LOCKED,
 	WRS_CALIBRATION,  WRS_CALIBRATED,  WRS_RESP_CALIB_REQ ,WRS_WR_LINK_ON,
-	/* Each WR main state (except IDLE) has an associated timetout
+	/* Each WR main state (except IDLE) has an associated timeout
 	 * we use state names to manage timeouts as well */
 	WR_TIMER_ARRAY_SIZE, /* number of states which has timeouts */
 	WRS_IDLE,

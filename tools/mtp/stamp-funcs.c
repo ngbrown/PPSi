@@ -1,7 +1,7 @@
 /*
  * This file is a "library" file which offers functions with the same
  * Interface as send() and recv() but that handle stamping as well.
- * The timestamp informazion is saved to global variables, so no
+ * The timestamp information is saved to global variables, so no
  * concurrency is allowed and so on.  In short: it's as crappy as
  * possible, but not crappier.
  *

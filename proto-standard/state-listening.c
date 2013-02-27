@@ -38,7 +38,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	default:
-		/* disreguard, nothing to do */
+		/* disregard, nothing to do */
 		break;
 	}
 
