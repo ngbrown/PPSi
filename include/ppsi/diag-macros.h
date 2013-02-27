@@ -66,8 +66,22 @@ extern CONST_VERBOSITY int pp_diag_verbosity;
 #define pp_verbose_time 1
 #endif
 
-/* FIXME: allow individual setting of the verbosity */
+/* Accept 4 individual flages to turn on each of them */
+#ifdef VERB_DUMP
+#define pp_verbose_dump 1
+#endif
 
+#ifdef VERB_SERVO
+#define pp_verbose_servo 1
+#endif
+
+#ifdef VERB_FRAMES
+#define pp_verbose_frames 1
+#endif
+
+#ifdef VERB_TIME
+#define pp_verbose_time 1
+#endif
 
 /* Provide 0 as default for all such values */
 #ifndef pp_verbose_dump
