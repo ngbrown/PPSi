@@ -8,7 +8,6 @@ LIBS += $(LIBWRO)
 
 OBJ-libwr := $D/fsm-table.o \
 	$D/common-fun.o \
-	$D/bmc.o \
 	$D/msg.o \
 	$D/hooks.o \
 	$D/state-wr-present.o \

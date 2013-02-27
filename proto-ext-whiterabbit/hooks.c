@@ -92,6 +92,18 @@ static int wr_update_delay(struct pp_instance *ppi)
 	return 0;
 }
 
+static void wr_s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
+{
+	WR_DSPOR(ppi)->parentIsWRnode =
+		((ann->wrFlags & WR_NODE_MODE) != NON_WR);
+	WR_DSPOR(ppi)->parentWrModeOn =
+		(ann->wrFlags & WR_IS_WR_MODE) ? TRUE : FALSE;
+	WR_DSPOR(ppi)->parentCalibrated =
+			((ann->wrFlags & WR_IS_CALIBRATED) ? 1 : 0);
+	WR_DSPOR(ppi)->parentWrConfig = ann->wrFlags & WR_NODE_MODE;
+	DSCUR(ppi)->primarySlavePortNumber =
+		DSPOR(ppi)->portIdentity.portNumber;
+}
 
 struct pp_ext_hooks pp_hooks = {
 	.init = wr_init,
@@ -100,4 +112,5 @@ struct pp_ext_hooks pp_hooks = {
 	.master_msg = wr_master_msg,
 	.new_slave = wr_new_slave,
 	.update_delay = wr_update_delay,
+	.s1 = wr_s1,
 };

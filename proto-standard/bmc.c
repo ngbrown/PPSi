@@ -84,6 +84,9 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 	DSPRO(ppi)->frequencyTraceable = ((hdr->flagField[1] & FFB_FTRA) != 0);
 	DSPRO(ppi)->ptpTimescale = ((hdr->flagField[1] & FFB_PTP) != 0);
 	DSPRO(ppi)->timeSource = ann->timeSource;
+
+	if (pp_hooks.s1)
+		pp_hooks.s1(ppi, hdr, ann);
 }
 
 

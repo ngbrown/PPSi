@@ -315,6 +315,7 @@ struct pp_ext_hooks {
 			  int plen, int msgtype);
 	int (*new_slave)(struct pp_instance *ppi, unsigned char *pkt, int plen);
 	int (*update_delay)(struct pp_instance *ppi);
+	void (*s1)(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann);
 };
 
 extern struct pp_ext_hooks pp_hooks; /* The one for the extension we build */
