@@ -11,6 +11,11 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0; /* error var, to check errors in msg handling */
 
+	if (pp_hooks.listening)
+		e = pp_hooks.listening(ppi, pkt, plen);
+	if (e)
+		goto no_incoming_msg;
+
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_LISTENING;
 		st_com_restart_annrec_timer(ppi);

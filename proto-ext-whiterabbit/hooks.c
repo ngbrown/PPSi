@@ -26,9 +26,17 @@ static int wr_open(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
 	return 0;
 }
 
+static int wr_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
+{
+	struct wr_dsport *wp = WR_DSPOR(ppi);
+
+	wp->wrMode = NON_WR;
+	wp->wrPortState = WRS_IDLE;
+	return 0;
+}
 
 struct pp_ext_hooks pp_hooks = {
 	.init = wr_init,
 	.open = wr_open,
+	.listening = wr_listening,
 };
-

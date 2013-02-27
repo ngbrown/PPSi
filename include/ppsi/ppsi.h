@@ -310,6 +310,7 @@ struct pp_ext_hooks {
 	int (*init)(struct pp_instance *ppi, unsigned char *pkt, int plen);
 	int (*open)(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts);
 	int (*close)(struct pp_instance *ppi);
+	int (*listening)(struct pp_instance *ppi, unsigned char *pkt, int plen);
 };
 
 extern struct pp_ext_hooks pp_hooks; /* The one for the extension we build */
