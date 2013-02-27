@@ -3,14 +3,9 @@
  * we need to remove all strings and parameter passing when running
  * wrpc-sw with all its options enabled, for space reasons.
  *
- * So, this first set is always enabled, unless you build with
- * PPSI_NO_DIAG (see diag/Makefile)
+ * Note that by building with PPSI_NO_DIAG (see diag/Makefile) no message
+ * at all is there (and it can save quite some binary space).
  */
-
-#define PP_FSM(ppi,seq,len) pp_diag_fsm(ppi,seq,len)
-#define PP_ERR(ppi,err) if pp_diag_error(ppi,err)
-#define PP_ERR2(ppi,s1,s2) if pp_diag_error_str2(ppi,s1,s2)
-#define PP_FATAL(ppi,s1,s2) if pp_diag_fatal(ppi,s1,s2)
 
 /*
  * Then we have a verbosity argument, that can be changed at run time
