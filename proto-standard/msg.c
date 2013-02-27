@@ -9,7 +9,7 @@
 
 static inline void Integer64_display(const char *label, Integer64 *bigint)
 {
-	if (pp_verbose_messages) {
+	if (pp_verbose_dump) {
 		PP_VPRINTF("%s:\n", label);
 		PP_VPRINTF("LSB: %u\n", bigint->lsb);
 		PP_VPRINTF("MSB: %d\n", bigint->msb);
@@ -18,7 +18,7 @@ static inline void Integer64_display(const char *label, Integer64 *bigint)
 
 static inline void UInteger48_display(const char *label, UInteger48 *bigint)
 {
-	if (pp_verbose_messages) {
+	if (pp_verbose_dump) {
 		PP_VPRINTF("%s:\n", label);
 		PP_VPRINTF("LSB: %u\n", bigint->lsb);
 		PP_VPRINTF("MSB: %u\n", bigint->msb);
@@ -27,7 +27,7 @@ static inline void UInteger48_display(const char *label, UInteger48 *bigint)
 
 static inline void timestamp_display(const char *label, Timestamp *timestamp)
 {
-	if (pp_verbose_messages) {
+	if (pp_verbose_dump) {
 		PP_VPRINTF("%s:\n", label);
 		UInteger48_display("seconds", &timestamp->secondsField);
 		PP_VPRINTF("nanoseconds: %u\n", timestamp->nanosecondsField);
@@ -36,7 +36,7 @@ static inline void timestamp_display(const char *label, Timestamp *timestamp)
 
 static inline void msg_display_header(MsgHeader *header)
 {
-	if (pp_verbose_messages) {
+	if (pp_verbose_dump) {
 		PP_VPRINTF("Message header:\n");
 		PP_VPRINTF("\n");
 		PP_VPRINTF("transportSpecific: %d\n",
@@ -59,7 +59,7 @@ static inline void msg_display_header(MsgHeader *header)
 
 static inline void msg_display_announce(MsgAnnounce *announce)
 {
-	if (pp_verbose_messages) {
+	if (pp_verbose_dump) {
 		PP_VPRINTF("Message ANNOUNCE:\n");
 		timestamp_display("Origin Timestamp",
 				  &announce->originTimestamp);

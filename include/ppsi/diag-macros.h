@@ -60,8 +60,28 @@ extern CONST_VERBOSITY int pp_diag_verbosity;
  * constants instead, to avoid the hairyness of ifdef.
  */
 #ifdef VERB_LOG_MSGS
-#define pp_verbose_messages 1
-#else
-#define pp_verbose_messages 0
+#define pp_verbose_dump 1
+#define pp_verbose_servo 1
+#define pp_verbose_frames 1
+#define pp_verbose_time 1
 #endif
 
+/* FIXME: allow individual setting of the verbosity */
+
+
+/* Provide 0 as default for all such values */
+#ifndef pp_verbose_dump
+#define pp_verbose_dump 0
+#endif
+
+#ifndef pp_verbose_servo
+#define pp_verbose_servo 0
+#endif
+
+#ifndef pp_verbose_frames
+#define pp_verbose_frames 0
+#endif
+
+#ifndef pp_verbose_time
+#define pp_verbose_time 0
+#endif

@@ -32,14 +32,14 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 		&ppi->delay_req_send_time);
 
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
-		if (s_to_m_dly.seconds && pp_verbose_messages)
+		if (s_to_m_dly.seconds && pp_verbose_servo)
 			PP_VPRINTF("pp_update_delay aborted, delay "
 				   "greater than 1 second\n");
 		if (s_to_m_dly.seconds)
 			return;
 
 		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly
-		    && pp_verbose_messages)
+		    && pp_verbose_servo)
 			PP_VPRINTF("pp_update_delay aborted, delay %d greater "
 				   "than administratively set maximum %d\n",
 				   s_to_m_dly.nanoseconds,
@@ -184,14 +184,14 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 	sub_TimeInternal(&m_to_s_dly, recv_time, send_time);
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
-		if (m_to_s_dly.seconds && pp_verbose_messages)
+		if (m_to_s_dly.seconds && pp_verbose_servo)
 			PP_PRINTF("pp_update_offset aborted, delay greater "
 			     "than 1 second\n");
 		if (m_to_s_dly.seconds)
 			return;
 
 		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly
-		    && pp_verbose_messages)
+		    && pp_verbose_servo)
 			PP_PRINTF("updateDelay aborted, delay %d greater than "
 				  "administratively set maximum %d\n",
 			     m_to_s_dly.nanoseconds,
@@ -245,14 +245,14 @@ void pp_update_clock(struct pp_instance *ppi)
 
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
 		if (DSCUR(ppi)->offsetFromMaster.seconds
-		    && pp_verbose_messages) {
+		    && pp_verbose_servo) {
 			PP_PRINTF("pp_update_clock aborted, offset greater "
 				   "than 1 second\n");
 			goto display;
 		}
 
 		if (DSCUR(ppi)->offsetFromMaster.nanoseconds >
-		    OPTS(ppi)->max_rst && pp_verbose_messages) {
+		    OPTS(ppi)->max_rst && pp_verbose_servo) {
 			PP_VPRINTF("pp_update_clock aborted, offset %d greater than "
 			     "administratively set maximum %d\n",
 			     DSCUR(ppi)->offsetFromMaster.nanoseconds,
@@ -317,7 +317,7 @@ void pp_update_clock(struct pp_instance *ppi)
 	}
 
 display:
-	if (pp_verbose_messages) {
+	if (pp_verbose_servo) {
 		PP_VPRINTF("\n--Offset Correction--\n");
 		PP_VPRINTF("Raw offset from master:  %10ds %11dns\n",
 			   SRV(ppi)->m_to_s_dly.seconds,

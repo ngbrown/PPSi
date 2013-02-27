@@ -42,12 +42,12 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 #define MSG_SEND_AND_RET_VARLEN(x, y, z, w) \
 	if (pp_net_ops.send(ppi, ppi->buf_out, w,\
 		&ppi->last_snt_time, PP_NP_##y , z) < w) { \
-		if (pp_verbose_messages) \
+		if (pp_verbose_frames) \
 			PP_PRINTF("%s(%d) Message can't be sent -> FAULTY\n", \
 			pp_msg_names[PPM_##x], PPM_##x); \
 		return -1; \
 	} \
-	if (pp_verbose_messages) \
+	if (pp_verbose_frames) \
 		PP_VPRINTF("SENT %02d %d.%d %s\n", w, \
 			ppi->last_snt_time.seconds, \
 			ppi->last_snt_time.nanoseconds, \
