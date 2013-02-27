@@ -7,7 +7,6 @@ LIBWRO := $D/libwr.o
 LIBS += $(LIBWRO)
 
 OBJ-libwr := $D/fsm-table.o \
-	$D/state-slave.o \
 	$D/common-fun.o \
 	$D/bmc.o \
 	$D/msg.o \

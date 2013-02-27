@@ -69,9 +69,35 @@ static int wr_master_msg(struct pp_instance *ppi, unsigned char *pkt, int plen,
 	return msgtype;
 }
 
+static int wr_new_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
+{
+	wr_servo_init(ppi);
+	return 0;
+}
+
+static int wr_update_delay(struct pp_instance *ppi)
+{
+	MsgHeader *hdr = &ppi->msg_tmp_header;
+	TimeInternal correction_field;
+
+	int64_to_TimeInternal(hdr->correctionfield, &correction_field);
+
+	/* If no WR mode is on, run normal code */
+	if (!WR_DSPOR(ppi)->wrModeOn) {
+		pp_update_delay(ppi, &correction_field);
+		return 0;
+	}
+	wr_servo_got_delay(ppi, hdr->correctionfield.lsb);
+	wr_servo_update(ppi);
+	return 0;
+}
+
+
 struct pp_ext_hooks pp_hooks = {
 	.init = wr_init,
 	.open = wr_open,
 	.listening = wr_listening,
 	.master_msg = wr_master_msg,
+	.new_slave = wr_new_slave,
+	.update_delay = wr_update_delay,
 };

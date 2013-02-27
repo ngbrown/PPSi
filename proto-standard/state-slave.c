@@ -19,7 +19,13 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_SLAVE;
+
 		pp_init_clock(ppi);
+
+		if (pp_hooks.new_slave)
+			e = pp_hooks.new_slave(ppi, pkt, plen);
+		if (e)
+			goto no_incoming_msg;
 
 		ppi->waiting_for_follow = FALSE;
 
@@ -102,7 +108,12 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				hdr->correctionfield,
 				&correction_field);
 
-			pp_update_delay(ppi, &correction_field);
+			if (pp_hooks.update_delay)
+				e = pp_hooks.update_delay(ppi);
+			else
+				pp_update_delay(ppi, &correction_field);
+			if (e)
+				goto no_incoming_msg;
 
 			ppi->log_min_delay_req_interval =
 				hdr->logMessageInterval;

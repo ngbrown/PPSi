@@ -313,6 +313,8 @@ struct pp_ext_hooks {
 	int (*listening)(struct pp_instance *ppi, unsigned char *pkt, int plen);
 	int (*master_msg)(struct pp_instance *ppi, unsigned char *pkt,
 			  int plen, int msgtype);
+	int (*new_slave)(struct pp_instance *ppi, unsigned char *pkt, int plen);
+	int (*update_delay)(struct pp_instance *ppi);
 };
 
 extern struct pp_ext_hooks pp_hooks; /* The one for the extension we build */
