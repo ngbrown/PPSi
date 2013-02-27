@@ -11,7 +11,6 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0; /* error var, to check errors in msg handling */
 	TimeInternal *time;
-	TimeInternal req_rec_tstamp;
 	TimeInternal correction_field;
 	TimeInternal resp_orig_tstamp;
 	MsgHeader *hdr = &ppi->msg_tmp_header;
@@ -96,12 +95,8 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			ppi->msg_tmp.resp.requestingPortIdentity.portNumber)
 			&& ppi->is_from_cur_par) {
 
-			to_TimeInternal(&req_rec_tstamp,
-				       &ppi->msg_tmp.resp.receiveTimestamp);
-			ppi->delay_req_receive_time.seconds =
-				req_rec_tstamp.seconds;
-			ppi->delay_req_receive_time.nanoseconds =
-				req_rec_tstamp.nanoseconds;
+			to_TimeInternal(&ppi->delay_req_receive_time,
+					&ppi->msg_tmp.resp.receiveTimestamp);
 
 			int64_to_TimeInternal(
 				hdr->correctionfield,
@@ -159,13 +154,9 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				ppi->pdelay_resp_receive_time.nanoseconds =
 					time->nanoseconds;
 				/* Store t2 (Fig 35) */
-				to_TimeInternal(&req_rec_tstamp,
-					       &ppi->msg_tmp.presp.
+				to_TimeInternal(&ppi->pdelay_req_receive_time,
+						&ppi->msg_tmp.presp.
 						       requestReceiptTimestamp);
-				ppi->pdelay_req_receive_time.seconds =
-					req_rec_tstamp.seconds;
-				ppi->pdelay_req_receive_time.nanoseconds =
-					req_rec_tstamp.nanoseconds;
 
 				int64_to_TimeInternal(hdr->correctionfield,
 					&correction_field);
