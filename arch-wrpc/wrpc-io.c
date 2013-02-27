@@ -4,7 +4,7 @@
 #include <ppsi/ppsi.h>
 #include <uart.h>
 #include <pps_gen.h>
-#include "spec.h"
+#include "wrpc.h"
 
 void pp_puts(const char *s)
 {
@@ -20,14 +20,14 @@ void pp_get_tstamp(TimeInternal *t) //uint32_t *sptr)
 	t->nanoseconds = (int32_t)nsec;
 }
 
-int32_t spec_set_tstamp(TimeInternal *t)
+int32_t wrpc_set_tstamp(TimeInternal *t)
 {
 	shw_pps_gen_set_time(t->seconds, t->nanoseconds);
 
 	return 0; /* SPEC uses a sort of monotonic tstamp for timers */
 }
 
-int spec_adj_freq(Integer32 adj)
+int wrpc_adj_freq(Integer32 adj)
 {
 	/* FIXME: this adjusts nanoseconds, not frequency */
 	shw_pps_gen_adjust(PPSG_ADJUST_NSEC, adj);
@@ -35,7 +35,7 @@ int spec_adj_freq(Integer32 adj)
 }
 
 int pp_adj_freq(Integer32 adj)
-	__attribute__((alias("spec_adj_freq")));
+	__attribute__((alias("wrpc_adj_freq")));
 
 int32_t pp_set_tstamp(TimeInternal *t)
-	__attribute__((alias("spec_set_tstamp")));
+	__attribute__((alias("wrpc_set_tstamp")));

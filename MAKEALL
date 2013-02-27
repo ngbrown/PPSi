@@ -23,7 +23,7 @@ build_diags () {
 build_ext () {
     unset PROTO_EXT
     build_diags
-    if [ "$ARCH" = "spec" ]; then
+    if [ "$ARCH" = "wrpc" ]; then
 	export PROTO_EXT=whiterabbit
 	build_diags
     fi
@@ -37,24 +37,24 @@ done
 PREFIX_gnu_linux=""
 PREFIX_bare_i386=""
 PREFIX_bare_x86_64=""
-PREFIX_spec="/opt/gcc-lm32/bin/lm32-elf-"
+PREFIX_wrpc="/opt/gcc-lm32/bin/lm32-elf-"
 
 CC_gnu_linux="gcc"
 CC_bare_i386="gcc -m32"
 CC_bare_x86_64="gcc -m64"
-CC_spec="${PREFIX_spec}gcc"
+CC_wrpc="${PREFIX_wrpc}gcc"
 
 LD_gnu_linux="ld"
 LD_bare_i386="ld -m elf_i386"
 LD_bare_x86_64="ld -m elf_x86_64"
-LD_spec="${PREFIX_spec}ld"
+LD_wrpc="${PREFIX_wrpc}ld"
 
 # Defaults, overridden by command line, later
 SHOW_UNDEF=false
 
 ARCHS="gnu-linux bare-i386 bare-x86-64"
 if [ "x${WRPCSW_ROOT}" != "x" ]; then
-    ARCHS="$ARCHS spec"
+    ARCHS="$ARCHS wrpc"
 fi
 
 # Parse command line, so we can limit the archs we build for
@@ -66,7 +66,7 @@ while [ $# -gt 0 ]; do
 	    ARCHS="$1";;
 	bare-x86-64)
 	    ARCHS="$1";;
-	spec)
+	wrpc)
 	    ARCHS="$1";;
 	bare)
 	    ARCHS="bare-i386 bare-x86-64";;

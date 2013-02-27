@@ -2,7 +2,7 @@
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 #include <ppsi/ppsi.h>
-#include "spec.h"
+#include "wrpc.h"
 #include <syscon.h>
 #include <pps_gen.h>
 #include <minic.h>
@@ -11,11 +11,11 @@
 #include <softpll_ng.h>
 #include <ptpd_netif.h>
 
-int spec_errno;
+int wrpc_errno;
 Octet buffer_out[PP_PACKET_SIZE + 14]; // 14 is ppi->proto_ofst for ethernet mode
 
 /* This function should init the minic and get the mac address */
-int spec_open_ch(struct pp_instance *ppi)
+int wrpc_open_ch(struct pp_instance *ppi)
 {
 	wr_socket_t *sock;
 	mac_addr_t mac;
@@ -39,7 +39,7 @@ int spec_open_ch(struct pp_instance *ppi)
 }
 
 /* To receive and send packets, we call the minic low-level stuff */
-int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
+int wrpc_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 		     TimeInternal *t)
 {
 	int got;
@@ -63,7 +63,7 @@ int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	return got;
 }
 
-int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
+int wrpc_send_packet(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	int snt;
@@ -101,19 +101,19 @@ int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
 	return snt;
 }
 
-int spec_net_init(struct pp_instance *ppi)
+int wrpc_net_init(struct pp_instance *ppi)
 {
 	ppi->buf_out = buffer_out;
 	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
 
 	ppi->buf_out+= 4 - (((int)ppi->buf_out) % 4); /* FIXME Alignment */
-	spec_open_ch(ppi);
+	wrpc_open_ch(ppi);
 
 	return 0;
 
 }
 
-int spec_net_shutdown(struct pp_instance *ppi)
+int wrpc_net_shutdown(struct pp_instance *ppi)
 {
 	ptpd_netif_close_socket(
 		(wr_socket_t *)NP(ppi)->ch[PP_NP_EVT].custom);
@@ -121,11 +121,11 @@ int spec_net_shutdown(struct pp_instance *ppi)
 }
 
 int pp_net_init(struct pp_instance *ppi)
-	__attribute__((alias("spec_net_init")));
+	__attribute__((alias("wrpc_net_init")));
 int pp_net_shutdown(struct pp_instance *ppi)
-	__attribute__((alias("spec_net_shutdown")));
+	__attribute__((alias("wrpc_net_shutdown")));
 int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
-	__attribute__((alias("spec_recv_packet")));
+	__attribute__((alias("wrpc_recv_packet")));
 int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t,
 				   int chtype, int use_pdelay_addr)
-	__attribute__((alias("spec_send_packet")));
+	__attribute__((alias("wrpc_send_packet")));

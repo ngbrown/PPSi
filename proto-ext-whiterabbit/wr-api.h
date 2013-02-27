@@ -75,7 +75,7 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen);
 int wr_link_on(struct pp_instance *ppi, unsigned char *pkt, int plen);
 
 /* White Rabbit hw-dependent functions (they are indeed implemented in
- * arch-spec or any other arch- */
+ * arch-wrpc or any other arch- */
 int wr_locking_enable(struct pp_instance *ppi);
 int wr_locking_poll(struct pp_instance *ppi);
 int wr_locking_disable(struct pp_instance *ppi);

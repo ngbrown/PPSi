@@ -2,8 +2,8 @@
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  * Aurelio Colosimo for CERN, 2012 -- GNU LGPL v2.1 or later
  */
-#ifndef __SPEC_H
-#define __SPEC_H
+#ifndef __WRPC_H
+#define __WRPC_H
 
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
@@ -11,14 +11,14 @@
 /*
  * These are the functions provided by the various bare files
  */
-extern int spec_open_ch(struct pp_instance *ppi);
+extern int wrpc_open_ch(struct pp_instance *ppi);
 
-extern int spec_recv_packet(struct pp_instance *ppi, void *pkt, int len,
+extern int wrpc_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t);
-extern int spec_send_packet(struct pp_instance *ppi, void *pkt, int len,
+extern int wrpc_send_packet(struct pp_instance *ppi, void *pkt, int len,
 			TimeInternal *t, int chtype, int use_pdelay_addr);
 
-extern void spec_main_loop(struct pp_instance *ppi);
+extern void wrpc_main_loop(struct pp_instance *ppi);
 extern void _irq_entry(void); /* unused, to make crt0.S happy */
 extern int main(void); /* alias to ppsi_main, so crt0.S is happy */
 
@@ -31,7 +31,7 @@ typedef struct {
   /* WR-PTP role of the port (Master, Slave, etc.) */
   int mode;
 
-  /* TX and RX delays (combined, big Deltas from the link model in the spec) */
+  /* TX and RX delays (combined, big Deltas from the link model in the wrpc) */
   uint32_t delta_tx;
   uint32_t delta_rx;
 
@@ -74,14 +74,14 @@ extern int halexp_get_port_state(hexp_port_state_t *state,
 /* End halexp_port_state */
 
 /* syscall-lookalike */
-extern int spec_time(void);
-extern void spec_udelay(int usecs);
-extern int spec_errno;
+extern int wrpc_time(void);
+extern void wrpc_udelay(int usecs);
+extern int wrpc_errno;
 
 /* Dev stuff */
-extern void spec_putc(int c);
-extern void spec_puts(const char *s);
-extern int spec_testc(void);
+extern void wrpc_putc(int c);
+extern void wrpc_puts(const char *s);
+extern int wrpc_testc(void);
 
 static inline void delay(int x)
 {
@@ -90,7 +90,7 @@ static inline void delay(int x)
 
 /* other network stuff, bah.... */
 
-struct spec_ethhdr {
+struct wrpc_ethhdr {
 	unsigned char	h_dest[6];
 	unsigned char	h_source[6];
 	uint16_t	h_proto;
@@ -130,4 +130,4 @@ struct spec_ethhdr {
 #define REF_CLOCK_PERIOD_PS 8000
 #define REF_CLOCK_FREQ_HZ 125000000
 
-#endif
+#endif /* __WRPC_H */

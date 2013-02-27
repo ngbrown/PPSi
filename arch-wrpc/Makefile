@@ -27,11 +27,11 @@ LIBARCH := $A/libarch.a
 LIBS += -L$A -larch
 
 
-OBJ-libarch := $A/spec-socket.o \
-	$A/spec-io.o \
-	$A/spec-timer.o \
-	$A/spec-spll.o \
-	$A/spec-calibration.o \
+OBJ-libarch := $A/wrpc-socket.o \
+	$A/wrpc-io.o \
+	$A/wrpc-timer.o \
+	$A/wrpc-spll.o \
+	$A/wrpc-calibration.o \
 	lib/div64.o
 
 $(LIBARCH): $(OBJ-libarch)
@@ -43,9 +43,9 @@ ppsi-bin: $(TARGET) $(TARGET).bin
 
 # to build the target, we need -lstd again, in case we call functions that
 # were not selected yet (e.g., pp_open_instance() ).
-$(TARGET): $(TARGET).o $A/crt0.o $(LIBARCH) $A/main-loop.o $A/spec-startup.o
+$(TARGET): $(TARGET).o $A/crt0.o $(LIBARCH) $A/main-loop.o $A/wrpc-startup.o
 	$(CC) -Wl,-Map,$(TARGET).map2 $(ARCH_LDFLAGS) -o $@ $A/crt0.o \
-		$(TARGET).o $(specdev-objects) $A/main-loop.o $A/spec-startup.o \
+		$(TARGET).o $(specdev-objects) $A/main-loop.o $A/wrpc-startup.o \
 		-L$A -larch $(LIBS)
 
 $(TARGET).bin: $(TARGET)

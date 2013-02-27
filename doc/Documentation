@@ -33,7 +33,7 @@ __________________________________________________________
           |       PTP PROTOCOL   | NET TRANSPORT PROTOCOL |
           |   IEEE1588 |  WR-EXT |   UDP  | IEEE802.3     |
           |            |         |        |               |
-spec      |       X    |    X    |        |     X         |
+wrpc      |       X    |    X    |        |     X         |
 gnu-linux |       X    |         |    X   |     X         |
 __________|____________|_________|________|_______________|
 
@@ -53,7 +53,7 @@ the extension:
 
     arch-gnu-linux/             The default for hosted compile
     arch-bare-linux/            A freestanding implementation (i386 syscalls)
-    arch-spec/                  For the SPEC card, lm32 processor
+    arch-wrpc/                  For WRPC-SW, lm32 processor
 
     proto-standard/             Standard PTP implementation
     proto-ext-whiterabbit/      Additional code for White Rabbit
