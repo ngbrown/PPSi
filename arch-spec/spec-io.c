@@ -6,8 +6,6 @@
 #include <pps_gen.h>
 #include "spec.h"
 
-const Integer32 PP_ADJ_FREQ_MAX = 512000; //GGDD value ?
-
 void pp_puts(const char *s)
 {
 	uart_write_string(s);
@@ -31,8 +29,9 @@ int32_t spec_set_tstamp(TimeInternal *t)
 
 int spec_adj_freq(Integer32 adj)
 {
+	/* FIXME: this adjusts nanoseconds, not frequency */
 	shw_pps_gen_adjust(PPSG_ADJUST_NSEC, adj);
-	return 0;
+	return -1; /* failure? */
 }
 
 int pp_adj_freq(Integer32 adj)

@@ -5,8 +5,6 @@
 #include <ppsi/diag.h>
 #include "bare-x86-64.h"
 
-const Integer32 PP_ADJ_FREQ_MAX = 512000;
-
 void pp_puts(const char *s)
 {
 	sys_write(0, s, strnlen(s, 300));
@@ -52,13 +50,13 @@ int bare_adj_freq(Integer32 adj)
 
 	if (adj > PP_ADJ_FREQ_MAX)
 		adj = PP_ADJ_FREQ_MAX;
-	else if (adj < -PP_ADJ_FREQ_MAX)
+	if (adj < -PP_ADJ_FREQ_MAX)
 		adj = -PP_ADJ_FREQ_MAX;
 
 	t.modes = MOD_FREQUENCY;
 	t.freq = adj * ((1 << 16) / 1000);
 
-	return !sys_adjtimex(&t);
+	return sys_adjtimex(&t);
 }
 
 int32_t pp_set_tstamp(TimeInternal *t)

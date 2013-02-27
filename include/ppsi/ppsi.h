@@ -431,10 +431,14 @@ extern void pp_get_tstamp(TimeInternal *t);
 extern int32_t pp_set_tstamp(TimeInternal *t);
 
 
-/* Virtualization of Linux adjtimex (or BSD adjtime) system clock time
- * adjustment. Boolean: returns 1 in case of success and 0 if failure */
+/*
+ * Virtualization of Linux adjtimex (or BSD adjtime) system clock time
+ * adjustment. Returns 0 for success, -1 for failure
+ */
 extern int pp_adj_freq(Integer32 adj);
-extern const Integer32 PP_ADJ_FREQ_MAX;
+
+/* Where is this maximum imposed from? And which unit? */
+#define  PP_ADJ_FREQ_MAX	512000
 
 /*
  * The state machine itself is an array of these structures.

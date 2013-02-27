@@ -11,8 +11,6 @@
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 
-const Integer32 PP_ADJ_FREQ_MAX = 512000;
-
 static void clock_fatal_error(char *context)
 {
 	PP_PRINTF("failure in \"%s\": %s\n.Exiting.\n", context,
@@ -57,13 +55,13 @@ int posix_adj_freq(Integer32 adj)
 
 	if (adj > PP_ADJ_FREQ_MAX)
 		adj = PP_ADJ_FREQ_MAX;
-	else if (adj < -PP_ADJ_FREQ_MAX)
+	if (adj < -PP_ADJ_FREQ_MAX)
 		adj = -PP_ADJ_FREQ_MAX;
 
 	t.modes = MOD_FREQUENCY;
 	t.freq = adj * ((1 << 16) / 1000);
 
-	return !adjtimex(&t);
+	return adjtimex(&t);
 }
 
 void pp_puts(const char *s)
