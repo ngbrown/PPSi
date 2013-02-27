@@ -78,9 +78,9 @@ int wrpc_calibrating_poll(struct pp_instance *ppi, int txrx, uint32_t *delta)
 }
 
 int wrpc_calibration_pattern_enable(struct pp_instance *ppi,
-                                          unsigned int calibrationPeriod,
-                                          unsigned int calibrationPattern,
-                                          unsigned int calibrationPatternLen)
+				    unsigned int calibrationPeriod,
+				    unsigned int calibrationPattern,
+				    unsigned int calibrationPatternLen)
 {
 	ep_cal_pattern_enable();
 	return WR_HW_CALIB_OK;
@@ -105,7 +105,7 @@ int wr_calibration_pattern_enable(struct pp_instance *ppi,
 	unsigned int calibrationPeriod, unsigned int calibrationPattern,
 	unsigned int calibrationPatternLen)
 	__attribute__((alias("wrpc_calibration_pattern_enable")));
-	
+
 int wr_calibration_pattern_disable(struct pp_instance *ppi)
 	__attribute__((alias("wrpc_calibration_pattern_disable")));
 

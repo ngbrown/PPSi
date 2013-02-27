@@ -240,7 +240,7 @@ Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
 }
 
 /* State decision algorithm 9.3.3 Fig 26 */
-UInteger8 bmc_state_decision( struct pp_instance *ppi,
+UInteger8 bmc_state_decision(struct pp_instance *ppi,
 			      MsgHeader *hdr, MsgAnnounce *ann)
 {
 	int cmpres;
@@ -285,9 +285,8 @@ UInteger8 bmc_state_decision( struct pp_instance *ppi,
 		}
 	}
 
-	if (cmpres == 0) {
+	if (cmpres == 0)
 		PP_PRINTF("Error in bmc_state_decision, cmpres=0.\n");
-	}
 
 	/*  MB: Is this the return code below correct? */
 	/*  Anyway, it's a valid return code. */

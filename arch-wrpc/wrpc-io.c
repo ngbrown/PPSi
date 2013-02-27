@@ -11,7 +11,7 @@ void pp_puts(const char *s)
 	uart_write_string(s);
 }
 
-void pp_get_tstamp(TimeInternal *t) //uint32_t *sptr)
+void pp_get_tstamp(TimeInternal *t)
 {
 	uint64_t sec;
 	uint32_t nsec;

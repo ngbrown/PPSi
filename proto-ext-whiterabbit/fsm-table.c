@@ -25,10 +25,9 @@ struct pp_state_table_item pp_state_table[] __weak = {
 	{ WRS_M_LOCK,		"master/wr-m-lock",	wr_m_lock,},
 	{ WRS_S_LOCK,		"uncalibrated/wr-s-lock",	wr_s_lock,},
 	{ WRS_LOCKED,		"uncalibrated/wr-locked",	wr_locked,},
-	{ WRS_CALIBRATION,	"wr-calibration",wr_calibration,},
-	{ WRS_CALIBRATED,	"wr-calibrated",wr_calibrated,},
-	{ WRS_RESP_CALIB_REQ,	"wr-resp-calib-req",
-					wr_resp_calib_req,},
-	{ WRS_WR_LINK_ON,	"wr-link-on",	wr_link_on,},
+	{ WRS_CALIBRATION,	"wr-calibration",	wr_calibration,},
+	{ WRS_CALIBRATED,	"wr-calibrated",	wr_calibrated,},
+	{ WRS_RESP_CALIB_REQ,	"wr-resp-calib-req",	wr_resp_calib_req,},
+	{ WRS_WR_LINK_ON,	"wr-link-on",		wr_link_on,},
 	{ PPS_END_OF_TABLE,}
 };

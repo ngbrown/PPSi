@@ -93,11 +93,11 @@ void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y)
 
 void div2_TimeInternal(TimeInternal *r)
 {
-    r->nanoseconds += r->seconds % 2 * 1000000000;
-    r->seconds /= 2;
-    r->nanoseconds /= 2;
+	r->nanoseconds += r->seconds % 2 * 1000000000;
+	r->seconds /= 2;
+	r->nanoseconds /= 2;
 
-    normalize_TimeInternal(r);
+	normalize_TimeInternal(r);
 }
 
 void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns)
@@ -108,7 +108,8 @@ void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns)
 
 void display_TimeInternal(const char *label, TimeInternal *t)
 {
-	PP_VPRINTF("%s: %s%d.%09d \n", label,
-		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0)) ? "-" : " ",
-		abs(t->seconds), abs(t->nanoseconds));
+	PP_VPRINTF("%s: %s%d.%09d\n", label,
+		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0))
+		   ? "-" : " ",
+		   abs(t->seconds), abs(t->nanoseconds));
 }

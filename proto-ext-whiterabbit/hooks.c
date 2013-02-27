@@ -42,9 +42,8 @@ static int wr_master_msg(struct pp_instance *ppi, unsigned char *pkt, int plen,
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 	MsgSignaling wrsig_msg;
 	TimeInternal *time = &ppi->last_rcv_time;
-;
 
-	switch(msgtype) {
+	switch (msgtype) {
 
 	/* This case is modified from the default one */
 	case PPM_DELAY_REQ:
@@ -156,9 +155,8 @@ void wr_unpack_announce(void *buf, MsgAnnounce *ann)
 {
 	int msg_len = htons(*(UInteger16 *) (buf + 2));
 
-	if (msg_len > PP_ANNOUNCE_LENGTH) {
+	if (msg_len > PP_ANNOUNCE_LENGTH)
 		msg_unpack_announce_wr_tlv(buf, ann);
-	}
 }
 
 

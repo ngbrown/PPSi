@@ -59,16 +59,16 @@ void msg_pack_announce_wr_tlv(struct pp_instance *ppi)
 	buf = ppi->buf_out;
 	*(UInteger16 *)(buf + 2) = htons(WR_ANNOUNCE_LENGTH);
 
-	*(UInteger16*)(buf + 64) = htons(TLV_TYPE_ORG_EXTENSION);
-	*(UInteger16*)(buf + 66) = htons(WR_ANNOUNCE_TLV_LENGTH);
-	// CERN's OUI: WR_TLV_ORGANIZATION_ID, how to flip bits?
-	*(UInteger16*)(buf + 68) = htons((WR_TLV_ORGANIZATION_ID >> 8));
-	*(UInteger16*)(buf + 70) = htons((0xFFFF & (WR_TLV_ORGANIZATION_ID << 8
+	*(UInteger16 *)(buf + 64) = htons(TLV_TYPE_ORG_EXTENSION);
+	*(UInteger16 *)(buf + 66) = htons(WR_ANNOUNCE_TLV_LENGTH);
+	/* CERN's OUI: WR_TLV_ORGANIZATION_ID, how to flip bits? */
+	*(UInteger16 *)(buf + 68) = htons((WR_TLV_ORGANIZATION_ID >> 8));
+	*(UInteger16 *)(buf + 70) = htons((0xFFFF & (WR_TLV_ORGANIZATION_ID << 8
 		| WR_TLV_MAGIC_NUMBER >> 8)));
-	*(UInteger16*)(buf + 72) = htons((0xFFFF & (WR_TLV_MAGIC_NUMBER << 8
+	*(UInteger16 *)(buf + 72) = htons((0xFFFF & (WR_TLV_MAGIC_NUMBER << 8
 		| WR_TLV_WR_VERSION_NUMBER)));
-	//wrMessageId
-	*(UInteger16*)(buf + 74) = htons(ANN_SUFIX);
+	/* wrMessageId */
+	*(UInteger16 *)(buf + 74) = htons(ANN_SUFIX);
 	wr_flags = wr_flags | WR_DSPOR(ppi)->wrConfig;
 
 	if (WR_DSPOR(ppi)->calibrated)
@@ -76,7 +76,7 @@ void msg_pack_announce_wr_tlv(struct pp_instance *ppi)
 
 	if (WR_DSPOR(ppi)->wrModeOn)
 		wr_flags = WR_IS_WR_MODE | wr_flags;
-	*(UInteger16*)(buf + 76) = htons(wr_flags);
+	*(UInteger16 *)(buf + 76) = htons(wr_flags);
 }
 
 void msg_unpack_announce_wr_tlv(void *buf, MsgAnnounce *ann)
@@ -88,14 +88,14 @@ void msg_unpack_announce_wr_tlv(void *buf, MsgAnnounce *ann)
 	UInteger16 tlv_wrMessageID;
 
 	tlv_type = (UInteger16)get_be16(buf+64);
-	tlv_organizationID = htons(*(UInteger16*)(buf+68)) << 8;
-	tlv_organizationID = htons(*(UInteger16*)(buf+70)) >> 8
+	tlv_organizationID = htons(*(UInteger16 *)(buf+68)) << 8;
+	tlv_organizationID = htons(*(UInteger16 *)(buf+70)) >> 8
 		| tlv_organizationID;
-	tlv_magicNumber = 0xFF00 & (htons(*(UInteger16*)(buf+70)) << 8);
-	tlv_magicNumber = htons(*(UInteger16*)(buf+72)) >> 8
+	tlv_magicNumber = 0xFF00 & (htons(*(UInteger16 *)(buf+70)) << 8);
+	tlv_magicNumber = htons(*(UInteger16 *)(buf+72)) >> 8
 		| tlv_magicNumber;
-	tlv_versionNumber = 0xFF & htons(*(UInteger16*)(buf+72));
-	tlv_wrMessageID = htons(*(UInteger16*)(buf+74));
+	tlv_versionNumber = 0xFF & htons(*(UInteger16 *)(buf+72));
+	tlv_wrMessageID = htons(*(UInteger16 *)(buf+74));
 
 	if (tlv_type == TLV_TYPE_ORG_EXTENSION &&
 		tlv_organizationID == WR_TLV_ORGANIZATION_ID &&
@@ -121,34 +121,33 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 	buf = ppi->buf_out;
 
 	/* Changes in header */
-	*(char*)(buf+0) = *(char*)(buf+0) & 0xF0; /* RAZ messageType */
-	*(char*)(buf+0) = *(char*)(buf+0) | 0x0C; /* Table 19 -> signaling */
+	*(char *)(buf+0) = *(char *)(buf+0) & 0xF0; /* RAZ messageType */
+	*(char *)(buf+0) = *(char *)(buf+0) | 0x0C; /* Table 19 -> signaling */
 
-	*(UInteger8*)(buf+32) = 0x05; //Table 23 -> all other
+	*(UInteger8 *)(buf+32) = 0x05; //Table 23 -> all other
 
 	/* target portIdentity */
-	memcpy((buf+34),DSPAR(ppi)->parentPortIdentity.clockIdentity,
+	memcpy((buf+34), DSPAR(ppi)->parentPortIdentity.clockIdentity,
 		PP_CLOCK_IDENTITY_LENGTH);
-	put_be16(buf + 42,DSPAR(ppi)->parentPortIdentity.portNumber);
+	put_be16(buf + 42, DSPAR(ppi)->parentPortIdentity.portNumber);
 
 	/* WR TLV */
-	*(UInteger16*)(buf+44) = htons(TLV_TYPE_ORG_EXTENSION);
+	*(UInteger16 *)(buf+44) = htons(TLV_TYPE_ORG_EXTENSION);
 	/* leave lenght free */
-	*(UInteger16*)(buf+48) = htons((WR_TLV_ORGANIZATION_ID >> 8));
-	*(UInteger16*)(buf+50) = htons((0xFFFF &
+	*(UInteger16 *)(buf+48) = htons((WR_TLV_ORGANIZATION_ID >> 8));
+	*(UInteger16 *)(buf+50) = htons((0xFFFF &
 		(WR_TLV_ORGANIZATION_ID << 8 | WR_TLV_MAGIC_NUMBER >> 8)));
-	*(UInteger16*)(buf+52) = htons((0xFFFF &
+	*(UInteger16 *)(buf+52) = htons((0xFFFF &
 		(WR_TLV_MAGIC_NUMBER    << 8 | WR_TLV_WR_VERSION_NUMBER)));
 	/* wrMessageId */
-	*(UInteger16*)(buf+54) = htons(wr_msg_id);
+	*(UInteger16 *)(buf+54) = htons(wr_msg_id);
 
 	switch (wr_msg_id) {
 	case CALIBRATE:
-		if(WR_DSPOR(ppi)->calibrated) {
+		if (WR_DSPOR(ppi)->calibrated) {
 			put_be16(buf+56,
 				 (WR_DSPOR(ppi)->calRetry << 8 | 0x0000));
-		}
-		else {
+		} else {
 			put_be16(buf+56,
 				 (WR_DSPOR(ppi)->calRetry << 8 | 0x0001));
 		}
@@ -176,10 +175,10 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 	/* header len */
 	put_be16(buf + 2, WR_SIGNALING_MSG_BASE_LENGTH + len);
 	/* TLV len */
-	*(Integer16*)(buf+46) = htons(len);
+	*(Integer16 *)(buf+46) = htons(len);
 
 	/* FIXME diagnostic */
-	return (WR_SIGNALING_MSG_BASE_LENGTH + len);
+	return WR_SIGNALING_MSG_BASE_LENGTH + len;
 }
 
 /* White Rabbit: unpacking wr signaling messages */
@@ -192,18 +191,18 @@ void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 	UInteger16 tlv_versionNumber;
 	Enumeration16 wr_msg_id;
 
-	memcpy(wrsig_msg->targetPortIdentity.clockIdentity,(buf+34),
+	memcpy(wrsig_msg->targetPortIdentity.clockIdentity, (buf + 34),
 	       PP_CLOCK_IDENTITY_LENGTH);
 	wrsig_msg->targetPortIdentity.portNumber = (UInteger16)get_be16(buf+42);
 
-	tlv_type  	   = (UInteger16)get_be16(buf+44);
-	tlv_organizationID = htons(*(UInteger16*)(buf+48)) << 8;
-	tlv_organizationID = htons(*(UInteger16*)(buf+50)) >> 8
+	tlv_type           = (UInteger16)get_be16(buf + 44);
+	tlv_organizationID = htons(*(UInteger16 *)(buf + 48)) << 8;
+	tlv_organizationID = htons(*(UInteger16 *)(buf + 50)) >> 8
 				| tlv_organizationID;
-	tlv_magicNumber = 0xFF00 & (htons(*(UInteger16*)(buf+50)) << 8);
-	tlv_magicNumber = htons(*(UInteger16*)(buf+52)) >>  8
+	tlv_magicNumber = 0xFF00 & (htons(*(UInteger16 *)(buf + 50)) << 8);
+	tlv_magicNumber = htons(*(UInteger16 *)(buf + 52)) >>  8
 				| tlv_magicNumber;
-	tlv_versionNumber = 0xFF & htons(*(UInteger16*)(buf+52));
+	tlv_versionNumber = 0xFF & htons(*(UInteger16 *)(buf + 52));
 
 	if (tlv_type != TLV_TYPE_ORG_EXTENSION) {
 		PP_PRINTF("handle Signaling msg, failed, This is not "
@@ -217,19 +216,19 @@ void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 		return;
 	}
 
-	if(tlv_magicNumber != WR_TLV_MAGIC_NUMBER) {
+	if (tlv_magicNumber != WR_TLV_MAGIC_NUMBER) {
 		PP_PRINTF("handle Signaling msg, failed, "
 		"not White Rabbit magic number = 0x%x\n", tlv_magicNumber);
 		return;
 	}
 
-	if(tlv_versionNumber  != WR_TLV_WR_VERSION_NUMBER ) {
+	if (tlv_versionNumber  != WR_TLV_WR_VERSION_NUMBER ) {
 		PP_PRINTF("handle Signaling msg, failed, not supported "
 			"version number = 0x%x\n", tlv_versionNumber);
 		return;
 	}
 
-	wr_msg_id = htons(*(UInteger16*)(buf+54));
+	wr_msg_id = htons(*(UInteger16 *)(buf + 54));
 
 	if (pwr_msg_id) {
 		*pwr_msg_id = wr_msg_id;

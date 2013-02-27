@@ -45,9 +45,9 @@ int wrpc_adjust_in_progress()
 
 int wrpc_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
 {
-	if(adjust_sec)
+	if (adjust_sec)
 		shw_pps_gen_adjust(PPSG_ADJUST_SEC, adjust_sec);
-	if(adjust_nsec)
+	if (adjust_nsec)
 		shw_pps_gen_adjust(PPSG_ADJUST_NSEC, adjust_nsec);
 	return 0;
 }

@@ -12,7 +12,7 @@
 #include <ptpd_netif.h>
 
 int wrpc_errno;
-Octet buffer_out[PP_PACKET_SIZE + 14]; // 14 is ppi->proto_ofst for ethernet mode
+Octet buffer_out[PP_PACKET_SIZE + 14]; /* 14 == ppi->proto_ofst for eth mode */
 
 /* This function should init the minic and get the mac address */
 int wrpc_open_ch(struct pp_instance *ppi)
@@ -76,8 +76,8 @@ int wrpc_send_packet(struct pp_instance *ppi, void *pkt, int len,
 		int j;
 		pp_printf("sent: %i\n", len);
 		for (j = 0; j < len; j++) {
-			pp_printf("%02x ", ((char*)pkt)[j]);
-			if( (j+1)%16==0 )
+			pp_printf("%02x ", ((char *)pkt)[j]);
+			if( (j + 1) % 16 == 0 )
 				pp_printf("\n");
 		}
 		pp_printf("\n");
@@ -94,7 +94,7 @@ int wrpc_send_packet(struct pp_instance *ppi, void *pkt, int len,
 		t->phase = 0;
 		t->correct = wr_ts.correct;
 
-		PP_VPRINTF("%s: snt=%d, sec=%d, nsec=%d\n", __FUNCTION__, snt,
+		PP_VPRINTF("%s: snt=%d, sec=%d, nsec=%d\n", __func__, snt,
 			   t->seconds, t->nanoseconds);
 	}
 
@@ -106,7 +106,7 @@ int wrpc_net_init(struct pp_instance *ppi)
 	ppi->buf_out = buffer_out;
 	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
 
-	ppi->buf_out+= 4 - (((int)ppi->buf_out) % 4); /* FIXME Alignment */
+	ppi->buf_out += 4 - (((int)ppi->buf_out) % 4); /* FIXME Alignment */
 	wrpc_open_ch(ppi);
 
 	return 0;

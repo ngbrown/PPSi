@@ -108,8 +108,7 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	if (POSIX_ARCH(ppi)->rcv_switch) {
 		ch1 = &(NP(ppi)->ch[PP_NP_GEN]);
 		ch2 = &(NP(ppi)->ch[PP_NP_EVT]);
-	}
-	else {
+	} else {
 		ch1 = &(NP(ppi)->ch[PP_NP_EVT]);
 		ch2 = &(NP(ppi)->ch[PP_NP_GEN]);
 	}
@@ -283,7 +282,7 @@ int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	iface_addr.s_addr =
 		((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
 
-	PP_VPRINTF("Local IP address used : %s \n", inet_ntoa(iface_addr));
+	PP_VPRINTF("Local IP address used : %s\n", inet_ntoa(iface_addr));
 
 	temp = 1; /* allow address reuse */
 

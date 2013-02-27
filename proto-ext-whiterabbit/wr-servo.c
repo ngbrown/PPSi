@@ -37,7 +37,8 @@ void wr_servo_enable_tracking(int enable)
 
 static void dump_timestamp(char *what, TimeInternal ts)
 {
-	PP_PRINTF("%s = %d:%d:%d\n", what, (int32_t)ts.seconds, ts.nanoseconds, ts.phase);
+	PP_PRINTF("%s = %d:%d:%d\n", what, (int32_t)ts.seconds,
+		  ts.nanoseconds, ts.phase);
 }
 
 static int64_t ts_to_picos(TimeInternal ts)
@@ -70,18 +71,16 @@ static TimeInternal ts_add(TimeInternal a, TimeInternal b)
 	c.seconds = 0;
 	c.nanoseconds = 0;
 
-	c.phase =a.phase + b.phase;
+	c.phase = a.phase + b.phase;
 
-	while(c.phase >= 1000)
-	{
+	while(c.phase >= 1000) {
 		c.phase -= 1000;
 		c.nanoseconds++;
 	}
 
 	c.nanoseconds += (a.nanoseconds + b.nanoseconds);
 
-	while(c.nanoseconds >= 1000000000L)
-	{
+	while(c.nanoseconds >= 1000000000L) {
 		c.nanoseconds -= 1000000000L;
 		c.seconds++;
 	}
@@ -100,15 +99,13 @@ static TimeInternal ts_sub(TimeInternal a, TimeInternal b)
 
 	c.phase = a.phase - b.phase;
 
-	while(c.phase < 0)
-	{
-		c.phase+=1000;
+	while(c.phase < 0) {
+		c.phase += 1000;
 		c.nanoseconds--;
 	}
 
 	c.nanoseconds += a.nanoseconds - b.nanoseconds;
-	while(c.nanoseconds < 0)
-	{
+	while(c.nanoseconds < 0) {
 		c.nanoseconds += 1000000000L;
 		c.seconds--;
 	}
@@ -122,37 +119,34 @@ static TimeInternal ts_sub(TimeInternal a, TimeInternal b)
  * of 8ns cycles and puts the extra nanoseconds in the phase field */
 static TimeInternal ts_hardwarize(TimeInternal ts, int clock_period_ps)
 {
-    int32_t q_threshold;
+	int32_t q_threshold;
 
-    q_threshold = (clock_period_ps + 999) / 1000;
+	q_threshold = (clock_period_ps + 999) / 1000;
 
-	if(ts.nanoseconds > 0)
-	{
+	if (ts.nanoseconds > 0) {
 		int32_t extra_nsec = ts.nanoseconds % q_threshold;
 
-		if(extra_nsec)
-		{
-			ts.nanoseconds -=extra_nsec;
+		if(extra_nsec) {
+			ts.nanoseconds -= extra_nsec;
 			ts.phase += extra_nsec * 1000;
 		}
 	}
 
-	if(ts.nanoseconds < 0) {
+	if (ts.nanoseconds < 0) {
 		ts.nanoseconds += 1000000000LL;
 		ts.seconds--;
 	}
 
-    if(ts.seconds == -1 && ts.nanoseconds > 0)
-    {
-        ts.seconds++;
-        ts.nanoseconds -= 1000000000LL;
-    }
+	if (ts.seconds == -1 && ts.nanoseconds > 0) {
+		ts.seconds++;
+		ts.nanoseconds -= 1000000000LL;
+	}
 
-    if(ts.nanoseconds < 0 && ts.nanoseconds >= (-q_threshold) && ts.seconds == 0)
-    {
-        ts.nanoseconds += q_threshold;
-        ts.phase -= q_threshold * 1000;
-    }
+	if (ts.nanoseconds < 0 && ts.nanoseconds >= (-q_threshold)
+	    && ts.seconds == 0) {
+		ts.nanoseconds += q_threshold;
+		ts.phase -= q_threshold * 1000;
+	}
 
 	return ts;
 }
@@ -189,7 +183,7 @@ int wr_servo_init(struct pp_instance *ppi)
 	s->state = WR_SYNC_TAI;
 	s->cur_setpoint = 0;
 	s->missed_iters = 0;
-	
+
 	s->delta_tx_m = ((((int32_t)WR_DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.msb) << 16);
 	s->delta_rx_m = ((((int32_t)WR_DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.msb) << 16);
 
@@ -278,13 +272,13 @@ int wr_servo_update(struct pp_instance *ppi)
 	if(!got_sync)
 		return 0;
 
-    if(!s->t1.correct || !s->t2.correct || !s->t3.correct || !s->t4.correct)
-    {
-	PP_VPRINTF( "servo: TimestampsIncorrect: %d %d %d %d\n",
-		s->t1.correct, s->t2.correct, s->t3.correct, s->t4.correct);
-
-	 return 0;
-    }
+	if(!s->t1.correct || !s->t2.correct ||
+	   !s->t3.correct || !s->t4.correct) {
+		PP_VPRINTF( "servo: TimestampsIncorrect: %d %d %d %d\n",
+			    s->t1.correct, s->t2.correct,
+			    s->t3.correct, s->t4.correct);
+		return 0;
+	}
 
 	cur_servo_state.update_count++;
 
@@ -348,29 +342,26 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	}
 
-	if (wr_locking_poll(ppi) != WR_SPLL_READY)
-	{
+	if (wr_locking_poll(ppi) != WR_SPLL_READY) {
 		PP_PRINTF("PLL OutOfLock, should restart sync\n");
 		wr_enable_timing_output(ppi, 0);
 		/* TODO check
 		 * DSPOR(ppi)->doRestart = TRUE; */
 	}
-	
-	switch(s->state)
-	{
-        case WR_WAIT_SYNC_IDLE:
-		if(!wr_adjust_in_progress())
-		{
-		   s->state = s->next_state;
-		}else PP_PRINTF("servo:busy\n");
 
+	switch (s->state) {
+	case WR_WAIT_SYNC_IDLE:
+		if (!wr_adjust_in_progress()) {
+			s->state = s->next_state;
+		} else {
+			PP_PRINTF("servo:busy\n");
+		}
 		break;
 
 	case WR_SYNC_TAI:
 		wr_enable_timing_output(ppi, 0);
 
-		if(ts_offset_hw.seconds != 0)
-		{
+		if (ts_offset_hw.seconds != 0) {
 			strcpy(cur_servo_state.slave_servo_state, "SYNC_SEC");
 			wr_adjust_counters(ts_offset_hw.seconds, 0);
 			wr_adjust_phase(0);
@@ -379,26 +370,30 @@ int wr_servo_update(struct pp_instance *ppi)
 			s->state = WR_WAIT_SYNC_IDLE;
 			s->last_tics = tics;
 
-		} else s->state = WR_SYNC_NSEC;
+		} else {
+			s->state = WR_SYNC_NSEC;
+		}
 		break;
 
 	case WR_SYNC_NSEC:
 		strcpy(cur_servo_state.slave_servo_state, "SYNC_NSEC");
 
-		if(ts_offset_hw.nanoseconds != 0)
-		{
+		if (ts_offset_hw.nanoseconds != 0) {
 			wr_adjust_counters(0, ts_offset_hw.nanoseconds);
 
 			s->next_state = WR_SYNC_NSEC;
 			s->state = WR_WAIT_SYNC_IDLE;
 			s->last_tics = tics;
 
-		} else s->state = WR_SYNC_PHASE;
+		} else {
+			s->state = WR_SYNC_PHASE;
+		}
 		break;
 
 	case WR_SYNC_PHASE:
 		strcpy(cur_servo_state.slave_servo_state, "SYNC_PHASE");
-		s->cur_setpoint = ts_offset_hw.phase + ts_offset_hw.nanoseconds * 1000;
+		s->cur_setpoint = ts_offset_hw.phase
+			+ ts_offset_hw.nanoseconds * 1000;
 
 		wr_adjust_phase(s->cur_setpoint);
 
@@ -406,36 +401,36 @@ int wr_servo_update(struct pp_instance *ppi)
 		s->state = WR_WAIT_SYNC_IDLE;
 		s->last_tics = tics;
 		s->delta_ms_prev = s->delta_ms;
-    	break;
+		break;
 
-    case WR_WAIT_OFFSET_STABLE:
-    {
-        int64_t remaining_offset = abs(ts_to_picos(ts_offset_hw));
+	case WR_WAIT_OFFSET_STABLE:
+	{
+		int64_t remaining_offset = abs(ts_to_picos(ts_offset_hw));
 
-				if(ts_offset_hw.seconds !=0 || ts_offset_hw.nanoseconds != 0)
-					s->state = WR_SYNC_TAI;
-        else if(remaining_offset < WR_SERVO_OFFSET_STABILITY_THRESHOLD)
-        {
-            wr_enable_timing_output(ppi, 1);
-            s->state = WR_TRACK_PHASE;
-        } else s->missed_iters++;
-        
-        if(s->missed_iters >= 10)
-        	s->state = WR_SYNC_TAI;
+		if (ts_offset_hw.seconds !=0 || ts_offset_hw.nanoseconds != 0)
+			s->state = WR_SYNC_TAI;
+		else
+			if(remaining_offset < WR_SERVO_OFFSET_STABILITY_THRESHOLD) {
+				wr_enable_timing_output(ppi, 1);
+				s->state = WR_TRACK_PHASE;
+			} else {
+				s->missed_iters++;
+			}
 
-        break;
-    }
+		if (s->missed_iters >= 10)
+			s->state = WR_SYNC_TAI;
+		break;
+	}
 
 	case WR_TRACK_PHASE:
 		strcpy(cur_servo_state.slave_servo_state, "TRACK_PHASE");
 		cur_servo_state.cur_setpoint = s->cur_setpoint;
 		cur_servo_state.cur_skew = s->delta_ms - s->delta_ms_prev;
 
-		if(ts_offset_hw.seconds !=0 || ts_offset_hw.nanoseconds != 0)
+		if (ts_offset_hw.seconds !=0 || ts_offset_hw.nanoseconds != 0)
 				s->state = WR_SYNC_TAI;
 
-		if(tracking_enabled)
-		{
+		if(tracking_enabled) {
 //         	shw_pps_gen_enable_output(1);
 			// just follow the changes of deltaMS
 			s->cur_setpoint += (s->delta_ms - s->delta_ms_prev);

@@ -10,7 +10,7 @@ int wrpc_timer_init(struct pp_instance *ppi)
 {
 	uint32_t i;
 
-	for(i =0; i<PP_TIMER_ARRAY_SIZE; i++)
+	for (i = 0; i < PP_TIMER_ARRAY_SIZE; i++)
 		ppi->timers[i] = &wrpc_timers[i];
 
 	return 0;
@@ -36,7 +36,7 @@ int wrpc_timer_expired(struct pp_timer *tm)
 	uint32_t now;
 
 	if (tm->start == 0) {
-		PP_PRINTF("%p Warning: posix_timer_expired: timer not started\n",tm);
+		PP_PRINTF("%s: Warning: timer %p not started\n", __func__, tm);
 		return 0;
 	}
 

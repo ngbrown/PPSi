@@ -6,7 +6,7 @@
  * These are the functions provided by the various posix files
  */
 
-#define POSIX_ARCH(ppi) ((struct posix_arch_data*)(ppi->arch_data))
+#define POSIX_ARCH(ppi) ((struct posix_arch_data *)(ppi->arch_data))
 struct posix_arch_data {
 	struct timeval tv;
 	int rcv_switch; /* flag for event / general receive order */

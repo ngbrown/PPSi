@@ -85,7 +85,8 @@ extern int wrpc_testc(void);
 
 static inline void delay(int x)
 {
-	while(x--) asm volatile("nop");
+	while (x--)
+		asm volatile("nop");
 }
 
 /* other network stuff, bah.... */

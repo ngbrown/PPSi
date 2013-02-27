@@ -45,7 +45,8 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			goto failure;
 
 		time_snt = &ppi->last_snt_time;
-		add_TimeInternal(time_snt, time_snt, &OPTS(ppi)->outbound_latency);
+		add_TimeInternal(time_snt, time_snt,
+				 &OPTS(ppi)->outbound_latency);
 		if (msg_issue_followup(ppi, time_snt))
 			goto failure;
 	}

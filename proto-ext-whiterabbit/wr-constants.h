@@ -22,7 +22,7 @@
 #define WR_DEFAULT_CAL_PATTERN		0x3E0	/* 1111100000 */
 #define WR_DEFAULT_CAL_PATTERN_LEN	0xA	/* 10 bits */
 
-#define WR_DEFAULT_STATE_TIMEOUT_MS	300 	/* [ms] */
+#define WR_DEFAULT_STATE_TIMEOUT_MS	300	/* [ms] */
 #define WR_WRS_PRESENT_TIMEOUT_MS	1000
 #define WR_M_LOCK_TIMEOUT_MS		10000
 #define WR_S_LOCK_TIMEOUT_MS		10000
@@ -54,7 +54,7 @@
 
 /* new stuff for WRPTPv2 */
 
-#define TLV_TYPE_ORG_EXTENSION 		0x0003 /* organization specific */
+#define TLV_TYPE_ORG_EXTENSION		0x0003 /* organization specific */
 
 #define WR_PRIORITY1                    64
 
@@ -69,8 +69,8 @@
 
 #define WR_DEFAULT_PHY_CALIBRATION_REQUIRED FALSE
 
-#define     SEND_CALIBRATION_PATTERN 	0X0001
-#define NOT_SEND_CALIBRATION_PATTERN 	0X0000
+#define     SEND_CALIBRATION_PATTERN	0X0001
+#define NOT_SEND_CALIBRATION_PATTERN	0X0000
 
 /* White Rabbit softpll status values */
 #define WR_SPLL_OK	0
@@ -88,15 +88,15 @@
 /* Indicates if a port is configured as White Rabbit, and what kind
  * (master/slave) */
 enum {
-	NON_WR      = 0x0,
-	WR_S_ONLY   = 0x2,
-	WR_M_ONLY   = 0x1,
-	WR_M_AND_S  = 0x3,
-	WR_MODE_AUTO= 0x4, /* only for ptpx - not in the spec */
+	NON_WR		= 0x0,
+	WR_S_ONLY	= 0x2,
+	WR_M_ONLY	= 0x1,
+	WR_M_AND_S	= 0x3,
+	WR_MODE_AUTO	= 0x4, /* only for ptpx - not in the spec */
 };
 
 /* White Rabbit node */
-enum{
+enum {
 	WR_SLAVE  = 2,
 	WR_MASTER = 1,
 };
@@ -116,8 +116,8 @@ enum {
 enum {
 	/* WR states start from 16 in order not to be confused with PTP states,
 	 * since our application FSM is flat */
-	WRS_PRESENT = 16,  WRS_S_LOCK, WRS_M_LOCK,  WRS_LOCKED,
-	WRS_CALIBRATION,  WRS_CALIBRATED,  WRS_RESP_CALIB_REQ ,WRS_WR_LINK_ON,
+	WRS_PRESENT = 16, WRS_S_LOCK, WRS_M_LOCK,  WRS_LOCKED,
+	WRS_CALIBRATION, WRS_CALIBRATED, WRS_RESP_CALIB_REQ, WRS_WR_LINK_ON,
 	/* Each WR main state (except IDLE) has an associated timeout
 	 * we use state names to manage timeouts as well */
 	WR_TIMER_ARRAY_SIZE, /* number of states which has timeouts */
@@ -154,8 +154,8 @@ enum {
 /* White Rabbit slave port's role */
 enum {
 	NON_SLAVE	= 0x0,
-	PRIMARY_SLAVE 	,
-	SECONDARY_SLAVE ,
+	PRIMARY_SLAVE,
+	SECONDARY_SLAVE,
 };
 
 /* White Rabbit data initialization mode */

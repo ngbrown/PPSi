@@ -20,9 +20,8 @@ void posix_main_loop(struct pp_instance *ppi)
 
 	set_TimeInternal(&ppi->last_rcv_time, 0, 0);
 
-	if (OPTS(ppi)->ethernet_mode) {
+	if (OPTS(ppi)->ethernet_mode)
 		NP(ppi)->proto_ofst = 14;
-	}
 
 	/*
 	 * The main loop here is based on select. While we are not

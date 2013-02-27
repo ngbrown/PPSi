@@ -40,25 +40,25 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 			     int len);
 
 #ifdef VERB_LOG_MSGS
-#define MSG_SEND_AND_RET_VARLEN(x,y,z,w)\
+#define MSG_SEND_AND_RET_VARLEN(x, y, z, w) \
 	if (pp_send_packet(ppi, ppi->buf_out, w,\
-		&ppi->last_snt_time, PP_NP_##y , z) < w) {\
-		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n",\
-			pp_msg_names[PPM_##x], PPM_##x);\
-		return -1;\
-	}\
-	PP_VPRINTF("SENT %02d %d.%d %s \n", w,\
-		ppi->last_snt_time.seconds,\
-		ppi->last_snt_time.nanoseconds,pp_msg_names[PPM_##x]);\
-	ppi->sent_seq_id[PPM_## x]++;\
+		&ppi->last_snt_time, PP_NP_##y , z) < w) { \
+		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n", \
+			pp_msg_names[PPM_##x], PPM_##x); \
+		return -1; \
+	} \
+	PP_VPRINTF("SENT %02d %d.%d %s\n", w, \
+		ppi->last_snt_time.seconds, \
+		ppi->last_snt_time.nanoseconds, pp_msg_names[PPM_##x]); \
+	ppi->sent_seq_id[PPM_## x]++; \
 	return 0;
 #else
-#define MSG_SEND_AND_RET_VARLEN(x,y,z,w)\
-	if (pp_send_packet(ppi, ppi->buf_out, w,\
-		&ppi->last_snt_time, PP_NP_##y , z) < w) {\
-		return -1;\
-	}\
-	ppi->sent_seq_id[PPM_## x]++;\
+#define MSG_SEND_AND_RET_VARLEN(x, y, z, w) \
+	if (pp_send_packet(ppi, ppi->buf_out, w, \
+		&ppi->last_snt_time, PP_NP_##y , z) < w) { \
+		return -1; \
+	} \
+	ppi->sent_seq_id[PPM_## x]++; \
 	return 0;
 #endif
 

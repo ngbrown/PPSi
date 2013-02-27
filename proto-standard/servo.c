@@ -34,18 +34,18 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
 		if (s_to_m_dly.seconds) {
 #ifdef VERB_LOG_MSGS
-			PP_VPRINTF("pp_update_delay aborted, delay greater than 1"
-			     " second\n");
+			PP_VPRINTF("pp_update_delay aborted, delay greater "
+				   "than 1 second\n");
 #endif
 			return;
 		}
 
 		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly) {
 #ifdef VERB_LOG_MSGS
-			PP_VPRINTF("pp_update_delay aborted, delay %d greater than "
-			     "administratively set maximum %d\n",
-			     s_to_m_dly.nanoseconds,
-			     OPTS(ppi)->max_dly);
+			PP_VPRINTF("pp_update_delay aborted, delay %d greater "
+				   "than administratively set maximum %d\n",
+				   s_to_m_dly.nanoseconds,
+				   OPTS(ppi)->max_dly);
 #endif
 			return;
 		}
@@ -328,12 +328,12 @@ void pp_update_clock(struct pp_instance *ppi)
 
 #ifdef VERB_LOG_MSGS
 display:
-	PP_VPRINTF("\n--Offset Correction-- \n");
+	PP_VPRINTF("\n--Offset Correction--\n");
 	PP_VPRINTF("Raw offset from master:  %10ds %11dns\n",
 		SRV(ppi)->m_to_s_dly.seconds,
 		SRV(ppi)->m_to_s_dly.nanoseconds);
 
-	PP_VPRINTF("\n--Offset and Delay filtered-- \n");
+	PP_VPRINTF("\n--Offset and Delay filtered--\n");
 
 	if (!OPTS(ppi)->e2e_mode) {
 		PP_VPRINTF("one-way delay averaged (P2P):  %10ds %11dns\n",

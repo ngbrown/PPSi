@@ -65,7 +65,7 @@ int posix_timer_expired(struct pp_timer *tm)
 	uint64_t now_ms;
 
 	if (tm->start == 0) {
-		PP_PRINTF("%p Warning: posix_timer_expired: timer not started\n",tm);
+		PP_PRINTF("%s: Warning: timer %p not started\n", __func__, tm);
 		return 0;
 	}
 

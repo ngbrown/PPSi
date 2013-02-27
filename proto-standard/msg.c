@@ -37,7 +37,7 @@ static inline void timestamp_display(const char *label, Timestamp *timestamp)
 static inline void msg_display_header(MsgHeader *header)
 {
 #ifdef VERB_LOG_MSGS
-	PP_VPRINTF("Message header: \n");
+	PP_VPRINTF("Message header:\n");
 	PP_VPRINTF("\n");
 	PP_VPRINTF("transportSpecific: %d\n", header->transportSpecific);
 	PP_VPRINTF("messageType: %d\n", header->messageType);
@@ -46,7 +46,7 @@ static inline void msg_display_header(MsgHeader *header)
 	PP_VPRINTF("domainNumber: %d\n", header->domainNumber);
 	PP_VPRINTF("FlagField %02x:%02x\n", header->flagField[0],
 		   header->flagField[1]);
-	Integer64_display("correctionfield",&header->correctionfield);
+	Integer64_display("correctionfield", &header->correctionfield);
 	/* FIXME diag portIdentity_display(&header->sourcePortIdentity); */
 	PP_VPRINTF("sequenceId: %d\n", header->sequenceId);
 	PP_VPRINTF("controlField: %d\n", header->controlField);
@@ -58,20 +58,20 @@ static inline void msg_display_header(MsgHeader *header)
 static inline void msg_display_announce(MsgAnnounce *announce)
 {
 #ifdef VERB_LOG_MSGS
-        PP_VPRINTF("Message ANNOUNCE:\n");
-        timestamp_display("Origin Timestamp", &announce->originTimestamp);
-        PP_VPRINTF("currentUtcOffset: %d\n", announce->currentUtcOffset);
-        PP_VPRINTF("grandMasterPriority1: %d\n",
+	PP_VPRINTF("Message ANNOUNCE:\n");
+	timestamp_display("Origin Timestamp", &announce->originTimestamp);
+	PP_VPRINTF("currentUtcOffset: %d\n", announce->currentUtcOffset);
+	PP_VPRINTF("grandMasterPriority1: %d\n",
 		   announce->grandmasterPriority1);
-        PP_VPRINTF("grandMasterClockQuality:\n");
-        /* FIXME diag clockQuality_display(&announce->grandmasterClockQuality); */
-        PP_VPRINTF("grandMasterPriority2: %d\n",
+	PP_VPRINTF("grandMasterClockQuality:\n");
+	/* FIXME diag clockQuality_display(&announce->grandmasterClockQuality); */
+	PP_VPRINTF("grandMasterPriority2: %d\n",
 		   announce->grandmasterPriority2);
-        PP_VPRINTF("grandMasterIdentity:\n");
-        /* FIXME diag clockIdentity_display(announce->grandmasterIdentity); */
-        PP_VPRINTF("stepsRemoved: %d\n", announce->stepsRemoved);
-        PP_VPRINTF("timeSource: %d\n", announce->timeSource);
-        PP_VPRINTF("\n");
+	PP_VPRINTF("grandMasterIdentity:\n");
+	/* FIXME diag clockIdentity_display(announce->grandmasterIdentity); */
+	PP_VPRINTF("stepsRemoved: %d\n", announce->stepsRemoved);
+	PP_VPRINTF("timeSource: %d\n", announce->timeSource);
+	PP_VPRINTF("\n");
 	/* FIXME: diagnostic for extension */
 #endif
 }
@@ -584,7 +584,7 @@ void msg_unpack_pdelay_resp_followup(void *buf,
 	PP_VPRINTF("\n");
 }
 
-const char const * pp_msg_names[] = {
+const char const *pp_msg_names[] = {
 	"sync",
 	"delay_req",
 	"pdelay_req",
@@ -614,7 +614,7 @@ int msg_issue_sync(struct pp_instance *ppi)
 	pp_get_tstamp(&now);
 	from_TimeInternal(&now, &orig_tstamp);
 
-	msg_pack_sync(ppi,&orig_tstamp);
+	msg_pack_sync(ppi, &orig_tstamp);
 
 	MSG_SEND_AND_RET(SYNC, EVT, 0);
 }

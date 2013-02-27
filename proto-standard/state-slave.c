@@ -185,7 +185,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 				int64_to_TimeInternal(hdr->correctionfield,
 					&correction_field);
-				pp_update_peer_delay(ppi,& correction_field, 0);
+				pp_update_peer_delay(ppi, &correction_field, 0);
 			}
 		} else {
 			PP_VPRINTF("pp_slave : PDelay Resp doesn't "

@@ -18,9 +18,8 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		e = msg_issue_wrsig(ppi, CALIBRATE);
 		pp_timer_start(WR_DSPOR(ppi)->calPeriod,
 			ppi->timers[PP_TIMER_WRS_CALIBRATION]);
-		if (WR_DSPOR(ppi)->calibrated) {
+		if (WR_DSPOR(ppi)->calibrated)
 			WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATION_2;
-		}
 	}
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_WRS_CALIBRATION])) {
@@ -63,9 +62,9 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb);
 
 			WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATION_3;
-		}
-		else
+		} else {
 			break; /* again */
+		}
 
 	case WRS_CALIBRATION_3:
 		/* disable Tx calibration */
@@ -105,9 +104,9 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb);
 
 			WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATION_7;
-		}
-		else
+		} else {
 			break; /* again */
+		}
 
 	case WRS_CALIBRATION_7:
 		/* disable Rx calibration */

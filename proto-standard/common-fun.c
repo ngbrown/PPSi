@@ -51,8 +51,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 
 		}
 	} else {
-		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ]))
-		{
+		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ])) {
 			PP_VPRINTF("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
 			ret = msg_issue_pdelay_req(ppi);
 		}
@@ -100,8 +99,7 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 			    clockIdentity,
 			    PP_CLOCK_IDENTITY_LENGTH) &&
 		    (hdr->sourcePortIdentity.portNumber ==
-		     ppi->frgn_master[j].port_identity.portNumber))
-		{
+		     ppi->frgn_master[j].port_identity.portNumber)) {
 			/* Foreign Master is already in Foreign master data set
 			 */
 			ppi->frgn_master[j].ann_messages++;
@@ -145,7 +143,7 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 
 	msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
 
-	PP_VPRINTF("New foreign Master added \n");
+	PP_VPRINTF("New foreign Master added\n");
 
 	ppi->foreign_record_i = (ppi->foreign_record_i+1) %
 		OPTS(ppi)->max_foreign_records;
