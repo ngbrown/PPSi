@@ -21,7 +21,7 @@
 #include "posix.h"
 
 /* posix_recv_msg uses recvmsg for timestamp query */
-int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
+static int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 {
 	ssize_t ret;
 	struct msghdr msg;
@@ -89,8 +89,8 @@ int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 }
 
 /* Receive and send is *not* so trivial */
-int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
-	TimeInternal *t)
+static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
+		   TimeInternal *t)
 {
 	struct pp_channel *ch1 = NULL, *ch2 = NULL;
 	void *hdr;
@@ -124,8 +124,8 @@ int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	return -1;
 }
 
-int posix_send_packet(struct pp_instance *ppi, void *pkt, int len,
-	TimeInternal *t, int chtype, int use_pdelay_addr)
+static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
+			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct sockaddr_in addr;
 	struct ethhdr *hdr;
@@ -163,14 +163,8 @@ int posix_send_packet(struct pp_instance *ppi, void *pkt, int len,
 	return -1;
 }
 
-int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
-	__attribute__((alias("posix_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t,
-				   int chtype, int use_pdelay_addr)
-	__attribute__((alias("posix_send_packet")));
-
 /* To open a channel we must bind to an interface and so on */
-int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
+static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 {
 
 	int sock = -1;
@@ -409,14 +403,10 @@ int posix_net_init(struct pp_instance *ppi)
 	return 0;
 }
 
-int pp_net_init(struct pp_instance *ppi)
-	__attribute__((alias("posix_net_init")));
-
-
 /*
  * Shutdown all the network stuff
  */
-int posix_net_shutdown(struct pp_instance *ppi)
+static int posix_net_exit(struct pp_instance *ppi)
 {
 	struct ip_mreq imr;
 	int fd;
@@ -527,5 +517,9 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 	return ret;
 }
 
-int pp_net_shutdown(struct pp_instance *ppi)
-__attribute__((alias("posix_net_shutdown")));
+struct pp_network_operations pp_net_ops = {
+	.init = posix_net_init,
+	.exit = posix_net_exit,
+	.recv = posix_net_recv,
+	.send = posix_net_send,
+};

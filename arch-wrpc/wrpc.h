@@ -11,13 +11,6 @@
 /*
  * These are the functions provided by the various bare files
  */
-extern int wrpc_open_ch(struct pp_instance *ppi);
-
-extern int wrpc_recv_packet(struct pp_instance *ppi, void *pkt, int len,
-			    TimeInternal *t);
-extern int wrpc_send_packet(struct pp_instance *ppi, void *pkt, int len,
-			TimeInternal *t, int chtype, int use_pdelay_addr);
-
 extern void wrpc_main_loop(struct pp_instance *ppi);
 extern void _irq_entry(void); /* unused, to make crt0.S happy */
 extern int main(void); /* alias to ppsi_main, so crt0.S is happy */

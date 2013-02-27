@@ -327,6 +327,23 @@ struct pp_ext_hooks {
 extern struct pp_ext_hooks pp_hooks; /* The one for the extension we build */
 
 
+/*
+ * Network methods are encapsulated in a structure, so each arch only needs
+ * to provide that structure. This should simplify management overall.
+ */
+struct pp_network_operations {
+	int (*init)(struct pp_instance *ppi);
+	int (*exit)(struct pp_instance *ppi);
+	int (*recv)(struct pp_instance *ppi, void *pkt, int len,
+		    TimeInternal *t);
+	/* chtype here is PP_NP_GEN or PP_NP_EVT */
+	int (*send)(struct pp_instance *ppi, void *pkt, int len,
+		    TimeInternal *t, int chtype, int use_pdelay_addr);
+};
+
+extern struct pp_network_operations pp_net_ops;
+
+
 /* The channel for an instance must be created and possibly destroyed. */
 extern int pp_open_instance(struct pp_instance *ppi,
 			    struct pp_runtime_opts *rt_opts);
@@ -334,15 +351,6 @@ extern int pp_open_instance(struct pp_instance *ppi,
 extern int pp_close_instance(struct pp_instance *ppi);
 
 extern int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv);
-
-/* Network stuff */
-extern int pp_net_init(struct pp_instance *ppi);
-extern int pp_net_shutdown(struct pp_instance *ppi);
-extern int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len,
-			  TimeInternal *t);
-extern int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
-			  TimeInternal *t, int chtype, int use_pdelay_addr);
-			  /* chtype: PP_NP_GEN || PP_NP_EVT */
 
 /* Timers */
 extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common

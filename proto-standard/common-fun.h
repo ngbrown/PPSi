@@ -41,7 +41,7 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 
 #ifdef VERB_LOG_MSGS
 #define MSG_SEND_AND_RET_VARLEN(x, y, z, w) \
-	if (pp_send_packet(ppi, ppi->buf_out, w,\
+	if (pp_net_ops.send(ppi, ppi->buf_out, w,\
 		&ppi->last_snt_time, PP_NP_##y , z) < w) { \
 		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n", \
 			pp_msg_names[PPM_##x], PPM_##x); \
@@ -54,7 +54,7 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 	return 0;
 #else
 #define MSG_SEND_AND_RET_VARLEN(x, y, z, w) \
-	if (pp_send_packet(ppi, ppi->buf_out, w, \
+	if (pp_net_ops.send(ppi, ppi->buf_out, w, \
 		&ppi->last_snt_time, PP_NP_##y , z) < w) { \
 		return -1; \
 	} \

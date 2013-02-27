@@ -66,8 +66,8 @@ void bare_main_loop(struct pp_instance *ppi)
 		 *
 		 * FIXME: we don't know which socket to receive from
 		 */
-		i = bare_recv_packet(ppi, payload, sizeof(packet),
-				     &ppi->last_rcv_time);
+		i = pp_net_ops.recv(ppi, payload, sizeof(packet),
+				    &ppi->last_rcv_time);
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
 		/* we passed payload but it filled the ether header too */

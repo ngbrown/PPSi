@@ -12,14 +12,6 @@ struct posix_arch_data {
 	int rcv_switch; /* flag for event / general receive order */
 };
 
-extern int posix_net_init(struct pp_instance *ppi);
 extern int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms);
-
-extern int posix_open_ch(struct pp_instance *ppi, char *name, int chtype);
-
-extern int posix_recv_packet(struct pp_instance *ppi, void *pkt, int len,
-			     TimeInternal *t);
-extern int posix_send_packet(struct pp_instance *ppi, void *pkt, int len,
-			     TimeInternal *t, int chtype, int use_pdelay_addr);
 
 extern void posix_main_loop(struct pp_instance *ppi);

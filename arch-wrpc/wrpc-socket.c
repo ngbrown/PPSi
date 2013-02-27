@@ -15,7 +15,7 @@ int wrpc_errno;
 Octet buffer_out[PP_PACKET_SIZE + 14]; /* 14 == ppi->proto_ofst for eth mode */
 
 /* This function should init the minic and get the mac address */
-int wrpc_open_ch(struct pp_instance *ppi)
+static int wrpc_open_ch(struct pp_instance *ppi)
 {
 	wr_socket_t *sock;
 	mac_addr_t mac;
@@ -39,8 +39,8 @@ int wrpc_open_ch(struct pp_instance *ppi)
 }
 
 /* To receive and send packets, we call the minic low-level stuff */
-int wrpc_recv_packet(struct pp_instance *ppi, void *pkt, int len,
-		     TimeInternal *t)
+static int wrpc_net_recv(struct pp_instance *ppi, void *pkt, int len,
+			 TimeInternal *t)
 {
 	int got;
 	wr_socket_t *sock;
@@ -63,8 +63,8 @@ int wrpc_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 	return got;
 }
 
-int wrpc_send_packet(struct pp_instance *ppi, void *pkt, int len,
-			  TimeInternal *t, int chtype, int use_pdelay_addr)
+static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
+			 TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	int snt;
 	wr_socket_t *sock;
@@ -101,7 +101,7 @@ int wrpc_send_packet(struct pp_instance *ppi, void *pkt, int len,
 	return snt;
 }
 
-int wrpc_net_init(struct pp_instance *ppi)
+static int wrpc_net_init(struct pp_instance *ppi)
 {
 	ppi->buf_out = buffer_out;
 	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
@@ -113,19 +113,16 @@ int wrpc_net_init(struct pp_instance *ppi)
 
 }
 
-int wrpc_net_shutdown(struct pp_instance *ppi)
+static int wrpc_net_exit(struct pp_instance *ppi)
 {
 	ptpd_netif_close_socket(
 		(wr_socket_t *)NP(ppi)->ch[PP_NP_EVT].custom);
 	return 0;
 }
 
-int pp_net_init(struct pp_instance *ppi)
-	__attribute__((alias("wrpc_net_init")));
-int pp_net_shutdown(struct pp_instance *ppi)
-	__attribute__((alias("wrpc_net_shutdown")));
-int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
-	__attribute__((alias("wrpc_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t,
-				   int chtype, int use_pdelay_addr)
-	__attribute__((alias("wrpc_send_packet")));
+struct pp_network_operations pp_net_ops = {
+	.init = wrpc_net_init,
+	.exit = wrpc_net_exit,
+	.recv = wrpc_net_recv,
+	.send = wrpc_net_send,
+};

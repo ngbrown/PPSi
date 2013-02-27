@@ -51,15 +51,11 @@ void ppsi_main(void)
 	ppi->frgn_master = &frgn_master;
 	ppi->arch_data   = NULL;
 
-#if 0
-	if (bare_open_ch(ppi, "eth0")) {
-		pp_diag_error(ppi, bare_errno);
-		pp_diag_fatal(ppi, "open_ch", "");
-	}
-#endif
+	/* This just llocates the stuff */
 	pp_open_instance(ppi, NULL);
 
 	OPTS(ppi)->iface_name = "eth0";
 
+	/* The actual sockets are opened in state-initializing */
 	bare_main_loop(ppi);
 }

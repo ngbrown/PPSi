@@ -11,8 +11,8 @@
 Octet buffer_out[PP_PACKET_SIZE + 14];
 
 /* FIXME: which socket we receive and send with? */
-int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
-		     TimeInternal *t)
+static int bare_net_recv(struct pp_instance *ppi, void *pkt, int len,
+			 TimeInternal *t)
 {
 	if (t)
 		pp_get_tstamp(t);
@@ -21,8 +21,8 @@ int bare_recv_packet(struct pp_instance *ppi, void *pkt, int len,
 			pkt - NP(ppi)->proto_ofst, len, 0);
 }
 
-int bare_send_packet(struct pp_instance *ppi, void *pkt, int len,
-		     TimeInternal *t, int chtype, int use_pdelay_addr)
+static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
+			 TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct bare_ethhdr *hdr;
 	hdr = PROTO_HDR(pkt);
@@ -43,12 +43,6 @@ int bare_send_packet(struct pp_instance *ppi, void *pkt, int len,
 					len + NP(ppi)->proto_ofst, 0);
 }
 
-int pp_recv_packet(struct pp_instance *ppi, void *pkt, int len, TimeInternal *t)
-	__attribute__((alias("bare_recv_packet")));
-int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
-		   TimeInternal *t, int chtype, int use_pdelay_addr)
-	__attribute__((alias("bare_send_packet")));
-
 #define SHUT_RD		0
 #define SHUT_WR		1
 #define SHUT_RDWR	2
@@ -57,7 +51,7 @@ int pp_send_packet(struct pp_instance *ppi, void *pkt, int len,
 #define SOCK_RAW 3
 
 /* To open a channel we must bind to an interface and so on */
-int bare_open_ch(struct pp_instance *ppi, char *ifname)
+static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 {
 	int sock = -1;
 	int temp, iindex;
@@ -137,7 +131,7 @@ int bare_open_ch(struct pp_instance *ppi, char *ifname)
 	return -1;
 }
 
-int bare_net_init(struct pp_instance *ppi)
+static int bare_net_init(struct pp_instance *ppi)
 {
 	ppi->buf_out = buffer_out;
 	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
@@ -154,12 +148,16 @@ int bare_net_init(struct pp_instance *ppi)
 
 	return 0;
 }
-int pp_net_init(struct pp_instance *ppi)
-	__attribute__((alias("bare_net_init")));
 
-int bare_net_shutdown(struct pp_instance *ppi)
+
+static int bare_net_exit(struct pp_instance *ppi)
 {
 	return sys_shutdown(NP(ppi)->ch[PP_NP_GEN].fd, SHUT_RDWR);
 }
-int pp_net_shutdown(struct pp_instance *ppi)
-	__attribute__((alias("bare_net_shutdown")));
+
+struct pp_network_operations pp_net_ops = {
+	.init = bare_net_init,
+	.exit = bare_net_exit,
+	.recv = bare_net_recv,
+	.send = bare_net_send,
+};
