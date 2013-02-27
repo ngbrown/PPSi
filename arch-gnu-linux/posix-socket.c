@@ -83,7 +83,7 @@ static int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 		 * spike in the offset signal sent to the clock servo
 		 */
 		PP_VPRINTF("no receive time stamp, getting it in user space\n");
-		pp_get_tstamp(t);
+		pp_t_ops.get(t);
 	}
 	return ret;
 }
@@ -155,7 +155,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 		addr.sin_addr.s_addr = NP(ppi)->peer_mcast_addr;
 
 	if (t)
-		pp_get_tstamp(t);
+		pp_t_ops.get(t);
 
 	return sendto(NP(ppi)->ch[chtype].fd, pkt, len, 0,
 		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));

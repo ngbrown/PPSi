@@ -344,6 +344,25 @@ struct pp_network_operations {
 extern struct pp_network_operations pp_net_ops;
 
 
+/*
+ * Time operations, like network operations above, are encapsulated.
+ * They may live in their own time-<name> subdirectory.
+ *
+ * Maybe this structure will need updating, to pass ppi as well
+ */
+struct pp_time_operations {
+	int (*get)(TimeInternal *t); /* returns error code */
+	int (*set)(TimeInternal *t); /* returns error code */
+	/* freq_ppm is "scaled-ppm" like the argument of adjtimex(2) */
+	int (*adjust)(long offset_ns, long freq_ppm);
+};
+
+/* Where is this maximum imposed from? And which unit? */
+#define  PP_ADJ_FREQ_MAX	512000
+
+extern struct pp_time_operations pp_t_ops;
+
+
 /* The channel for an instance must be created and possibly destroyed. */
 extern int pp_open_instance(struct pp_instance *ppi,
 			    struct pp_runtime_opts *rt_opts);
@@ -430,20 +449,6 @@ extern void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns);
 extern void display_TimeInternal(const char *label, TimeInternal *t);
 extern void div2_TimeInternal(TimeInternal *r);
-
-/* Get and Set system timestamp */
-extern void pp_get_tstamp(TimeInternal *t);
-extern int32_t pp_set_tstamp(TimeInternal *t);
-
-
-/*
- * Virtualization of Linux adjtimex (or BSD adjtime) system clock time
- * adjustment. Returns 0 for success, -1 for failure
- */
-extern int pp_adj_freq(Integer32 adj);
-
-/* Where is this maximum imposed from? And which unit? */
-#define  PP_ADJ_FREQ_MAX	512000
 
 /*
  * The state machine itself is an array of these structures.

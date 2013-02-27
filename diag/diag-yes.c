@@ -58,7 +58,7 @@ void pp_timed_printf(char *fmt, ...)
 	va_list args;
 	TimeInternal t;
 
-	pp_get_tstamp(&t);
+	pp_t_ops.get(&t);
 	pp_printf("%09d.%03d ", (int)t.seconds,
 		  (int)t.nanoseconds / 1000000);
 	va_start(args, fmt);

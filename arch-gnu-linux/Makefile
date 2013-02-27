@@ -9,6 +9,7 @@ OBJ-libarch := $A/posix-startup.o \
 	$A/main-loop.o \
 	$A/posix-socket.o \
 	$A/posix-io.o \
+	$A/posix-time.o \
 	$A/posix-timer.o \
 	lib/cmdline.o \
 	lib/div64.o

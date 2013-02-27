@@ -13,6 +13,7 @@ OBJ-libarch := $A/bare-startup.o \
 	$A/bare-socket.o \
 	$A/bare-timer.o \
 	$A/bare-io.o \
+	$A/bare-time.o \
 	$A/syscall.o \
 	$A/syscalls.o \
 	lib/libc-functions.o \
