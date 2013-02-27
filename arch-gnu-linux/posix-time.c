@@ -24,6 +24,8 @@ static int posix_time_get(TimeInternal *t)
 		clock_fatal_error("clock_gettime");
 	t->seconds = tp.tv_sec;
 	t->nanoseconds = tp.tv_nsec;
+	if (pp_verbose_time)
+		pp_printf("%s: %9li.%09li\n", __func__, tp.tv_sec, tp.tv_nsec);
 	return 0;
 }
 
@@ -35,13 +37,15 @@ int32_t posix_time_set(TimeInternal *t)
 	tp.tv_nsec = t->nanoseconds;
 	if (clock_settime(CLOCK_REALTIME, &tp) < 0)
 		clock_fatal_error("clock_settime");
-
+	if (pp_verbose_time)
+		pp_printf("%s: %9li.%09li\n", __func__, tp.tv_sec, tp.tv_nsec);
 	return 0;
 }
 
 int posix_time_adjust(long offset_ns, long freq_ppm)
 {
 	struct timex t;
+	int ret;
 
 	if (freq_ppm > PP_ADJ_FREQ_MAX)
 		freq_ppm = PP_ADJ_FREQ_MAX;
@@ -52,7 +56,10 @@ int posix_time_adjust(long offset_ns, long freq_ppm)
 	t.freq = freq_ppm; /* was: "adj * ((1 << 16) / 1000)" */
 	t.modes = MOD_FREQUENCY | MOD_OFFSET;
 
-	return adjtimex(&t);
+	ret = adjtimex(&t);
+	if (pp_verbose_time)
+		pp_printf("%s: %li %li\n", __func__, offset_ns, freq_ppm);
+	return ret;
 }
 
 struct pp_time_operations pp_t_ops = {

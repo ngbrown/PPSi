@@ -2,6 +2,7 @@
  * Alessandro Rubini for CERN, 2013 -- LGPL 2.1 or later
  */
 #include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 #include "bare-i386.h"
 
 static int bare_time_get(TimeInternal *t)
@@ -14,6 +15,8 @@ static int bare_time_get(TimeInternal *t)
 	}
 	t->seconds = tv.tv_sec;
 	t->nanoseconds = tv.tv_usec * 1000;
+	if (pp_verbose_time)
+		pp_printf("%s: %9li.%09li\n", __func__, tv.tv_sec, tv.tv_nsec);
 	return 0;
 }
 
@@ -28,12 +31,15 @@ static int bare_time_set(TimeInternal *t)
 		PP_PRINTF("settimeofday error");
 		sys_exit(0);
 	}
+	if (pp_verbose_time)
+		pp_printf("%s: %9li.%09li\n", __func__, tv.tv_sec, tv.tv_nsec);
 	return 0;
 }
 
 static int bare_time_adjust(long offset_ns, long freq_ppm)
 {
 	struct bare_timex t;
+	int ret;
 
 	if (freq_ppm > PP_ADJ_FREQ_MAX)
 		freq_ppm = PP_ADJ_FREQ_MAX;
@@ -44,7 +50,10 @@ static int bare_time_adjust(long offset_ns, long freq_ppm)
 	t.freq = freq_ppm; /* was: "adj * ((1 << 16) / 1000)" */
 	t.modes = MOD_FREQUENCY | MOD_OFFSET;
 
-	return sys_adjtimex(&t);
+	ret = sys_adjtimex(&t);
+	if (pp_verbose_time)
+		pp_printf("%s: %li %li\n", __func__, offset_ns, freq_ppm);
+	return ret;
 }
 
 struct pp_time_operations pp_t_ops = {
