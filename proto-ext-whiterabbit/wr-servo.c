@@ -43,24 +43,22 @@ static void dump_timestamp(char *what, TimeInternal ts)
 
 static int64_t ts_to_picos(TimeInternal ts)
 {
-	return (int64_t) ts.seconds * (int64_t)1000000000000LL
-		+ (int64_t) ts.nanoseconds * (int64_t)1000LL
-		+ (int64_t) ts.phase;
+	return ts.seconds * 1000000000000LL
+		+ ts.nanoseconds * 1000LL
+		+ ts.phase;
 }
 
 static TimeInternal picos_to_ts(int64_t picos)
 {
-	int64_t phase = picos % 1000LL;
-	picos = (picos - phase) / 1000LL;
-
-	int64_t nsec = picos % 1000000000LL;
-	picos = (picos-nsec)/1000000000LL;
-
+	int64_t nsec, phase;
 	TimeInternal ts;
-	ts.seconds = (int64_t) picos;
-	ts.nanoseconds = (int32_t) nsec;
-	ts.phase = (int32_t) phase;
 
+	phase = picos % 1000;
+	nsec = picos / 1000;
+
+	ts.seconds = nsec / PP_NSEC_PER_SEC;
+	ts.nanoseconds = nsec % PP_NSEC_PER_SEC;
+	ts.phase = phase;
 	return ts;
 }
 
@@ -68,25 +66,18 @@ static TimeInternal ts_add(TimeInternal a, TimeInternal b)
 {
 	TimeInternal c;
 
-	c.seconds = 0;
-	c.nanoseconds = 0;
-
 	c.phase = a.phase + b.phase;
+	c.nanoseconds = a.nanoseconds + b.nanoseconds;
+	c.seconds = a.seconds + b.seconds;
 
-	while(c.phase >= 1000) {
+	while (c.phase >= 1000) {
 		c.phase -= 1000;
 		c.nanoseconds++;
 	}
-
-	c.nanoseconds += (a.nanoseconds + b.nanoseconds);
-
-	while(c.nanoseconds >= 1000000000L) {
-		c.nanoseconds -= 1000000000L;
+	while (c.nanoseconds >= PP_NSEC_PER_SEC) {
+		c.nanoseconds -= PP_NSEC_PER_SEC;
 		c.seconds++;
 	}
-
-	c.seconds += (a.seconds + b.seconds);
-
 	return c;
 }
 
@@ -94,24 +85,18 @@ static TimeInternal ts_sub(TimeInternal a, TimeInternal b)
 {
 	TimeInternal c;
 
-	c.seconds = 0;
-	c.nanoseconds = 0;
-
 	c.phase = a.phase - b.phase;
+	c.nanoseconds = a.nanoseconds - b.nanoseconds;
+	c.seconds = a.seconds - b.seconds;
 
 	while(c.phase < 0) {
 		c.phase += 1000;
 		c.nanoseconds--;
 	}
-
-	c.nanoseconds += a.nanoseconds - b.nanoseconds;
 	while(c.nanoseconds < 0) {
-		c.nanoseconds += 1000000000L;
+		c.nanoseconds += PP_NSEC_PER_SEC;
 		c.seconds--;
 	}
-
-	c.seconds += a.seconds - b.seconds;
-
 	return c;
 }
 
@@ -133,13 +118,13 @@ static TimeInternal ts_hardwarize(TimeInternal ts, int clock_period_ps)
 	}
 
 	if (ts.nanoseconds < 0) {
-		ts.nanoseconds += 1000000000LL;
+		ts.nanoseconds += PP_NSEC_PER_SEC;
 		ts.seconds--;
 	}
 
 	if (ts.seconds == -1 && ts.nanoseconds > 0) {
 		ts.seconds++;
-		ts.nanoseconds -= 1000000000LL;
+		ts.nanoseconds -= PP_NSEC_PER_SEC;
 	}
 
 	if (ts.nanoseconds < 0 && ts.nanoseconds >= (-q_threshold)
