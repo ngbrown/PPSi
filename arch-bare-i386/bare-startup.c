@@ -61,9 +61,5 @@ void ppsi_main(void)
 
 	OPTS(ppi)->iface_name = "eth0";
 
-#ifdef PPSI_SLAVE
-	OPTS(ppi)->slave_only = 1;
-#endif
-
 	bare_main_loop(ppi);
 }

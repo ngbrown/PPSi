@@ -67,8 +67,6 @@ environment:
     PROTO_EXT                   "whiterabbit" or empty
     ARCH                        name of you arch (default: gnu-linux)
     PPSI_NO_DIAG                if set, prevents diagnostics from being there
-    WRMODE (spec only)          set to "master" for m/s autodetect; set to
-                                "slave" for slave only configuration
 
 If none of the variables are specified, the default Makefile compiles
 with standard gcc, over gnu-linux architecture, with no protocol

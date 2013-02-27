@@ -51,16 +51,6 @@ ifdef PROTO_EXT
 endif
 include proto-standard/Makefile
 
-# WRMODE - Update 2012-11-24
-# obsolete compilation parameter. No used when ppsi is compiled inside wrpc-sw.
-# Still used only by ppsi standalone main. In this case, set WRMODE=master|slave
-WRMODE = none
-ifeq ($(WRMODE), master)
-CFLAGS += -DPPSI_MASTER
-else ifeq ($(WRMODE), slave)
-CFLAGS += -DPPSI_SLAVE
-endif
-
 # VERB_LOG_MSGS: uncomment if you want very verbose msg when log verbosity=2.
 # As default, they are not even compiled, in order to save space in the final
 # binary executable

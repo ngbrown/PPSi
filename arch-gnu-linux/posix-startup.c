@@ -56,10 +56,6 @@ int main(int argc, char **argv)
 
 	OPTS(ppi)->iface_name = ifname;
 
-#ifdef PPSI_SLAVE
-	OPTS(ppi)->slave_only = 1;
-#endif
-
 	if (pp_parse_cmdline(ppi, argc, argv) != 0)
 		return -1;
 
