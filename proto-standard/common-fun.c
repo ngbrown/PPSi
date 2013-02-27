@@ -10,6 +10,14 @@
 int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 {
 	int ret = 0;
+
+	if (pp_hooks.execute_slave)
+		ret = pp_hooks.execute_slave(ppi);
+	if (ret == 1) /* done: just return */
+		return 0;
+	if (ret < 0)
+		return ret;
+
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_RECEIPT])) {
 		PP_VPRINTF("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
 		ppi->number_foreign_records = 0;
@@ -33,8 +41,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 
 			ret = msg_issue_delay_req(ppi);
 
-			set_TimeInternal(&ppi->delay_req_send_time,
-				ppi->last_snt_time.seconds, ppi->last_snt_time.nanoseconds);
+			ppi->delay_req_send_time = ppi->last_snt_time;
 
 			/* Add latency */
 			add_TimeInternal(&ppi->delay_req_send_time,
@@ -173,6 +180,9 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	/*Reset Timer handling Announce receipt timeout*/
 	st_com_restart_annrec_timer(ppi);
 
+	if (pp_hooks.handle_announce)
+		pp_hooks.handle_announce(ppi);
+
 	return 0;
 }
 
@@ -193,8 +203,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	time = &ppi->last_rcv_time;
 
 	if (ppi->is_from_cur_par) {
-		ppi->sync_receive_time.seconds = time->seconds;
-		ppi->sync_receive_time.nanoseconds = time->nanoseconds;
+		ppi->sync_receive_time = *time;
 
 		/* FIXME diag to file? will we ever handle it?
 		if (OPTS(ppi)->recordFP)
@@ -241,6 +250,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 {
 	TimeInternal precise_orig_timestamp;
 	TimeInternal correction_field;
+	int ret = 0;
 
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
@@ -272,6 +282,15 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 
 	add_TimeInternal(&correction_field, &correction_field,
 		&ppi->last_sync_corr_field);
+
+	/* Call the extension; it may do it all and ask to return */
+	if (pp_hooks.handle_followup)
+		ret = pp_hooks.handle_followup(ppi, &precise_orig_timestamp,
+					       &correction_field);
+	if (ret == 1)
+		return 0;
+	if (ret < 0)
+		return ret;
 
 	pp_update_offset(ppi, &precise_orig_timestamp,
 			&ppi->sync_receive_time,

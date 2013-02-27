@@ -1,5 +1,6 @@
 #include <ppsi/ppsi.h>
 #include "wr-api.h"
+#include "../proto-standard/common-fun.h"
 
 /* ext-whiterabbit must offer its own hooks */
 
@@ -105,6 +106,43 @@ static void wr_s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 		DSPOR(ppi)->portIdentity.portNumber;
 }
 
+static int wr_execute_slave(struct pp_instance *ppi)
+{
+	if (!WR_DSPOR(ppi)->doRestart)
+		return 0;
+
+	ppi->next_state = PPS_INITIALIZING;
+	st_com_restart_annrec_timer(ppi);
+	WR_DSPOR(ppi)->doRestart = FALSE;
+	return 1; /* the caller returns too */
+}
+
+static void wr_handle_announce(struct pp_instance *ppi)
+{
+	if ((WR_DSPOR(ppi)->wrConfig & WR_S_ONLY) &&
+	    (1 /* FIXME: Recommended State, see page 33*/) &&
+	    (WR_DSPOR(ppi)->parentWrConfig & WR_M_ONLY) &&
+	    (!WR_DSPOR(ppi)->wrModeOn || !WR_DSPOR(ppi)->parentWrModeOn))
+		ppi->next_state = WRS_PRESENT;
+}
+
+static int wr_handle_followup(struct pp_instance *ppi,
+			      TimeInternal *precise_orig_timestamp,
+			      TimeInternal *correction_field)
+{
+	if (!WR_DSPOR(ppi)->wrModeOn)
+		return 0;
+
+	precise_orig_timestamp->phase = 0;
+	wr_servo_got_sync(ppi, precise_orig_timestamp,
+			  &ppi->sync_receive_time);
+	/* TODO Check: generates unstability (Tx timestamp invalid) */
+	/* return msg_issue_delay_req(ppi); */
+
+	return 1; /* the caller returns too */
+}
+
+
 struct pp_ext_hooks pp_hooks = {
 	.init = wr_init,
 	.open = wr_open,
@@ -113,4 +151,7 @@ struct pp_ext_hooks pp_hooks = {
 	.new_slave = wr_new_slave,
 	.update_delay = wr_update_delay,
 	.s1 = wr_s1,
+	.execute_slave = wr_execute_slave,
+	.handle_announce = wr_handle_announce,
+	.handle_followup = wr_handle_followup,
 };
