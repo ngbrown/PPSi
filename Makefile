@@ -8,6 +8,9 @@
 # The default architecture is hosted GNU/Linux stuff
 ARCH ?= gnu-linux
 
+# Also, you can set USER_CFLAGS, like this (or on the command line)
+# USER_CFLAGS = -DVERB_LOG_MSGS -DCONFIG_PPSI_RUNTIME_VERBOSITY
+
 #### In theory, users should not change stuff below this line (but please read)
 
 # classic cross-compilation tool-set
@@ -28,6 +31,7 @@ TARGET = ppsi
 all: $(TARGET).o
 
 # CFLAGS to use. Both this Makefile (later) and app-makefile may grow CFLAGS
+CFLAGS = $(USER_CFLAGS)
 CFLAGS += -Wall -O2 -ggdb -Iinclude
 
 # to avoid ifdef as much as possible, I use the kernel trick for OBJ variables
@@ -50,11 +54,6 @@ ifdef PROTO_EXT
   include proto-ext-$(PROTO_EXT)/Makefile
 endif
 include proto-standard/Makefile
-
-# VERB_LOG_MSGS: uncomment if you want very verbose msg when log verbosity=2.
-# As default, they are not even compiled, in order to save space in the final
-# binary executable
-# VERB_LOG_MSGS=y
 
 # Include arch code
 # we need this -I so <arch/arch.h> can be found
