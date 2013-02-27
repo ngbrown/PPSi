@@ -295,6 +295,8 @@ enum pp_std_messages {
 	PPM_ANNOUNCE,
 	PPM_SIGNALING,
 	PPM_MANAGEMENT,
+
+	PPM_NOTHING_TO_DO	= 0x100, /* for hooks.master_msg() */
 };
 
 extern const char const * pp_msg_names[];

@@ -14,7 +14,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	TimeInternal req_rec_tstamp;
 	TimeInternal correction_field;
 	TimeInternal resp_orig_tstamp;
-
+	int msgtype;
 	int e = 0; /* error var, to check errors in msg handling */
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
@@ -67,7 +67,23 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (plen == 0)
 		goto no_incoming_msg;
 
-	switch (ppi->msg_tmp_header.messageType) {
+	/*
+	 * An extension can do special treatment of this message type,
+	 * possibly returning error or eating the message by returning
+	 * PPM_NOTHING_TO_DO
+	 */
+	msgtype = ppi->msg_tmp_header.messageType;
+	if (pp_hooks.master_msg)
+		msgtype = pp_hooks.master_msg(ppi, pkt, plen, msgtype);
+	if (msgtype < 0) {
+		e = msgtype;
+		goto failure;
+	}
+
+	switch (msgtype) {
+
+	case PPM_NOTHING_TO_DO:
+		break;
 
 	case PPM_ANNOUNCE:
 		e = st_com_master_handle_announce(ppi, pkt, plen);
