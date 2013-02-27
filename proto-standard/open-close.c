@@ -56,7 +56,7 @@ int pp_open_instance(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
 
 int pp_close_instance(struct pp_instance *ppi)
 {
-	if (pp_hooks.open)
+	if (pp_hooks.close)
 		return pp_hooks.close(ppi);
 	return 0;
 }
