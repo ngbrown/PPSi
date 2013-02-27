@@ -32,23 +32,20 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 		&ppi->delay_req_send_time);
 
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
-		if (s_to_m_dly.seconds) {
-#ifdef VERB_LOG_MSGS
-			PP_VPRINTF("pp_update_delay aborted, delay greater "
-				   "than 1 second\n");
-#endif
+		if (s_to_m_dly.seconds && pp_verbose_messages)
+			PP_VPRINTF("pp_update_delay aborted, delay "
+				   "greater than 1 second\n");
+		if (s_to_m_dly.seconds)
 			return;
-		}
 
-		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly) {
-#ifdef VERB_LOG_MSGS
+		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly
+		    && pp_verbose_messages)
 			PP_VPRINTF("pp_update_delay aborted, delay %d greater "
 				   "than administratively set maximum %d\n",
 				   s_to_m_dly.nanoseconds,
 				   OPTS(ppi)->max_dly);
-#endif
+		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
 			return;
-		}
 	}
 
 	if (OPTS(ppi)->ofst_first_updated) {
@@ -187,23 +184,20 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 	sub_TimeInternal(&m_to_s_dly, recv_time, send_time);
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
-		if (m_to_s_dly.seconds) {
-#ifdef VERB_LOG_MSGS
+		if (m_to_s_dly.seconds && pp_verbose_messages)
 			PP_PRINTF("pp_update_offset aborted, delay greater "
 			     "than 1 second\n");
-#endif
+		if (m_to_s_dly.seconds)
 			return;
-		}
 
-		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly) {
-#ifdef VERB_LOG_MSGS
+		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly
+		    && pp_verbose_messages)
 			PP_PRINTF("updateDelay aborted, delay %d greater than "
 				  "administratively set maximum %d\n",
 			     m_to_s_dly.nanoseconds,
 			     OPTS(ppi)->max_dly);
-#endif
+		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly)
 			return;
-		}
 	}
 
 	SRV(ppi)->m_to_s_dly = m_to_s_dly;
@@ -250,23 +244,20 @@ void pp_update_clock(struct pp_instance *ppi)
 	TimeInternal time_tmp;
 
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
-		if (DSCUR(ppi)->offsetFromMaster.seconds) {
-#ifdef VERB_LOG_MSGS
+		if (DSCUR(ppi)->offsetFromMaster.seconds
+		    && pp_verbose_messages) {
 			PP_PRINTF("pp_update_clock aborted, offset greater "
 				   "than 1 second\n");
 			goto display;
-#endif
 		}
 
 		if (DSCUR(ppi)->offsetFromMaster.nanoseconds >
-			OPTS(ppi)->max_rst) {
-#ifdef VERB_LOG_MSGS
+		    OPTS(ppi)->max_rst && pp_verbose_messages) {
 			PP_VPRINTF("pp_update_clock aborted, offset %d greater than "
 			     "administratively set maximum %d\n",
 			     DSCUR(ppi)->offsetFromMaster.nanoseconds,
 			     OPTS(ppi)->max_rst);
 			goto display;
-#endif
 		}
 	}
 
@@ -325,28 +316,29 @@ void pp_update_clock(struct pp_instance *ppi)
 		}
 	}
 
-#ifdef VERB_LOG_MSGS
 display:
-	PP_VPRINTF("\n--Offset Correction--\n");
-	PP_VPRINTF("Raw offset from master:  %10ds %11dns\n",
-		SRV(ppi)->m_to_s_dly.seconds,
-		SRV(ppi)->m_to_s_dly.nanoseconds);
+	if (pp_verbose_messages) {
+		PP_VPRINTF("\n--Offset Correction--\n");
+		PP_VPRINTF("Raw offset from master:  %10ds %11dns\n",
+			   SRV(ppi)->m_to_s_dly.seconds,
+			   SRV(ppi)->m_to_s_dly.nanoseconds);
 
-	PP_VPRINTF("\n--Offset and Delay filtered--\n");
+		PP_VPRINTF("\n--Offset and Delay filtered--\n");
 
-	if (!OPTS(ppi)->e2e_mode) {
-		PP_VPRINTF("one-way delay averaged (P2P):  %10ds %11dns\n",
-		    DSPOR(ppi)->peerMeanPathDelay.seconds,
-		    DSPOR(ppi)->peerMeanPathDelay.nanoseconds);
-	} else {
-		PP_VPRINTF("one-way delay averaged (E2E):  %10ds %11dns\n",
-		    DSCUR(ppi)->meanPathDelay.seconds,
-		    DSCUR(ppi)->meanPathDelay.nanoseconds);
+		if (!OPTS(ppi)->e2e_mode) {
+			PP_VPRINTF("one-way delay averaged (P2P): %9i.%09i\n",
+				   DSPOR(ppi)->peerMeanPathDelay.seconds,
+				   DSPOR(ppi)->peerMeanPathDelay.nanoseconds);
+		} else {
+			PP_VPRINTF("one-way delay averaged (E2E): %9i.%09i\n",
+				   DSCUR(ppi)->meanPathDelay.seconds,
+				   DSCUR(ppi)->meanPathDelay.nanoseconds);
+		}
+
+		PP_VPRINTF("offset from master:       %9i.%09i\n",
+			   DSCUR(ppi)->offsetFromMaster.seconds,
+			   DSCUR(ppi)->offsetFromMaster.nanoseconds);
+		PP_VPRINTF("observed drift:          %10d\n",
+			   SRV(ppi)->obs_drift);
 	}
-
-	PP_VPRINTF("offset from master:      %10ds %11dns\n",
-	    DSCUR(ppi)->offsetFromMaster.seconds,
-	    DSCUR(ppi)->offsetFromMaster.nanoseconds);
-	PP_VPRINTF("observed drift:          %10d\n", SRV(ppi)->obs_drift);
-#endif
 }
