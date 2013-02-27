@@ -42,17 +42,31 @@ extern int pp_diag_verbosity;
 extern CONST_VERBOSITY int pp_diag_verbosity;
 
 /*
+ * The following ones are expected to overcome the above uppercase macros.
+ * We really need to remove code from the object files, but the finer-grained
+ * selection (pp_verbose_dump etc) is a better long-term solution than
+ * CONFIG_PPSI_RUNTIME_VERBOSITY
+ */
+#define pp_error(...) \
+	if (pp_verbose_error && pp_diag_verbosity) pp_printf(__VA_ARGS__)
+
+/*
  * Then, we have this VERB_LOG_MSGS that used to be an ifdef. Provide
  * constants instead, to avoid the hairyness of ifdef.
  */
 #ifdef VERB_LOG_MSGS
+#define pp_verbose_error 1
 #define pp_verbose_dump 1
 #define pp_verbose_servo 1
 #define pp_verbose_frames 1
 #define pp_verbose_time 1
 #endif
 
-/* Accept 4 individual flages to turn on each of them */
+/* Accept 5 individual flags to turn on each of them */
+#ifdef VERB_ERR
+#define pp_verbose_error 1
+#endif
+
 #ifdef VERB_DUMP
 #define pp_verbose_dump 1
 #endif
@@ -70,6 +84,10 @@ extern CONST_VERBOSITY int pp_diag_verbosity;
 #endif
 
 /* Provide 0 as default for all such values */
+#ifndef pp_verbose_error
+#define pp_verbose_error 0
+#endif
+
 #ifndef pp_verbose_dump
 #define pp_verbose_dump 0
 #endif
