@@ -279,7 +279,6 @@ void pp_update_clock(struct pp_instance *ppi)
 				sub_TimeInternal(&time_tmp, &time_tmp,
 					&DSCUR(ppi)->offsetFromMaster);
 				tstamp_diff = pp_set_tstamp(&time_tmp);
-				pp_timer_adjust_all(ppi, tstamp_diff);
 				pp_init_clock(ppi);
 			} else {
 				adj = DSCUR(ppi)->offsetFromMaster.nanoseconds

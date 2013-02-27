@@ -358,9 +358,6 @@ extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common
 extern int pp_timer_start(uint32_t interval_ms, struct pp_timer *tm);
 extern int pp_timer_stop(struct pp_timer *tm);
 extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
-/* pp_adj_timers is called after pp_set_tstamp and must be defined for those
- * platform who rely on system timestamp for timer expiration handling */
-extern void pp_timer_adjust_all(struct pp_instance *ppi, int32_t diff);
 
 /* Servo */
 extern void pp_init_clock(struct pp_instance *ppi);

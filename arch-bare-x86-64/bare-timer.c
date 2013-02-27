@@ -55,16 +55,6 @@ int bare_timer_expired(struct pp_timer *tm)
 	return 0;
 }
 
-void bare_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
-{
-  /*	int i;
-
-	for (i = 0; i < PP_TIMER_ARRAY_SIZE; i++) {
-		ppi->timers[i]->start += diff;
-	}
-  */
-}
-
 int pp_timer_init(struct pp_instance *ppi)
 	__attribute__((alias("bare_timer_init")));
 
@@ -76,6 +66,3 @@ int pp_timer_stop(struct pp_timer *tm)
 
 int pp_timer_expired(struct pp_timer *tm)
 	__attribute__((alias("bare_timer_expired")));
-
-void pp_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
-	__attribute__((alias("bare_timer_adjust_all")));

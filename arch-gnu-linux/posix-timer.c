@@ -82,12 +82,6 @@ int posix_timer_expired(struct pp_timer *tm)
 	return 0;
 }
 
-void posix_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
-{
-	/* Do nothing, clock_gettime uses MONOTONIC tstamps */
-}
-
-
 int pp_timer_init(struct pp_instance *ppi)
 	__attribute__((alias("posix_timer_init")));
 
@@ -99,6 +93,3 @@ int pp_timer_stop(struct pp_timer *tm)
 
 int pp_timer_expired(struct pp_timer *tm)
 	__attribute__((alias("posix_timer_expired")));
-
-void pp_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
-	__attribute__((alias("posix_timer_adjust_all")));

@@ -50,13 +50,6 @@ int wrpc_timer_expired(struct pp_timer *tm)
 	return 0;
 }
 
-void wrpc_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
-{
-	/* No need for timer adjust in SPEC: it uses a sort of monotonic
-	 * tstamp for timers
-	*/
-}
-
 uint32_t wrpc_timer_get_msec_tics(void)
 {
 	return timer_get_tics();
@@ -73,9 +66,6 @@ int pp_timer_stop(struct pp_timer *tm)
 
 int pp_timer_expired(struct pp_timer *tm)
 	__attribute__((alias("wrpc_timer_expired")));
-
-void pp_timer_adjust_all(struct pp_instance *ppi, int32_t diff)
-	__attribute__((alias("wrpc_timer_adjust_all")));
 
 uint32_t wr_timer_get_msec_tics(void)
 	__attribute__((alias("wrpc_timer_get_msec_tics")));
