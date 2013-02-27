@@ -48,6 +48,12 @@ static inline struct wr_dsport *WR_DSPOR(struct pp_instance *ppi)
 	return ppi->portDS->ext_dsport;
 }
 
+static inline Integer32 phase_to_cf_units(Integer32 phase)
+{
+	return (Integer32) ((int64_t)phase * 65536LL / 1000LL);
+}
+
+
 /* Pack/Unkpack White rabbit message in the suffix of PTP announce message */
 void msg_pack_announce_wr_tlv(struct pp_instance *ppi);
 void msg_unpack_announce_wr_tlv(void *buf, MsgAnnounce *ann);

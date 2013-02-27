@@ -9,11 +9,6 @@
 #include "wr-constants.h"
 #include "wr-api.h"
 
-static Integer32 phase_to_cf_units(Integer32 phase)
-{
-	return (Integer32) ((int64_t)phase * 65536LL / 1000LL);
-}
-
 int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	TimeInternal *time;
