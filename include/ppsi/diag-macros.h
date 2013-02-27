@@ -17,7 +17,6 @@
 #define CONST_VERBOSITY /* nothing: use "int pp_diag_verbosity" */
 extern int pp_diag_verbosity;
 
-#define PP_VTR(ppi,f,l) if (pp_diag_verbosity) pp_diag_trace(ppi,f,l)
 #define PP_PRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
 #define PP_TPRINTF(...) pp_timed_printf(__VA_ARGS__)
 #define PP_VPRINTF(...) if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
@@ -32,12 +31,10 @@ extern int pp_diag_verbosity;
 #define CONST_VERBOSITY const /* use "const int pp_diag_verbosity */
 
   #if CONFIG_PPSI_VERBOSITY > 0
-  #define PP_VTR(ppi,f,l) if (pp_diag_verbosity) pp_diag_trace(ppi,f,l)
   #define PP_PRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
   #define PP_TPRINTF(...) pp_timed_printf(__VA_ARGS__)
   #define PP_VPRINTF(...) if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
   #else
-  #define PP_VTR(ppi,f,l)
   #define PP_PRINTF(...)
   #define PP_TPRINTF(...)
   #define PP_VPRINTF(...)
