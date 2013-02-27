@@ -592,17 +592,6 @@ const char const * pp_msg_names[] = {
 	"management"
 };
 
-#ifdef PPSI_SLAVE
-#define MSG_SEND_AND_RET(x,y,z)\
-	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH,\
-		&ppi->last_snt_time, PP_NP_##y , z) < PP_## x ##_LENGTH) {\
-		PP_PRINTF("%s(%d) Message can't be sent -> FAULTY state!\n",\
-			pp_msg_names[PPM_##x], PPM_##x);\
-		return -1;\
-	}\
-	ppi->sent_seq_id[PPM_## x]++;\
-	return 0;
-#else
 #define MSG_SEND_AND_RET(x,y,z)\
 	if (pp_send_packet(ppi, ppi->buf_out, PP_## x ##_LENGTH,\
 		&ppi->last_snt_time, PP_NP_##y , z) < PP_## x ##_LENGTH) {\
@@ -615,7 +604,6 @@ const char const * pp_msg_names[] = {
 		ppi->last_snt_time.seconds,\
 		ppi->last_snt_time.nanoseconds,pp_msg_names[PPM_##x]);\
 	return 0;
-#endif
 
 /* Pack and send on general multicast ip adress an Announce message */
 int msg_issue_announce(struct pp_instance *ppi)
