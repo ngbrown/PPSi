@@ -12,6 +12,7 @@ OBJ-libarch := $A/posix-startup.o \
 	$A/posix-time.o \
 	$A/posix-timer.o \
 	lib/cmdline.o \
+	lib/libc-functions.o \
 	lib/div64.o
 
 $(LIBARCH): $(OBJ-libarch)
