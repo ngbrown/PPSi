@@ -5,7 +5,7 @@
 
 #include <ppsi/ppsi.h>
 #include "wr-api.h"
-#include "common-fun.h"
+#include "../proto-standard/common-fun.h"
 
 int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {

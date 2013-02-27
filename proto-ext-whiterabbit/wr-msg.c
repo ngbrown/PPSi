@@ -6,7 +6,7 @@
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 #include "wr-api.h"
-#include "common-fun.h"
+#include "../proto-standard/common-fun.h"
 
 /*
  * WR way to handle little/big endianess

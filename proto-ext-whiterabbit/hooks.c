@@ -142,6 +142,25 @@ static int wr_handle_followup(struct pp_instance *ppi,
 	return 1; /* the caller returns too */
 }
 
+int wr_pack_announce(struct pp_instance *ppi)
+{
+	if (WR_DSPOR(ppi)->wrConfig != NON_WR &&
+		WR_DSPOR(ppi)->wrConfig != WR_S_ONLY) {
+		msg_pack_announce_wr_tlv(ppi);
+		return WR_ANNOUNCE_LENGTH;
+	}
+	return PP_ANNOUNCE_LENGTH;
+}
+
+void wr_unpack_announce(void *buf, MsgAnnounce *ann)
+{
+	int msg_len = htons(*(UInteger16 *) (buf + 2));
+
+	if (msg_len > PP_ANNOUNCE_LENGTH) {
+		msg_unpack_announce_wr_tlv(buf, ann);
+	}
+}
+
 
 struct pp_ext_hooks pp_hooks = {
 	.init = wr_init,
@@ -154,4 +173,6 @@ struct pp_ext_hooks pp_hooks = {
 	.execute_slave = wr_execute_slave,
 	.handle_announce = wr_handle_announce,
 	.handle_followup = wr_handle_followup,
+	.pack_announce = wr_pack_announce,
+	.unpack_announce = wr_unpack_announce,
 };
