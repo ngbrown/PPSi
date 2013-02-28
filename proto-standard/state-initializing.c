@@ -28,8 +28,10 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	port->portState = PPS_INITIALIZING;
 
-	/* Initialize default data set */
-	def->twoStepFlag = PP_TWO_STEP_FLAG;
+	/*
+	 * Initialize default data set
+	 */
+	def->twoStepFlag = TRUE;
 	/* Clock identity comes from mac address with 0xff:0xfe intermixed */
 	id = def->clockIdentity;
 	mac = NP(ppi)->ch[PP_NP_GEN].addr;
@@ -42,19 +44,20 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	id[6] = mac[4];
 	id[7] = mac[5];
 
-	def->numberPorts = 1;
-	memcpy(&def->clockQuality, &opt->clock_quality,
-		sizeof(ClockQuality));
+	def->numberPorts = 1; /* Change this when multi-port */
+	memcpy(&def->clockQuality, &opt->clock_quality,	sizeof(ClockQuality));
 	def->priority1 = opt->prio1;
 	def->priority2 = opt->prio2;
 	def->domainNumber = opt->domain_number;
 	def->slaveOnly = opt->slave_only;
 	if (opt->slave_only)
-		ppi->defaultDS->clockQuality.clockClass = 255;
+		def->clockQuality.clockClass = 255;
 
-	/* Initialize port data set */
-	memcpy(ppi->portDS->portIdentity.clockIdentity,
-		ppi->defaultDS->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
+	/*
+	 * Initialize port data set
+	 */
+	memcpy(port->portIdentity.clockIdentity,
+		def->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
 	port->portIdentity.portNumber = 1;
 	port->logMinDelayReqInterval = PP_DEFAULT_DELAYREQ_INTERVAL;
 	clear_TimeInternal(&port->peerMeanPathDelay);

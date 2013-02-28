@@ -141,8 +141,7 @@ void msg_pack_header(struct pp_instance *ppi, void *buf)
 	*(UInteger4 *) (buf + 1) = DSPOR(ppi)->versionNumber;
 	*(UInteger8 *) (buf + 4) = DSDEF(ppi)->domainNumber;
 
-	if (DSDEF(ppi)->twoStepFlag)
-		*(UInteger8 *) (buf + 6) = PP_TWO_STEP_FLAG;
+	*(UInteger8 *) (buf + 6) = PP_TWO_STEP_FLAG;
 
 	memset((buf + 8), 0, 8);
 	memcpy((buf + 20), DSPOR(ppi)->portIdentity.clockIdentity,
