@@ -7,7 +7,7 @@
 #include <ppsi/diag.h>
 #include "common-fun.h"
 
-static inline void Integer64_display(const char *label, Integer64 *bigint)
+static void Integer64_display(const char *label, Integer64 *bigint)
 {
 	if (pp_verbose_dump) {
 		PP_VPRINTF("%s:\n", label);
@@ -16,7 +16,7 @@ static inline void Integer64_display(const char *label, Integer64 *bigint)
 	}
 }
 
-static inline void UInteger48_display(const char *label, UInteger48 *bigint)
+static void UInteger48_display(const char *label, UInteger48 *bigint)
 {
 	if (pp_verbose_dump) {
 		PP_VPRINTF("%s:\n", label);
@@ -25,7 +25,7 @@ static inline void UInteger48_display(const char *label, UInteger48 *bigint)
 	}
 }
 
-static inline void timestamp_display(const char *label, Timestamp *timestamp)
+static void timestamp_display(const char *label, Timestamp *timestamp)
 {
 	if (pp_verbose_dump) {
 		PP_VPRINTF("%s:\n", label);
@@ -34,7 +34,7 @@ static inline void timestamp_display(const char *label, Timestamp *timestamp)
 	}
 }
 
-static inline void msg_display_header(MsgHeader *header)
+static void msg_display_header(MsgHeader *header)
 {
 	if (pp_verbose_dump) {
 		PP_VPRINTF("Message header:\n");
@@ -57,7 +57,7 @@ static inline void msg_display_header(MsgHeader *header)
 	}
 }
 
-static inline void msg_display_announce(MsgAnnounce *announce)
+static void msg_display_announce(MsgAnnounce *announce)
 {
 	if (pp_verbose_dump) {
 		PP_VPRINTF("Message ANNOUNCE:\n");
