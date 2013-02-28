@@ -149,9 +149,6 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	if (len < PP_ANNOUNCE_LENGTH)
 		return -1;
 
-	if (ppi->is_from_self)
-		return 0;
-
 	/*
 	 * Valid announce message is received : BMC algorithm
 	 * will be executed
@@ -185,9 +182,6 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 
 	if (len < PP_SYNC_LENGTH)
 		return -1;
-
-	if (ppi->is_from_self)
-		return 0;
 
 	time = &ppi->last_rcv_time;
 
@@ -297,11 +291,6 @@ int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 {
 	if (len < PP_ANNOUNCE_LENGTH)
 		return -1;
-
-	if (ppi->is_from_self) {
-		PP_VPRINTF("master handle_announce: ignore msg from self\n");
-		return 0;
-	}
 
 	PP_VPRINTF("Announce message from another foreign master\n");
 

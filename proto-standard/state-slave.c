@@ -55,13 +55,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_DELAY_REQ:
-
-		e = (plen < PP_DELAY_REQ_LENGTH);
-
-		if (!e && ppi->is_from_self) {
-			/* No more used: delay_req_send_time was taken
-			 * when sending it */
-		}
+		/* Being slave, we are not waiting for a delay request */
 		break;
 
 	case PPM_DELAY_RESP:

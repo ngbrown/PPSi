@@ -16,16 +16,19 @@
 int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 {
 	struct pp_state_table_item *ip;
-	int state, err;
+	int state, err = 0;
 
-	if (plen > 0)
+	if (plen && plen < PP_HEADER_LENGTH)
+		err = -1;
+	if (plen >= PP_HEADER_LENGTH) {
 		PP_VPRINTF("RECV %02d %d.%09d %s\n", plen,
 			(int)ppi->last_rcv_time.seconds,
 			(int)ppi->last_rcv_time.nanoseconds,
 			pp_msg_names[packet[0] & 0x0f]);
-
-	if (packet)
-		msg_unpack_header(ppi, packet);
+		err = msg_unpack_header(ppi, packet);
+	}
+	if (err)
+		return ppi->next_delay;
 
 	state = ppi->state;
 

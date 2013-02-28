@@ -81,7 +81,7 @@ static void msg_display_announce(MsgAnnounce *announce)
 }
 
 /* Unpack header from in buffer to msg_tmp_header field */
-void msg_unpack_header(struct pp_instance *ppi, void *buf)
+int msg_unpack_header(struct pp_instance *ppi, void *buf)
 {
 	MsgHeader *hdr = &ppi->msg_tmp_header;
 
@@ -107,14 +107,17 @@ void msg_unpack_header(struct pp_instance *ppi, void *buf)
 	hdr->controlField = (*(UInteger8 *) (buf + 32));
 	hdr->logMessageInterval = (*(Integer8 *) (buf + 33));
 
-	if (DSPOR(ppi)->portIdentity.portNumber ==
-	    ppi->msg_tmp_header.sourcePortIdentity.portNumber
-	    && !memcmp(ppi->msg_tmp_header.sourcePortIdentity.clockIdentity,
+	/*
+	 * If the message is from us, we should discard it.
+	 * The best way to do that is comparing the mac address,
+	 * but it's easier to check the clock identity (we refuse
+	 * any port, not only the same port, as we can't sync with
+	 * ourself even when we'll run in multi-port mode.
+	 */
+	if (!memcmp(ppi->msg_tmp_header.sourcePortIdentity.clockIdentity,
 			DSPOR(ppi)->portIdentity.clockIdentity,
-			PP_CLOCK_IDENTITY_LENGTH))
-		ppi->is_from_self = 1;
-	else
-		ppi->is_from_self = 0;
+		    PP_CLOCK_IDENTITY_LENGTH))
+		return -1;
 
 	if (!memcmp(DSPAR(ppi)->parentPortIdentity.clockIdentity,
 			hdr->sourcePortIdentity.clockIdentity,
@@ -126,6 +129,7 @@ void msg_unpack_header(struct pp_instance *ppi, void *buf)
 		ppi->is_from_cur_par = 0;
 
 	msg_display_header(hdr);
+	return 0;
 }
 
 /* Pack header message into out buffer of ppi */
