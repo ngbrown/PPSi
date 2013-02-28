@@ -25,7 +25,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if (pp_hooks.new_slave)
 			e = pp_hooks.new_slave(ppi, pkt, plen);
 		if (e)
-			goto no_incoming_msg;
+			goto out;
 
 		ppi->waiting_for_follow = FALSE;
 
@@ -50,7 +50,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto state_updated;
 
 	if (plen == 0)
-		goto no_incoming_msg;
+		goto out;
 
 	switch (ppi->msg_tmp_header.messageType) {
 
@@ -109,7 +109,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			else
 				pp_update_delay(ppi, &correction_field);
 			if (e)
-				goto no_incoming_msg;
+				goto out;
 
 			ppi->log_min_delay_req_interval =
 				hdr->logMessageInterval;
@@ -232,7 +232,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	}
 
-no_incoming_msg:
+out:
 	if (e == 0)
 		e = st_com_execute_slave(ppi, 1);
 

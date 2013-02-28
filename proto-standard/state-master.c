@@ -33,7 +33,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			ppi->timers[PP_TIMER_PDELAYREQ]);
 		/* Send an announce immediately, when becomes master */
 		if (msg_issue_announce(ppi) < 0)
-			goto failure;
+			goto out;
 	}
 
 	if (st_com_check_record_update(ppi))
@@ -42,31 +42,31 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (pp_timer_expired(ppi->timers[PP_TIMER_SYNC])) {
 		PP_VPRINTF("event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
 		if (msg_issue_sync(ppi) < 0)
-			goto failure;
+			goto out;
 
 		time_snt = &ppi->last_snt_time;
 		add_TimeInternal(time_snt, time_snt,
 				 &OPTS(ppi)->outbound_latency);
 		if (msg_issue_followup(ppi, time_snt))
-			goto failure;
+			goto out;
 	}
 
 	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_INTERVAL])) {
 		PP_VPRINTF("event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
 		if (msg_issue_announce(ppi) < 0)
-			goto failure;
+			goto out;
 	}
 
 	if (!OPTS(ppi)->e2e_mode) {
 		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ])) {
 			PP_VPRINTF("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
 			if (msg_issue_pdelay_req(ppi) < 0)
-				goto failure;
+				goto out;
 		}
 	}
 
 	if (plen == 0)
-		goto no_incoming_msg;
+		goto out;
 
 	/*
 	 * An extension can do special treatment of this message type,
@@ -78,7 +78,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		msgtype = pp_hooks.master_msg(ppi, pkt, plen, msgtype);
 	if (msgtype < 0) {
 		e = msgtype;
-		goto failure;
+		goto out;
 	}
 
 	switch (msgtype) {
@@ -198,8 +198,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 	}
 
-no_incoming_msg:
-failure:
+out:
 	if (e == 0) {
 		if (DSDEF(ppi)->slaveOnly ||
 			DSDEF(ppi)->clockQuality.clockClass == 255)

@@ -14,7 +14,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (pp_hooks.listening)
 		e = pp_hooks.listening(ppi, pkt, plen);
 	if (e)
-		goto no_incoming_msg;
+		goto out;
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_LISTENING;
@@ -25,7 +25,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto state_updated;
 
 	if (plen == 0)
-		goto no_incoming_msg;
+		goto out;
 
 	switch (ppi->msg_tmp_header.messageType) {
 
@@ -42,7 +42,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 	}
 
-no_incoming_msg:
+out:
 	if (e == 0)
 		e = st_com_execute_slave(ppi, 0);
 
