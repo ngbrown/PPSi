@@ -194,14 +194,10 @@ struct pp_instance {
 	union {
 		MsgSync  sync;
 		MsgFollowUp  follow;
-		MsgDelayReq  req;
 		MsgDelayResp resp;
-		MsgPDelayReq  preq;
 		MsgPDelayResp  presp;
 		MsgPDelayRespFollowUp  prespfollow;
-		MsgManagement  manage;
 		MsgAnnounce  announce;
-		MsgSignaling signaling;
 	} msg_tmp;
 	UInteger16 *sent_seq_id; /* sequence id of the last message sent of the
 				  * same type
