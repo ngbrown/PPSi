@@ -11,8 +11,8 @@ void pp_init_clock(struct pp_instance *ppi)
 	PP_PRINTF("SERVO init clock\n");
 
 	/* clear vars */
-	set_TimeInternal(&SRV(ppi)->m_to_s_dly, 0, 0);
-	set_TimeInternal(&SRV(ppi)->s_to_m_dly, 0, 0);
+	clear_TimeInternal(&SRV(ppi)->m_to_s_dly);
+	clear_TimeInternal(&SRV(ppi)->s_to_m_dly);
 	SRV(ppi)->obs_drift = 0;	/* clears clock servo accumulator (the
 					 * I term) */
 	SRV(ppi)->owd_fltr.s_exp = 0;	/* clears one-way delay filter */

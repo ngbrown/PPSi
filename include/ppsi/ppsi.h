@@ -410,7 +410,6 @@ extern int from_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern int to_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern void add_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
 extern void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);
-extern void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns);
 extern void display_TimeInternal(const char *label, TimeInternal *t);
 extern void div2_TimeInternal(TimeInternal *r);
 

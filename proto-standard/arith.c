@@ -100,12 +100,6 @@ void div2_TimeInternal(TimeInternal *r)
 	normalize_TimeInternal(r);
 }
 
-void set_TimeInternal(TimeInternal *t, Integer32 s, Integer32 ns)
-{
-	t->seconds = s;
-	t->nanoseconds = ns;
-}
-
 void display_TimeInternal(const char *label, TimeInternal *t)
 {
 	PP_VPRINTF("%s: %s%d.%09d\n", label,

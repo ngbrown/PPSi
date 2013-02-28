@@ -21,7 +21,7 @@ void bare_main_loop(struct pp_instance *ppi)
 {
 	int delay_ms;
 
-	set_TimeInternal(&ppi->last_rcv_time, 0, 0);
+	clear_TimeInternal(&ppi->last_rcv_time);
 	NP(ppi)->proto_ofst = 14;
 
 	/*

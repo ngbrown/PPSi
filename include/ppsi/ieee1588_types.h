@@ -73,6 +73,11 @@ typedef struct TimeInternal {
 	/* White Rabbit extension end */
 } TimeInternal;
 
+static inline void clear_TimeInternal(struct TimeInternal *t)
+{
+	memset(t, 0, sizeof(*t));
+}
+
 typedef Octet		ClockIdentity[PP_CLOCK_IDENTITY_LENGTH];
 
 typedef struct PortIdentity {
