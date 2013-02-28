@@ -39,8 +39,6 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		if (pp_diag_verbosity)
 			pp_diag_fsm(ppi, ip->name, STATE_ENTER, plen);
 		err = ip->f1(ppi, packet, plen);
-		if (!err && ip->f2)
-			err = ip->f2(ppi, packet, plen);
 		if (err)
 			pp_diag_error(ppi, err);
 		if (pp_diag_verbosity)

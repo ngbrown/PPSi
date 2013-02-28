@@ -419,7 +419,6 @@ struct pp_state_table_item {
 	int state;
 	char *name;
 	int (*f1)(struct pp_instance *ppi, uint8_t *packet, int plen);
-	int (*f2)(struct pp_instance *ppi, uint8_t *packet, int plen);
 };
 
 extern struct pp_state_table_item pp_state_table[]; /* 0-terminated */
