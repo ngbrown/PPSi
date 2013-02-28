@@ -27,8 +27,6 @@ typedef uint8_t		Enumeration4;
 typedef uint8_t		UInteger4;
 typedef uint8_t		Nibble;
 
-#define PP_CLOCK_IDENTITY_LENGTH 8
-
 /* FIXME: each struct must be aligned for lower memory usage */
 
 typedef struct UInteger48 {
@@ -46,7 +44,7 @@ typedef struct UInteger64 {
 	uint32_t		msb;
 } UInteger64;
 
-typedef struct TimeInterval {
+struct TimeInterval { /* page 12 (32) -- never used */
 	Integer64	scaledNanoseconds;
 } TimeInterval;
 
@@ -55,7 +53,7 @@ typedef struct FixedDelta {
 	UInteger64 scaledPicoseconds;
 } FixedDelta;
 
-typedef struct Timestamp {
+typedef struct Timestamp { /* page 13 (33) -- no typedef expected */
 	UInteger48	secondsField;
 	UInteger32	nanosecondsField;
 } Timestamp;
@@ -84,43 +82,44 @@ static inline void clear_TimeInternal(struct TimeInternal *t)
 	memset(t, 0, sizeof(*t));
 }
 
-typedef Octet		ClockIdentity[PP_CLOCK_IDENTITY_LENGTH];
+typedef Octet	ClockIdentity[8]; /* page 13 (33) */
+#define PP_CLOCK_IDENTITY_LENGTH	sizeof(ClockIdentity)
 
-typedef struct PortIdentity {
+typedef struct PortIdentity { /* page 13 (33) */
 	ClockIdentity	clockIdentity;
 	UInteger16	portNumber;
 } PortIdentity;
 
-typedef struct PortAdress {
+typedef struct PortAdress { /* page 13 (33) */
 	Enumeration16	networkProtocol;
 	UInteger16	adressLength;
 	Octet		*adressField;
 } PortAdress;
 
-typedef struct ClockQuality {
+typedef struct ClockQuality { /* page 14 (34) */
 	UInteger8	clockClass;
 	Enumeration8	clockAccuracy;
 	UInteger16	offsetScaledLogVariance;
 } ClockQuality;
 
-typedef struct TLV {
+struct TLV { /* page 14 (34) -- never used */
 	Enumeration16	tlvType;
 	UInteger16	lengthField;
 	Octet		*valueField;
 } TLV;
 
-typedef struct PTPText {
+struct PTPText { /* page 14 (34) -- never used */
 	UInteger8	lengthField;
 	Octet		*textField;
 } PTPText;
 
-typedef struct FaultRecord {
+struct FaultRecord { /* page 14 (34) -- never used */
 	UInteger16	faultRecordLength;
 	Timestamp	faultTime;
 	Enumeration8	severityCode;
-	PTPText		faultName;
-	PTPText		faultValue;
-	PTPText		faultDescription;
+	struct PTPText	faultName;
+	struct PTPText	faultValue;
+	struct PTPText	faultDescription;
 } FaultRecord;
 
 
@@ -211,7 +210,7 @@ typedef struct MsgManagement{
 } MsgManagement;
 
 /* Default Data Set */
-typedef struct DSDefault {
+typedef struct DSDefault {		/* page 65 */
 	/* Static */
 	Boolean		twoStepFlag;
 	ClockIdentity	clockIdentity;
@@ -226,7 +225,7 @@ typedef struct DSDefault {
 } DSDefault;
 
 /* Current Data Set */
-typedef struct DSCurrent {
+typedef struct DSCurrent {		/* page 67 */
 	/* Dynamic */
 	UInteger16	stepsRemoved;
 	TimeInternal	offsetFromMaster;
@@ -237,7 +236,7 @@ typedef struct DSCurrent {
 } DSCurrent;
 
 /* Parent Data Set */
-typedef struct DSParent {
+typedef struct DSParent {		/* page 68 */
 	/* Dynamic */
 	PortIdentity	parentPortIdentity;
 	Boolean		parentStats;
@@ -250,7 +249,7 @@ typedef struct DSParent {
 } DSParent;
 
 /* Port Data set */
-typedef struct DSPort {
+typedef struct DSPort {			/* page 72 */
 	/* Static */
 	PortIdentity	portIdentity;
 	/* Dynamic */
@@ -269,15 +268,15 @@ typedef struct DSPort {
 } DSPort;
 
 /* Time Properties Data Set */
-typedef struct DSTimeProperties {
+typedef struct DSTimeProperties {	/* page 70 */
 	/* Dynamic */
 	Integer16	currentUtcOffset;
-	Boolean	currentUtcOffsetValid;
-	Boolean	leap59;
-	Boolean	leap61;
-	Boolean	timeTraceable;
-	Boolean	frequencyTraceable;
-	Boolean	ptpTimescale;
+	Boolean		currentUtcOffsetValid;
+	Boolean		leap59;
+	Boolean		leap61;
+	Boolean		timeTraceable;
+	Boolean		frequencyTraceable;
+	Boolean		ptpTimescale;
 	Enumeration8	timeSource;
 } DSTimeProperties;
 

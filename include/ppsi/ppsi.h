@@ -160,11 +160,11 @@ struct pp_instance {
 	struct pp_servo *servo;
 
 	/* Data sets */
-	DSDefault *defaultDS;
-	DSCurrent *currentDS;
-	DSParent *parentDS;
-	DSPort *portDS;
-	DSTimeProperties *timePropertiesDS;
+	DSDefault *defaultDS;			/* page 65 */
+	DSCurrent *currentDS;			/* page 67 */
+	DSParent *parentDS;			/* page 68 */
+	DSPort *portDS;				/* page 72 */
+	DSTimeProperties *timePropertiesDS;	/* page 70 */
 	struct pp_timer *timers[PP_TIMER_ARRAY_SIZE];
 
 	UInteger16 number_foreign_records;
