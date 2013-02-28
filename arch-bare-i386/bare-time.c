@@ -11,7 +11,7 @@ static int bare_time_get(TimeInternal *t)
 
 	if (sys_gettimeofday(&tv, NULL) < 0) {
 		PP_PRINTF("gettimeofday error");
-		sys_exit(0);
+		sys_exit(1);
 	}
 	t->seconds = tv.tv_sec;
 	t->nanoseconds = tv.tv_usec * 1000;
@@ -29,7 +29,7 @@ static int bare_time_set(TimeInternal *t)
 
 	if (sys_settimeofday(&tv, NULL) < 0) {
 		PP_PRINTF("settimeofday error");
-		sys_exit(0);
+		sys_exit(1);
 	}
 	if (pp_verbose_time)
 		pp_printf("%s: %9li.%09li\n", __func__, tv.tv_sec, tv.tv_nsec);
