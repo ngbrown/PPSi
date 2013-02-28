@@ -34,7 +34,7 @@ static DSTimeProperties timePropertiesDS;
 static struct pp_servo servo;
 static struct pp_frgn_master frgn_master;
 
-void ppsi_main(void)
+int ppsi_main(int argc, char **argv)
 {
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
 
@@ -56,6 +56,10 @@ void ppsi_main(void)
 
 	OPTS(ppi)->iface_name = "eth0";
 
+	if (pp_parse_cmdline(ppi, argc, argv) != 0)
+		return -1;
+
 	/* The actual sockets are opened in state-initializing */
 	bare_main_loop(ppi);
+	return 0;
 }
