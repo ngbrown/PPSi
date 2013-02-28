@@ -56,9 +56,11 @@ static int wrpc_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		t->nanoseconds = wr_ts.nsec;
 		t->phase = wr_ts.phase;
 		t->correct = wr_ts.correct;
+#if 0 /* I disabled the fields, for space: they were only used here */
 		t->raw_nsec = wr_ts.raw_nsec;
 		t->raw_ahead = wr_ts.raw_ahead;
 		t->raw_phase = wr_ts.raw_phase;
+#endif
 	}
 	return got;
 }

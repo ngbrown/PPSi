@@ -66,10 +66,16 @@ typedef struct TimeInternal {
 	/* White Rabbit extension begin */
 	Integer32	phase;
 	int 		correct;
-	/* raw time (non-linearized) for debugging purposes */
+#if 0
+	/*
+	 * The following three fields may be used for diagnostics, but
+	 * they cost space. So remove them but keep the code around just
+	 * in case it is useful again (they are only set, never read)
+	 */
 	int32_t raw_phase;
 	int32_t raw_nsec;
 	int32_t raw_ahead;
+#endif
 	/* White Rabbit extension end */
 } TimeInternal;
 
