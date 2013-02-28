@@ -6,6 +6,7 @@
  * This is the startup thing for hosted environments. It
  * defines main and then calls the main loop.
  */
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -21,6 +22,7 @@ int main(int argc, char **argv)
 	struct pp_instance *ppi;
 	char *ifname;
 
+	setbuf(stdout, NULL);
 	/*
 	 * Here, we may fork or whatever for each interface.
 	 * To keep things simple, just run one thing for one interface.
