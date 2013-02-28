@@ -12,9 +12,6 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_PASSIVE;
-		pp_timer_start(
-			(1 << DSPOR(ppi)->logMinPdelayReqInterval) * 1000,
-			ppi->timers[PP_TIMER_PDELAYREQ]);
 
 		st_com_restart_annrec_timer(ppi);
 	}
@@ -29,10 +26,6 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	case PPM_ANNOUNCE:
 		e = st_com_master_handle_announce(ppi, pkt, plen);
-		break;
-
-	case PPM_PDELAY_REQ:
-		e = st_com_handle_pdelay_req(ppi, pkt, plen);
 		break;
 
 	case PPM_SYNC:
@@ -57,7 +50,6 @@ state_updated:
 	/* Leaving this state */
 	if (ppi->next_state != ppi->state) {
 		pp_timer_stop(ppi->timers[PP_TIMER_ANN_RECEIPT]);
-		pp_timer_stop(ppi->timers[PP_TIMER_PDELAYREQ]);
 	}
 
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;

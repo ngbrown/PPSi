@@ -136,10 +136,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 		hdr->h_proto = htons(ETH_P_1588);
 
-		if (OPTS(ppi)->gptp_mode)
-			memcpy(hdr->h_dest, PP_PEER_MACADDRESS, ETH_ALEN);
-		else
-			memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
+		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
 		/* raw socket implementation always uses gen socket */
 		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
 		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
@@ -150,10 +147,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(chtype == PP_NP_GEN ? PP_GEN_PORT : PP_EVT_PORT);
 
-	if (!use_pdelay_addr)
-		addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
-	else
-		addr.sin_addr.s_addr = NP(ppi)->peer_mcast_addr;
+	addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
 
 	if (t)
 		pp_t_ops.get(t);
@@ -224,11 +218,6 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 		pmr.mr_type = PACKET_MR_MULTICAST;
 		pmr.mr_alen = ETH_ALEN;
 		memcpy(pmr.mr_address, PP_MCAST_MACADDRESS, ETH_ALEN);
-		setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
-			   &pmr, sizeof(pmr)); /* lazily ignore errors */
-
-		/* also the PEER multicast address */
-		memcpy(pmr.mr_address, PP_PEER_MACADDRESS, ETH_ALEN);
 		setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
 			   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
@@ -323,15 +312,6 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 		return -1;
 	}
 	/* End of General multicast Ip address init */
-
-	/* Init Peer multicast IP address */
-	memcpy(addr_str, PP_PEER_DOMAIN_ADDRESS, INET_ADDRSTRLEN);
-
-	if (!inet_aton(addr_str, &net_addr)) {
-		pp_diag_error_str2(ppi, "inet_aton()", strerror(errno));
-		return -1;
-	}
-	NP(ppi)->peer_mcast_addr = net_addr.s_addr;
 
 	/* multicast sends only on specified interface */
 	imr.imr_multiaddr.s_addr = net_addr.s_addr;
@@ -430,13 +410,6 @@ static int posix_net_exit(struct pp_instance *ppi)
 
 		setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
 			&imr, sizeof(struct ip_mreq));
-
-		/* Close Peer Multicast */
-		imr.imr_multiaddr.s_addr = NP(ppi)->peer_mcast_addr;
-		imr.imr_interface.s_addr = htonl(INADDR_ANY);
-
-		setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
-			   &imr, sizeof(struct ip_mreq));
 
 		close(fd);
 

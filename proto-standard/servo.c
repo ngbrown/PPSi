@@ -104,76 +104,6 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 	}
 }
 
-void pp_update_peer_delay(struct pp_instance *ppi,
-			  TimeInternal *correction_field, int two_step)
-{
-	Integer16 s;
-	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
-
-	if (two_step) {
-		/* calc 'slave_to_master_delay' */
-		sub_TimeInternal(&SRV(ppi)->pdelay_ms,
-			&ppi->pdelay_resp_receive_time,
-			&ppi->pdelay_resp_send_time);
-		sub_TimeInternal(&SRV(ppi)->pdelay_sm,
-			&ppi->pdelay_req_receive_time,
-			&ppi->pdelay_req_send_time);
-
-		/* update 'one_way_delay' */
-		add_TimeInternal(&DSPOR(ppi)->peerMeanPathDelay,
-			&SRV(ppi)->pdelay_ms,
-			&SRV(ppi)->pdelay_sm);
-
-		/* Substract correctionField */
-		sub_TimeInternal(&DSPOR(ppi)->peerMeanPathDelay,
-			&DSPOR(ppi)->peerMeanPathDelay, correction_field);
-
-		/* Compute one-way delay */
-		div2_TimeInternal(&DSPOR(ppi)->peerMeanPathDelay);
-	} else {
-		/* One step clock */
-
-		sub_TimeInternal(&DSPOR(ppi)->peerMeanPathDelay,
-			&ppi->pdelay_resp_receive_time,
-			&ppi->pdelay_req_send_time);
-
-		/* Substract correctionField */
-		sub_TimeInternal(&DSPOR(ppi)->peerMeanPathDelay,
-			&DSPOR(ppi)->peerMeanPathDelay, correction_field);
-
-		/* Compute one-way delay */
-		div2_TimeInternal(&DSPOR(ppi)->peerMeanPathDelay);
-	}
-
-	if (DSPOR(ppi)->peerMeanPathDelay.seconds) {
-		/* cannot filter with secs, clear filter */
-		owd_fltr->s_exp = owd_fltr->nsec_prev = 0;
-		return;
-	}
-	/* avoid overflowing filter */
-	s = OPTS(ppi)->s;
-	while (abs(owd_fltr->y) >> (31 - s))
-		--s;
-
-	/* crank down filter cutoff by increasing 's_exp' */
-	if (owd_fltr->s_exp < 1)
-		owd_fltr->s_exp = 1;
-	else if (owd_fltr->s_exp < 1 << s)
-		++owd_fltr->s_exp;
-	else if (owd_fltr->s_exp > 1 << s)
-		owd_fltr->s_exp = 1 << s;
-
-	/* filter 'meanPathDelay' */
-	owd_fltr->y = (owd_fltr->s_exp - 1) *
-		owd_fltr->y / owd_fltr->s_exp +
-		(DSPOR(ppi)->peerMeanPathDelay.nanoseconds / 2 +
-		 owd_fltr->nsec_prev / 2) / owd_fltr->s_exp;
-
-	owd_fltr->nsec_prev = DSPOR(ppi)->peerMeanPathDelay.nanoseconds;
-	DSPOR(ppi)->peerMeanPathDelay.nanoseconds = owd_fltr->y;
-
-}
-
 void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 		      TimeInternal *recv_time, TimeInternal *correction_field)
 {
@@ -209,17 +139,10 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 	sub_TimeInternal(&SRV(ppi)->m_to_s_dly,
 		&SRV(ppi)->m_to_s_dly, correction_field);
 
-	/* update 'offsetFromMaster' */
-	if (!OPTS(ppi)->e2e_mode) {
-		sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster,
-			&SRV(ppi)->m_to_s_dly,
-			&DSPOR(ppi)->peerMeanPathDelay);
-	} else {
-		/* (End to End mode) */
-		sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster,
+	/* update 'offsetFromMaster', (End to End mode) */
+	sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster,
 			&SRV(ppi)->m_to_s_dly,
 			&DSCUR(ppi)->meanPathDelay);
-	}
 
 	if (DSCUR(ppi)->offsetFromMaster.seconds) {
 		/* cannot filter with secs, clear filter */
@@ -325,15 +248,9 @@ display:
 
 		PP_VPRINTF("\n--Offset and Delay filtered--\n");
 
-		if (!OPTS(ppi)->e2e_mode) {
-			PP_VPRINTF("one-way delay averaged (P2P): %9i.%09i\n",
-				   DSPOR(ppi)->peerMeanPathDelay.seconds,
-				   DSPOR(ppi)->peerMeanPathDelay.nanoseconds);
-		} else {
-			PP_VPRINTF("one-way delay averaged (E2E): %9i.%09i\n",
-				   DSCUR(ppi)->meanPathDelay.seconds,
-				   DSCUR(ppi)->meanPathDelay.nanoseconds);
-		}
+		PP_VPRINTF("one-way delay averaged (E2E): %9i.%09i\n",
+			   DSCUR(ppi)->meanPathDelay.seconds,
+			   DSCUR(ppi)->meanPathDelay.nanoseconds);
 
 		PP_VPRINTF("offset from master:       %9i.%09i\n",
 			   DSCUR(ppi)->offsetFromMaster.seconds,

@@ -176,20 +176,20 @@ typedef struct MsgDelayResp {
 	PortIdentity	requestingPortIdentity;
 } MsgDelayResp;
 
-/* PdelayReq Message (table 29, page 131) */
-typedef struct MsgPDelayReq {
+/* PdelayReq Message (table 29, page 131) -- not used in ppsi */
+struct MsgPDelayReq {
 	Timestamp	originTimestamp;
 
 } MsgPDelayReq;
 
-/* PdelayResp Message (table 30, page 131) */
-typedef struct MsgPDelayResp {
+/* PdelayResp Message (table 30, page 131) -- not used in ppsi */
+struct MsgPDelayResp {
 	Timestamp	requestReceiptTimestamp;
 	PortIdentity	requestingPortIdentity;
 } MsgPDelayResp;
 
-/* PdelayRespFollowUp Message (table 31, page 132) */
-typedef struct MsgPDelayRespFollowUp {
+/* PdelayRespFollowUp Message (table 31, page 132) -- not used in ppsi */
+struct MsgPDelayRespFollowUp {
 	Timestamp	responseOriginTimestamp;
 	PortIdentity	requestingPortIdentity;
 } MsgPDelayRespFollowUp;

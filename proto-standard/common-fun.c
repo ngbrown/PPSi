@@ -35,26 +35,17 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 	if (!check_delayreq)
 		return 0;
 
-	if (OPTS(ppi)->e2e_mode) {
-		if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {
-			PP_VPRINTF("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
+	if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {
+		PP_VPRINTF("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
 
-			ret = msg_issue_delay_req(ppi);
+		ret = msg_issue_delay_req(ppi);
 
-			ppi->delay_req_send_time = ppi->last_snt_time;
+		ppi->delay_req_send_time = ppi->last_snt_time;
 
-			/* Add latency */
-			add_TimeInternal(&ppi->delay_req_send_time,
-						&ppi->delay_req_send_time,
-						&OPTS(ppi)->outbound_latency);
-
-
-		}
-	} else {
-		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ])) {
-			PP_VPRINTF("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
-			ret = msg_issue_pdelay_req(ppi);
-		}
+		/* Add latency */
+		add_TimeInternal(&ppi->delay_req_send_time,
+				 &ppi->delay_req_send_time,
+				 &OPTS(ppi)->outbound_latency);
 	}
 	return ret;
 }
@@ -298,41 +289,6 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 			&correction_field);
 
 	pp_update_clock(ppi);
-	return 0;
-}
-
-
-int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
-			     int len)
-{
-	TimeInternal *time;
-	MsgHeader *hdr = &ppi->msg_tmp_header;
-
-	if (len < PP_PDELAY_REQ_LENGTH)
-		return -1;
-
-	if (OPTS(ppi)->e2e_mode)
-		return 0;
-
-	time = &ppi->last_rcv_time;
-
-	if (ppi->is_from_self) {
-		/* Get sending timestamp from IP stack
-		 * with So_TIMESTAMP */
-		ppi->pdelay_req_send_time.seconds =
-			time->seconds;
-		ppi->pdelay_req_send_time.nanoseconds =
-			time->nanoseconds;
-
-		/*Add latency*/
-		add_TimeInternal(&ppi->pdelay_req_send_time,
-			&ppi->pdelay_req_send_time,
-			&OPTS(ppi)->outbound_latency);
-	} else {
-		msg_copy_header(&ppi->pdelay_req_hdr, hdr);
-
-		return msg_issue_pdelay_resp(ppi, time, hdr);
-	}
 	return 0;
 }
 

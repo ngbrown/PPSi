@@ -11,9 +11,6 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	TimeInternal *time;
 	TimeInternal *time_snt;
-	TimeInternal req_rec_tstamp;
-	TimeInternal correction_field;
-	TimeInternal resp_orig_tstamp;
 	int msgtype;
 	int e = 0; /* error var, to check errors in msg handling */
 	MsgHeader *hdr = &ppi->msg_tmp_header;
@@ -28,9 +25,6 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		pp_timer_start((1 << DSPOR(ppi)->logAnnounceInterval) * 1000,
 			ppi->timers[PP_TIMER_ANN_INTERVAL]);
 
-		pp_timer_start(
-			(1 << DSPOR(ppi)->logMinPdelayReqInterval) * 1000,
-			ppi->timers[PP_TIMER_PDELAYREQ]);
 		/* Send an announce immediately, when becomes master */
 		if (msg_issue_announce(ppi) < 0)
 			goto out;
@@ -55,14 +49,6 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		PP_VPRINTF("event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
 		if (msg_issue_announce(ppi) < 0)
 			goto out;
-	}
-
-	if (!OPTS(ppi)->e2e_mode) {
-		if (pp_timer_expired(ppi->timers[PP_TIMER_PDELAYREQ])) {
-			PP_VPRINTF("event PDELAYREQ_INTERVAL_TOUT_EXPIRES\n");
-			if (msg_issue_pdelay_req(ppi) < 0)
-				goto out;
-		}
 	}
 
 	if (plen == 0)
@@ -99,99 +85,12 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		msg_issue_delay_resp(ppi, time);
 		break;
 
-	case PPM_PDELAY_REQ:
-		e = st_com_handle_pdelay_req(ppi, pkt, plen);
-		break;
-
-	case PPM_PDELAY_RESP:
-		/* Loopback Timestamp */
-		if (OPTS(ppi)->e2e_mode)
-			break;
-
-		if (ppi->is_from_self) {
-			/*Add latency*/
-			add_TimeInternal(time, time,
-					 &OPTS(ppi)->outbound_latency);
-
-			e = msg_issue_pdelay_resp_follow_up(ppi, time);
-			break;
-		}
-		msg_unpack_pdelay_resp(pkt, &ppi->msg_tmp.presp);
-
-		if (!((ppi->sent_seq_id[PPM_PDELAY_REQ] ==
-		       hdr->sequenceId)
-			&& (!memcmp(DSPOR(ppi)->portIdentity.clockIdentity,
-			       ppi->msg_tmp.presp.requestingPortIdentity.
-				       clockIdentity,
-			       PP_CLOCK_IDENTITY_LENGTH))
-			&& (DSPOR(ppi)->portIdentity.portNumber ==
-			ppi->msg_tmp.presp.requestingPortIdentity.portNumber))
-		   ) {
-			if ((hdr->flagField[0] & PP_TWO_STEP_FLAG) != 0) {
-				/* Two Step Clock */
-				/* Store t4 (Fig 35) */
-				ppi->pdelay_resp_receive_time.seconds =
-					time->seconds;
-				ppi->pdelay_resp_receive_time.nanoseconds =
-					time->nanoseconds;
-				/* Store t2 (Fig 35) */
-				to_TimeInternal(&req_rec_tstamp,
-					       &ppi->msg_tmp.presp.
-					       requestReceiptTimestamp);
-				ppi->pdelay_req_receive_time.seconds =
-					req_rec_tstamp.seconds;
-				ppi->pdelay_req_receive_time.nanoseconds =
-					req_rec_tstamp.nanoseconds;
-				int64_to_TimeInternal(
-					hdr->correctionfield,
-					&correction_field);
-				ppi->last_pdelay_resp_corr_field.seconds =
-					correction_field.seconds;
-				ppi->last_pdelay_resp_corr_field.nanoseconds =
-					correction_field.nanoseconds;
-				break;
-			} else {
-				/* One step Clock */
-				/* Store t4 (Fig 35)*/
-				ppi->pdelay_resp_receive_time.seconds =
-					time->seconds;
-				ppi->pdelay_resp_receive_time.nanoseconds =
-					time->nanoseconds;
-
-				int64_to_TimeInternal(
-					hdr->correctionfield,
-					&correction_field);
-				pp_update_peer_delay(ppi, &correction_field, 0);
-				break;
-			}
-		}
-		break; /* XXX added by gnn for safety */
-
-
-	case PPM_PDELAY_RESP_FOLLOW_UP:
-		if (hdr->sequenceId == ppi->sent_seq_id[PPM_PDELAY_REQ] - 1) {
-			msg_unpack_pdelay_resp_followup(pkt,
-				&ppi->msg_tmp.prespfollow);
-			to_TimeInternal(&resp_orig_tstamp,
-				       &ppi->msg_tmp.prespfollow.
-					       responseOriginTimestamp);
-			ppi->pdelay_resp_send_time.seconds =
-				resp_orig_tstamp.seconds;
-			ppi->pdelay_resp_send_time.nanoseconds =
-				resp_orig_tstamp.nanoseconds;
-
-			int64_to_TimeInternal(
-				ppi->msg_tmp_header.correctionfield,
-				&correction_field);
-			add_TimeInternal(&correction_field,
-				&correction_field,
-				&ppi->last_pdelay_resp_corr_field);
-
-			pp_update_peer_delay(ppi, &correction_field, 1);
-			break;
-		}
-
-		break;
+	/*
+	 * We are not supporting pdelay (not configured to, see
+	 * 9.5.13.1, p 106), so all the code about pdelay is removed
+	 * as a whole by one commit in our history. It can be recoverd
+	 * and fixed if needed
+	 */
 
 	default:
 		/* disregard, nothing to do */
@@ -212,7 +111,6 @@ state_updated:
 	if (ppi->next_state != ppi->state) {
 		pp_timer_stop(ppi->timers[PP_TIMER_SYNC]);
 		pp_timer_stop(ppi->timers[PP_TIMER_ANN_INTERVAL]);
-		pp_timer_stop(ppi->timers[PP_TIMER_PDELAYREQ]);
 	}
 
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;

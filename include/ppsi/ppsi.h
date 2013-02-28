@@ -29,8 +29,8 @@ struct pp_runtime_opts {
 			display_stats:1,
 			csv_stats:1,
 			ethernet_mode:1,
-			e2e_mode:1,
-			gptp_mode:1,
+			/* e2e_mode:1, -- no more: we only support e2e */
+			/* gptp_mode:1, -- no more: peer-to-peer unsupported */
 			ofst_first_updated:1,
 			no_rst_clk:1,
 			use_syslog:1;
@@ -120,8 +120,6 @@ struct pp_servo {
 	TimeInternal s_to_m_dly;
 	TimeInternal delay_ms;
 	TimeInternal delay_sm;
-	TimeInternal pdelay_ms;
-	TimeInternal pdelay_sm;
 	Integer32 obs_drift;
 	struct pp_owd_fltr owd_fltr;
 	struct pp_ofm_fltr ofm_fltr;
@@ -181,12 +179,6 @@ struct pp_instance {
 	TimeInternal last_snt_time; /* used to store timestamp retreived from
 				     * sent packet */
 	TimeInternal last_sync_corr_field;
-	TimeInternal last_pdelay_req_corr_field;
-	TimeInternal last_pdelay_resp_corr_field;
-	TimeInternal pdelay_req_send_time;
-	TimeInternal pdelay_req_receive_time;
-	TimeInternal pdelay_resp_send_time;
-	TimeInternal pdelay_resp_receive_time;
 	TimeInternal delay_req_send_time;
 	TimeInternal delay_req_receive_time;
 	Integer8 log_min_delay_req_interval;
@@ -195,15 +187,12 @@ struct pp_instance {
 		MsgSync  sync;
 		MsgFollowUp  follow;
 		MsgDelayResp resp;
-		MsgPDelayResp  presp;
-		MsgPDelayRespFollowUp  prespfollow;
 		MsgAnnounce  announce;
 	} msg_tmp;
 	UInteger16 *sent_seq_id; /* sequence id of the last message sent of the
 				  * same type
 				  */
 	MsgHeader msg_tmp_header;
-	MsgHeader pdelay_req_hdr;
 	MsgHeader delay_req_hdr;
 	UInteger32
 		is_from_self:1,
@@ -291,7 +280,7 @@ struct pp_network_operations {
 	int (*exit)(struct pp_instance *ppi);
 	int (*recv)(struct pp_instance *ppi, void *pkt, int len,
 		    TimeInternal *t);
-	/* chtype here is PP_NP_GEN or PP_NP_EVT */
+	/* chtype here is PP_NP_GEN or PP_NP_EVT -- use_pdelay must be 0 */
 	int (*send)(struct pp_instance *ppi, void *pkt, int len,
 		    TimeInternal *t, int chtype, int use_pdelay_addr);
 };
@@ -366,35 +355,19 @@ extern void msg_unpack_announce(void *buf, MsgAnnounce *ann);
 extern void msg_pack_follow_up(struct pp_instance *ppi,
 			       Timestamp *prec_orig_tstamp);
 extern void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup);
-extern void msg_pack_pdelay_req(struct pp_instance *ppi,
-				Timestamp *orig_tstamp);
-extern void msg_unpack_pdelay_req(void *buf, MsgPDelayReq *pdelay_req);
 extern void msg_pack_delay_req(struct pp_instance *ppi,
 			       Timestamp *orig_tstamp);
 extern void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req);
 extern void msg_pack_delay_resp(struct pp_instance *ppi,
 				MsgHeader *hdr, Timestamp *rcv_tstamp);
 extern void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp);
-extern void msg_pack_pdelay_resp(struct pp_instance *ppi,
-				 MsgHeader *hdr, Timestamp *req_rec_tstamp);
-extern void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp);
-extern void msg_pack_pdelay_resp_followup(struct pp_instance *ppi,
-					  MsgHeader *hdr,
-					  Timestamp *resp_orig_tstamp);
-extern void msg_unpack_pdelay_resp_followup(void *buf,
-	MsgPDelayRespFollowUp *presp_follow);
 
 /* each of them returns 0 if no error and -1 in case of error in send */
 extern int msg_issue_announce(struct pp_instance *ppi);
 extern int msg_issue_sync(struct pp_instance *ppi);
 extern int msg_issue_followup(struct pp_instance *ppi, TimeInternal *time);
 extern int msg_issue_delay_req(struct pp_instance *ppi);
-extern int msg_issue_pdelay_req(struct pp_instance *ppi);
-extern int msg_issue_pdelay_resp(struct pp_instance *ppi, TimeInternal *time,
-			MsgHeader *hdr);
 extern int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time);
-extern int msg_issue_pdelay_resp_follow_up(struct pp_instance *ppi,
-			TimeInternal *time);
 
 
 /* Functions for timestamp handling (internal to protocol format conversion*/

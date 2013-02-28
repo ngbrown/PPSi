@@ -133,9 +133,6 @@ void msg_pack_header(struct pp_instance *ppi, void *buf)
 {
 	Nibble transport = 0x80;
 
-	if (OPTS(ppi)->gptp_mode)
-		transport = 0x10;
-
 	/* (spec annex D) */
 	*(UInteger8 *) (buf + 0) = transport;
 	*(UInteger4 *) (buf + 1) = DSPOR(ppi)->versionNumber;
@@ -315,39 +312,6 @@ void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup)
 	}
 }
 
-/* pack PdelayReq message into out buffer of ppi */
-void msg_pack_pdelay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
-{
-	void *buf;
-
-	buf = ppi->buf_out;
-
-	/* changes in header */
-	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
-	/* RAZ messageType */
-
-	*(char *)(buf + 0) = *(char *)(buf + 0) | 0x02;
-
-	/* Table 19 */
-	*(UInteger16 *) (buf + 2) = htons(PP_PDELAY_REQ_LENGTH);
-	*(UInteger16 *) (buf + 30) = htons(ppi->sent_seq_id[PPM_PDELAY_REQ]);
-	*(UInteger8 *) (buf + 32) = 0x05;
-
-	/* Table 23 */
-	*(Integer8 *) (buf + 33) = 0x7F;
-
-	/* Table 24 */
-	memset((buf + 8), 0, 8);
-
-	/* Pdelay_req message */
-	*(UInteger16 *) (buf + 34) = htons(orig_tstamp->secondsField.msb);
-	*(UInteger32 *) (buf + 36) = htonl(orig_tstamp->secondsField.lsb);
-	*(UInteger32 *) (buf + 40) = htonl(orig_tstamp->nanosecondsField);
-
-	memset((buf + 44), 0, 10);
-	/* RAZ reserved octets */
-}
-
 /* pack DelayReq message into out buffer of ppi */
 void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
@@ -419,41 +383,6 @@ void msg_pack_delay_resp(struct pp_instance *ppi,
 		htons(hdr->sourcePortIdentity.portNumber);
 }
 
-/* Pack PdelayResp message into out buffer of ppi */
-void msg_pack_pdelay_resp(struct pp_instance *ppi, MsgHeader *hdr,
-			  Timestamp *req_rec_tstamp)
-{
-	void *buf;
-
-	buf = ppi->buf_out;
-
-	/* changes in header */
-	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
-	/* RAZ messageType */
-	*(char *)(buf + 0) = *(char *)(buf + 0) | 0x03;
-	/* Table 19 */
-	*(UInteger16 *) (buf + 2) = htons(PP_PDELAY_RESP_LENGTH);
-	*(UInteger8 *) (buf + 4) = hdr->domainNumber;
-	memset((buf + 8), 0, 8);
-
-	*(UInteger16 *) (buf + 30) = htons(hdr->sequenceId);
-
-	*(UInteger8 *) (buf + 32) = 0x05;
-	/* Table 23 */
-	*(Integer8 *) (buf + 33) = 0x7F;
-	/* Table 24 */
-
-	/* Pdelay_resp message */
-	*(UInteger16 *) (buf + 34) = htons(req_rec_tstamp->secondsField.msb);
-	*(UInteger32 *) (buf + 36) = htonl(req_rec_tstamp->secondsField.lsb);
-	*(UInteger32 *) (buf + 40) = htonl(req_rec_tstamp->nanosecondsField);
-	memcpy((buf + 44), hdr->sourcePortIdentity.clockIdentity,
-		  PP_CLOCK_IDENTITY_LENGTH);
-	*(UInteger16 *) (buf + 52) =
-		htons(hdr->sourcePortIdentity.portNumber);
-
-}
-
 /* Unpack delayReq message from in buffer of ppi to msgtmp.req */
 void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req)
 {
@@ -468,24 +397,6 @@ void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req)
 		PP_VPRINTF("Message DELAY_REQ\n");
 		timestamp_display("Origin Timestamp",
 				  &delay_req->originTimestamp);
-		PP_VPRINTF("\n");
-	}
-}
-
-/* Unpack PdelayReq message from IN buffer of ppi to msgtmp.req */
-void msg_unpack_pdelay_req(void *buf, MsgPDelayReq *pdelay_req)
-{
-	pdelay_req->originTimestamp.secondsField.msb =
-		htons(*(UInteger16 *) (buf + 34));
-	pdelay_req->originTimestamp.secondsField.lsb =
-		htonl(*(UInteger32 *) (buf + 36));
-	pdelay_req->originTimestamp.nanosecondsField =
-		htonl(*(UInteger32 *) (buf + 40));
-
-	if (pp_verbose_dump) {
-		PP_VPRINTF("Message PDELAY_REQ\n");
-		timestamp_display("Origin Timestamp",
-				  &pdelay_req->originTimestamp);
 		PP_VPRINTF("\n");
 	}
 }
@@ -508,94 +419,6 @@ void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp)
 		PP_VPRINTF("Message DELAY_RESP\n");
 		timestamp_display("Receive Timestamp",
 				  &resp->receiveTimestamp);
-		/* FIXME diag display requestingPortIdentity */
-		PP_VPRINTF("\n");
-	}
-}
-
-/* Unpack PdelayResp message from IN buffer of ppi to msgtmp.presp */
-void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp)
-{
-	presp->requestReceiptTimestamp.secondsField.msb =
-		htons(*(UInteger16 *) (buf + 34));
-	presp->requestReceiptTimestamp.secondsField.lsb =
-		htonl(*(UInteger32 *) (buf + 36));
-	presp->requestReceiptTimestamp.nanosecondsField =
-		htonl(*(UInteger32 *) (buf + 40));
-	memcpy(presp->requestingPortIdentity.clockIdentity,
-	       (buf + 44), PP_CLOCK_IDENTITY_LENGTH);
-	presp->requestingPortIdentity.portNumber =
-		htons(*(UInteger16 *) (buf + 52));
-
-	if (pp_verbose_dump) {
-		PP_VPRINTF("Message PDELAY_RESP\n");
-		timestamp_display("Request Receipt Timestamp",
-				  &presp->requestReceiptTimestamp);
-		/* FIXME diag display requestingPortIdentity */
-		PP_VPRINTF("\n");
-	}
-}
-
-/* Pack PdelayRespFollowUp message into out buffer of ppi */
-void msg_pack_pdelay_resp_followup(struct pp_instance *ppi,
-				   MsgHeader *hdr,
-				   Timestamp *resp_orig_tstamp)
-{
-	void *buf;
-
-	buf = ppi->buf_out;
-
-	/* changes in header */
-	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
-	/* RAZ messageType */
-	*(char *)(buf + 0) = *(char *)(buf + 0) | 0x0A;
-
-	/* Table 19 */
-	*(UInteger16 *) (buf + 2) = htons(PP_PDELAY_RESP_FOLLOW_UP_LENGTH);
-	*(UInteger16 *) (buf + 30) = htons(ppi->pdelay_req_hdr.sequenceId);
-	*(UInteger8 *) (buf + 32) = 0x05;
-
-	/* Table 23 */
-	*(Integer8 *) (buf + 33) = 0x7F;
-
-	/* Table 24 */
-
-	/* Copy correctionField of PdelayReqMessage */
-	*(Integer32 *) (buf + 8) = htonl(hdr->correctionfield.msb);
-	*(Integer32 *) (buf + 12) = htonl(hdr->correctionfield.lsb);
-
-	/* Pdelay_resp_follow_up message */
-	*(UInteger16 *) (buf + 34) =
-		htons(resp_orig_tstamp->secondsField.msb);
-	*(UInteger32 *) (buf + 36) =
-		htonl(resp_orig_tstamp->secondsField.lsb);
-	*(UInteger32 *) (buf + 40) =
-		htonl(resp_orig_tstamp->nanosecondsField);
-	memcpy((buf + 44), hdr->sourcePortIdentity.clockIdentity,
-	       PP_CLOCK_IDENTITY_LENGTH);
-	*(UInteger16 *) (buf + 52) =
-		htons(hdr->sourcePortIdentity.portNumber);
-}
-
-/* Unpack PdelayResp message from in buffer of ppi to msgtmp.presp */
-void msg_unpack_pdelay_resp_followup(void *buf,
-	MsgPDelayRespFollowUp *presp_follow)
-{
-	presp_follow->responseOriginTimestamp.secondsField.msb =
-		htons(*(UInteger16 *) (buf + 34));
-	presp_follow->responseOriginTimestamp.secondsField.lsb =
-		htonl(*(UInteger32 *) (buf + 36));
-	presp_follow->responseOriginTimestamp.nanosecondsField =
-		htonl(*(UInteger32 *) (buf + 40));
-	memcpy(presp_follow->requestingPortIdentity.clockIdentity,
-	       (buf + 44), PP_CLOCK_IDENTITY_LENGTH);
-	presp_follow->requestingPortIdentity.portNumber =
-		htons(*(UInteger16 *) (buf + 52));
-
-	if (pp_verbose_dump) {
-		PP_VPRINTF("Message PDELAY_RESP_FOLLOW_UP\n");
-		timestamp_display("Response Origin Timestamp",
-				  &presp_follow->responseOriginTimestamp);
 		/* FIXME diag display requestingPortIdentity */
 		PP_VPRINTF("\n");
 	}
@@ -660,30 +483,6 @@ int msg_issue_delay_req(struct pp_instance *ppi)
 	MSG_SEND_AND_RET(DELAY_REQ, EVT, 0);
 }
 
-/* Pack and send on event multicast ip address a PDelayReq message */
-int msg_issue_pdelay_req(struct pp_instance *ppi)
-{
-	Timestamp orig_tstamp;
-	TimeInternal now;
-	pp_t_ops.get(&now);
-	from_TimeInternal(&now, &orig_tstamp);
-
-	msg_pack_pdelay_req(ppi, &orig_tstamp);
-
-	MSG_SEND_AND_RET(PDELAY_REQ, EVT, 1);
-}
-
-/* Pack and send on event multicast ip address a PDelayResp message */
-int msg_issue_pdelay_resp(struct pp_instance *ppi, TimeInternal *time,
-			MsgHeader *hdr)
-{
-	Timestamp req_rec_tstamp;
-	from_TimeInternal(time, &req_rec_tstamp);
-	msg_pack_pdelay_resp(ppi, hdr, &req_rec_tstamp);
-
-	MSG_SEND_AND_RET(PDELAY_RESP, EVT, 1);
-}
-
 /* Pack and send on event multicast ip adress a DelayResp message */
 int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time)
 {
@@ -693,16 +492,4 @@ int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time)
 	msg_pack_delay_resp(ppi, &ppi->delay_req_hdr, &rcv_tstamp);
 
 	MSG_SEND_AND_RET(DELAY_RESP, GEN, 0);
-}
-
-/* Pack and send on event multicast ip adress a DelayResp message */
-int msg_issue_pdelay_resp_follow_up(struct pp_instance *ppi, TimeInternal *time)
-{
-	Timestamp resp_orig_tstamp;
-	from_TimeInternal(time, &resp_orig_tstamp);
-
-	msg_pack_pdelay_resp_followup(ppi, &ppi->pdelay_req_hdr,
-		&resp_orig_tstamp);
-
-	MSG_SEND_AND_RET(PDELAY_RESP_FOLLOW_UP, GEN, 0);
 }

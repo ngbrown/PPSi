@@ -36,9 +36,6 @@ int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 				 int len);
 
-int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
-			     int len);
-
 #define MSG_SEND_AND_RET_VARLEN(x, y, z, w) \
 	if (pp_net_ops.send(ppi, ppi->buf_out, w,\
 		&ppi->last_snt_time, PP_NP_##y , z) < w) { \

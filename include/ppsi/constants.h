@@ -44,11 +44,10 @@
 #define PP_DEFAULT_MAX_RESET			0
 #define PP_DEFAULT_MAX_DELAY			0
 #define PP_DEFAULT_NO_ADJUST			0
-#define PP_DEFAULT_E2E_MODE			0
 #define PP_DEFAULT_TTL				1
 
 /* We use an array of timers, with these indexes */
-#define PP_TIMER_PDELAYREQ	0
+#define PP_TIMER_UNUSED		0
 #define PP_TIMER_DELAYREQ	1
 #define PP_TIMER_SYNC		2
 #define PP_TIMER_ANN_RECEIPT	3
@@ -91,7 +90,7 @@
 #define PP_EVT_PORT			319
 #define PP_GEN_PORT			320
 #define PP_DEFAULT_DOMAIN_ADDRESS	"224.0.1.129"
-#define PP_PEER_DOMAIN_ADDRESS		"224.0.0.107"
+#define PP_PDELAY_DOMAIN_ADDRESS	"224.0.0.107"
 #define PP_MM_STARTING_BOUNDARY_HOPS	0x7fff
 
 /* Raw ethernet dependent */
@@ -100,7 +99,7 @@
 #endif
 
 #define PP_MCAST_MACADDRESS		"\x01\x1B\x19\x00\x00\x00"
-#define PP_PEER_MACADDRESS		"\x01\x80\xC2\x00\x00\x0E"
+#define PP_PDELAY_MACADDRESS		"\x01\x80\xC2\x00\x00\x0E"
 
 #include <arch/constants.h> /* architectures may override the defaults */
 
