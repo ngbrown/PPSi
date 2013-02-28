@@ -55,7 +55,7 @@ typedef struct FixedDelta {
 	UInteger64 scaledPicoseconds;
 } FixedDelta;
 
-typedef struct  {
+typedef struct Timestamp {
 	UInteger48	secondsField;
 	UInteger32	nanosecondsField;
 } Timestamp;
