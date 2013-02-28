@@ -256,17 +256,20 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 		return -1;
 
 	if (!ppi->is_from_cur_par) {
-		PP_VPRINTF("SequenceID doesn't match last Sync message\n");
+		pp_error("%s: SequenceID doesn't match last Sync message\n",
+			__func__);
 		return 0;
 	}
 
 	if (!ppi->waiting_for_follow) {
-		PP_VPRINTF("Slave was not waiting a follow up message\n");
+		pp_error("%s: Slave was not waiting a follow up message\n",
+			__func__);
 		return 0;
 	}
 
 	if (ppi->recv_sync_sequence_id != hdr->sequenceId) {
-		PP_VPRINTF("Follow up message is not from current parent\n");
+		pp_error("%s: Follow up message is not from current parent\n",
+			__func__);
 		return 0;
 	}
 

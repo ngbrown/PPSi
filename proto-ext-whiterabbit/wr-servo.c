@@ -259,7 +259,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	if(!s->t1.correct || !s->t2.correct ||
 	   !s->t3.correct || !s->t4.correct) {
-		PP_VPRINTF( "servo: TimestampsIncorrect: %d %d %d %d\n",
+		pp_error("%s: TimestampsIncorrect: %d %d %d %d\n", __func__,
 			    s->t1.correct, s->t2.correct,
 			    s->t3.correct, s->t4.correct);
 		return 0;
@@ -269,7 +269,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	got_sync = 0;
 
-	if (0) { /* enable for debugging */
+	if (pp_verbose_servo) {
 		dump_timestamp("servo:t1", s->t1);
 		dump_timestamp("servo:t2", s->t2);
 		dump_timestamp("servo:t3", s->t3);

@@ -19,7 +19,7 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 	int state, err;
 
 	if (plen > 0)
-		PP_VPRINTF("RECV %02d %d.%d %s\n", plen,
+		PP_VPRINTF("RECV %02d %d.%09d %s\n", plen,
 			(int)ppi->last_rcv_time.seconds,
 			(int)ppi->last_rcv_time.nanoseconds,
 			pp_msg_names[packet[0] & 0x0f]);

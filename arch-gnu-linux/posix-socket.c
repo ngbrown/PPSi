@@ -55,12 +55,12 @@ static int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 		return ret;
 	}
 	if (msg.msg_flags & MSG_TRUNC) {
-		PP_PRINTF("Error: received truncated message\n");
+		pp_error("%s: truncated message\n", __func__);
 		return 0;
 	}
 	/* get time stamp of packet */
 	if (msg.msg_flags & MSG_CTRUNC) {
-		PP_PRINTF("Error: received truncated ancillary data\n");
+		pp_error("%s: truncated ancillary data\n", __func__);
 		return 0;
 	}
 
@@ -75,8 +75,9 @@ static int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 	if (tv) {
 		t->seconds = tv->tv_sec;
 		t->nanoseconds = tv->tv_usec * 1000;
-		PP_VPRINTF("kernel recv time stamp %us %dns\n",
-		     t->seconds, t->nanoseconds);
+		if (pp_verbose_time)
+			pp_printf("%s: %9li.%06li\n", __func__, tv->tv_sec,
+				  tv->tv_usec);
 	} else {
 		/*
 		 * get the recording time here, even though it may  put a big

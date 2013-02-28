@@ -48,7 +48,7 @@ int st_com_handle_pdelay_req(struct pp_instance *ppi, unsigned char *buf,
 		return -1; \
 	} \
 	if (pp_verbose_frames) \
-		PP_VPRINTF("SENT %02d %d.%d %s\n", w, \
+		PP_VPRINTF("SENT %02d %d.%09d %s\n", w, \
 			ppi->last_snt_time.seconds, \
 			ppi->last_snt_time.nanoseconds, \
 			pp_msg_names[PPM_##x]); \
