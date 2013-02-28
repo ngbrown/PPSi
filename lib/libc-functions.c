@@ -1,6 +1,5 @@
 /*
- * Alessandro Rubini for CERN, 2011 -- GPL 2 or later (it includes u-boot code)
- * (FIXME: turn to LGPL by using uclibc or equivalent -- avoid rewriting :)
+ * All code from uClibc-0.9.32. LGPL V2.1
  */
 #include <ppsi/lib.h>
 
@@ -11,54 +10,62 @@ int puts(const char *s)
 	return 0;
 }
 
-size_t strnlen(const char *s, size_t maxlen)
+/* libc/string/strnlen.c */
+size_t strnlen(const char *s, size_t max)
 {
-	int len = 0;
-	while (*(s++))
-		len++;
-	return len;
+	register const char *p = s;
+
+	while (max && *p) {
+		++p;
+		--max;
+	}
+	return p - s;
 }
 
-void *memcpy(void *dest, const void *src, size_t count)
+/* libc/string/memcpy.c */
+void *memcpy(void *s1, const void *s2, size_t n)
 {
-	/* from u-boot-1.1.2 */
-	char *tmp = (char *) dest, *s = (char *) src;
+	register char *r1 = s1;
+	register const char *r2 = s2;
 
-	while (count--)
-		*tmp++ = *s++;
-
-	return dest;
+	while (n) {
+		*r1++ = *r2++;
+		--n;
+	}
+	return s1;
 }
 
-int memcmp(const void *cs, const void *ct, size_t count)
+/* libc/string/memcmp.c */
+int memcmp(const void *s1, const void *s2, size_t n)
 {
-	/* from u-boot-1.1.2 */
-	const unsigned char *su1, *su2;
-	int res = 0;
+	register const unsigned char *r1 = s1;
+	register const unsigned char *r2 = s2;
+	int r = 0;
 
-	for (su1 = cs, su2 = ct; 0 < count; ++su1, ++su2, count--)
-		if ((res = *su1 - *su2) != 0)
-			break;
-	return res;
+	while (n-- && ((r = ((int)(*r1++)) - *r2++) == 0))
+		;
+	return r;
 }
 
-void *memset(void *s, int c, size_t count)
+/* libc/string/memset.c */
+void *memset(void *s, int c, size_t n)
 {
-	/* from u-boot-1.1.2 */
-	char *xs = (char *) s;
+	register unsigned char *p = s;
 
-	while (count--)
-		*xs++ = c;
-
+	while (n) {
+		*p++ = (unsigned char) c;
+		--n;
+	}
 	return s;
 }
 
-char *strcpy(char *dest, const char *src)
-{
-	/* from u-boot-1.1.2 */
-	char *tmp = dest;
 
-	while ((*dest++ = *src++) != '\0')
-		/* nothing */;
-	return tmp;
+/* libc/string/strcpy.c */
+char *strcpy(char *s1, const char *s2)
+{
+	register char *s = s1;
+
+	while ( (*s++ = *s2++) != 0 )
+		;
+	return s1;
 }
