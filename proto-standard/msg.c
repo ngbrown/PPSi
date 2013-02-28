@@ -589,17 +589,17 @@ void msg_unpack_pdelay_resp_followup(void *buf,
 }
 
 const char const *pp_msg_names[] = {
-	"sync",
-	"delay_req",
-	"pdelay_req",
-	"pdelay_resp",
-	"invalid", "invalid", "invalid", "invalid",
-	"follow_up",
-	"delay_resp",
-	"pdelay_resp_follow_up",
-	"announce",
-	"signaling",
-	"management"
+	[PPM_SYNC] =			"sync",
+	[PPM_DELAY_REQ] =		"delay_req",
+	[PPM_PDELAY_REQ] =		"pdelay_req",
+	[PPM_PDELAY_RESP] =		"pdelay_resp",
+
+	[PPM_FOLLOW_UP] =		"follow_up",
+	[PPM_DELAY_RESP] =		"delay_resp",
+	[PPM_PDELAY_RESP_FOLLOW_UP] =	"pdelay_resp_follow_up",
+	[PPM_ANNOUNCE] =		"announce",
+	[PPM_SIGNALING] =		"signaling",
+	[PPM_MANAGEMENT] =		"management",
 };
 
 /* Pack and send on general multicast ip adress an Announce message */
