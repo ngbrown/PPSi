@@ -29,14 +29,10 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		ppi->waiting_for_follow = FALSE;
 
-		ppi->pdelay_req_send_time.seconds = 0;
-		ppi->pdelay_req_send_time.nanoseconds = 0;
-		ppi->pdelay_req_receive_time.seconds = 0;
-		ppi->pdelay_req_receive_time.nanoseconds = 0;
-		ppi->pdelay_resp_send_time.seconds = 0;
-		ppi->pdelay_resp_send_time.nanoseconds = 0;
-		ppi->pdelay_resp_receive_time.seconds = 0;
-		ppi->pdelay_resp_receive_time.nanoseconds = 0;
+		clear_TimeInternal(&ppi->pdelay_req_send_time);
+		clear_TimeInternal(&ppi->pdelay_req_receive_time);
+		clear_TimeInternal(&ppi->pdelay_resp_send_time);
+		clear_TimeInternal(&ppi->pdelay_resp_receive_time);
 
 		st_com_restart_annrec_timer(ppi);
 

@@ -19,10 +19,8 @@ void m1(struct pp_instance *ppi)
 {
 	/* Current data set update */
 	DSCUR(ppi)->stepsRemoved = 0;
-	DSCUR(ppi)->offsetFromMaster.nanoseconds = 0;
-	DSCUR(ppi)->offsetFromMaster.seconds = 0;
-	DSCUR(ppi)->meanPathDelay.nanoseconds = 0;
-	DSCUR(ppi)->meanPathDelay.seconds = 0;
+	clear_TimeInternal(&DSCUR(ppi)->offsetFromMaster);
+	clear_TimeInternal(&DSCUR(ppi)->meanPathDelay);
 
 	/* Parent data set */
 	memcpy(DSPAR(ppi)->parentPortIdentity.clockIdentity,

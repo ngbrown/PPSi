@@ -57,8 +57,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		ppi->defaultDS->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
 	port->portIdentity.portNumber = 1;
 	port->logMinDelayReqInterval = PP_DEFAULT_DELAYREQ_INTERVAL;
-	port->peerMeanPathDelay.seconds = 0;
-	port->peerMeanPathDelay.nanoseconds = 0;
+	clear_TimeInternal(&port->peerMeanPathDelay);
 	port->logAnnounceInterval = opt->announce_intvl;
 	port->announceReceiptTimeout = PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT;
 	port->logSyncInterval = opt->sync_intvl;
