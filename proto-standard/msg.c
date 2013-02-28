@@ -10,72 +10,72 @@
 static void Integer64_display(const char *label, Integer64 *bigint)
 {
 	if (pp_verbose_dump) {
-		PP_VPRINTF("%s:\n", label);
-		PP_VPRINTF("LSB: %u\n", bigint->lsb);
-		PP_VPRINTF("MSB: %d\n", bigint->msb);
+		pp_Vprintf("%s:\n", label);
+		pp_Vprintf("LSB: %u\n", bigint->lsb);
+		pp_Vprintf("MSB: %d\n", bigint->msb);
 	}
 }
 
 static void UInteger48_display(const char *label, UInteger48 *bigint)
 {
 	if (pp_verbose_dump) {
-		PP_VPRINTF("%s:\n", label);
-		PP_VPRINTF("LSB: %u\n", bigint->lsb);
-		PP_VPRINTF("MSB: %u\n", bigint->msb);
+		pp_Vprintf("%s:\n", label);
+		pp_Vprintf("LSB: %u\n", bigint->lsb);
+		pp_Vprintf("MSB: %u\n", bigint->msb);
 	}
 }
 
 static void timestamp_display(const char *label, Timestamp *timestamp)
 {
 	if (pp_verbose_dump) {
-		PP_VPRINTF("%s:\n", label);
+		pp_Vprintf("%s:\n", label);
 		UInteger48_display("seconds", &timestamp->secondsField);
-		PP_VPRINTF("nanoseconds: %u\n", timestamp->nanosecondsField);
+		pp_Vprintf("nanoseconds: %u\n", timestamp->nanosecondsField);
 	}
 }
 
 static void msg_display_header(MsgHeader *header)
 {
 	if (pp_verbose_dump) {
-		PP_VPRINTF("Message header:\n");
-		PP_VPRINTF("\n");
-		PP_VPRINTF("transportSpecific: %d\n",
+		pp_Vprintf("Message header:\n");
+		pp_Vprintf("\n");
+		pp_Vprintf("transportSpecific: %d\n",
 			   header->transportSpecific);
-		PP_VPRINTF("messageType: %d\n", header->messageType);
-		PP_VPRINTF("versionPTP: %d\n", header->versionPTP);
-		PP_VPRINTF("messageLength: %d\n", header->messageLength);
-		PP_VPRINTF("domainNumber: %d\n", header->domainNumber);
-		PP_VPRINTF("FlagField %02x:%02x\n", header->flagField[0],
+		pp_Vprintf("messageType: %d\n", header->messageType);
+		pp_Vprintf("versionPTP: %d\n", header->versionPTP);
+		pp_Vprintf("messageLength: %d\n", header->messageLength);
+		pp_Vprintf("domainNumber: %d\n", header->domainNumber);
+		pp_Vprintf("FlagField %02x:%02x\n", header->flagField[0],
 			   header->flagField[1]);
 		Integer64_display("correctionfield", &header->correctionfield);
 		/* FIXME diag portIdentity_display(&h->sourcePortIdentity); */
-		PP_VPRINTF("sequenceId: %d\n", header->sequenceId);
-		PP_VPRINTF("controlField: %d\n", header->controlField);
-		PP_VPRINTF("logMessageInterval: %d\n",
+		pp_Vprintf("sequenceId: %d\n", header->sequenceId);
+		pp_Vprintf("controlField: %d\n", header->controlField);
+		pp_Vprintf("logMessageInterval: %d\n",
 			   header->logMessageInterval);
-		PP_VPRINTF("\n");
+		pp_Vprintf("\n");
 	}
 }
 
 static void msg_display_announce(MsgAnnounce *announce)
 {
 	if (pp_verbose_dump) {
-		PP_VPRINTF("Message ANNOUNCE:\n");
+		pp_Vprintf("Message ANNOUNCE:\n");
 		timestamp_display("Origin Timestamp",
 				  &announce->originTimestamp);
-		PP_VPRINTF("currentUtcOffset: %d\n",
+		pp_Vprintf("currentUtcOffset: %d\n",
 			   announce->currentUtcOffset);
-		PP_VPRINTF("grandMasterPriority1: %d\n",
+		pp_Vprintf("grandMasterPriority1: %d\n",
 			   announce->grandmasterPriority1);
-		PP_VPRINTF("grandMasterClockQuality:\n");
+		pp_Vprintf("grandMasterClockQuality:\n");
 		/* FIXME diag clockQuality_display(&ann->gmasterQuality); */
-		PP_VPRINTF("grandMasterPriority2: %d\n",
+		pp_Vprintf("grandMasterPriority2: %d\n",
 			   announce->grandmasterPriority2);
-		PP_VPRINTF("grandMasterIdentity:\n");
+		pp_Vprintf("grandMasterIdentity:\n");
 		/* FIXME diag clockIdentity_display(ann->gmasterIdentity); */
-		PP_VPRINTF("stepsRemoved: %d\n", announce->stepsRemoved);
-		PP_VPRINTF("timeSource: %d\n", announce->timeSource);
-		PP_VPRINTF("\n");
+		pp_Vprintf("stepsRemoved: %d\n", announce->stepsRemoved);
+		pp_Vprintf("timeSource: %d\n", announce->timeSource);
+		pp_Vprintf("\n");
 		/* FIXME: diagnostic for extension */
 	}
 }

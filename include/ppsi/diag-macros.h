@@ -50,6 +50,9 @@ extern CONST_VERBOSITY int pp_diag_verbosity;
 #define pp_error(...) \
 	if (pp_verbose_error && pp_diag_verbosity) pp_printf(__VA_ARGS__)
 
+#define pp_Vprintf(...) \
+	if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
+
 /*
  * Then, we have this VERB_LOG_MSGS that used to be an ifdef. Provide
  * constants instead, to avoid the hairyness of ifdef.
