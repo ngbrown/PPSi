@@ -313,22 +313,6 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	}
 	/* End of General multicast Ip address init */
 
-	/* multicast sends only on specified interface */
-	imr.imr_multiaddr.s_addr = net_addr.s_addr;
-	imr.imr_interface.s_addr = iface_addr.s_addr;
-	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF,
-		       &imr.imr_interface.s_addr, sizeof(struct in_addr)) < 0) {
-		pp_diag_error_str2(ppi, "IP_MULTICAST_IF", strerror(errno));
-		return -1;
-	}
-	/* join multicast group (for receiving) on specified interface */
-	if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-		       &imr, sizeof(struct ip_mreq)) < 0) {
-		pp_diag_error_str2(ppi, "IP_ADD_MEMBERSHIP", strerror(errno));
-		return -1;
-	}
-	/* End of Peer multicast Ip address init */
-
 	/* set socket time-to-live */
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL,
 		       &OPTS(ppi)->ttl, sizeof(int)) < 0) {
