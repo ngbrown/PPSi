@@ -318,8 +318,11 @@ struct pp_time_operations {
 	int (*adjust)(long offset_ns, long freq_ppm);
 };
 
-/* Where is this maximum imposed from? And which unit? */
-#define  PP_ADJ_FREQ_MAX	512000
+/* IF the configuration prevents jumps, this is the max jump (0.5ms) */
+#define  PP_ADJ_NS_MAX		(500*1000)
+
+/* In geeneral, we can't adjust the rate by more than 200ppm */
+#define  PP_ADJ_FREQ_MAX	(200 << 16)
 
 extern struct pp_time_operations pp_t_ops;
 

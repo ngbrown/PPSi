@@ -273,7 +273,7 @@ void pp_update_clock(struct pp_instance *ppi)
 				pp_init_clock(ppi);
 			} else {
 				adj = DSCUR(ppi)->offsetFromMaster.nanoseconds
-					> 0 ? PP_ADJ_FREQ_MAX:-PP_ADJ_FREQ_MAX;
+					> 0 ? PP_ADJ_NS_MAX:-PP_ADJ_NS_MAX;
 				pp_t_ops.adjust(-adj, 0);
 			}
 		}
