@@ -196,9 +196,11 @@ void msg_unpack_sync(void *buf, MsgSync *sync)
 	sync->originTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
 
-	PP_VPRINTF("Message SYNC\n");
-	timestamp_display("Origin Timestamp", &sync->originTimestamp);
-	PP_VPRINTF("\n");
+	if (pp_verbose_dump) {
+		PP_VPRINTF("Message SYNC\n");
+		timestamp_display("Origin Timestamp", &sync->originTimestamp);
+		PP_VPRINTF("\n");
+	}
 }
 
 /* Pack Announce message into out buffer of ppi */
@@ -306,10 +308,12 @@ void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup)
 	flwup->preciseOriginTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
 
-	PP_VPRINTF("Message FOLLOW_UP\n");
-	timestamp_display("Precise Origin Timestamp",
-			  &flwup->preciseOriginTimestamp);
-	PP_VPRINTF("\n");
+	if (pp_verbose_dump) {
+		PP_VPRINTF("Message FOLLOW_UP\n");
+		timestamp_display("Precise Origin Timestamp",
+				  &flwup->preciseOriginTimestamp);
+		PP_VPRINTF("\n");
+	}
 }
 
 /* pack PdelayReq message into out buffer of ppi */
@@ -461,10 +465,12 @@ void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req)
 	delay_req->originTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
 
-	PP_VPRINTF("Message DELAY_REQ\n");
-	timestamp_display("Origin Timestamp",
-			  &delay_req->originTimestamp);
-	PP_VPRINTF("\n");
+	if (pp_verbose_dump) {
+		PP_VPRINTF("Message DELAY_REQ\n");
+		timestamp_display("Origin Timestamp",
+				  &delay_req->originTimestamp);
+		PP_VPRINTF("\n");
+	}
 }
 
 /* Unpack PdelayReq message from IN buffer of ppi to msgtmp.req */
@@ -477,10 +483,12 @@ void msg_unpack_pdelay_req(void *buf, MsgPDelayReq *pdelay_req)
 	pdelay_req->originTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
 
-	PP_VPRINTF("Message PDELAY_REQ\n");
-	timestamp_display("Origin Timestamp",
-			  &pdelay_req->originTimestamp);
-	PP_VPRINTF("\n");
+	if (pp_verbose_dump) {
+		PP_VPRINTF("Message PDELAY_REQ\n");
+		timestamp_display("Origin Timestamp",
+				  &pdelay_req->originTimestamp);
+		PP_VPRINTF("\n");
+	}
 }
 
 /* Unpack delayResp message from IN buffer of ppi to msgtmp.presp */
@@ -497,11 +505,13 @@ void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp)
 	resp->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
 
-	PP_VPRINTF("Message DELAY_RESP\n");
-	timestamp_display("Receive Timestamp",
-			  &resp->receiveTimestamp);
-	/* FIXME diag display requestingPortIdentity */
-	PP_VPRINTF("\n");
+	if (pp_verbose_dump) {
+		PP_VPRINTF("Message DELAY_RESP\n");
+		timestamp_display("Receive Timestamp",
+				  &resp->receiveTimestamp);
+		/* FIXME diag display requestingPortIdentity */
+		PP_VPRINTF("\n");
+	}
 }
 
 /* Unpack PdelayResp message from IN buffer of ppi to msgtmp.presp */
@@ -518,11 +528,13 @@ void msg_unpack_pdelay_resp(void *buf, MsgPDelayResp *presp)
 	presp->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
 
-	PP_VPRINTF("Message PDELAY_RESP\n");
-	timestamp_display("Request Receipt Timestamp",
-			  &presp->requestReceiptTimestamp);
-	/* FIXME diag display requestingPortIdentity */
-	PP_VPRINTF("\n");
+	if (pp_verbose_dump) {
+		PP_VPRINTF("Message PDELAY_RESP\n");
+		timestamp_display("Request Receipt Timestamp",
+				  &presp->requestReceiptTimestamp);
+		/* FIXME diag display requestingPortIdentity */
+		PP_VPRINTF("\n");
+	}
 }
 
 /* Pack PdelayRespFollowUp message into out buffer of ppi */
@@ -581,11 +593,13 @@ void msg_unpack_pdelay_resp_followup(void *buf,
 	presp_follow->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
 
-	PP_VPRINTF("Message PDELAY_RESP_FOLLOW_UP\n");
-	timestamp_display("Response Origin Timestamp",
-			  &presp_follow->responseOriginTimestamp);
-	/* FIXME diag display requestingPortIdentity */
-	PP_VPRINTF("\n");
+	if (pp_verbose_dump) {
+		PP_VPRINTF("Message PDELAY_RESP_FOLLOW_UP\n");
+		timestamp_display("Response Origin Timestamp",
+				  &presp_follow->responseOriginTimestamp);
+		/* FIXME diag display requestingPortIdentity */
+		PP_VPRINTF("\n");
+	}
 }
 
 const char const *pp_msg_names[] = {
