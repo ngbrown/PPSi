@@ -13,8 +13,6 @@
 #include <ppsi/ieee1588_types.h>
 #include <ppsi/constants.h>
 
-#define __weak __attribute__((weak))
-
 /*
  * Runtime options. Default values can be overridden by command line.
  */

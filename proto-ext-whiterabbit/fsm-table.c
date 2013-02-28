@@ -6,12 +6,10 @@
 #include "wr-api.h"
 
 /*
- * This is the default state machine table. It is weak so an extension
- * protocol can define its own stuff. It is in its own source file, so
- * the linker can avoid pulling this data space if another table is there.
+ * This is the WR state machine table.
  */
 
-struct pp_state_table_item pp_state_table[] __weak = {
+struct pp_state_table_item pp_state_table[] = {
 	{ PPS_INITIALIZING,	"initializing",	pp_initializing,},
 	{ PPS_FAULTY,		"faulty",	pp_faulty,},
 	{ PPS_DISABLED,		"disabled",	pp_disabled,},
