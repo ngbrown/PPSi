@@ -10,7 +10,6 @@
 #include <string.h>
 #include <errno.h>
 
-#define CONFIG_PPSI_RUNTIME_VERBOSITY 1
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 #include "posix.h"
