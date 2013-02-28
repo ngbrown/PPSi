@@ -335,7 +335,7 @@ void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 	/* Table 24 */
 	memset((buf + 8), 0, 8);
 
-	/* Pdelay_req message */
+	/* Delay_req message */
 	*(UInteger16 *) (buf + 34) = htons(orig_tstamp->secondsField.msb);
 	*(UInteger32 *) (buf + 36) = htonl(orig_tstamp->secondsField.lsb);
 	*(UInteger32 *) (buf + 40) = htonl(orig_tstamp->nanosecondsField);
@@ -372,7 +372,7 @@ void msg_pack_delay_resp(struct pp_instance *ppi,
 
 	/* Table 24 */
 
-	/* Pdelay_resp message */
+	/* Delay_resp message */
 	*(UInteger16 *) (buf + 34) =
 		htons(rcv_tstamp->secondsField.msb);
 	*(UInteger32 *) (buf + 36) = htonl(rcv_tstamp->secondsField.lsb);
