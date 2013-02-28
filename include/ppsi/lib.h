@@ -7,6 +7,7 @@
 #include <string.h>
 
 extern void pp_puts(const char *s);
+extern int atoi(const char *s);
 
 extern uint32_t __div64_32(uint64_t *n, uint32_t base);
 

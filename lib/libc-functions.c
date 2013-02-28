@@ -69,3 +69,26 @@ char *strcpy(char *s1, const char *s2)
 		;
 	return s1;
 }
+
+/* for strtol even uClibc is too heavy. Let's rewrite some hack */
+long int strtol(const char *s, char **end, int base)
+{
+	long res = 0;
+
+	if (!base)
+		base = 10;
+	while (*s) {
+		if (end)
+			*end = (void *)s;
+		/* we only use it for cmdline: avoid alpha digits */
+		if (base > 10 || *s < '0' || *s >= '0' + base) {
+			return res;
+		}
+		res = res * base + *(s++) - '0';
+	}
+	return res;
+}
+int atoi(const char *s)
+{
+	return strtol(s, NULL, 10);
+}
