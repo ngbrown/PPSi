@@ -68,13 +68,13 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (pp_hooks.init)
 		ret = pp_hooks.init(ppi, pkt, plen);
 	if (ret) {
-		PP_PRINTF("%s: can't init extension\n");
+		PP_PRINTF("%s: can't init extension\n", __func__);
 		goto failure;
 	}
 
 	ret = pp_timer_init(ppi);
 	if (ret) {
-		PP_PRINTF("%s: can't init timers\n");
+		PP_PRINTF("%s: can't init timers\n", __func__);
 		goto failure;
 	}
 	pp_init_clock(ppi);
