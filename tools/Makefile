@@ -21,6 +21,12 @@ $(PROGS): $(wildcard *.h) $(wildcard ../include/ppsi/*.h)
 %: %.c
 	$(CC) $(CFLAGS) $*.c $(LDFLAGS) -o $@
 
+%.o: %.c
+	$(CC) $(CFLAGS) -c $*.c $(LDFLAGS) -o $@
+
+ptpdump: dump-main.o dump-funcs.o
+	$(CC) $(LDFLAGS) dump-main.o dump-funcs.o -o $@
+
 clean:
 	rm -f $(PROGS) *.o *~
 
