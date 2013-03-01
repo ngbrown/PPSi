@@ -30,8 +30,8 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		st_com_restart_annrec_timer(ppi);
 
-		pp_timer_start((1 << DSPOR(ppi)->logMinDelayReqInterval)
-			       * 1000, ppi->timers[PP_TIMER_DELAYREQ]);
+		pp_timeout_set(ppi, PP_TO_DELAYREQ,
+		       (1 << DSPOR(ppi)->logMinDelayReqInterval) * 1000);
 	}
 
 	if (st_com_check_record_update(ppi))
@@ -124,9 +124,8 @@ state_updated:
 
 	/* Leaving this state */
 	if (ppi->next_state != ppi->state) {
-		pp_timer_stop(ppi->timers[PP_TIMER_ANN_RECEIPT]);
-
-		pp_timer_stop(ppi->timers[PP_TIMER_DELAYREQ]);
+		pp_timeout_clr(ppi, PP_TO_ANN_RECEIPT);
+		pp_timeout_clr(ppi, PP_TO_DELAYREQ);
 
 		pp_init_clock(ppi);
 	}

@@ -16,15 +16,14 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 		if (WR_DSPOR(ppi)->otherNodeCalSendPattern) {
 			wr_calibration_pattern_enable(ppi, 0, 0, 0);
-			pp_timer_start(
-				WR_DSPOR(ppi)->otherNodeCalPeriod / 1000,
-				ppi->timers[PP_TIMER_WRS_RESP_CALIB_REQ]);
+			pp_timeout_set(ppi, PP_TO_WRS_RESP_CALIB_REQ,
+			       WR_DSPOR(ppi)->otherNodeCalPeriod / 1000);
 		}
 
 	}
 
 	if ((WR_DSPOR(ppi)->otherNodeCalSendPattern) &&
-	    (pp_timer_expired(ppi->timers[PP_TIMER_WRS_RESP_CALIB_REQ]))) {
+	    (pp_timeout(ppi, PP_TO_WRS_RESP_CALIB_REQ))) {
 		if (WR_DSPOR(ppi)->wrMode == WR_MASTER)
 			ppi->next_state = PPS_MASTER;
 		else
@@ -54,7 +53,7 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 state_updated:
 	if (ppi->next_state != ppi->state)
-		pp_timer_stop(ppi->timers[PP_TIMER_WRS_M_LOCK]);
+		pp_timeout_clr(ppi, PP_TO_WRS_M_LOCK);
 
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
 

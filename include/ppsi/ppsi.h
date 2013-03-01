@@ -12,6 +12,7 @@
 #include <ppsi/lib.h>
 #include <ppsi/ieee1588_types.h>
 #include <ppsi/constants.h>
+#include <ppsi/jiffies.h>
 
 /*
  * Runtime options. Default values can be overridden by command line.
@@ -74,16 +75,6 @@ struct pp_frgn_master {
 	MsgAnnounce ann;
 	MsgHeader hdr;
 };
-
-/*
- * Timer. Struct which contains timestamp of timer start and desired interval
- * for timer expiration computation. Both are seconds
- */
-struct pp_timer {
-	uint64_t start;
-	uint32_t interval_ms;
-};
-
 
 /*
  * Servo. Structs which contain filters for delay average computation. They
@@ -163,8 +154,7 @@ struct pp_instance {
 	DSParent *parentDS;			/* page 68 */
 	DSPort *portDS;				/* page 72 */
 	DSTimeProperties *timePropertiesDS;	/* page 70 */
-	struct pp_timer *timers[PP_TIMER_ARRAY_SIZE];
-
+	unsigned long timeouts[__PP_TO_ARRAY_SIZE];
 	UInteger16 number_foreign_records;
 	Integer16  foreign_record_i;
 	Integer16  foreign_record_best;
@@ -309,6 +299,38 @@ struct pp_time_operations {
 extern struct pp_time_operations pp_t_ops;
 
 
+/*
+ * Timeouts. I renamed from "timer" to "timeout" to avoid
+ * misread/miswrite with the time operations above. A timeout, actually,
+ * is just a number that must be compared with the current counter.
+ * So we don't need struct operations, as it is one function only.
+ */
+extern unsigned long pp_calc_timeout(int millisec); /* cannot return zero */
+
+static inline void pp_timeout_set(struct pp_instance *ppi, int index,
+				  int millisec)
+{
+	ppi->timeouts[index] = pp_calc_timeout(millisec);
+}
+
+static inline void pp_timeout_clr(struct pp_instance *ppi, int index)
+{
+	ppi->timeouts[index] = 0;
+}
+
+static inline int pp_timeout(struct pp_instance *ppi, int index)
+{
+	return ppi->timeouts[index] &&
+		time_after_eq(pp_calc_timeout(0), ppi->timeouts[index]);
+}
+
+
+/* This functions are generic, not architecture-specific */
+extern void pp_timeout_set(struct pp_instance *ppi, int index, int millisec);
+extern void pp_timeout_clr(struct pp_instance *ppi, int index);
+extern int pp_timeout(struct pp_instance *ppi, int index); /* 1 == timeout */
+
+
 /* The channel for an instance must be created and possibly destroyed. */
 extern int pp_open_instance(struct pp_instance *ppi,
 			    struct pp_runtime_opts *rt_opts);
@@ -316,13 +338,6 @@ extern int pp_open_instance(struct pp_instance *ppi,
 extern int pp_close_instance(struct pp_instance *ppi);
 
 extern int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv);
-
-/* Timers */
-extern int pp_timer_init(struct pp_instance *ppi); /* initializes timer common
-						      structure */
-extern int pp_timer_start(uint32_t interval_ms, struct pp_timer *tm);
-extern int pp_timer_stop(struct pp_timer *tm);
-extern int pp_timer_expired(struct pp_timer *tm); /* returns 1 when expired */
 
 /* Servo */
 extern void pp_init_clock(struct pp_instance *ppi);

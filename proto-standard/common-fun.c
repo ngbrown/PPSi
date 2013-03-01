@@ -18,7 +18,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 	if (ret < 0)
 		return ret;
 
-	if (pp_timer_expired(ppi->timers[PP_TIMER_ANN_RECEIPT])) {
+	if (pp_timeout(ppi, PP_TO_ANN_RECEIPT)) {
 		PP_VPRINTF("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
 		ppi->number_foreign_records = 0;
 		ppi->foreign_record_i = 0;
@@ -35,7 +35,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 	if (!check_delayreq)
 		return 0;
 
-	if (pp_timer_expired(ppi->timers[PP_TIMER_DELAYREQ])) {
+	if (pp_timeout(ppi, PP_TO_DELAYREQ)) {
 		PP_VPRINTF("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
 
 		ret = msg_issue_delay_req(ppi);
@@ -56,9 +56,9 @@ void st_com_restart_annrec_timer(struct pp_instance *ppi)
 	if (DSPOR(ppi)->logAnnounceInterval < 0)
 		PP_PRINTF("Error: logAnnounceInterval < 0");
 
-	pp_timer_start(((DSPOR(ppi)->announceReceiptTimeout) <<
-			DSPOR(ppi)->logAnnounceInterval) * 1000,
-			ppi->timers[PP_TIMER_ANN_RECEIPT]);
+	pp_timeout_set(ppi, PP_TO_ANN_RECEIPT,
+		       ((DSPOR(ppi)->announceReceiptTimeout) <<
+			DSPOR(ppi)->logAnnounceInterval) * 1000);
 }
 
 

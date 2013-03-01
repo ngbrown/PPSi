@@ -52,7 +52,7 @@ out:
 state_updated:
 	/* Leaving this state */
 	if (ppi->next_state != ppi->state)
-		pp_timer_stop(ppi->timers[PP_TIMER_ANN_RECEIPT]);
+		pp_timeout_clr(ppi, PP_TO_ANN_RECEIPT);
 
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 

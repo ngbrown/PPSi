@@ -13,7 +13,7 @@ OBJ-libarch := $A/posix-startup.o \
 	$A/posix-socket.o \
 	$A/posix-io.o \
 	$A/posix-time.o \
-	$A/posix-timer.o \
+	$A/posix-timeout.o \
 	lib/cmdline.o \
 	lib/libc-functions.o \
 	lib/div64.o

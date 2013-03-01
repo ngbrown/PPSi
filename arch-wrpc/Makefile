@@ -29,7 +29,7 @@ LIBS += -L$A -larch
 
 OBJ-libarch := $A/wrpc-socket.o \
 	$A/wrpc-io.o \
-	$A/wrpc-timer.o \
+	$A/wrpc-timeout.o \
 	$A/wrpc-spll.o \
 	$A/wrpc-calibration.o \
 	lib/div64.o

@@ -46,22 +46,23 @@
 #define PP_DEFAULT_NO_ADJUST			0
 #define PP_DEFAULT_TTL				1
 
-/* We use an array of timers, with these indexes */
-#define PP_TIMER_UNUSED		0
-#define PP_TIMER_DELAYREQ	1
-#define PP_TIMER_SYNC		2
-#define PP_TIMER_ANN_RECEIPT	3
-#define PP_TIMER_ANN_INTERVAL	4
-/* White Rabbit timers */
-#define PP_TIMER_WRS_PRESENT	5
-#define PP_TIMER_WRS_S_LOCK	6
-#define PP_TIMER_WRS_M_LOCK	7
-#define PP_TIMER_WRS_LOCKED	8
-#define PP_TIMER_WRS_CALIBRATION 9
-#define PP_TIMER_WRS_CALIBRATED 10
-#define PP_TIMER_WRS_RESP_CALIB_REQ 11
-#define PP_TIMER_WRS_WR_LINK_ON 12
-#define PP_TIMER_ARRAY_SIZE	13
+/* We use an array of timeouts, with these indexes */
+enum pp_timeouts {
+	PP_TO_DELAYREQ = 0,
+	PP_TO_SYNC,
+	PP_TO_ANN_RECEIPT,
+	PP_TO_ANN_INTERVAL,
+	/* White Rabbit timers */
+	PP_TO_WRS_PRESENT,
+	PP_TO_WRS_S_LOCK,
+	PP_TO_WRS_M_LOCK,
+	PP_TO_WRS_LOCKED,
+	PP_TO_WRS_CALIBRATION,
+	PP_TO_WRS_CALIBRATED,
+	PP_TO_WRS_RESP_CALIB_REQ,
+	PP_TO_WRS_WR_LINK_ON,
+	__PP_TO_ARRAY_SIZE,
+};
 
 #define PP_TWO_STEP_FLAG		2
 #define PP_VERSION_PTP			2

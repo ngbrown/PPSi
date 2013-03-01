@@ -75,7 +75,6 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto failure;
 	}
 
-	ret = pp_timer_init(ppi);
 	if (ret) {
 		PP_PRINTF("%s: can't init timers\n", __func__);
 		goto failure;

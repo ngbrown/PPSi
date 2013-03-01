@@ -16,13 +16,13 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATION;
 
 		e = msg_issue_wrsig(ppi, CALIBRATE);
-		pp_timer_start(WR_DSPOR(ppi)->calPeriod,
-			ppi->timers[PP_TIMER_WRS_CALIBRATION]);
+		pp_timeout_set(ppi, PP_TO_WRS_CALIBRATION,
+			       WR_DSPOR(ppi)->calPeriod);
 		if (WR_DSPOR(ppi)->calibrated)
 			WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATION_2;
 	}
 
-	if (pp_timer_expired(ppi->timers[PP_TIMER_WRS_CALIBRATION])) {
+	if (pp_timeout(ppi, PP_TO_WRS_CALIBRATION)) {
 		if (WR_DSPOR(ppi)->wrMode == WR_MASTER)
 			ppi->next_state = PPS_MASTER;
 		else
@@ -127,7 +127,7 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 state_updated:
 	if (ppi->next_state != ppi->state)
-		pp_timer_stop(ppi->timers[PP_TIMER_WRS_CALIBRATION]);
+		pp_timeout_clr(ppi, PP_TO_WRS_CALIBRATION);
 
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
 

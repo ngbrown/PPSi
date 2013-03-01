@@ -17,13 +17,13 @@ int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
 		WR_DSPOR(ppi)->wrPortState = WRS_PRESENT;
 		WR_DSPOR(ppi)->wrMode = WR_SLAVE;
-		pp_timer_start(WR_WRS_PRESENT_TIMEOUT_MS,
-			ppi->timers[PP_TIMER_WRS_PRESENT]);
+		pp_timeout_set(ppi, PP_TO_WRS_PRESENT,
+			       WR_WRS_PRESENT_TIMEOUT_MS);
 		st_com_restart_annrec_timer(ppi);
 		e = msg_issue_wrsig(ppi, SLAVE_PRESENT);
 	}
 
-	if (pp_timer_expired(ppi->timers[PP_TIMER_WRS_PRESENT])) {
+	if (pp_timeout(ppi, PP_TO_WRS_PRESENT)) {
 		ppi->next_state = PPS_LISTENING;
 		WR_DSPOR(ppi)->wrMode = NON_WR;
 		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
@@ -50,8 +50,8 @@ no_incoming_msg:
 
 state_updated:
 	if (ppi->next_state != ppi->state) {
-		pp_timer_stop(ppi->timers[PP_TIMER_WRS_PRESENT]);
-		pp_timer_stop(ppi->timers[PP_TIMER_ANN_RECEIPT]);
+		pp_timeout_clr(ppi, PP_TO_WRS_PRESENT);
+		pp_timeout_clr(ppi, PP_TO_ANN_RECEIPT);
 	}
 
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
