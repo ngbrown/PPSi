@@ -162,9 +162,13 @@ struct bare_ethhdr {
 } __attribute__((packed));
 
 struct bare_timeval {
-	unsigned long tv_sec;
-	unsigned long tv_usec;
-	unsigned long tv_nsec;
+	long tv_sec;
+	long tv_usec;
+};
+
+struct bare_timespec {
+	long tv_sec;
+	long tv_nsec;
 };
 
 #ifndef NULL

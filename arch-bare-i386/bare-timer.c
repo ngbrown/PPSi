@@ -35,7 +35,7 @@ int bare_timer_stop(struct pp_timer *tm)
 
 int bare_timer_expired(struct pp_timer *tm)
 {
-	struct bare_timeval now;
+	struct bare_timespec now;
 	uint64_t now_ms;
 
 	if (tm->start == 0) {
