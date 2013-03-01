@@ -36,6 +36,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 		return 0;
 
 	if (pp_timeout(ppi, PP_TO_DELAYREQ)) {
+		pp_timeout_clr(ppi, PP_TO_DELAYREQ);
 		PP_VPRINTF("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
 
 		ret = msg_issue_delay_req(ppi);
