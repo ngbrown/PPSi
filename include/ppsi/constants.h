@@ -52,14 +52,11 @@ enum pp_timeouts {
 	PP_TO_SYNC,
 	PP_TO_ANN_RECEIPT,
 	PP_TO_ANN_INTERVAL,
-	/* White Rabbit timers */
-	PP_TO_WRS_PRESENT,
-	PP_TO_WRS_S_LOCK,
-	PP_TO_WRS_M_LOCK,
-	PP_TO_WRS_LOCKED,
-	PP_TO_WRS_CALIBRATION,
-	PP_TO_WRS_CALIBRATED,
-	PP_TO_WRS_RESP_CALIB_REQ,
+	/* A few timeouts for the protocol extension  */
+	PP_TO_EXT_0,
+	PP_TO_EXT_1,
+	PP_TO_EXT_2,
+	PP_TO_EXT_3,
 	__PP_TO_ARRAY_SIZE,
 };
 

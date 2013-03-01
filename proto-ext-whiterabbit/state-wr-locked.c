@@ -14,14 +14,14 @@ int wr_locked(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
 		WR_DSPOR(ppi)->wrPortState = WRS_LOCKED;
-		pp_timeout_set(ppi, PP_TO_WRS_LOCKED,
+		pp_timeout_set(ppi, PP_TO_EXT_0,
 			       WR_DSPOR(ppi)->wrStateTimeout);
 
 
 		e = msg_issue_wrsig(ppi, LOCKED);
 	}
 
-	if (pp_timeout(ppi, PP_TO_WRS_LOCKED)) {
+	if (pp_timeout(ppi, PP_TO_EXT_0)) {
 		ppi->next_state = PPS_LISTENING;
 		WR_DSPOR(ppi)->wrMode = NON_WR;
 		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
@@ -46,7 +46,7 @@ no_incoming_msg:
 
 state_updated:
 	if (ppi->next_state != ppi->state)
-		pp_timeout_clr(ppi, PP_TO_WRS_LOCKED);
+		pp_timeout_clr(ppi, PP_TO_EXT_0);
 
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
 
