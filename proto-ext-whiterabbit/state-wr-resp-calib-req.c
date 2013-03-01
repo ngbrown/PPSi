@@ -53,7 +53,7 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 state_updated:
 	if (ppi->next_state != ppi->state)
-		pp_timeout_clr(ppi, PP_TO_WRS_M_LOCK);
+		pp_timeout_clr(ppi, PP_TO_RESP_CALIB_REQ);
 
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
 
