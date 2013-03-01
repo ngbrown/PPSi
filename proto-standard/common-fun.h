@@ -36,9 +36,9 @@ int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 				 int len);
 
-#define MSG_SEND_AND_RET_VARLEN(_name, _chan, _pdelay, _size) \
+#define MSG_SEND_AND_RET(_name, _chan, _size) \
 	if (pp_net_ops.send(ppi, ppi->buf_out, _size,\
-		&ppi->last_snt_time, PP_NP_ ## _chan , _pdelay) < _size) { \
+		&ppi->last_snt_time, PP_NP_ ## _chan , 0) < _size) { \
 		if (pp_verbose_frames) \
 			PP_PRINTF("%s(%d) Message can't be sent -> FAULTY\n", \
 			pp_msg_names[PPM_ ## _name], PPM_ ## _name); \
@@ -51,8 +51,5 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 			pp_msg_names[PPM_ ## _name]); \
 	ppi->sent_seq_id[PPM_ ## _name]++; \
 	return 0;
-
-#define MSG_SEND_AND_RET(_name, _chan, _pdelay)\
-	MSG_SEND_AND_RET_VARLEN(_name, _chan, _pdelay, PP_## _name ##_LENGTH)
 
 #endif /* __COMMON_FUN_H */

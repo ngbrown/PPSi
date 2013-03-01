@@ -447,7 +447,7 @@ int msg_issue_announce(struct pp_instance *ppi)
 {
 	int len;
 	len = msg_pack_announce(ppi);
-	MSG_SEND_AND_RET_VARLEN(ANNOUNCE, GEN, 0, len);
+	MSG_SEND_AND_RET(ANNOUNCE, GEN, len);
 }
 
 /* Pack and send on event multicast ip adress a Sync message */
@@ -460,7 +460,7 @@ int msg_issue_sync(struct pp_instance *ppi)
 
 	msg_pack_sync(ppi, &orig_tstamp);
 
-	MSG_SEND_AND_RET(SYNC, EVT, 0);
+	MSG_SEND_AND_RET(SYNC, EVT, PP_SYNC_LENGTH);
 }
 
 /* Pack and send on general multicast ip address a FollowUp message */
@@ -471,7 +471,7 @@ int msg_issue_followup(struct pp_instance *ppi, TimeInternal *time)
 
 	msg_pack_follow_up(ppi, &prec_orig_tstamp);
 
-	MSG_SEND_AND_RET(FOLLOW_UP, GEN, 0);
+	MSG_SEND_AND_RET(FOLLOW_UP, GEN, PP_FOLLOW_UP_LENGTH);
 }
 
 /* Pack and send on event multicast ip adress a DelayReq message */
@@ -484,7 +484,7 @@ int msg_issue_delay_req(struct pp_instance *ppi)
 
 	msg_pack_delay_req(ppi, &orig_tstamp);
 
-	MSG_SEND_AND_RET(DELAY_REQ, EVT, 0);
+	MSG_SEND_AND_RET(DELAY_REQ, EVT, PP_PDELAY_REQ_LENGTH);
 }
 
 /* Pack and send on event multicast ip adress a DelayResp message */
@@ -495,5 +495,5 @@ int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time)
 
 	msg_pack_delay_resp(ppi, &ppi->delay_req_hdr, &rcv_tstamp);
 
-	MSG_SEND_AND_RET(DELAY_RESP, GEN, 0);
+	MSG_SEND_AND_RET(DELAY_RESP, GEN, PP_DELAY_RESP_LENGTH);
 }

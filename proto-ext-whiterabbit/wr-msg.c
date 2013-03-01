@@ -269,5 +269,5 @@ int msg_issue_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 {
 	int len;
 	len = msg_pack_wrsig(ppi, wr_msg_id);
-	MSG_SEND_AND_RET_VARLEN(SIGNALING, GEN, 0, len);
+	MSG_SEND_AND_RET(SIGNALING, GEN, len);
 }
