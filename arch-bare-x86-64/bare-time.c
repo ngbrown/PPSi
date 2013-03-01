@@ -16,7 +16,7 @@ static int bare_time_get(TimeInternal *t)
 	t->seconds = tv.tv_sec;
 	t->nanoseconds = tv.tv_usec * 1000;
 	if (pp_verbose_time)
-		pp_printf("%s: %9li.%09li\n", __func__, tv.tv_sec, tv.tv_nsec);
+		pp_printf("%s: %9li.%06li\n", __func__, tv.tv_sec, tv.tv_usec);
 	return 0;
 }
 
@@ -32,7 +32,7 @@ static int bare_time_set(TimeInternal *t)
 		sys_exit(1);
 	}
 	if (pp_verbose_time)
-		pp_printf("%s: %9li.%09li\n", __func__, tv.tv_sec, tv.tv_nsec);
+		pp_printf("%s: %9li.%06li\n", __func__, tv.tv_sec, tv.tv_usec);
 	return 0;
 }
 
