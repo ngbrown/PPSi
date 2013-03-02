@@ -32,9 +32,7 @@
 /* White Rabbit package Size */
 #define WR_ANNOUNCE_TLV_LENGTH		0x0A
 
-#define WR_ANNOUNCE_LENGTH    (PP_ANNOUNCE_LENGTH + WR_ANNOUNCE_TLV_LENGTH + 4)
-#define WR_MANAGEMENT_TLV_LENGTH	 6
-#define WR_MANAGEMENT_LENGTH  (MANAGEMENT_LENGTH + WR_MANAGEMENT_TLV_LENGTH)
+#define WR_ANNOUNCE_LENGTH    (PP_ANNOUNCE_LENGTH + WR_ANNOUNCE_TLV_LENGTH)
 
 /* memory footprint tweak for WRPC */
 #ifdef WRPC_EXTRA_SLIM
@@ -114,13 +112,18 @@ enum {
 
 /* brief WR PTP states (new, single FSM) */
 enum {
-	/* WR states start from 16 in order not to be confused with PTP states,
-	 * since our application FSM is flat */
-	WRS_PRESENT = 16, WRS_S_LOCK, WRS_M_LOCK,  WRS_LOCKED,
-	WRS_CALIBRATION, WRS_CALIBRATED, WRS_RESP_CALIB_REQ, WRS_WR_LINK_ON,
-	/* Each WR main state (except IDLE) has an associated timeout
-	 * we use state names to manage timeouts as well */
-	WR_TIMER_ARRAY_SIZE, /* number of states which has timeouts */
+	/*
+	 * Extension-specific states start from 100 according to some docs
+	 * so not to conflict with normal states
+	 */
+	WRS_PRESENT = 100,
+	WRS_S_LOCK,
+	WRS_M_LOCK,
+	WRS_LOCKED,
+	WRS_CALIBRATION,
+	WRS_CALIBRATED,
+	WRS_RESP_CALIB_REQ,
+	WRS_WR_LINK_ON,
 	WRS_IDLE,
 	/* here are substates*/
 	WRS_S_LOCK_1,
