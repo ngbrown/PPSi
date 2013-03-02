@@ -24,7 +24,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				DSPOR(ppi)->logAnnounceInterval);
 
 		/* Send an announce immediately, when becomes master */
-		if (msg_issue_announce(ppi) < 0)
+		if ((e = msg_issue_announce(ppi)) < 0)
 			goto out;
 	}
 
@@ -32,13 +32,13 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto state_updated;
 
 	if (pp_timeout_z(ppi, PP_TO_SYNC)) {
-		if (msg_issue_sync(ppi) < 0)
+		if ((e = msg_issue_sync(ppi) < 0))
 			goto out;
 
 		time_snt = &ppi->last_snt_time;
 		add_TimeInternal(time_snt, time_snt,
 				 &OPTS(ppi)->outbound_latency);
-		if (msg_issue_followup(ppi, time_snt))
+		if ((e = msg_issue_followup(ppi, time_snt)))
 			goto out;
 
 		/* Restart the timeout for next time */
@@ -46,7 +46,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 	if (pp_timeout_z(ppi, PP_TO_ANN_INTERVAL)) {
-		if (msg_issue_announce(ppi) < 0)
+		if ((e = msg_issue_announce(ppi) < 0))
 			goto out;
 
 		/* Restart the timeout for next time */
@@ -110,14 +110,6 @@ out:
 	}
 
 state_updated:
-	/* Leaving this state */
-	if (ppi->next_state != ppi->state) {
-		pp_timeout_clr(ppi, PP_TO_SYNC);
-		pp_timeout_clr(ppi, PP_TO_ANN_INTERVAL);
-	}
-
 	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
-
 	return 0;
-
 }
