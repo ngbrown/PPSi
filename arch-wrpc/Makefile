@@ -38,15 +38,3 @@ $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^
 
 $(TARGET).o: $(LIBARCH)
-
-ppsi-bin: $(TARGET) $(TARGET).bin
-
-# to build the target, we need -lstd again, in case we call functions that
-# were not selected yet (e.g., pp_open_instance() ).
-$(TARGET): $(TARGET).o $A/crt0.o $(LIBARCH) $A/main-loop.o $A/wrpc-startup.o
-	$(CC) -Wl,-Map,$(TARGET).map2 $(ARCH_LDFLAGS) -o $@ $A/crt0.o \
-		$(TARGET).o $(specdev-objects) $A/main-loop.o $A/wrpc-startup.o \
-		-L$A -larch $(LIBS)
-
-$(TARGET).bin: $(TARGET)
-	$(OBJCOPY) -O binary $^ $@

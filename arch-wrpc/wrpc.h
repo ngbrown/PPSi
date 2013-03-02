@@ -12,8 +12,6 @@
  * These are the functions provided by the various bare files
  */
 extern void wrpc_main_loop(struct pp_instance *ppi);
-extern void _irq_entry(void); /* unused, to make crt0.S happy */
-extern int main(void); /* alias to ppsi_main, so crt0.S is happy */
 
 /* FIXME halexp_port_state, to be renamed and moved somewhere else */
 
