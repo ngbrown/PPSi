@@ -313,6 +313,8 @@ static inline void pp_timeout_set(struct pp_instance *ppi, int index,
 	ppi->timeouts[index] = pp_calc_timeout(millisec);
 }
 
+extern void pp_timeout_rand(struct pp_instance *ppi, int index, int logval);
+
 static inline void pp_timeout_clr(struct pp_instance *ppi, int index)
 {
 	ppi->timeouts[index] = 0;

@@ -30,8 +30,8 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		st_com_restart_annrec_timer(ppi);
 
-		pp_timeout_set(ppi, PP_TO_DELAYREQ,
-		       (1 << DSPOR(ppi)->logMinDelayReqInterval) * 1000);
+		pp_timeout_rand(ppi, PP_TO_DELAYREQ,
+				DSPOR(ppi)->logMinDelayReqInterval);
 	}
 
 	if (st_com_check_record_update(ppi))
