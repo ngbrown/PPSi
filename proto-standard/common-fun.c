@@ -7,6 +7,7 @@
 #include <ppsi/diag.h>
 #include "common-fun.h"
 
+/* Called by listening, passive, slave, uncalibrated */
 int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 {
 	int ret = 0;
@@ -61,7 +62,8 @@ int st_com_check_record_update(struct pp_instance *ppi)
 	return 0;
 }
 
-void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
+/* Called by this file, basically when an announce is got, all states */
+static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 {
 	int i, j;
 	int found = 0;
@@ -127,6 +129,7 @@ void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 }
 
 
+/* Called by slave and uncalibrated */
 int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 				 int len)
 {
@@ -158,6 +161,7 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	return 0;
 }
 
+/* Called by slave and uncalibrated */
 int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			     int len)
 {
@@ -214,6 +218,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	return 0;
 }
 
+/* Called by slave and uncalibrated */
 int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 				 int len)
 {
@@ -272,6 +277,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	return 0;
 }
 
+/* Called by master, listenting, passive. */
 int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 				  int len)
 {
@@ -287,6 +293,10 @@ int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	return 0;
 }
 
+/*
+ * Called by master, listenting, passive.
+ * FIXME: this must be implemented to support one-step masters
+ */
 int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			      int len)
 {
