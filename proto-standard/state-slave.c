@@ -10,11 +10,8 @@
 int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0; /* error var, to check errors in msg handling */
-	TimeInternal *time;
 	TimeInternal correction_field;
 	MsgHeader *hdr = &ppi->msg_tmp_header;
-
-	time = &ppi->last_rcv_time;
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_SLAVE;
