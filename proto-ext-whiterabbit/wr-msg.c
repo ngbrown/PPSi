@@ -114,7 +114,7 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 
 	if ((WR_DSPOR(ppi)->wrMode == NON_WR) || (wr_msg_id == ANN_SUFIX)) {
 		PP_PRINTF("BUG: Trying to send invalid wr_msg mode=%x id=%x",
-			  DSPOR(ppi)->wrMode, wr_msg_id);
+			  WR_DSPOR(ppi)->wrMode, wr_msg_id);
 		return 0;
 	}
 

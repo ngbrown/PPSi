@@ -57,9 +57,9 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb =
 				0xFFFFFFFF & (((uint64_t)delta) << 16);
 			PP_PRINTF("Tx=>>scaledPicoseconds.msb = 0x%x\n",
-				DSPOR(ppi)->deltaTx.scaledPicoseconds.msb);
+				WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.msb);
 			PP_PRINTF("Tx=>>scaledPicoseconds.lsb = 0x%x\n",
-				DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb);
+				WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb);
 
 			WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATION_3;
 		} else {
@@ -99,9 +99,9 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb =
 				0xFFFFFFFF & (delta << 16);
 			PP_PRINTF("Rx=>>scaledPicoseconds.msb = 0x%x\n",
-				DSPOR(ppi)->deltaRx.scaledPicoseconds.msb);
+				WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.msb);
 			PP_PRINTF("Rx=>>scaledPicoseconds.lsb = 0x%x\n",
-				DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb);
+				WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb);
 
 			WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATION_7;
 		} else {
