@@ -62,8 +62,8 @@ typedef struct TimeInternal {
 	Integer32	seconds;
 	Integer32	nanoseconds;
 	/* White Rabbit extension begin */
-	Integer32	phase;
-	int 		correct;
+	Integer32	phase;		/* This is the set point */
+	int 		correct;	/* 0 or 1 */
 #if 0
 	/*
 	 * The following three fields may be used for diagnostics, but
@@ -254,14 +254,14 @@ typedef struct DSPort {			/* page 72 */
 	PortIdentity	portIdentity;
 	/* Dynamic */
 	Enumeration8	portState;
-	Integer8	logMinDelayReqInterval;
+	Integer8	logMinDelayReqInterval; /* note: never changed */
 	TimeInternal	peerMeanPathDelay;
 	/* Configurable */
 	Integer8	logAnnounceInterval;
 	UInteger8	announceReceiptTimeout;
 	Integer8	logSyncInterval;
 	Enumeration8	delayMechanism;
-	Integer8	logMinPdelayReqInterval;
+	Integer8	logMinPdelayReqInterval; /* note: never changed */
 	UInteger4	versionNumber;
 
 	void		*ext_dsport;

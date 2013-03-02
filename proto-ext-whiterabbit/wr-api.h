@@ -23,7 +23,7 @@ struct wr_dsport {
 	FixedDelta deltaRx;
 	UInteger32 wrStateTimeout;
 	UInteger8 wrStateRetry;
-	UInteger32 calPeriod;
+	UInteger32 calPeriod;		/* microseconsds, never changed */
 	UInteger8 calRetry;
 	Enumeration8 parentWrConfig;
 	Boolean parentIsWRnode; /* FIXME Not in the doc */
@@ -34,7 +34,7 @@ struct wr_dsport {
 
 	/* FIXME: are they in the doc? */
 	UInteger16 otherNodeCalSendPattern;
-	UInteger32 otherNodeCalPeriod;
+	UInteger32 otherNodeCalPeriod;/* microseconsds, never changed */
 	UInteger8 otherNodeCalRetry;
 	FixedDelta otherNodeDeltaTx;
 	FixedDelta otherNodeDeltaRx;
@@ -115,7 +115,7 @@ struct wr_servo_state_t {
 	int state;
 	int next_state;
 	TimeInternal prev_t4;
-	TimeInternal mu;
+	TimeInternal mu;		/* half of the RTT */
 	TimeInternal nsec_offset;
 	int32_t delta_tx_m;
 	int32_t delta_rx_m;
