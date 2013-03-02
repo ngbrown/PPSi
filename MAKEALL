@@ -15,9 +15,12 @@ build_one () {
 
 build_diags () {
     msg="arch \"$ARCH\", ext \"$PROTO_EXT\""
-    build_one "$msg, printf none" CONFIG_PRINTF_NONE=y
+    # only build xint, we know pp_printf works
+    unset USER_CFLAGS
     build_one "$msg, printf xint" CONFIG_PRINTF_XINT=y
-    build_one "$msg, printf full" CONFIG_PRINTF_FULL=y
+    # then build with all diagnostics, and default printf
+    export USER_CFLAGS="-DVERB_LOG_MSGS -DCONFIG_PPSI_RUNTIME_VERBOSITY"
+    build_one "$msg, all messages"
 }
 
 build_ext () {
