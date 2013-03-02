@@ -41,11 +41,19 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				 &OPTS(ppi)->outbound_latency);
 		if (msg_issue_followup(ppi, time_snt))
 			goto out;
+
+		/* Restart the timeout for next time */
+		pp_timeout_set(ppi, PP_TO_SYNC,
+				 (1 << DSPOR(ppi)->logSyncInterval) * 1000);
 	}
 
 	if (pp_timeout_z(ppi, PP_TO_ANN_INTERVAL)) {
 		if (msg_issue_announce(ppi) < 0)
 			goto out;
+
+		/* Restart the timeout for next time */
+		pp_timeout_set(ppi, PP_TO_ANN_INTERVAL,
+			       (1 << DSPOR(ppi)->logAnnounceInterval) * 1000);
 	}
 
 	if (plen == 0)
