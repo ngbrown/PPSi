@@ -17,17 +17,17 @@ int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			       WR_DSPOR(ppi)->wrStateTimeout);
 	}
 
-	if (pp_timeout(ppi, PP_TO_EXT_0)) {
+	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
 		if (WR_DSPOR(ppi)->wrMode == WR_MASTER)
 			ppi->next_state = PPS_MASTER;
 		else
 			ppi->next_state = PPS_LISTENING;
 		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
-		goto state_updated;
+		goto out;
 	}
 
 	if (plen == 0)
-		goto ret;
+		goto out;
 
 	if (ppi->msg_tmp_header.messageType == PPM_SIGNALING) {
 		msg_unpack_wrsig(ppi, pkt, &wrsig_msg,
@@ -41,11 +41,7 @@ int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			ppi->next_state = WRS_WR_LINK_ON;
 	}
 
-state_updated:
-	if (ppi->next_state != ppi->state)
-		pp_timeout_clr(ppi, PP_TO_EXT_0);
-
-ret:
+out:
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
 	return 0;
 }

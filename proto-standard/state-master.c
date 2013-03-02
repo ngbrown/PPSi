@@ -32,8 +32,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (st_com_check_record_update(ppi))
 		goto state_updated;
 
-	if (pp_timeout(ppi, PP_TO_SYNC)) {
-		PP_VPRINTF("event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
+	if (pp_timeout_z(ppi, PP_TO_SYNC)) {
 		if (msg_issue_sync(ppi) < 0)
 			goto out;
 
@@ -44,8 +43,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			goto out;
 	}
 
-	if (pp_timeout(ppi, PP_TO_ANN_INTERVAL)) {
-		PP_VPRINTF("event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
+	if (pp_timeout_z(ppi, PP_TO_ANN_INTERVAL)) {
 		if (msg_issue_announce(ppi) < 0)
 			goto out;
 	}

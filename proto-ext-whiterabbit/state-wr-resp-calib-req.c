@@ -23,17 +23,17 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 	if ((WR_DSPOR(ppi)->otherNodeCalSendPattern) &&
-	    (pp_timeout(ppi, PP_TO_EXT_0))) {
+	    (pp_timeout_z(ppi, PP_TO_EXT_0))) {
 		if (WR_DSPOR(ppi)->wrMode == WR_MASTER)
 			ppi->next_state = PPS_MASTER;
 		else
 			ppi->next_state = PPS_LISTENING;
 		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
-		goto state_updated;
+		goto out;
 	}
 
 	if (plen == 0)
-		goto state_updated;
+		goto out;
 
 	if (ppi->msg_tmp_header.messageType == PPM_SIGNALING) {
 
@@ -51,11 +51,7 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		}
 	}
 
-state_updated:
-	if (ppi->next_state != ppi->state)
-		pp_timeout_clr(ppi, PP_TO_EXT_0);
-
+out:
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
-
 	return e;
 }

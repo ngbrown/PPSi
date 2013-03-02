@@ -17,11 +17,11 @@ int wr_s_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		pp_timeout_set(ppi, PP_TO_EXT_0, WR_S_LOCK_TIMEOUT_MS);
 	}
 
-	if (pp_timeout(ppi, PP_TO_EXT_0)) {
+	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
 		ppi->next_state = PPS_FAULTY;
 		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
 		WR_DSPOR(ppi)->wrMode = NON_WR;
-		goto state_updated;
+		goto out;
 	}
 
 	if (wr_locking_poll(ppi) == WR_SPLL_READY) {
@@ -29,11 +29,7 @@ int wr_s_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		wr_locking_disable(ppi);
 	}
 
-state_updated:
-	if (ppi->next_state != ppi->state)
-		pp_timeout_clr(ppi, PP_TO_EXT_0);
-
+out:
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
-
 	return e;
 }

@@ -318,12 +318,26 @@ static inline void pp_timeout_clr(struct pp_instance *ppi, int index)
 	ppi->timeouts[index] = 0;
 }
 
+extern void pp_timeout_log(struct pp_instance *ppi, int index);
+
 static inline int pp_timeout(struct pp_instance *ppi, int index)
 {
-	return ppi->timeouts[index] &&
+	int ret = ppi->timeouts[index] &&
 		time_after_eq(pp_calc_timeout(0), ppi->timeouts[index]);
+
+	if (ret && pp_verbose_time)
+		pp_timeout_log(ppi, index);
+	return ret;
 }
 
+static inline int pp_timeout_z(struct pp_instance *ppi, int index)
+{
+	int ret = pp_timeout(ppi, index);
+
+	if (ret)
+		pp_timeout_clr(ppi, index);
+	return ret;
+}
 
 /* This functions are generic, not architecture-specific */
 extern void pp_timeout_set(struct pp_instance *ppi, int index, int millisec);
