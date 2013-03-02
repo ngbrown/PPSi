@@ -320,6 +320,14 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 		return -1;
 	}
 
+	/* forcibly disable loopback */
+	temp = 0;
+	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP,
+		       &temp, sizeof(int)) < 0) {
+		pp_diag_error_str2(ppi, "IP_MULTICAST_LOOP", strerror(errno));
+		return -1;
+	}
+
 	/* make timestamps available through recvmsg() */
 	if (setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
 		       &temp, sizeof(int)) < 0) {
