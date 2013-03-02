@@ -286,6 +286,7 @@ struct pp_time_operations {
 	int (*set)(TimeInternal *t); /* returns error code */
 	/* freq_ppm is "scaled-ppm" like the argument of adjtimex(2) */
 	int (*adjust)(long offset_ns, long freq_ppm);
+	unsigned long (*calc_timeout)(int millisec); /* cannot return zero */
 };
 
 /* IF the configuration prevents jumps, this is the max jump (0.5ms) */
@@ -301,14 +302,14 @@ extern struct pp_time_operations pp_t_ops;
  * Timeouts. I renamed from "timer" to "timeout" to avoid
  * misread/miswrite with the time operations above. A timeout, actually,
  * is just a number that must be compared with the current counter.
- * So we don't need struct operations, as it is one function only.
+ * So we don't need struct operations, as it is one function only,
+ * which is folded into the "pp_time_operations" above.
  */
-extern unsigned long pp_calc_timeout(int millisec); /* cannot return zero */
 
 static inline void pp_timeout_set(struct pp_instance *ppi, int index,
 				  int millisec)
 {
-	ppi->timeouts[index] = pp_calc_timeout(millisec);
+	ppi->timeouts[index] = pp_t_ops.calc_timeout(millisec);
 }
 
 extern void pp_timeout_rand(struct pp_instance *ppi, int index, int logval);
@@ -323,7 +324,7 @@ extern void pp_timeout_log(struct pp_instance *ppi, int index);
 static inline int pp_timeout(struct pp_instance *ppi, int index)
 {
 	int ret = ppi->timeouts[index] &&
-		time_after_eq(pp_calc_timeout(0), ppi->timeouts[index]);
+		time_after_eq(pp_t_ops.calc_timeout(0), ppi->timeouts[index]);
 
 	if (ret && pp_verbose_time)
 		pp_timeout_log(ppi, index);

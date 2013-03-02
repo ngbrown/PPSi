@@ -11,7 +11,6 @@ LIBARCH := $A/libarch.a
 OBJ-libarch := $A/bare-startup.o \
 	$A/main-loop.o \
 	$A/bare-socket.o \
-	$A/bare-timeout.o \
 	$A/bare-io.o \
 	$A/bare-time.o \
 	$A/syscalls.o \

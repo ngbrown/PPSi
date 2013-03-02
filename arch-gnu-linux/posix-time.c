@@ -62,8 +62,24 @@ int posix_time_adjust(long offset_ns, long freq_ppm)
 	return ret;
 }
 
+static unsigned long posix_calc_timeout(int millisec)
+{
+	struct timespec now;
+	uint64_t now_ms;
+	unsigned long result;
+
+	if (!millisec)
+		millisec = 1;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	now_ms = 1000LL * now.tv_sec + now.tv_nsec / 1000 / 1000;
+
+	result = now_ms + millisec;
+	return result ? result : 1; /* cannot return 0 */
+}
+
 struct pp_time_operations pp_t_ops = {
 	.get = posix_time_get,
 	.set = posix_time_set,
 	.adjust = posix_time_adjust,
+	.calc_timeout = posix_calc_timeout,
 };
