@@ -7,6 +7,7 @@
 #define __COMMON_FUN_H
 
 #include <ppsi/ppsi.h>
+#include <ppsi/diag.h>
 
 /* Contains all functions common to more than one state */
 
@@ -36,23 +37,24 @@ int st_com_master_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 				 int len);
 
-#define MSG_SEND_AND_RET_VARLEN(x, y, z, w) \
-	if (pp_net_ops.send(ppi, ppi->buf_out, w,\
-		&ppi->last_snt_time, PP_NP_##y , z) < w) { \
-		if (pp_verbose_frames) \
-			PP_PRINTF("%s(%d) Message can't be sent -> FAULTY\n", \
-			pp_msg_names[PPM_##x], PPM_##x); \
-		return -1; \
-	} \
-	if (pp_verbose_frames) \
-		PP_VPRINTF("SENT %02d %d.%09d %s\n", w, \
-			ppi->last_snt_time.seconds, \
-			ppi->last_snt_time.nanoseconds, \
-			pp_msg_names[PPM_##x]); \
-	ppi->sent_seq_id[PPM_## x]++; \
+static inline int __send_and_log(struct pp_instance *ppi, int msglen,
+				 int msgtype, int chtype)
+{
+	if (pp_net_ops.send(ppi, ppi->buf_out, msglen,
+			    &ppi->last_snt_time, chtype, 0) < msglen) {
+		if (pp_verbose_frames)
+			PP_PRINTF("%s(%d) Message can't be sent\n",
+			pp_msg_names[msgtype], msgtype);
+		return -1;
+	}
+	/* FIXME: verbose_frames should be looped back in the send method */
+	if (pp_verbose_frames)
+		PP_VPRINTF("SENT %02d %d.%09d %s\n", msglen,
+			ppi->last_snt_time.seconds,
+			ppi->last_snt_time.nanoseconds,
+			pp_msg_names[msgtype]);
+	ppi->sent_seq_id[msgtype]++; /* FIXME: fold in the send method too? */
 	return 0;
-
-#define MSG_SEND_AND_RET(x,y,z)\
-	MSG_SEND_AND_RET_VARLEN(x,y,z,PP_## x ##_LENGTH)
+}
 
 #endif /* __COMMON_FUN_H */

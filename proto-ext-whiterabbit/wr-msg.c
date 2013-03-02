@@ -267,7 +267,7 @@ void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 /* Pack and send a White Rabbit signalling message */
 int msg_issue_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 {
-	int len;
-	len = msg_pack_wrsig(ppi, wr_msg_id);
-	MSG_SEND_AND_RET_VARLEN(SIGNALING, GEN, 0, len);
+	int len = msg_pack_wrsig(ppi, wr_msg_id);
+
+	return __send_and_log(ppi, len, PPM_SIGNALING, PP_NP_GEN);
 }
