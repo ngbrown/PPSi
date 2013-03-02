@@ -313,22 +313,42 @@ static inline void pp_timeout_set(struct pp_instance *ppi, int index,
 	ppi->timeouts[index] = pp_calc_timeout(millisec);
 }
 
+extern void pp_timeout_rand(struct pp_instance *ppi, int index, int logval);
+
 static inline void pp_timeout_clr(struct pp_instance *ppi, int index)
 {
 	ppi->timeouts[index] = 0;
 }
 
+extern void pp_timeout_log(struct pp_instance *ppi, int index);
+
 static inline int pp_timeout(struct pp_instance *ppi, int index)
 {
-	return ppi->timeouts[index] &&
+	int ret = ppi->timeouts[index] &&
 		time_after_eq(pp_calc_timeout(0), ppi->timeouts[index]);
+
+	if (ret && pp_verbose_time)
+		pp_timeout_log(ppi, index);
+	return ret;
 }
 
+static inline int pp_timeout_z(struct pp_instance *ppi, int index)
+{
+	int ret = pp_timeout(ppi, index);
 
-/* This functions are generic, not architecture-specific */
-extern void pp_timeout_set(struct pp_instance *ppi, int index, int millisec);
-extern void pp_timeout_clr(struct pp_instance *ppi, int index);
-extern int pp_timeout(struct pp_instance *ppi, int index); /* 1 == timeout */
+	if (ret)
+		pp_timeout_clr(ppi, index);
+	return ret;
+}
+
+/* called several times, only sets a timeout, so inline it here */
+static inline void pp_timeout_restart_annrec(struct pp_instance *ppi)
+{
+	/* This timeout is a number of the announce interval lapses */
+	pp_timeout_set(ppi, PP_TO_ANN_RECEIPT,
+		       ((DSPOR(ppi)->announceReceiptTimeout) <<
+			DSPOR(ppi)->logAnnounceInterval) * 1000);
+}
 
 
 /* The channel for an instance must be created and possibly destroyed. */

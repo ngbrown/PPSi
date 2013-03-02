@@ -166,7 +166,12 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				break;
 			case 'n':
 				a = argv[++i];
+				/* Page 237 says 0 to 4 (1s .. 16s) */
 				OPTS(ppi)->announce_intvl = atoi(a);
+				if (OPTS(ppi)->announce_intvl < 0)
+					OPTS(ppi)->announce_intvl = 0;
+				if (OPTS(ppi)->announce_intvl > 4)
+					OPTS(ppi)->announce_intvl = 4;
 				break;
 			case 'm':
 				a = argv[++i];

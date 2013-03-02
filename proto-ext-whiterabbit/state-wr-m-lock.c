@@ -19,14 +19,14 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		pp_timeout_set(ppi, PP_TO_EXT_0, WR_M_LOCK_TIMEOUT_MS);
 	}
 
-	if (pp_timeout(ppi, PP_TO_EXT_0)) {
+	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
 		ppi->next_state = PPS_MASTER;
 		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
-		goto state_updated;
+		goto out;
 	}
 
 	if (plen == 0)
-		goto no_incoming_msg;
+		goto out;
 
 	if (ppi->msg_tmp_header.messageType == PPM_SIGNALING) {
 
@@ -37,14 +37,9 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			ppi->next_state = WRS_CALIBRATION;
 	}
 
-no_incoming_msg:
+out:
 	if (e != 0)
 		ppi->next_state = PPS_FAULTY;
-
-state_updated:
-	if (ppi->next_state != ppi->state)
-		pp_timeout_clr(ppi, PP_TO_EXT_0);
-
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
 
 	return e;

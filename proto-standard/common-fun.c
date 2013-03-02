@@ -18,8 +18,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 	if (ret < 0)
 		return ret;
 
-	if (pp_timeout(ppi, PP_TO_ANN_RECEIPT)) {
-		PP_VPRINTF("event ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES\n");
+	if (pp_timeout_z(ppi, PP_TO_ANN_RECEIPT)) {
 		ppi->number_foreign_records = 0;
 		ppi->foreign_record_i = 0;
 		if (!DSDEF(ppi)->slaveOnly &&
@@ -28,17 +27,14 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 			ppi->next_state = PPS_MASTER;
 		} else {
 			ppi->next_state = PPS_LISTENING;
-			st_com_restart_annrec_timer(ppi);
+			pp_timeout_restart_annrec(ppi);
 		}
 	}
 
 	if (!check_delayreq)
 		return 0;
 
-	if (pp_timeout(ppi, PP_TO_DELAYREQ)) {
-		pp_timeout_clr(ppi, PP_TO_DELAYREQ);
-		PP_VPRINTF("event DELAYREQ_INTERVAL_TIMEOUT_EXPIRES\n");
-
+	if (pp_timeout_z(ppi, PP_TO_DELAYREQ)) {
 		ret = msg_issue_delay_req(ppi);
 
 		ppi->delay_req_send_time = ppi->last_snt_time;
@@ -51,18 +47,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 	return ret;
 }
 
-void st_com_restart_annrec_timer(struct pp_instance *ppi)
-{
-	/* 0 <= logAnnounceInterval <= 4, see pag. 237 of spec */
-	if (DSPOR(ppi)->logAnnounceInterval < 0)
-		PP_PRINTF("Error: logAnnounceInterval < 0");
-
-	pp_timeout_set(ppi, PP_TO_ANN_RECEIPT,
-		       ((DSPOR(ppi)->announceReceiptTimeout) <<
-			DSPOR(ppi)->logAnnounceInterval) * 1000);
-}
-
-
+/* Called by listening, master, passive, slave */
 int st_com_check_record_update(struct pp_instance *ppi)
 {
 	if (ppi->record_update) {
@@ -165,7 +150,7 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	}
 
 	/*Reset Timer handling Announce receipt timeout*/
-	st_com_restart_annrec_timer(ppi);
+	pp_timeout_restart_annrec(ppi);
 
 	if (pp_hooks.handle_announce)
 		pp_hooks.handle_announce(ppi);

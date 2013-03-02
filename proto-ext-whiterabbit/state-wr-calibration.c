@@ -22,13 +22,13 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATION_2;
 	}
 
-	if (pp_timeout(ppi, PP_TO_EXT_0)) {
+	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
 		if (WR_DSPOR(ppi)->wrMode == WR_MASTER)
 			ppi->next_state = PPS_MASTER;
 		else
 			ppi->next_state = PPS_LISTENING;
 		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
-		goto state_updated;
+		goto out;
 	}
 
 	switch (WR_DSPOR(ppi)->wrPortState) {
@@ -125,10 +125,7 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 	}
 
-state_updated:
-	if (ppi->next_state != ppi->state)
-		pp_timeout_clr(ppi, PP_TO_EXT_0);
-
+out:
 	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
 
 	return e;

@@ -19,10 +19,9 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_MASTER;
-		pp_timeout_set(ppi, PP_TO_SYNC,
-				 (1 << DSPOR(ppi)->logSyncInterval) * 1000);
-		pp_timeout_set(ppi, PP_TO_ANN_INTERVAL,
-			       (1 << DSPOR(ppi)->logAnnounceInterval) * 1000);
+		pp_timeout_rand(ppi, PP_TO_SYNC, DSPOR(ppi)->logSyncInterval);
+		pp_timeout_rand(ppi, PP_TO_ANN_INTERVAL,
+				DSPOR(ppi)->logAnnounceInterval);
 
 		/* Send an announce immediately, when becomes master */
 		if (msg_issue_announce(ppi) < 0)
@@ -32,8 +31,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (st_com_check_record_update(ppi))
 		goto state_updated;
 
-	if (pp_timeout(ppi, PP_TO_SYNC)) {
-		PP_VPRINTF("event SYNC_INTERVAL_TIMEOUT_EXPIRES\n");
+	if (pp_timeout_z(ppi, PP_TO_SYNC)) {
 		if (msg_issue_sync(ppi) < 0)
 			goto out;
 
@@ -42,12 +40,18 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				 &OPTS(ppi)->outbound_latency);
 		if (msg_issue_followup(ppi, time_snt))
 			goto out;
+
+		/* Restart the timeout for next time */
+		pp_timeout_rand(ppi, PP_TO_SYNC, DSPOR(ppi)->logSyncInterval);
 	}
 
-	if (pp_timeout(ppi, PP_TO_ANN_INTERVAL)) {
-		PP_VPRINTF("event ANNOUNCE_INTERVAL_TIMEOUT_EXPIRES\n");
+	if (pp_timeout_z(ppi, PP_TO_ANN_INTERVAL)) {
 		if (msg_issue_announce(ppi) < 0)
 			goto out;
+
+		/* Restart the timeout for next time */
+		pp_timeout_rand(ppi, PP_TO_ANN_INTERVAL,
+				DSPOR(ppi)->logAnnounceInterval);
 	}
 
 	if (plen == 0)
