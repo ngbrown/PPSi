@@ -49,10 +49,11 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 
 		ppi->is_new_state = 0;
 
-		/* done: accept next state and delay */
+		/* done: if new state mark it, and enter it now (0 ms) */
 		if (ppi->state != ppi->next_state) {
 			ppi->state = ppi->next_state;
 			ppi->is_new_state = 1;
+			return 0;
 		}
 		return ppi->next_delay;
 	}
