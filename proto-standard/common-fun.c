@@ -47,18 +47,15 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 	return ret;
 }
 
+/* Called by listening, passive, slave, and this same file */
 void st_com_restart_annrec_timer(struct pp_instance *ppi)
 {
-	/* 0 <= logAnnounceInterval <= 4, see pag. 237 of spec */
-	if (DSPOR(ppi)->logAnnounceInterval < 0)
-		PP_PRINTF("Error: logAnnounceInterval < 0");
-
 	pp_timeout_set(ppi, PP_TO_ANN_RECEIPT,
 		       ((DSPOR(ppi)->announceReceiptTimeout) <<
 			DSPOR(ppi)->logAnnounceInterval) * 1000);
 }
 
-
+/* Called by listening, master, passive, slave */
 int st_com_check_record_update(struct pp_instance *ppi)
 {
 	if (ppi->record_update) {
