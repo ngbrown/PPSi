@@ -25,7 +25,6 @@ static struct pp_net_path net_path_static;
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
 /* ppi fields */
-static UInteger16 sent_seq_id[16];
 static DSDefault defaultDS;
 static DSCurrent currentDS;
 static DSParent parentDS;
@@ -41,7 +40,6 @@ int ppsi_main(int argc, char **argv)
 	PP_PRINTF("bare: starting. Compiled on %s\n", __DATE__);
 
 	ppi->net_path = &net_path_static;
-	ppi->sent_seq_id = sent_seq_id;
 	ppi->defaultDS   = &defaultDS;
 	ppi->currentDS   = &currentDS;
 	ppi->parentDS    = &parentDS;

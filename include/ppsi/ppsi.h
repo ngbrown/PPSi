@@ -179,9 +179,7 @@ struct pp_instance {
 		MsgDelayResp resp;
 		MsgAnnounce  announce;
 	} msg_tmp;
-	UInteger16 *sent_seq_id; /* sequence id of the last message sent of the
-				  * same type
-				  */
+	UInteger16 sent_seq[__PP_NR_MESSAGES_TYPES]; /* last sent this type */
 	MsgHeader msg_tmp_header;
 	MsgHeader delay_req_hdr;
 	UInteger32

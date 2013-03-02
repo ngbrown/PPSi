@@ -67,7 +67,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if ((memcmp(DSPOR(ppi)->portIdentity.clockIdentity,
 			ppi->msg_tmp.resp.requestingPortIdentity.clockIdentity,
 			PP_CLOCK_IDENTITY_LENGTH) == 0) &&
-			((ppi->sent_seq_id[PPM_DELAY_REQ] - 1) ==
+			((ppi->sent_seq[PPM_DELAY_REQ] - 1) ==
 				hdr->sequenceId) &&
 			(DSPOR(ppi)->portIdentity.portNumber ==
 			ppi->msg_tmp.resp.requestingPortIdentity.portNumber)

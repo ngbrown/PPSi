@@ -304,6 +304,7 @@ enum pp_std_messages {
 	PPM_ANNOUNCE,
 	PPM_SIGNALING,
 	PPM_MANAGEMENT,
+	__PP_NR_MESSAGES_TYPES,
 
 	PPM_NOTHING_TO_DO	= 0x100, /* for hooks.master_msg() */
 };

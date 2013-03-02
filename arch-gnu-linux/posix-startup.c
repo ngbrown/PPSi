@@ -36,7 +36,6 @@ int main(int argc, char **argv)
 	if (!ppi)
 		exit(__LINE__);
 
-	ppi->sent_seq_id = calloc(16, sizeof(*ppi->sent_seq_id));
 	ppi->defaultDS = calloc(1, sizeof(*ppi->defaultDS));
 	ppi->currentDS = calloc(1, sizeof(*ppi->currentDS));
 	ppi->parentDS = calloc(1, sizeof(*ppi->parentDS));
@@ -48,7 +47,7 @@ int main(int argc, char **argv)
 	ppi->arch_data = calloc(1, sizeof(struct posix_arch_data));
 
 	if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
-	    || (!ppi->portDS) || (!ppi->timePropertiesDS) || (!ppi->sent_seq_id)
+	    || (!ppi->portDS) || (!ppi->timePropertiesDS)
 	    || (!ppi->net_path) || (!ppi->frgn_master) || (!ppi->arch_data)
 	   )
 		exit(__LINE__);
