@@ -64,8 +64,6 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	port->logAnnounceInterval = opt->announce_intvl;
 	port->announceReceiptTimeout = PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT;
 	port->logSyncInterval = opt->sync_intvl;
-	port->delayMechanism = PP_DEFAULT_DELAY_MECHANISM;
-	port->logMinPdelayReqInterval = PP_DEFAULT_PDELAYREQ_INTERVAL;
 	port->versionNumber = PP_VERSION_PTP;
 
 	if (pp_hooks.init)

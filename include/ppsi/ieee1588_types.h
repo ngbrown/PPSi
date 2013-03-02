@@ -261,7 +261,6 @@ typedef struct DSPort {			/* page 72 */
 	UInteger8	announceReceiptTimeout;
 	Integer8	logSyncInterval;
 	Enumeration8	delayMechanism;
-	Integer8	logMinPdelayReqInterval; /* note: never changed */
 	UInteger4	versionNumber;
 
 	void		*ext_dsport;
