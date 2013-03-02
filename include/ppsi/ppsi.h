@@ -341,10 +341,14 @@ static inline int pp_timeout_z(struct pp_instance *ppi, int index)
 	return ret;
 }
 
-/* This functions are generic, not architecture-specific */
-extern void pp_timeout_set(struct pp_instance *ppi, int index, int millisec);
-extern void pp_timeout_clr(struct pp_instance *ppi, int index);
-extern int pp_timeout(struct pp_instance *ppi, int index); /* 1 == timeout */
+/* called several times, only sets a timeout, so inline it here */
+static inline void pp_timeout_restart_annrec(struct pp_instance *ppi)
+{
+	/* This timeout is a number of the announce interval lapses */
+	pp_timeout_set(ppi, PP_TO_ANN_RECEIPT,
+		       ((DSPOR(ppi)->announceReceiptTimeout) <<
+			DSPOR(ppi)->logAnnounceInterval) * 1000);
+}
 
 
 /* The channel for an instance must be created and possibly destroyed. */

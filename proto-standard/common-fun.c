@@ -27,7 +27,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 			ppi->next_state = PPS_MASTER;
 		} else {
 			ppi->next_state = PPS_LISTENING;
-			st_com_restart_annrec_timer(ppi);
+			pp_timeout_restart_annrec(ppi);
 		}
 	}
 
@@ -45,14 +45,6 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 				 &OPTS(ppi)->outbound_latency);
 	}
 	return ret;
-}
-
-/* Called by listening, passive, slave, and this same file */
-void st_com_restart_annrec_timer(struct pp_instance *ppi)
-{
-	pp_timeout_set(ppi, PP_TO_ANN_RECEIPT,
-		       ((DSPOR(ppi)->announceReceiptTimeout) <<
-			DSPOR(ppi)->logAnnounceInterval) * 1000);
 }
 
 /* Called by listening, master, passive, slave */
@@ -158,7 +150,7 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	}
 
 	/*Reset Timer handling Announce receipt timeout*/
-	st_com_restart_annrec_timer(ppi);
+	pp_timeout_restart_annrec(ppi);
 
 	if (pp_hooks.handle_announce)
 		pp_hooks.handle_announce(ppi);

@@ -28,7 +28,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 		ppi->waiting_for_follow = FALSE;
 
-		st_com_restart_annrec_timer(ppi);
+		pp_timeout_restart_annrec(ppi);
 
 		pp_timeout_rand(ppi, PP_TO_DELAYREQ,
 				DSPOR(ppi)->logMinDelayReqInterval);

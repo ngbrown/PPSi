@@ -18,7 +18,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_LISTENING;
-		st_com_restart_annrec_timer(ppi);
+		pp_timeout_restart_annrec(ppi);
 	}
 
 	if (st_com_check_record_update(ppi))
