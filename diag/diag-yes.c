@@ -12,17 +12,17 @@ void pp_diag_fsm(struct pp_instance *ppi, char *name, int sequence, int plen)
 {
 	if (sequence == STATE_ENTER) {
 		/* enter with or without a packet len */
-		pp_timed_printf("fsm: ENTER %s, packet len %i\n",
+		pp_timed_printf(ppi, "fsm: ENTER %s, packet len %i\n",
 			  name, plen);
 		return;
 	}
 	if (sequence == STATE_LOOP) {
-		pp_timed_printf("fsm: %s: reenter in %i ms\n", name,
+		pp_timed_printf(ppi, "fsm: %s: reenter in %i ms\n", name,
 				ppi->next_delay);
 		return;
 	}
 	/* leave has one \n more, so different states are separate */
-	pp_timed_printf("fsm: LEAVE %s (next: %3i in %i ms)\n\n",
+	pp_timed_printf(ppi, "fsm: LEAVE %s (next: %3i in %i ms)\n\n",
 		name, ppi->next_state, ppi->next_delay);
 }
 
@@ -58,7 +58,7 @@ void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...)
 	va_end(args);
 }
 
-void pp_timed_printf(char *fmt, ...)
+void pp_timed_printf(struct pp_instance *ppi, char *fmt, ...)
 {
 	va_list args;
 	TimeInternal t;
