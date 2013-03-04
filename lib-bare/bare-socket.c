@@ -7,7 +7,7 @@
 #include <ppsi/diag.h>
 #include "bare-linux.h"
 
-/* 14 is ppi->proto_ofst for ethernet mode */
+/* 14 is ptp_offset for ethernet mode */
 Octet buffer_out[PP_PACKET_SIZE + 14];
 
 /* FIXME: which socket we receive and send with? */
@@ -18,14 +18,14 @@ static int bare_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		ppi->t_ops->get(t);
 
 	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd,
-			pkt - NP(ppi)->proto_ofst, len, 0);
+			pkt - NP(ppi)->ptp_offset, len, 0);
 }
 
 static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct bare_ethhdr *hdr;
-	hdr = PROTO_HDR(pkt);
+	hdr = pp_get_header(ppi, pkt);
 	hdr->h_proto = htons(ETH_P_1588);
 
 	memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, 6);
@@ -37,7 +37,7 @@ static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
 		ppi->t_ops->get(t);
 
 	return sys_send(NP(ppi)->ch[chtype].fd, hdr,
-					len + NP(ppi)->proto_ofst, 0);
+					len + NP(ppi)->ptp_offset, 0);
 }
 
 #define SHUT_RD		0
@@ -126,7 +126,7 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 static int bare_net_init(struct pp_instance *ppi)
 {
 	ppi->buf_out = buffer_out;
-	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
+	ppi->buf_out = pp_get_payload(ppi, ppi->buf_out);
 
 	if (OPTS(ppi)->ethernet_mode) {
 		PP_PRINTF("bare_net_init IEEE 802.3\n");

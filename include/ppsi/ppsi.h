@@ -130,11 +130,9 @@ struct pp_net_path {
 	/* FIXME check if useful Integer32 ucast_addr;*/
 	Integer32 mcast_addr;
 	Integer32 peer_mcast_addr;
-	int proto_ofst;
+	int ptp_offset;
 	int inited;
 };
-#define PROTO_HDR(x) ( (x) - NP(ppi)->proto_ofst);
-#define PROTO_PAYLOAD(x) ( (x) + NP(ppi)->proto_ofst);
 
 /*
  * Structure for the individual ppsi link
@@ -196,6 +194,7 @@ extern unsigned long pp_global_flags; /* Supplement ppi-specific ones */
 
 #define PP_FLAG_NOTIMELOG	1 /* This is for a special case, I'm sorry */
 
+
 /* We use data sets a lot, so have these helpers */
 static inline struct pp_runtime_opts *OPTS(struct pp_instance *ppi)
 {
@@ -235,6 +234,18 @@ static inline struct pp_net_path *NP(struct pp_instance *ppi)
 static inline struct pp_servo *SRV(struct pp_instance *ppi)
 {
 	return ppi->servo;
+}
+
+
+/* Sometimes (e.g., raw ethernet frames), we need to consider an offset */
+static inline void *pp_get_header(struct pp_instance *ppi, void *ptp_payload)
+{
+	return ptp_payload - NP(ppi)->ptp_offset;
+}
+
+static inline void *pp_get_payload(struct pp_instance *ppi, void *frame_ptr)
+{
+	return frame_ptr + NP(ppi)->ptp_offset;
 }
 
 

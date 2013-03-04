@@ -18,8 +18,12 @@ void posix_main_loop(struct pp_instance *ppi)
 {
 	int delay_ms;
 
+	/*
+	 * If we are sending or receiving raw ethernet frames,
+	 * the ptp payload is one-eth-header bytes into the frame
+	 */
 	if (OPTS(ppi)->ethernet_mode)
-		NP(ppi)->proto_ofst = 14;
+		NP(ppi)->ptp_offset = ETH_HLEN;
 
 	/*
 	 * The main loop here is based on select. While we are not

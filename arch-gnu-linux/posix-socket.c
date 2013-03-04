@@ -101,10 +101,10 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	if (OPTS(ppi)->ethernet_mode) {
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
-		hdr = PROTO_HDR(pkt);
+		hdr = pp_get_header(ppi, pkt);
 		ret = posix_recv_msg(ppi, fd, hdr,
-				      len + NP(ppi)->proto_ofst, t);
-		return ret <= 0 ? ret : ret - NP(ppi)->proto_ofst;
+				      len + NP(ppi)->ptp_offset, t);
+		return ret <= 0 ? ret : ret - NP(ppi)->ptp_offset;
 		/* FIXME: check header */
 	}
 
@@ -135,7 +135,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 	struct ethhdr *hdr;
 
 	if (OPTS(ppi)->ethernet_mode) {
-		hdr = PROTO_HDR(pkt);
+		hdr = pp_get_header(ppi, pkt);
 
 		hdr->h_proto = htons(ETH_P_1588);
 
@@ -143,7 +143,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 		/* raw socket implementation always uses gen socket */
 		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
 		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
-					len + NP(ppi)->proto_ofst, 0);
+					len + NP(ppi)->ptp_offset, 0);
 	}
 
 	/* else: UDP */
@@ -349,11 +349,11 @@ int posix_net_init(struct pp_instance *ppi)
 {
 	int i;
 
-	ppi->buf_out = calloc(1, PP_PACKET_SIZE + NP(ppi)->proto_ofst);
+	ppi->buf_out = calloc(1, PP_PACKET_SIZE + NP(ppi)->ptp_offset);
 	if (!ppi->buf_out)
 		return -1;
 
-	ppi->buf_out = PROTO_PAYLOAD(ppi->buf_out);
+	ppi->buf_out = pp_get_payload(ppi, ppi->buf_out);
 
 	if (OPTS(ppi)->ethernet_mode) {
 		PP_PRINTF("posix_net_init IEEE 802.3\n");

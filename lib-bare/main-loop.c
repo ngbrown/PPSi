@@ -21,7 +21,7 @@ void bare_main_loop(struct pp_instance *ppi)
 {
 	int delay_ms;
 
-	NP(ppi)->proto_ofst = 14;
+	NP(ppi)->ptp_offset = 14;
 
 	/*
 	 * The main loop here is based on select. While we are not
