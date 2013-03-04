@@ -21,7 +21,8 @@
 #include "posix.h"
 
 /* posix_recv_msg uses recvmsg for timestamp query */
-static int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
+static int posix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
+			  TimeInternal *t)
 {
 	ssize_t ret;
 	struct msghdr msg;
@@ -84,7 +85,7 @@ static int posix_recv_msg(int fd, void *pkt, int len, TimeInternal *t)
 		 * spike in the offset signal sent to the clock servo
 		 */
 		PP_VPRINTF("no receive time stamp, getting it in user space\n");
-		pp_t_ops.get(t);
+		ppi->t_ops->get(t);
 	}
 	return ret;
 }
@@ -98,8 +99,10 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	int ret;
 
 	if (OPTS(ppi)->ethernet_mode) {
+		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
+
 		hdr = PROTO_HDR(pkt);
-		ret = posix_recv_msg(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
+		ret = posix_recv_msg(ppi, fd, hdr,
 				      len + NP(ppi)->proto_ofst, t);
 		return ret <= 0 ? ret : ret - NP(ppi)->proto_ofst;
 		/* FIXME: check header */
@@ -117,10 +120,10 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	POSIX_ARCH(ppi)->rcv_switch = !POSIX_ARCH(ppi)->rcv_switch;
 
 	if (ch1->pkt_present)
-		return posix_recv_msg(ch1->fd, pkt, len, t);
+		return posix_recv_msg(ppi, ch1->fd, pkt, len, t);
 
 	if (ch2->pkt_present)
-		return posix_recv_msg(ch2->fd, pkt, len, t);
+		return posix_recv_msg(ppi, ch2->fd, pkt, len, t);
 
 	return -1;
 }
@@ -150,7 +153,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 	addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
 
 	if (t)
-		pp_t_ops.get(t);
+		ppi->t_ops->get(t);
 
 	return sendto(NP(ppi)->ch[chtype].fd, pkt, len, 0,
 		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));

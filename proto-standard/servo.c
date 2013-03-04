@@ -19,7 +19,7 @@ void pp_init_clock(struct pp_instance *ppi)
 
 	/* level clock */
 	if (!OPTS(ppi)->no_adjust)
-		pp_t_ops.adjust(0, 0);
+		ppi->t_ops->adjust(0, 0);
 }
 
 void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
@@ -189,15 +189,15 @@ void pp_update_clock(struct pp_instance *ppi)
 		if (!OPTS(ppi)->no_adjust) {
 			if (!OPTS(ppi)->no_rst_clk) {
 				/* FIXME: use adjust instead of set? */
-				pp_t_ops.get(&time_tmp);
+				ppi->t_ops->get(&time_tmp);
 				sub_TimeInternal(&time_tmp, &time_tmp,
 					&DSCUR(ppi)->offsetFromMaster);
-				pp_t_ops.set(&time_tmp);
+				ppi->t_ops->set(&time_tmp);
 				pp_init_clock(ppi);
 			} else {
 				adj = DSCUR(ppi)->offsetFromMaster.nanoseconds
 					> 0 ? PP_ADJ_NS_MAX:-PP_ADJ_NS_MAX;
-				pp_t_ops.adjust(-adj, 0);
+				ppi->t_ops->adjust(-adj, 0);
 			}
 		}
 	} else {
@@ -226,7 +226,7 @@ void pp_update_clock(struct pp_instance *ppi)
 
 		/* apply controller output as a clock tick rate adjustment */
 		if (!OPTS(ppi)->no_adjust)
-			pp_t_ops.adjust(0, -adj);
+			ppi->t_ops->adjust(0, -adj);
 
 		dc++;
 		if (dc % 2 == 0) { /* Prints statistics every 8s */

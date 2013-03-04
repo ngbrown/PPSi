@@ -455,7 +455,7 @@ int msg_issue_sync(struct pp_instance *ppi)
 {
 	Timestamp orig_tstamp;
 	TimeInternal now;
-	pp_t_ops.get(&now);
+	ppi->t_ops->get(&now);
 	from_TimeInternal(&now, &orig_tstamp);
 
 	msg_pack_sync(ppi, &orig_tstamp);
@@ -480,7 +480,7 @@ int msg_issue_delay_req(struct pp_instance *ppi)
 {
 	Timestamp orig_tstamp;
 	TimeInternal now;
-	pp_t_ops.get(&now);
+	ppi->t_ops->get(&now);
 	from_TimeInternal(&now, &orig_tstamp);
 
 	msg_pack_delay_req(ppi, &orig_tstamp);

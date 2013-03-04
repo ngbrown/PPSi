@@ -77,7 +77,7 @@ static unsigned long posix_calc_timeout(int millisec)
 	return result ? result : 1; /* cannot return 0 */
 }
 
-struct pp_time_operations pp_t_ops = {
+struct pp_time_operations posix_time_ops = {
 	.get = posix_time_get,
 	.set = posix_time_set,
 	.adjust = posix_time_adjust,

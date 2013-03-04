@@ -151,6 +151,7 @@ struct pp_instance {
 
 	/* Operations that may be different in each instance */
 	struct pp_network_operations *n_ops;
+	struct pp_time_operations *t_ops;
 
 	/* Data sets */
 	DSDefault *defaultDS;			/* page 65 */
@@ -301,8 +302,6 @@ struct pp_time_operations {
 /* In geeneral, we can't adjust the rate by more than 200ppm */
 #define  PP_ADJ_FREQ_MAX	(200 << 16)
 
-extern struct pp_time_operations pp_t_ops;
-
 
 /*
  * Timeouts. I renamed from "timer" to "timeout" to avoid
@@ -315,7 +314,7 @@ extern struct pp_time_operations pp_t_ops;
 static inline void pp_timeout_set(struct pp_instance *ppi, int index,
 				  int millisec)
 {
-	ppi->timeouts[index] = pp_t_ops.calc_timeout(millisec);
+	ppi->timeouts[index] = ppi->t_ops->calc_timeout(millisec);
 }
 
 extern void pp_timeout_rand(struct pp_instance *ppi, int index, int logval);
@@ -330,7 +329,8 @@ extern void pp_timeout_log(struct pp_instance *ppi, int index);
 static inline int pp_timeout(struct pp_instance *ppi, int index)
 {
 	int ret = ppi->timeouts[index] &&
-		time_after_eq(pp_t_ops.calc_timeout(0), ppi->timeouts[index]);
+		time_after_eq(ppi->t_ops->calc_timeout(0),
+			      ppi->timeouts[index]);
 
 	if (ret && pp_verbose_time)
 		pp_timeout_log(ppi, index);
