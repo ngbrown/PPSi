@@ -83,7 +83,7 @@ static void msg_display_announce(MsgAnnounce *announce)
 /* Unpack header from in buffer to msg_tmp_header field */
 int msg_unpack_header(struct pp_instance *ppi, void *buf)
 {
-	MsgHeader *hdr = &ppi->msg_tmp_header;
+	MsgHeader *hdr = &ppi->received_ptp_header;
 
 	hdr->transportSpecific = (*(Nibble *) (buf + 0)) >> 4;
 	hdr->messageType = (*(Enumeration4 *) (buf + 0)) & 0x0F;
@@ -114,7 +114,7 @@ int msg_unpack_header(struct pp_instance *ppi, void *buf)
 	 * any port, not only the same port, as we can't sync with
 	 * ourself even when we'll run in multi-port mode.
 	 */
-	if (!memcmp(ppi->msg_tmp_header.sourcePortIdentity.clockIdentity,
+	if (!memcmp(ppi->received_ptp_header.sourcePortIdentity.clockIdentity,
 			DSPOR(ppi)->portIdentity.clockIdentity,
 		    PP_CLOCK_IDENTITY_LENGTH))
 		return -1;
@@ -164,7 +164,7 @@ void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
 	void *buf;
 
-	buf = ppi->buf_out;
+	buf = ppi->tx_ptp;
 
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -208,7 +208,7 @@ int msg_pack_announce(struct pp_instance *ppi)
 {
 	void *buf;
 
-	buf = ppi->buf_out;
+	buf = ppi->tx_ptp;
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
 	/* RAZ messageType */
@@ -272,7 +272,7 @@ void msg_pack_follow_up(struct pp_instance *ppi, Timestamp *prec_orig_tstamp)
 {
 	void *buf;
 
-	buf = ppi->buf_out;
+	buf = ppi->tx_ptp;
 
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -321,7 +321,7 @@ void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
 	void *buf;
 
-	buf = ppi->buf_out;
+	buf = ppi->tx_ptp;
 
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;
@@ -351,7 +351,7 @@ void msg_pack_delay_resp(struct pp_instance *ppi,
 {
 	void *buf;
 
-	buf = ppi->buf_out;
+	buf = ppi->tx_ptp;
 
 	/* changes in header */
 	*(char *)(buf + 0) = *(char *)(buf + 0) & 0xF0;

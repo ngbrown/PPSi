@@ -56,7 +56,7 @@ void msg_pack_announce_wr_tlv(struct pp_instance *ppi)
 	UInteger16 wr_flags = 0;
 
 	/* Change length */
-	buf = ppi->buf_out;
+	buf = ppi->tx_ptp;
 	*(UInteger16 *)(buf + 2) = htons(WR_ANNOUNCE_LENGTH);
 
 	*(UInteger16 *)(buf + 64) = htons(TLV_TYPE_ORG_EXTENSION);
@@ -118,7 +118,7 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 		return 0;
 	}
 
-	buf = ppi->buf_out;
+	buf = ppi->tx_ptp;
 
 	/* Changes in header */
 	*(char *)(buf+0) = *(char *)(buf+0) & 0xF0; /* RAZ messageType */

@@ -27,7 +27,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (plen == 0)
 		goto out;
 
-	switch (ppi->msg_tmp_header.messageType) {
+	switch (ppi->received_ptp_header.messageType) {
 
 	case PPM_ANNOUNCE:
 		e = st_com_master_handle_announce(ppi, pkt, plen);

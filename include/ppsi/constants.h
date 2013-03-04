@@ -72,7 +72,8 @@ enum pp_timeouts {
 #define PP_PDELAY_RESP_FOLLOW_UP_LENGTH 54
 #define PP_MANAGEMENT_LENGTH		48
 
-#define PP_MINIMUM_LENGTH 44
+#define PP_MINIMUM_LENGTH	44
+#define PP_MAX_FRAME_LENGTH	200 /* must fit extension and ethhdr */
 
 #define PP_DEFAULT_NEXT_DELAY_MS	1000
 
@@ -81,7 +82,6 @@ enum pp_timeouts {
 #define PP_PORT_ADDRESS_LENGTH		2
 #define PP_UUID_LENGTH			6
 #define PP_FLAG_FIELD_LENGTH		2
-#define PP_PACKET_SIZE			300
 #define PP_EVT_PORT			319
 #define PP_GEN_PORT			320
 #define PP_DEFAULT_DOMAIN_ADDRESS	"224.0.1.129"

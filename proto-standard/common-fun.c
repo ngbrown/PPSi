@@ -2,10 +2,36 @@
  * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
  * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
-
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 #include "common-fun.h"
+
+static void *__align_pointer(void *p)
+{
+	unsigned long ip, align = 0;
+
+	ip = (unsigned long)p;
+	if (ip & 3)
+		align = 4 - (ip & 3);
+	return p + align;
+}
+
+void pp_prepare_pointers(struct pp_instance *ppi)
+{
+	ppi->tx_ptp = __align_pointer(pp_get_payload(ppi, ppi->tx_buffer));
+	ppi->rx_ptp = __align_pointer(pp_get_payload(ppi, ppi->rx_buffer));
+
+	/* Now that ptp payload is aligned, get back the header */
+	ppi->tx_frame = pp_get_header(ppi, ppi->tx_ptp);
+	ppi->rx_frame = pp_get_header(ppi, ppi->rx_ptp);
+
+	if (0) { /* enable to verify... it works for me though */
+		pp_printf("%p -> %p %p\n",
+			  ppi->tx_buffer, ppi->tx_frame, ppi->tx_ptp);
+		pp_printf("%p -> %p %p\n",
+			  ppi->rx_buffer, ppi->rx_frame, ppi->rx_ptp);
+	}
+}
 
 /* Called by listening, passive, slave, uncalibrated */
 int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
@@ -67,7 +93,7 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 {
 	int i, j;
 	int found = 0;
-	MsgHeader *hdr = &ppi->msg_tmp_header;
+	MsgHeader *hdr = &ppi->received_ptp_header;
 
 	j = ppi->foreign_record_best;
 
@@ -133,7 +159,7 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 				 int len)
 {
-	MsgHeader *hdr = &ppi->msg_tmp_header;
+	MsgHeader *hdr = &ppi->received_ptp_header;
 
 	if (len < PP_ANNOUNCE_LENGTH)
 		return -1;
@@ -168,7 +194,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	TimeInternal *time;
 	TimeInternal origin_tstamp;
 	TimeInternal correction_field;
-	MsgHeader *hdr = &ppi->msg_tmp_header;
+	MsgHeader *hdr = &ppi->received_ptp_header;
 
 	if (len < PP_SYNC_LENGTH)
 		return -1;
@@ -200,7 +226,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 		} else {
 			msg_unpack_sync(buf, &ppi->msg_tmp.sync);
 			int64_to_TimeInternal(
-				ppi->msg_tmp_header.correctionfield,
+				ppi->received_ptp_header.correctionfield,
 				&correction_field);
 
 			display_TimeInternal("Correction field",
@@ -226,7 +252,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	TimeInternal correction_field;
 	int ret = 0;
 
-	MsgHeader *hdr = &ppi->msg_tmp_header;
+	MsgHeader *hdr = &ppi->received_ptp_header;
 
 	if (len < PP_FOLLOW_UP_LENGTH)
 		return -1;
@@ -254,7 +280,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	to_TimeInternal(&precise_orig_timestamp,
 			&ppi->msg_tmp.follow.preciseOriginTimestamp);
 
-	int64_to_TimeInternal(ppi->msg_tmp_header.correctionfield,
+	int64_to_TimeInternal(ppi->received_ptp_header.correctionfield,
 					&correction_field);
 
 	add_TimeInternal(&correction_field, &correction_field,

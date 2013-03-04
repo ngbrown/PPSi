@@ -7,9 +7,6 @@
 #include <ppsi/diag.h>
 #include "bare-linux.h"
 
-/* 14 is ptp_offset for ethernet mode */
-Octet buffer_out[PP_PACKET_SIZE + 14];
-
 /* FIXME: which socket we receive and send with? */
 static int bare_net_recv(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t)
@@ -125,8 +122,8 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 
 static int bare_net_init(struct pp_instance *ppi)
 {
-	ppi->buf_out = buffer_out;
-	ppi->buf_out = pp_get_payload(ppi, ppi->buf_out);
+	/* The buffer is inside ppi, but we need to set pointers and align */
+	pp_prepare_pointers(ppi);
 
 	if (OPTS(ppi)->ethernet_mode) {
 		PP_PRINTF("bare_net_init IEEE 802.3\n");

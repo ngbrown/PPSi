@@ -39,7 +39,7 @@ static int wr_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 static int wr_master_msg(struct pp_instance *ppi, unsigned char *pkt, int plen,
 			 int msgtype)
 {
-	MsgHeader *hdr = &ppi->msg_tmp_header;
+	MsgHeader *hdr = &ppi->received_ptp_header;
 	MsgSignaling wrsig_msg;
 	TimeInternal *time = &ppi->last_rcv_time;
 
@@ -77,7 +77,7 @@ static int wr_new_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 static int wr_update_delay(struct pp_instance *ppi)
 {
-	MsgHeader *hdr = &ppi->msg_tmp_header;
+	MsgHeader *hdr = &ppi->received_ptp_header;
 	TimeInternal correction_field;
 
 	int64_to_TimeInternal(hdr->correctionfield, &correction_field);

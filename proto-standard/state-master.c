@@ -13,7 +13,6 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	TimeInternal *time_snt;
 	int msgtype;
 	int e = 0; /* error var, to check errors in msg handling */
-	MsgHeader *hdr = &ppi->msg_tmp_header;
 
 	time = &ppi->last_rcv_time;
 
@@ -62,7 +61,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	 * possibly returning error or eating the message by returning
 	 * PPM_NOTHING_TO_DO
 	 */
-	msgtype = ppi->msg_tmp_header.messageType;
+	msgtype = ppi->received_ptp_header.messageType;
 	if (pp_hooks.master_msg)
 		msgtype = pp_hooks.master_msg(ppi, pkt, plen, msgtype);
 	if (msgtype < 0) {
@@ -84,7 +83,8 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_DELAY_REQ:
-		msg_copy_header(&ppi->delay_req_hdr, hdr);
+		msg_copy_header(&ppi->delay_req_hdr,
+				&ppi->received_ptp_header);
 		msg_issue_delay_resp(ppi, time);
 		break;
 

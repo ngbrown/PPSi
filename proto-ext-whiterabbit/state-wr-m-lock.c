@@ -28,7 +28,7 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (plen == 0)
 		goto out;
 
-	if (ppi->msg_tmp_header.messageType == PPM_SIGNALING) {
+	if (ppi->received_ptp_header.messageType == PPM_SIGNALING) {
 
 		msg_unpack_wrsig(ppi, pkt, &wrsig_msg,
 			 &(WR_DSPOR(ppi)->msgTmpWrMessageID));

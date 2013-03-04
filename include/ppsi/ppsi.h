@@ -130,6 +130,7 @@ struct pp_net_path {
 	/* FIXME check if useful Integer32 ucast_addr;*/
 	Integer32 mcast_addr;
 	Integer32 peer_mcast_addr;
+
 	int ptp_offset;
 	int inited;
 };
@@ -151,6 +152,14 @@ struct pp_instance {
 	struct pp_network_operations *n_ops;
 	struct pp_time_operations *t_ops;
 
+	/*
+	 * We host the buffer for this fsm here, tracking both frame
+	 * and payload. send/recv get the frame, pack/unpack the payload
+	 */
+	unsigned char tx_buffer[PP_MAX_FRAME_LENGTH];
+	unsigned char rx_buffer[PP_MAX_FRAME_LENGTH];
+	void *tx_frame, *rx_frame, *tx_ptp, *rx_ptp;
+
 	/* Data sets */
 	DSDefault *defaultDS;			/* page 65 */
 	DSCurrent *currentDS;			/* page 67 */
@@ -163,7 +172,6 @@ struct pp_instance {
 	Integer16  foreign_record_best;
 	Boolean  record_update;
 	struct pp_frgn_master *frgn_master;
-	Octet *buf_out;
 	TimeInternal sync_receive_time;
 	UInteger16 recv_sync_sequence_id;
 
@@ -183,7 +191,7 @@ struct pp_instance {
 		MsgAnnounce  announce;
 	} msg_tmp;
 	UInteger16 sent_seq[__PP_NR_MESSAGES_TYPES]; /* last sent this type */
-	MsgHeader msg_tmp_header;
+	MsgHeader received_ptp_header;
 	MsgHeader delay_req_hdr;
 	UInteger32
 		is_from_cur_par:1,
@@ -247,6 +255,8 @@ static inline void *pp_get_payload(struct pp_instance *ppi, void *frame_ptr)
 {
 	return frame_ptr + NP(ppi)->ptp_offset;
 }
+
+extern void pp_prepare_pointers(struct pp_instance *ppi);
 
 
 /*

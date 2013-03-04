@@ -37,7 +37,7 @@ static int posix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	struct timeval *tv;
 
 	vec[0].iov_base = pkt;
-	vec[0].iov_len = PP_PACKET_SIZE;
+	vec[0].iov_len = PP_MAX_FRAME_LENGTH;
 
 	memset(&msg, 0, sizeof(msg));
 	memset(&cmsg_un, 0, sizeof(cmsg_un));
@@ -353,11 +353,8 @@ int posix_net_init(struct pp_instance *ppi)
 {
 	int i;
 
-	ppi->buf_out = calloc(1, PP_PACKET_SIZE + NP(ppi)->ptp_offset);
-	if (!ppi->buf_out)
-		return -1;
-
-	ppi->buf_out = pp_get_payload(ppi, ppi->buf_out);
+	/* The buffer is inside ppi, but we need to set pointers and align */
+	pp_prepare_pointers(ppi);
 
 	if (OPTS(ppi)->ethernet_mode) {
 		PP_PRINTF("posix_net_init IEEE 802.3\n");

@@ -12,7 +12,6 @@
 #include <ptpd_netif.h>
 
 int wrpc_errno;
-Octet buffer_out[PP_PACKET_SIZE + 14]; /* 14 == ppi->proto_ofst for eth mode */
 
 /* This function should init the minic and get the mac address */
 static int wrpc_open_ch(struct pp_instance *ppi)
@@ -105,10 +104,7 @@ static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 static int wrpc_net_init(struct pp_instance *ppi)
 {
-	ppi->buf_out = buffer_out;
-	ppi->buf_out = pp_get_payload(ppi, ppi->buf_out);
-
-	ppi->buf_out += 4 - (((int)ppi->buf_out) % 4); /* FIXME Alignment */
+	pp_prepare_pointers(ppi);
 	wrpc_open_ch(ppi);
 
 	return 0;

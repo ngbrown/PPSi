@@ -256,11 +256,11 @@ UInteger8 bmc_state_decision(struct pp_instance *ppi,
 	if ((!ppi->number_foreign_records) && (ppi->state == PPS_LISTENING))
 		return PPS_LISTENING;
 
-	copy_d0(ppi, &ppi->msg_tmp_header, &ppi->msg_tmp.announce);
+	copy_d0(ppi, &ppi->received_ptp_header, &ppi->msg_tmp.announce);
 
 
 	cmpres = bmc_dataset_cmp(ppi,
-				 &ppi->msg_tmp_header,
+				 &ppi->received_ptp_header,
 				 &ppi->msg_tmp.announce,
 				 hdr, ann);
 

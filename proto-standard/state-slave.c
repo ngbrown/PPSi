@@ -11,7 +11,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0; /* error var, to check errors in msg handling */
 	TimeInternal correction_field;
-	MsgHeader *hdr = &ppi->msg_tmp_header;
+	MsgHeader *hdr = &ppi->received_ptp_header;
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_SLAVE;
@@ -37,7 +37,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (plen == 0)
 		goto out;
 
-	switch (ppi->msg_tmp_header.messageType) {
+	switch (hdr->messageType) {
 
 	case PPM_ANNOUNCE:
 		e = st_com_slave_handle_announce(ppi, pkt, plen);
