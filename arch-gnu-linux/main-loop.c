@@ -18,8 +18,6 @@ void posix_main_loop(struct pp_instance *ppi)
 {
 	int delay_ms;
 
-	clear_TimeInternal(&ppi->last_rcv_time);
-
 	if (OPTS(ppi)->ethernet_mode)
 		NP(ppi)->proto_ofst = 14;
 
