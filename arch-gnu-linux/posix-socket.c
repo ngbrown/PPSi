@@ -142,6 +142,10 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
 		/* raw socket implementation always uses gen socket */
 		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
+
+		if (t)
+			ppi->t_ops->get(t);
+
 		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
 					len + NP(ppi)->ptp_offset, 0);
 	}
