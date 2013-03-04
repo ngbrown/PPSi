@@ -137,7 +137,7 @@ struct pp_net_path {
 #define PROTO_PAYLOAD(x) ( (x) + NP(ppi)->proto_ofst);
 
 /*
- * Structure for the standard protocol
+ * Structure for the individual ppsi link
  */
 struct pp_instance {
 	int state;
@@ -147,6 +147,7 @@ struct pp_instance {
 	struct pp_runtime_opts *rt_opts;
 	struct pp_net_path *net_path;
 	struct pp_servo *servo;
+	unsigned long flags;		/* ppi-specific flags (diag mainly) */
 
 	/* Data sets */
 	DSDefault *defaultDS;			/* page 65 */
@@ -186,6 +187,10 @@ struct pp_instance {
 		is_from_cur_par:1,
 		waiting_for_follow:1;
 };
+
+extern unsigned long pp_global_flags; /* Supplement ppi-specific ones */
+
+#define PP_FLAG_NOTIMELOG	1 /* This is for a special case, I'm sorry */
 
 /* We use data sets a lot, so have these helpers */
 static inline struct pp_runtime_opts *OPTS(struct pp_instance *ppi)

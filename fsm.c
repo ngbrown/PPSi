@@ -4,6 +4,8 @@
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
 
+unsigned long pp_global_flags; /* This is the only "global" file in ppsi */
+
 /*
  * This is the state machine code. i.e. the extension-independent
  * function that runs the machine. Errors are managed and reported
