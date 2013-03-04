@@ -45,7 +45,7 @@ static int wrpc_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	wr_socket_t *sock;
 	wr_timestamp_t wr_ts;
 	wr_sockaddr_t addr;
-	sock = (wr_socket_t *)NP(ppi)->ch[PP_NP_EVT].custom;
+	sock = NP(ppi)->ch[PP_NP_EVT].custom;
 	got = ptpd_netif_recvfrom(sock, &addr, pkt, len, &wr_ts);
 
 	/* FIXME check mac of received packet? */
@@ -71,7 +71,7 @@ static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
 	wr_socket_t *sock;
 	wr_timestamp_t wr_ts;
 	wr_sockaddr_t addr;
-	sock = (wr_socket_t *)NP(ppi)->ch[PP_NP_EVT].custom;
+	sock = NP(ppi)->ch[PP_NP_EVT].custom;
 
 	if (pp_diag_verbosity > 1) {
 		int j;
@@ -113,8 +113,7 @@ static int wrpc_net_init(struct pp_instance *ppi)
 
 static int wrpc_net_exit(struct pp_instance *ppi)
 {
-	ptpd_netif_close_socket(
-		(wr_socket_t *)NP(ppi)->ch[PP_NP_EVT].custom);
+	ptpd_netif_close_socket(NP(ppi)->ch[PP_NP_EVT].custom);
 	return 0;
 }
 
