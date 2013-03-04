@@ -53,7 +53,6 @@ static inline int __send_and_log(struct pp_instance *ppi, int msglen,
 			ppi->last_snt_time.seconds,
 			ppi->last_snt_time.nanoseconds,
 			pp_msg_names[msgtype]);
-	ppi->sent_seq[msgtype]++; /* FIXME: fold in the send method too? */
 	return 0;
 }
 
