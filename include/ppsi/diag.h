@@ -15,6 +15,7 @@
  */
 enum {
 	STATE_ENTER,
+	STATE_LOOP,
 	STATE_LEAVE
 };
 
