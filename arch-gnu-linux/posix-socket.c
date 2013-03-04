@@ -95,17 +95,11 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
 	struct pp_channel *ch1 = NULL, *ch2 = NULL;
-	void *hdr;
-	int ret;
 
 	if (OPTS(ppi)->ethernet_mode) {
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
-		hdr = pp_get_header(ppi, pkt);
-		ret = posix_recv_msg(ppi, fd, hdr,
-				      len + NP(ppi)->ptp_offset, t);
-		return ret <= 0 ? ret : ret - NP(ppi)->ptp_offset;
-		/* FIXME: check header */
+		return posix_recv_msg(ppi, fd, pkt, len, t);
 	}
 
 	/* else: UDP */
@@ -132,11 +126,9 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct sockaddr_in addr;
-	struct ethhdr *hdr;
+	struct ethhdr *hdr = pkt;
 
 	if (OPTS(ppi)->ethernet_mode) {
-		hdr = pp_get_header(ppi, pkt);
-
 		hdr->h_proto = htons(ETH_P_1588);
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
@@ -146,8 +138,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 		if (t)
 			ppi->t_ops->get(t);
 
-		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr,
-					len + NP(ppi)->ptp_offset, 0);
+		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr, len, 0);
 	}
 
 	/* else: UDP */

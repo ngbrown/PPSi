@@ -14,15 +14,14 @@ static int bare_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	if (t)
 		ppi->t_ops->get(t);
 
-	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd,
-			pkt - NP(ppi)->ptp_offset, len, 0);
+	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
 }
 
 static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t, int chtype, int use_pdelay_addr)
 {
-	struct bare_ethhdr *hdr;
-	hdr = pp_get_header(ppi, pkt);
+	struct bare_ethhdr *hdr = pkt;
+
 	hdr->h_proto = htons(ETH_P_1588);
 
 	memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, 6);
@@ -33,8 +32,7 @@ static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
 	if (t)
 		ppi->t_ops->get(t);
 
-	return sys_send(NP(ppi)->ch[chtype].fd, hdr,
-					len + NP(ppi)->ptp_offset, 0);
+	return sys_send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
 }
 
 #define SHUT_RD		0

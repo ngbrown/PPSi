@@ -34,8 +34,6 @@ void posix_main_loop(struct pp_instance *ppi)
 	delay_ms = pp_state_machine(ppi, NULL, 0);
 	while (1) {
 		int i;
-		unsigned char packet[1500];
-		void *payload = packet + 16; /* aligned */
 
 	again:
 
@@ -53,8 +51,9 @@ void posix_main_loop(struct pp_instance *ppi)
 		 * We got a packet. If it's not ours, continue consuming
 		 * the pending timeout
 		 */
-		i = ppi->n_ops->recv(ppi, payload, sizeof(packet) - 16,
-				      &ppi->last_rcv_time);
+		i = ppi->n_ops->recv(ppi, ppi->rx_frame,
+				     PP_MAX_FRAME_LENGTH - 4,
+				     &ppi->last_rcv_time);
 
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
@@ -66,6 +65,7 @@ void posix_main_loop(struct pp_instance *ppi)
 			goto again;
 		}
 
-		delay_ms = pp_state_machine(ppi, payload, i);
+		delay_ms = pp_state_machine(ppi, ppi->rx_ptp,
+					    i - NP(ppi)->ptp_offset);
 	}
 }

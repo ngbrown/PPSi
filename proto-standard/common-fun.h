@@ -40,7 +40,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 static inline int __send_and_log(struct pp_instance *ppi, int msglen,
 				 int msgtype, int chtype)
 {
-	if (ppi->n_ops->send(ppi, ppi->tx_ptp, msglen,
+	if (ppi->n_ops->send(ppi, ppi->tx_frame, msglen + NP(ppi)->ptp_offset,
 			    &ppi->last_snt_time, chtype, 0) < msglen) {
 		if (pp_verbose_frames)
 			PP_PRINTF("%s(%d) Message can't be sent\n",
