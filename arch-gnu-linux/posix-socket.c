@@ -94,7 +94,7 @@ static int posix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
-	struct pp_channel *ch1 = NULL, *ch2 = NULL;
+	struct pp_channel *ch1, *ch2;
 
 	if (OPTS(ppi)->ethernet_mode) {
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
@@ -102,7 +102,7 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		return posix_recv_msg(ppi, fd, pkt, len, t);
 	}
 
-	/* else: UDP */
+	/* else: UDP, we can return one frame only, so swap priority */
 	if (POSIX_ARCH(ppi)->rcv_switch) {
 		ch1 = &(NP(ppi)->ch[PP_NP_GEN]);
 		ch2 = &(NP(ppi)->ch[PP_NP_EVT]);
