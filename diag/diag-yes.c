@@ -62,8 +62,13 @@ void pp_timed_printf(char *fmt, ...)
 {
 	va_list args;
 	TimeInternal t;
+	unsigned long oflags = pp_global_flags;
 
+	/* temporarily set NOTIMELOG, as we'll print the time ourselves */
+	pp_global_flags |= PP_FLAG_NOTIMELOG;
 	pp_t_ops.get(&t);
+	pp_global_flags = oflags;
+
 	pp_printf("%09d.%03d ", (int)t.seconds,
 		  (int)t.nanoseconds / 1000000);
 	va_start(args, fmt);

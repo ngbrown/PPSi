@@ -24,7 +24,7 @@ static int posix_time_get(TimeInternal *t)
 		clock_fatal_error("clock_gettime");
 	t->seconds = tp.tv_sec;
 	t->nanoseconds = tp.tv_nsec;
-	if (pp_verbose_time)
+	if (pp_verbose_time && !(pp_global_flags & PP_FLAG_NOTIMELOG))
 		pp_printf("%s: %9li.%09li\n", __func__, tp.tv_sec, tp.tv_nsec);
 	return 0;
 }

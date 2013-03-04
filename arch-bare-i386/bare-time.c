@@ -15,7 +15,7 @@ static int bare_time_get(TimeInternal *t)
 	}
 	t->seconds = tv.tv_sec;
 	t->nanoseconds = tv.tv_usec * 1000;
-	if (pp_verbose_time)
+	if (pp_verbose_time && !(pp_global_flags & PP_FLAG_NOTIMELOG))
 		pp_printf("%s: %9li.%06li\n", __func__, tv.tv_sec, tv.tv_usec);
 	return 0;
 }
