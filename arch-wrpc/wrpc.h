@@ -67,7 +67,6 @@ extern int halexp_get_port_state(hexp_port_state_t *state,
 /* syscall-lookalike */
 extern int wrpc_time(void);
 extern void wrpc_udelay(int usecs);
-extern int wrpc_errno;
 
 /* Dev stuff */
 extern void wrpc_putc(int c);

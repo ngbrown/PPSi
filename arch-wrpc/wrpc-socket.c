@@ -11,8 +11,6 @@
 #include <softpll_ng.h>
 #include <ptpd_netif.h>
 
-int wrpc_errno;
-
 /* This function should init the minic and get the mac address */
 static int wrpc_open_ch(struct pp_instance *ppi)
 {
