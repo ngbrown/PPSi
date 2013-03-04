@@ -122,7 +122,7 @@ static int wrpc_net_exit(struct pp_instance *ppi)
 	return 0;
 }
 
-struct pp_network_operations pp_net_ops = {
+struct pp_network_operations wrpc_net_ops = {
 	.init = wrpc_net_init,
 	.exit = wrpc_net_exit,
 	.recv = wrpc_net_recv,

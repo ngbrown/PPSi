@@ -15,3 +15,5 @@ struct posix_arch_data {
 extern int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms);
 
 extern void posix_main_loop(struct pp_instance *ppi);
+
+extern struct pp_network_operations posix_net_ops;

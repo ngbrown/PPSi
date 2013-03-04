@@ -146,7 +146,7 @@ static int bare_net_exit(struct pp_instance *ppi)
 	return sys_shutdown(NP(ppi)->ch[PP_NP_GEN].fd, SHUT_RDWR);
 }
 
-struct pp_network_operations pp_net_ops = {
+struct pp_network_operations bare_net_ops = {
 	.init = bare_net_init,
 	.exit = bare_net_exit,
 	.recv = bare_net_recv,

@@ -46,6 +46,8 @@ int main(int argc, char **argv)
 	ppi->frgn_master = calloc(1, sizeof(*ppi->frgn_master));
 	ppi->arch_data = calloc(1, sizeof(struct posix_arch_data));
 
+	ppi->n_ops = &posix_net_ops;
+
 	if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
 	    || (!ppi->portDS) || (!ppi->timePropertiesDS)
 	    || (!ppi->net_path) || (!ppi->frgn_master) || (!ppi->arch_data)

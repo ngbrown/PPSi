@@ -50,7 +50,7 @@ void posix_main_loop(struct pp_instance *ppi)
 		 * We got a packet. If it's not ours, continue consuming
 		 * the pending timeout
 		 */
-		i = pp_net_ops.recv(ppi, payload, sizeof(packet) - 16,
+		i = ppi->n_ops->recv(ppi, payload, sizeof(packet) - 16,
 				      &ppi->last_rcv_time);
 
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;

@@ -19,9 +19,9 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int ret = 0;
 
 	if (NP(ppi)->inited)
-		pp_net_ops.exit(ppi);
+		ppi->n_ops->exit(ppi);
 
-	if (pp_net_ops.init(ppi) < 0)
+	if (ppi->n_ops->init(ppi) < 0)
 		goto failure;
 
 	NP(ppi)->inited = 1;

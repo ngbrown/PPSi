@@ -475,7 +475,7 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 	return ret;
 }
 
-struct pp_network_operations pp_net_ops = {
+struct pp_network_operations posix_net_ops = {
 	.init = posix_net_init,
 	.exit = posix_net_exit,
 	.recv = posix_net_recv,

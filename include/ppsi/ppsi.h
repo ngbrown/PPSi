@@ -149,6 +149,9 @@ struct pp_instance {
 	struct pp_servo *servo;
 	unsigned long flags;		/* ppi-specific flags (diag mainly) */
 
+	/* Operations that may be different in each instance */
+	struct pp_network_operations *n_ops;
+
 	/* Data sets */
 	DSDefault *defaultDS;			/* page 65 */
 	DSCurrent *currentDS;			/* page 67 */
@@ -276,8 +279,6 @@ struct pp_network_operations {
 	int (*send)(struct pp_instance *ppi, void *pkt, int len,
 		    TimeInternal *t, int chtype, int use_pdelay_addr);
 };
-
-extern struct pp_network_operations pp_net_ops;
 
 
 /*

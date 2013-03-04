@@ -48,6 +48,7 @@ int ppsi_main(int argc, char **argv)
 	ppi->servo       = &servo;
 	ppi->frgn_master = &frgn_master;
 	ppi->arch_data   = NULL;
+	ppi->n_ops       = &bare_net_ops;
 
 	/* This just llocates the stuff */
 	pp_open_instance(ppi, NULL);

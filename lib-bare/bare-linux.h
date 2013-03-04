@@ -8,6 +8,8 @@
 
 extern void bare_main_loop(struct pp_instance *ppi);
 
+extern struct pp_network_operations bare_net_ops;
+
 /* syscalls */
 struct bare_sockaddr;
 
