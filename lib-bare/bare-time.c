@@ -3,7 +3,7 @@
  */
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "bare-x86-64.h"
+#include "bare-linux.h"
 
 static int bare_time_get(TimeInternal *t)
 {

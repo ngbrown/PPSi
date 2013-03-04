@@ -3,16 +3,19 @@
 CFLAGS += -ffreestanding -Os -fno-stack-protector
 ARCH_LDFLAGS = -nostdlib -static -T $(ARCH).lds
 
-# All files are under A (short for ARCH): I'm lazy
+# All files are under A (short for ARCH) or L (short for lib): I'm lazy
 A := arch-$(ARCH)
+L := lib-bare
+
+CFLAGS += -Ilib-bare
 
 LIBARCH := $A/libarch.a
 
-OBJ-libarch := $A/bare-startup.o \
-	$A/main-loop.o \
-	$A/bare-socket.o \
-	$A/bare-io.o \
-	$A/bare-time.o \
+OBJ-libarch := $L/bare-startup.o \
+	$L/main-loop.o \
+	$L/bare-socket.o \
+	$L/bare-io.o \
+	$L/bare-time.o \
 	$A/syscall.o \
 	$A/syscalls.o \
 	lib/libc-functions.o \

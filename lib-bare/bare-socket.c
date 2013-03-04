@@ -5,14 +5,14 @@
 /* Socket interface for bare Linux */
 #include <ppsi/ppsi.h>
 #include <ppsi/diag.h>
-#include "bare-i386.h"
+#include "bare-linux.h"
 
 /* 14 is ppi->proto_ofst for ethernet mode */
 Octet buffer_out[PP_PACKET_SIZE + 14];
 
 /* FIXME: which socket we receive and send with? */
 static int bare_net_recv(struct pp_instance *ppi, void *pkt, int len,
-			 TimeInternal *t)
+			    TimeInternal *t)
 {
 	if (t)
 		pp_t_ops.get(t);
@@ -22,7 +22,7 @@ static int bare_net_recv(struct pp_instance *ppi, void *pkt, int len,
 }
 
 static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
-			 TimeInternal *t, int chtype, int use_pdelay_addr)
+			    TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct bare_ethhdr *hdr;
 	hdr = PROTO_HDR(pkt);
@@ -109,7 +109,7 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		pmr.mr_alen = ETH_ALEN;
 		memcpy(pmr.mr_address, PP_MCAST_MACADDRESS, ETH_ALEN);
 		sys_setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
-			       &pmr, sizeof(pmr)); /* lazily ignore errors */
+			   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
 		NP(ppi)->ch[PP_NP_GEN].fd = sock;
 		NP(ppi)->ch[PP_NP_EVT].fd = sock;
@@ -140,7 +140,6 @@ static int bare_net_init(struct pp_instance *ppi)
 
 	return 0;
 }
-
 
 static int bare_net_exit(struct pp_instance *ppi)
 {

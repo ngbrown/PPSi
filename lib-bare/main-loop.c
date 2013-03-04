@@ -7,7 +7,7 @@
  * This is the main loop for "freestanding" stuff under Linux.
  */
 #include <ppsi/ppsi.h>
-#include "bare-i386.h"
+#include "bare-linux.h"
 
 /* Define other hackish stuff */
 struct bare_fd_set {
@@ -66,7 +66,7 @@ void bare_main_loop(struct pp_instance *ppi)
 		 *
 		 * FIXME: we don't know which socket to receive from
 		 */
-		i = pp_net_ops.recv(ppi, payload, sizeof(packet),
+		i = pp_net_ops.recv(ppi, payload, sizeof(packet) - 16,
 				    &ppi->last_rcv_time);
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
