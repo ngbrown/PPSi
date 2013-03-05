@@ -23,18 +23,14 @@ struct pp_runtime_opts {
 	Integer32 max_rst; /* Maximum number of nanoseconds to reset */
 	Integer32 max_dly; /* Maximum number of nanoseconds of delay */
 	Integer32 ttl;
-	char *unicast_addr;
 	UInteger32	slave_only:1,
 			master_only:1,
 			no_adjust:1,
-			display_stats:1,
-			csv_stats:1,
 			ethernet_mode:1,
 			/* e2e_mode:1, -- no more: we only support e2e */
 			/* gptp_mode:1, -- no more: peer-to-peer unsupported */
 			ofst_first_updated:1,
-			no_rst_clk:1,
-			use_syslog:1;
+			no_rst_clk:1;
 	Integer16 ap, ai;
 	Integer16 s;
 	Integer16 max_foreign_records;
