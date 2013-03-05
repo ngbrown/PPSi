@@ -121,15 +121,15 @@ struct pp_servo {
  * the event/general channels (sockets on most platforms, see above)
  */
 
-#define PP_NP_GEN	0
-#define PP_NP_EVT	1
-#define PP_NP_LAST	2
+enum {
+	PP_NP_GEN =	0,
+	PP_NP_EVT,
+	__NR_PP_NP,
+};
+
 struct pp_net_path {
-	struct pp_channel ch[2]; /* event and general channel (see above
-				  * #define's */
-	/* FIXME check if useful Integer32 ucast_addr;*/
-	Integer32 mcast_addr;
-	Integer32 peer_mcast_addr;
+	struct pp_channel ch[__NR_PP_NP];	/* general and event ch */
+	Integer32 mcast_addr;			/* FIXME: only ipv4/udp */
 
 	int ptp_offset;
 	int inited;

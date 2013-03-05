@@ -396,7 +396,6 @@ static int posix_net_exit(struct pp_instance *ppi)
 	}
 
 	NP(ppi)->mcast_addr = 0;
-	NP(ppi)->peer_mcast_addr = 0;
 
 	return 0;
 }
