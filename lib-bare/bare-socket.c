@@ -130,10 +130,9 @@ static int bare_net_init(struct pp_instance *ppi)
 		return bare_open_ch(ppi, OPTS(ppi)->iface_name);
 	}
 
-	/* else: UDP */
+	/* else: UDP -- not supported */
 	PP_PRINTF("bare_net_init UDP\n");
-
-	return 0;
+	return -1;
 }
 
 static int bare_net_exit(struct pp_instance *ppi)
