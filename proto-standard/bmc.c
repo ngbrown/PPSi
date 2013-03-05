@@ -26,7 +26,6 @@ void m1(struct pp_instance *ppi)
 	memcpy(DSPAR(ppi)->parentPortIdentity.clockIdentity,
 		  DSDEF(ppi)->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
 	DSPAR(ppi)->parentPortIdentity.portNumber = 0;
-	DSPAR(ppi)->parentStats = PP_DEFAULT_PARENTS_STATS;
 	DSPAR(ppi)->observedParentClockPhaseChangeRate = 0;
 	DSPAR(ppi)->observedParentOffsetScaledLogVariance = 0;
 	memcpy(DSPAR(ppi)->grandmasterIdentity, DSDEF(ppi)->clockIdentity,

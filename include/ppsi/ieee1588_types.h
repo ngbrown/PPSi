@@ -239,7 +239,7 @@ typedef struct DSCurrent {		/* page 67 */
 typedef struct DSParent {		/* page 68 */
 	/* Dynamic */
 	PortIdentity	parentPortIdentity;
-	Boolean		parentStats;
+	/* Boolean		parentStats; -- not used */
 	UInteger16	observedParentOffsetScaledLogVariance;
 	Integer32	observedParentClockPhaseChangeRate;
 	ClockIdentity	grandmasterIdentity;
@@ -255,12 +255,12 @@ typedef struct DSPort {			/* page 72 */
 	/* Dynamic */
 	Enumeration8	portState;
 	Integer8	logMinDelayReqInterval; /* note: never changed */
-	TimeInternal	peerMeanPathDelay;
+	/* TimeInternal	peerMeanPathDelay; -- not used */
 	/* Configurable */
 	Integer8	logAnnounceInterval;
 	UInteger8	announceReceiptTimeout;
 	Integer8	logSyncInterval;
-	Enumeration8	delayMechanism;
+	/* Enumeration8	delayMechanism; -- not used */
 	UInteger4	versionNumber;
 
 	void		*ext_dsport;
