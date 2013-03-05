@@ -118,8 +118,18 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 	return -1;
 }
 
+static int bare_net_exit(struct pp_instance *ppi)
+{
+	return sys_shutdown(NP(ppi)->ch[PP_NP_GEN].fd, SHUT_RDWR);
+}
+
+/* This function must be able to be called twice, and clean-up internally */
 static int bare_net_init(struct pp_instance *ppi)
 {
+	/* Here, socket may not be 0 (do we have stdin even if bare) */
+	if (NP(ppi)->ch[PP_NP_GEN].fd)
+		bare_net_exit(ppi);
+
 	/* The buffer is inside ppi, but we need to set pointers and align */
 	pp_prepare_pointers(ppi);
 
@@ -135,10 +145,6 @@ static int bare_net_init(struct pp_instance *ppi)
 	return -1;
 }
 
-static int bare_net_exit(struct pp_instance *ppi)
-{
-	return sys_shutdown(NP(ppi)->ch[PP_NP_GEN].fd, SHUT_RDWR);
-}
 
 struct pp_network_operations bare_net_ops = {
 	.init = bare_net_init,

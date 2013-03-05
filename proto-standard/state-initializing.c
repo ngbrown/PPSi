@@ -18,13 +18,8 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	struct pp_runtime_opts *opt = OPTS(ppi);
 	int ret = 0;
 
-	if (NP(ppi)->inited)
-		ppi->n_ops->exit(ppi);
-
-	if (ppi->n_ops->init(ppi) < 0)
+	if (ppi->n_ops->init(ppi) < 0) /* it must handle being called twice */
 		goto failure;
-
-	NP(ppi)->inited = 1;
 
 	port->portState = PPS_INITIALIZING;
 

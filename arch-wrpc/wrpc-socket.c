@@ -100,19 +100,22 @@ static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
 	return snt;
 }
 
+static int wrpc_net_exit(struct pp_instance *ppi)
+{
+	ptpd_netif_close_socket(NP(ppi)->ch[PP_NP_EVT].custom);
+	return 0;
+}
+
+/* This function must be able to be called twice, and clean-up internally */
 static int wrpc_net_init(struct pp_instance *ppi)
 {
+	if (NP(ppi)->ch[PP_NP_EVT].custom)
+		wrpc_net_exit(ppi);
 	pp_prepare_pointers(ppi);
 	wrpc_open_ch(ppi);
 
 	return 0;
 
-}
-
-static int wrpc_net_exit(struct pp_instance *ppi)
-{
-	ptpd_netif_close_socket(NP(ppi)->ch[PP_NP_EVT].custom);
-	return 0;
 }
 
 struct pp_network_operations wrpc_net_ops = {

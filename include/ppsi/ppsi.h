@@ -132,7 +132,6 @@ struct pp_net_path {
 	Integer32 mcast_addr;			/* FIXME: only ipv4/udp */
 
 	int ptp_offset;
-	int inited;
 };
 
 /*

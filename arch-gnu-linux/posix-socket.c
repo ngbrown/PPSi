@@ -337,12 +337,19 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	return 0;
 }
 
+static int posix_net_exit(struct pp_instance *ppi);
+
 /*
  * Inits all the network stuff
  */
+
+/* This function must be able to be called twice, and clean-up internally */
 int posix_net_init(struct pp_instance *ppi)
 {
 	int i;
+
+	if (NP(ppi)->ch[0].fd)
+		posix_net_exit(ppi);
 
 	/* The buffer is inside ppi, but we need to set pointers and align */
 	pp_prepare_pointers(ppi);
