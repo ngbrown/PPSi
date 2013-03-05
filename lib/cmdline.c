@@ -27,7 +27,7 @@ static struct cmd_line_opt cmd_line_list[] = {
 	{"-O NUMBER", "do not reset the clock if offset is more than NUMBER nanoseconds"},
 	{"-M NUMBER", "do not accept delay values of more than NUMBER nanoseconds"},
 	{"-t", "do not adjust the system clock"},
-	{"-a NUMBER,NUMBER", "specify clock servo P and I attenuations"},
+	{"-a NUMBER,NUMBER", "specify clock servo P and I values (min == 1)"},
 	{"-w NUMBER", "specify one way delay filter stiffness"},
 	CMD_LINE_SEPARATOR,
 	{"-b NAME", "bind PTP to network interface NAME"},
@@ -133,6 +133,9 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 			case 'a':
 				a = argv[++i];
 				cmd_line_parse_two(a, &n1, &n2);
+				/* no negative or zero attenuation */
+				if (n1 < 1 || n2 < 1)
+					return -1;
 				OPTS(ppi)->ap = n1;
 				OPTS(ppi)->ai = n2;
 				break;

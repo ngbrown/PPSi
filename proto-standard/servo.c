@@ -204,12 +204,6 @@ void pp_update_clock(struct pp_instance *ppi)
 		static int dc = 0;
 		/* the PI controller */
 
-		/* no negative or zero attenuation */
-		if (OPTS(ppi)->ap < 1)
-			OPTS(ppi)->ap = 1;
-		if (OPTS(ppi)->ai < 1)
-			OPTS(ppi)->ai = 1;
-
 		/* the accumulator for the I component */
 		SRV(ppi)->obs_drift +=
 			DSCUR(ppi)->offsetFromMaster.nanoseconds /
