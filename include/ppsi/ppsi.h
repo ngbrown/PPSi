@@ -34,7 +34,6 @@ struct pp_runtime_opts {
 	Integer16 ap, ai;
 	Integer16 s;
 	Integer16 max_foreign_records;
-	Integer16 cur_utc_ofst;
 	Integer8 announce_intvl;
 	Integer8 sync_intvl;
 	UInteger8 prio1;

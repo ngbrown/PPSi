@@ -38,7 +38,6 @@ static struct cmd_line_opt cmd_line_list[] = {
 	/* {"-G", "run in gPTP mode (implies -e)"}, -- no peer-to-peer mode */
 	{"-l NUMBER,NUMBER", "specify inbound, outbound latency in nsec"},
 	CMD_LINE_SEPARATOR,
-	{"-o NUMBER", "specify current UTC offset"},
 	{"-i NUMBER", "specify PTP domain number"},
 	CMD_LINE_SEPARATOR,
 	{"-n NUMBER", "specify announce interval in 2^NUMBER sec"},
@@ -151,10 +150,6 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				cmd_line_parse_two(a, &n1, &n2);
 				OPTS(ppi)->inbound_latency.nanoseconds = n1;
 				OPTS(ppi)->outbound_latency.nanoseconds = n2;
-				break;
-			case 'o':
-				a = argv[++i];
-				OPTS(ppi)->cur_utc_ofst = atoi(a);
 				break;
 			case 'i':
 				a = argv[++i];

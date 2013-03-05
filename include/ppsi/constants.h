@@ -20,7 +20,6 @@
 #define PP_DEFAULT_AI				120
 #define PP_DEFAULT_DELAY_S			6
 #define PP_DEFAULT_ANNOUNCE_INTERVAL		1	/* 0 in 802.1AS, 3 is ok */
-#define PP_DEFAULT_UTC_OFFSET			0
 #define PP_DEFAULT_UTC_VALID			0
 #define PP_DEFAULT_DELAYREQ_INTERVAL		0	/* 3 is ok */
 #define PP_DEFAULT_SYNC_INTERVAL		0	/* -7 in 802.1AS, 1 is ok */
