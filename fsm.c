@@ -20,17 +20,28 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 	struct pp_state_table_item *ip;
 	int state, err = 0;
 
-	if (plen && plen < PP_HEADER_LENGTH)
-		err = -1;
-	if (plen >= PP_HEADER_LENGTH) {
-		PP_VPRINTF("RECV %02d %d.%09d %s\n", plen,
-			(int)ppi->last_rcv_time.seconds,
-			(int)ppi->last_rcv_time.nanoseconds,
-			pp_msg_names[packet[0] & 0x0f]);
-		err = msg_unpack_header(ppi, packet);
+	if (plen && pp_verbose_frames) {
+		PP_VPRINTF("RECV %02d bytes at %d.%09d (type %x)\n", plen,
+			   (int)ppi->last_rcv_time.seconds,
+			   (int)ppi->last_rcv_time.nanoseconds,
+			   packet[0] & 0xf);
 	}
-	if (err)
-		return ppi->next_delay;
+
+	/*
+	 * Since all ptp frames have the same header, parse it now.
+	 * In case of error continue without a frame, so the current
+	 * ptp state can update ppi->next_delay and return a proper value
+	 */
+	if (plen) {
+		if (plen >= PP_HEADER_LENGTH)
+			err = msg_unpack_header(ppi, packet);
+		else
+			err = 1;
+		if (err) {
+			plen = 0;
+			packet = NULL;
+		}
+	}
 
 	state = ppi->state;
 
