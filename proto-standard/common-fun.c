@@ -34,7 +34,7 @@ void pp_prepare_pointers(struct pp_instance *ppi)
 }
 
 /* Called by listening, passive, slave, uncalibrated */
-int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
+int st_com_execute_slave(struct pp_instance *ppi)
 {
 	int ret = 0;
 
@@ -57,21 +57,7 @@ int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq)
 			pp_timeout_restart_annrec(ppi);
 		}
 	}
-
-	if (!check_delayreq)
-		return 0;
-
-	if (pp_timeout_z(ppi, PP_TO_DELAYREQ)) {
-		ret = msg_issue_delay_req(ppi);
-
-		ppi->delay_req_send_time = ppi->last_snt_time;
-
-		/* Add latency */
-		add_TimeInternal(&ppi->delay_req_send_time,
-				 &ppi->delay_req_send_time,
-				 &OPTS(ppi)->outbound_latency);
-	}
-	return ret;
+	return 0;
 }
 
 /* Called by listening, master, passive, slave */

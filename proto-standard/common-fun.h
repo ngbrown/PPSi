@@ -12,7 +12,7 @@
 /* Contains all functions common to more than one state */
 
 /* returns -1 in case of error, see below */
-int st_com_execute_slave(struct pp_instance *ppi, int check_delayreq);
+int st_com_execute_slave(struct pp_instance *ppi);
 
 void st_com_restart_annrec_timer(struct pp_instance *ppi);
 

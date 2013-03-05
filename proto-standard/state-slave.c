@@ -112,10 +112,23 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 out:
 	if (e == 0)
-		e = st_com_execute_slave(ppi, 1);
+		e = st_com_execute_slave(ppi);
 
-	if (e != 0)
+	if (pp_timeout_z(ppi, PP_TO_DELAYREQ)) {
+		e = msg_issue_delay_req(ppi);
+
+		ppi->delay_req_send_time = ppi->last_snt_time;
+
+		/* Add latency */
+		add_TimeInternal(&ppi->delay_req_send_time,
+				 &ppi->delay_req_send_time,
+				 &OPTS(ppi)->outbound_latency);
+	}
+
+	if (e) {
 		ppi->next_state = PPS_FAULTY;
+		return 0;
+	}
 
 state_updated:
 

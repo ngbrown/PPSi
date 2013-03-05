@@ -44,7 +44,7 @@ int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 out:
 	if (e == 0)
-		st_com_execute_slave(ppi, 0);
+		st_com_execute_slave(ppi);
 	else
 		ppi->next_state = PPS_FAULTY;
 
