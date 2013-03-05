@@ -54,7 +54,7 @@ state_updated:
 	if (ppi->next_state != ppi->state)
 		pp_timeout_clr(ppi, PP_TO_ANN_RECEIPT);
 
-	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
+	ppi->next_delay = pp_ms_to_timeout(ppi, PP_TO_ANN_RECEIPT);
 
 	return 0;
 }

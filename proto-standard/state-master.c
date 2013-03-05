@@ -11,7 +11,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	TimeInternal *time;
 	TimeInternal *time_snt;
-	int msgtype;
+	int msgtype, d1, d2;
 	int e = 0; /* error var, to check errors in msg handling */
 
 	time = &ppi->last_rcv_time;
@@ -110,6 +110,8 @@ out:
 	}
 
 state_updated:
-	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
+	d1 = pp_ms_to_timeout(ppi, PP_TO_ANN_INTERVAL);
+	d2 = pp_ms_to_timeout(ppi, PP_TO_SYNC);
+	ppi->next_delay = d1 < d2 ? d1 : d2;
 	return 0;
 }

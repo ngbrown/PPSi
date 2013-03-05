@@ -12,6 +12,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int e = 0; /* error var, to check errors in msg handling */
 	TimeInternal correction_field;
 	MsgHeader *hdr = &ppi->received_ptp_header;
+	int d1, d2;
 
 	if (ppi->is_new_state) {
 		DSPOR(ppi)->portState = PPS_SLAVE;
@@ -139,8 +140,9 @@ state_updated:
 
 		pp_init_clock(ppi);
 	}
-
-	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
-
+	d1 = d2 = pp_ms_to_timeout(ppi, PP_TO_ANN_RECEIPT);
+	if (ppi->timeouts[PP_TO_DELAYREQ])
+		d2 = pp_ms_to_timeout(ppi, PP_TO_DELAYREQ);
+	ppi->next_delay = d1 < d2 ? d1 : d2;
 	return 0;
 }
