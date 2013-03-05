@@ -16,7 +16,6 @@ static struct cmd_line_opt cmd_line_list[] = {
 	{"-?", "show this page"},
 	/* FIXME cmdline check if useful */
 	//{"-c", "run in command line (non-daemon) mode"},
-	//{"-f FILE", "send output to FILE"},
 	//{"-S", "send output to syslog"},
 	//{"-T", "set multicast time to live"},
 	//{"-d", "display stats"},

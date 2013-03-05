@@ -204,14 +204,6 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	if (ppi->is_from_cur_par) {
 		ppi->sync_receive_time = *time;
 
-		/* FIXME diag to file? will we ever handle it?
-		if (OPTS(ppi)->recordFP)
-			fprintf(rtOpts->recordFP, "%d %llu\n",
-				header->sequenceId,
-				((time->seconds * 1000000000ULL) +
-					time->nanoseconds));
-		*/
-
 		if ((hdr->flagField[0] & PP_TWO_STEP_FLAG) != 0) {
 			ppi->waiting_for_follow = TRUE;
 			ppi->recv_sync_sequence_id = hdr->sequenceId;
