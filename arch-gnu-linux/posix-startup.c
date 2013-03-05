@@ -41,7 +41,6 @@ int main(int argc, char **argv)
 	ppi->parentDS = calloc(1, sizeof(*ppi->parentDS));
 	ppi->portDS = calloc(1, sizeof(*ppi->portDS));
 	ppi->timePropertiesDS = calloc(1, sizeof(*ppi->timePropertiesDS));
-	ppi->net_path = calloc(1, sizeof(*ppi->net_path));
 	ppi->servo = calloc(1, sizeof(*ppi->servo));
 	ppi->frgn_master = calloc(1, sizeof(*ppi->frgn_master));
 	ppi->arch_data = calloc(1, sizeof(struct posix_arch_data));
@@ -51,7 +50,7 @@ int main(int argc, char **argv)
 
 	if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
 	    || (!ppi->portDS) || (!ppi->timePropertiesDS)
-	    || (!ppi->net_path) || (!ppi->frgn_master) || (!ppi->arch_data)
+	    || (!ppi->frgn_master) || (!ppi->arch_data)
 	   )
 		exit(__LINE__);
 

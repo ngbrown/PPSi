@@ -144,7 +144,6 @@ struct pp_instance {
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
 	struct pp_runtime_opts *rt_opts;
-	struct pp_net_path *net_path;
 	struct pp_servo *servo;
 	unsigned long flags;		/* ppi-specific flags (diag mainly) */
 
@@ -159,6 +158,9 @@ struct pp_instance {
 	unsigned char tx_buffer[PP_MAX_FRAME_LENGTH];
 	unsigned char rx_buffer[PP_MAX_FRAME_LENGTH];
 	void *tx_frame, *rx_frame, *tx_ptp, *rx_ptp;
+
+	/* The net_path used to be allocated separately, but there's no need */
+	struct pp_net_path np;
 
 	/* Data sets */
 	DSDefault *defaultDS;			/* page 65 */
@@ -236,7 +238,7 @@ static inline struct DSTimeProperties *DSPRO(struct pp_instance *ppi)
 
 static inline struct pp_net_path *NP(struct pp_instance *ppi)
 {
-	return ppi->net_path;
+	return &ppi->np;
 }
 
 static inline struct pp_servo *SRV(struct pp_instance *ppi)

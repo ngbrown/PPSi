@@ -21,7 +21,6 @@ void ppsi_clear_bss(void)
 }
 
 static struct pp_instance ppi_static;
-static struct pp_net_path net_path_static;
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
 /* ppi fields */
@@ -39,7 +38,6 @@ int ppsi_main(int argc, char **argv)
 
 	PP_PRINTF("bare: starting. Compiled on %s\n", __DATE__);
 
-	ppi->net_path = &net_path_static;
 	ppi->defaultDS   = &defaultDS;
 	ppi->currentDS   = &currentDS;
 	ppi->parentDS    = &parentDS;
