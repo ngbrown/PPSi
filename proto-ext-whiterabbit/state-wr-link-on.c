@@ -30,7 +30,5 @@ int wr_link_on(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		ppi->next_state = PPS_SLAVE;
 	else
 		ppi->next_state = PPS_MASTER;
-
-	ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 	return 0;
 }

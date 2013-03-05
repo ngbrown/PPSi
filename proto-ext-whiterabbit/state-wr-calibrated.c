@@ -12,7 +12,6 @@ int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->is_new_state) {
 		WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATED;
-		ppi->next_delay = PP_DEFAULT_NEXT_DELAY_MS;
 		pp_timeout_set(ppi, PP_TO_EXT_0,
 			       WR_DSPOR(ppi)->wrStateTimeout);
 	}
