@@ -362,6 +362,18 @@ static inline int pp_timeout_z(struct pp_instance *ppi, int index)
 	return ret;
 }
 
+/* how many ms to wait for the timeout to happen, for ppi->next_delay */
+static inline int pp_ms_to_timeout(struct pp_instance *ppi, int index)
+{
+	signed long ret;
+
+	if (!ppi->timeouts[index]) /* not pending, nothing to wait for */
+		return 0;
+
+	ret = ppi->timeouts[index] - ppi->t_ops->calc_timeout(0);
+	return ret <= 0 ? 0 : ret;
+}
+
 /* called several times, only sets a timeout, so inline it here */
 static inline void pp_timeout_restart_annrec(struct pp_instance *ppi)
 {
