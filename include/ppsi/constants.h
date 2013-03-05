@@ -36,7 +36,7 @@
 						       * 802.1AS. We use the
 						       * same value as in ptpdv1
 						       */
-#define PP_DEFAULT_MAX_FOREIGN_RECORDS		5
+#define PP_NR_FOREIGN_RECORDS			5
 #define PP_DEFAULT_PARENTS_STATS		0
 #define PP_DEFAULT_MAX_RESET			0
 #define PP_DEFAULT_MAX_DELAY			0

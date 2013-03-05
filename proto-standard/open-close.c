@@ -28,7 +28,6 @@ struct pp_runtime_opts default_rt_opts = {
 	.s =			PP_DEFAULT_DELAY_S,
 	.ethernet_mode =	PP_DEFAULT_ETHERNET_MODE,
 	.ofst_first_updated =	0, /* FIXME: is it a option or a state var? */
-	.max_foreign_records =	PP_DEFAULT_MAX_FOREIGN_RECORDS,
 	.announce_intvl =	PP_DEFAULT_ANNOUNCE_INTERVAL,
 	.sync_intvl =		PP_DEFAULT_SYNC_INTERVAL,
 	.prio1 =		PP_DEFAULT_PRIORITY1,

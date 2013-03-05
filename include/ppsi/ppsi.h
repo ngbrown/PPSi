@@ -33,7 +33,6 @@ struct pp_runtime_opts {
 			no_rst_clk:1;
 	Integer16 ap, ai;
 	Integer16 s;
-	Integer16 max_foreign_records;
 	Integer8 announce_intvl;
 	Integer8 sync_intvl;
 	UInteger8 prio1;
@@ -167,7 +166,7 @@ struct pp_instance {
 	Integer16  foreign_record_i;
 	Integer16  foreign_record_best;
 	Boolean  record_update;
-	struct pp_frgn_master *frgn_master;
+	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
 	TimeInternal sync_receive_time;
 	UInteger16 recv_sync_sequence_id;
 

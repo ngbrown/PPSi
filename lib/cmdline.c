@@ -41,7 +41,6 @@ static struct cmd_line_opt cmd_line_list[] = {
 	CMD_LINE_SEPARATOR,
 	{"-n NUMBER", "specify announce interval in 2^NUMBER sec"},
 	{"-y NUMBER", "specify sync interval in 2^NUMBER sec"},
-	{"-m NUMBER", "specify max number of foreign master records"},
 	CMD_LINE_SEPARATOR,
 	{"-g", "run as slave only"},
 	{"-v NUMBER", "specify system clock allen variance"},
@@ -169,12 +168,6 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 					OPTS(ppi)->announce_intvl = 0;
 				if (OPTS(ppi)->announce_intvl > 4)
 					OPTS(ppi)->announce_intvl = 4;
-				break;
-			case 'm':
-				a = argv[++i];
-				OPTS(ppi)->max_foreign_records = atoi(a);
-				if (OPTS(ppi)->max_foreign_records < 1)
-					OPTS(ppi)->max_foreign_records = 1;
 				break;
 			case 'g':
 				OPTS(ppi)->slave_only = 1;
