@@ -5,19 +5,27 @@
 
 unsigned long pp_global_flags; /* This is the only "global" file in ppsi */
 
-static void pp_timed_printf(struct pp_instance *ppi, char *fmt, ...)
+/*
+ * This is somehow a duplicate of __pp_diag, but I still want
+ * explicit timing in the fsm enter/stay/leave messages,
+ * while there's no need to add times to all diagnostic messages
+ */
+static void pp_fsm_printf(struct pp_instance *ppi, char *fmt, ...)
 {
 	va_list args;
 	TimeInternal t;
 	unsigned long oflags = pp_global_flags;
+
+	if (!__PP_DIAG_ALLOW(ppi, pp_dt_fsm, 1))
+		return;
 
 	/* temporarily set NOTIMELOG, as we'll print the time ourselves */
 	pp_global_flags |= PP_FLAG_NOTIMELOG;
 	ppi->t_ops->get(&t);
 	pp_global_flags = oflags;
 
-	pp_printf("%09d.%03d ", (int)t.seconds,
-		  (int)t.nanoseconds / 1000000);
+	pp_printf("diag-fsm-1-%s: %09d.%03d: ", OPTS(ppi)->iface_name,
+		  (int)t.seconds, (int)t.nanoseconds / 1000000);
 	va_start(args, fmt);
 	pp_vprintf(fmt, args);
 	va_end(args);
@@ -37,17 +45,17 @@ static void pp_diag_fsm(struct pp_instance *ppi, char *name, int sequence,
 {
 	if (sequence == STATE_ENTER) {
 		/* enter with or without a packet len */
-		pp_timed_printf(ppi, "fsm: ENTER %s, packet len %i\n",
+		pp_fsm_printf(ppi, "ENTER %s, packet len %i\n",
 			  name, plen);
 		return;
 	}
 	if (sequence == STATE_LOOP) {
-		pp_timed_printf(ppi, "fsm: %s: reenter in %i ms\n", name,
+		pp_fsm_printf(ppi, "%s: reenter in %i ms\n", name,
 				ppi->next_delay);
 		return;
 	}
 	/* leave has one \n more, so different states are separate */
-	pp_timed_printf(ppi, "fsm: LEAVE %s (next: %3i in %i ms)\n\n",
+	pp_fsm_printf(ppi, "LEAVE %s (next: %3i in %i ms)\n\n",
 		name, ppi->next_state, ppi->next_delay);
 }
 
