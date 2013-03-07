@@ -59,7 +59,7 @@ struct pp_channel {
  * Foreign master record. Used to manage Foreign masters
  */
 struct pp_frgn_master {
-	PortIdentity port_identity;
+	PortIdentity port_id;	/* used to identify old/new masters */
 	//This one is not in the spec
 	MsgAnnounce ann;
 	MsgHeader hdr;

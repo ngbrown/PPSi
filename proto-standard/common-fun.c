@@ -84,14 +84,10 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 
 	/* Check if foreign master is already known */
 	for (i = 0; i < ppi->number_foreign_records; i++) {
-		if (!memcmp(&hdr->sourcePortIdentity.clockIdentity,
-			    &ppi->frgn_master[j].port_identity.
-			    clockIdentity,
-			    PP_CLOCK_IDENTITY_LENGTH) &&
-		    (hdr->sourcePortIdentity.portNumber ==
-		     ppi->frgn_master[j].port_identity.portNumber)) {
-			/* Foreign Master is already in Foreign master data set
-			 */
+		if (!memcmp(&hdr->sourcePortIdentity,
+			    &ppi->frgn_master[j].port_id,
+			    sizeof(hdr->sourcePortIdentity))) {
+			/* already in Foreign master data set */
 			found = 1;
 			msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
 			msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
@@ -112,11 +108,8 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 	j = ppi->foreign_record_i;
 
 	/* Copy new foreign master data set from announce message */
-	memcpy(&ppi->frgn_master[j].port_identity.clockIdentity,
-		&hdr->sourcePortIdentity.clockIdentity,
-		PP_CLOCK_IDENTITY_LENGTH);
-	ppi->frgn_master[j].port_identity.portNumber =
-		hdr->sourcePortIdentity.portNumber;
+	memcpy(&ppi->frgn_master[j].port_id,
+	       &hdr->sourcePortIdentity, sizeof(hdr->sourcePortIdentity));
 
 	/*
 	 * header and announce field of each Foreign Master are
