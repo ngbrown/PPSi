@@ -74,21 +74,16 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 
 
 /* Copy local data set into header and ann message. 9.3.4 table 12. */
-void copy_d0( struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
+static void copy_d0( struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 {
-	ann->grandmasterPriority1 = DSDEF(ppi)->priority1;
-	memcpy(&ann->grandmasterIdentity, &DSDEF(ppi)->clockIdentity,
-	       PP_CLOCK_IDENTITY_LENGTH);
-	ann->grandmasterClockQuality.clockClass =
-		DSDEF(ppi)->clockQuality.clockClass;
-	ann->grandmasterClockQuality.clockAccuracy =
-		DSDEF(ppi)->clockQuality.clockAccuracy;
-	ann->grandmasterClockQuality.offsetScaledLogVariance =
-		DSDEF(ppi)->clockQuality.offsetScaledLogVariance;
-	ann->grandmasterPriority2 = DSDEF(ppi)->priority2;
+	struct DSDefault *defds = DSDEF(ppi);
+
+	ann->grandmasterIdentity = defds->clockIdentity;
+	ann->grandmasterClockQuality = defds->clockQuality;
+	ann->grandmasterPriority1 = defds->priority1;
+	ann->grandmasterPriority2 = defds->priority2;
 	ann->stepsRemoved = 0;
-	memcpy(&hdr->sourcePortIdentity.clockIdentity,
-	       &DSDEF(ppi)->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
+	hdr->sourcePortIdentity.clockIdentity = defds->clockIdentity;
 }
 
 
