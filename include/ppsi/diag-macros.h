@@ -103,6 +103,11 @@ extern unsigned long pp_global_flags; /* Supplement ppi-specific ones */
 #define __PP_DIAG_ALLOW(ppi, th, level) \
 		((__PP_FLAGS(ppi) >> (4 * (th)) & 0xf) >= level)
 
+#define __PP_DIAG_ALLOW_FLAGS(f, th, level) \
+		((f >> (4 * (th)) & 0xf) >= level)
+
+
+
 /* The function it is better external, since it is variadic */
 extern void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 		      int level, char *fmt, ...)
@@ -141,16 +146,11 @@ extern unsigned long pp_diag_parse(char *diaglevel);
  * constants instead, to avoid the hairyness of ifdef.
  */
 #ifdef VERB_LOG_MSGS
-#define pp_verbose_dump 1
 #define pp_verbose_servo 1
 #define pp_verbose_time 1
 #endif
 
 /* Accept individual flags to turn on each of them */
-#ifdef VERB_DUMP
-#define pp_verbose_dump 1
-#endif
-
 #ifdef VERB_SERVO
 #define pp_verbose_servo 1
 #endif
@@ -160,10 +160,6 @@ extern unsigned long pp_diag_parse(char *diaglevel);
 #endif
 
 /* Provide 0 as default for all such values */
-#ifndef pp_verbose_dump
-#define pp_verbose_dump 0
-#endif
-
 #ifndef pp_verbose_servo
 #define pp_verbose_servo 0
 #endif

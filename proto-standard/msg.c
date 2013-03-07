@@ -6,6 +6,14 @@
 #include <ppsi/ppsi.h>
 #include "common-fun.h"
 
+/*
+ * Temporarily, use the diagnostic level to set a fake pp_verbose_dump.
+ * We can't use ppi-specific flags at this point, but I plan to fix
+ * this msg.c overall -- ARub
+ */
+#define pp_verbose_dump \
+	__PP_DIAG_ALLOW_FLAGS(pp_global_flags, pp_dt_frames, 2)
+
 static void Integer64_display(const char *label, Integer64 *bigint)
 {
 	if (pp_verbose_dump) {
