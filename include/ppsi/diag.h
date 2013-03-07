@@ -14,7 +14,6 @@
  */
 extern void pp_diag_error(struct pp_instance *ppi, int err);
 extern void pp_diag_error_str2(struct pp_instance *ppi, char *s1, char *s2);
-extern void pp_timed_printf(struct pp_instance *ppi, char *fmt, ...);
 
 /* Our printf, that is implemented internally */
 extern int pp_printf(const char *fmt, ...)

@@ -6,6 +6,24 @@
 
 unsigned long pp_global_flags; /* This is the only "global" file in ppsi */
 
+static void pp_timed_printf(struct pp_instance *ppi, char *fmt, ...)
+{
+	va_list args;
+	TimeInternal t;
+	unsigned long oflags = pp_global_flags;
+
+	/* temporarily set NOTIMELOG, as we'll print the time ourselves */
+	pp_global_flags |= PP_FLAG_NOTIMELOG;
+	ppi->t_ops->get(&t);
+	pp_global_flags = oflags;
+
+	pp_printf("%09d.%03d ", (int)t.seconds,
+		  (int)t.nanoseconds / 1000000);
+	va_start(args, fmt);
+	pp_vprintf(fmt, args);
+	va_end(args);
+}
+
 /*
  * Diagnostics about state machine, enter, leave, remain
  */
