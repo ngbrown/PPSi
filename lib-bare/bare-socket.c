@@ -50,34 +50,26 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 	struct bare_ifreq ifr;
 	struct bare_sockaddr_ll addr_ll;
 	struct bare_packet_mreq pmr;
+	char *context;
 
 	if (OPTS(ppi)->ethernet_mode) {
 		/* open socket */
+		context = "socket()";
 		sock = sys_socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
-		if (sock < 0) {
-			pp_diag_error(ppi, bare_errno);
-			pp_diag_error_str2(ppi, "socket()", "");
-			sys_close(sock);
-			return -1;
-		}
+		if (sock < 0)
+			goto err_out;
 
 		/* hw interface information */
 		memset(&ifr, 0, sizeof(ifr));
 		strcpy(ifr.ifr_ifrn.ifrn_name, ifname);
-		if (sys_ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
-			pp_diag_error(ppi, bare_errno);
-			pp_diag_error_str2(ppi, "ioctl(GIFINDEX)", "");
-			sys_close(sock);
-			return -1;
-		}
+		context = "ioctl(SIOCGIFINDEX)";
+		if (sys_ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
+			goto err_out;
 
 		iindex = ifr.ifr_ifru.index;
-		if (sys_ioctl(sock, SIOCGIFHWADDR, &ifr) < 0) {
-			pp_diag_error(ppi, bare_errno);
-			pp_diag_error_str2(ppi, "ioctl(GIFHWADDR)", "");
-			sys_close(sock);
-			return -1;
-		}
+		context = "ioctl(SIOCGIFHWADDR)";
+		if (sys_ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
+			goto err_out;
 
 		memcpy(NP(ppi)->ch[PP_NP_GEN].addr,
 					ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
@@ -89,13 +81,10 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		addr_ll.sll_family = PF_PACKET;
 		addr_ll.sll_protocol = htons(ETH_P_1588);
 		addr_ll.sll_ifindex = iindex;
+		context = "bind()";
 		if (sys_bind(sock, (struct bare_sockaddr *)&addr_ll,
-							sizeof(addr_ll)) < 0) {
-			pp_diag_error(ppi, bare_errno);
-			pp_diag_error_str2(ppi, "bind", "");
-			sys_close(sock);
-			return -1;
-		}
+							sizeof(addr_ll)) < 0)
+			goto err_out;
 
 		/* accept the multicast address for raw-ethernet ptp */
 		memset(&pmr, 0, sizeof(pmr));
@@ -115,6 +104,11 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 
 		return 0;
 	}
+err_out:
+	pp_printf("%s: %s: fatal error, errno = %i\n", __func__, context,
+		  bare_errno);
+	if (sock >= 0)
+		sys_close(sock);
 	return -1;
 }
 
