@@ -43,40 +43,30 @@ void m1(struct pp_instance *ppi)
 /* Local clock is synchronized to Ebest Table 16 (9.3.5) of the spec. */
 void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 {
+	struct DSParent *parent = DSPAR(ppi);
+	struct DSTimeProperties *prop = DSPRO(ppi);
+
 	/* Current DS */
 	DSCUR(ppi)->stepsRemoved = ann->stepsRemoved + 1;
 
 	/* Parent DS */
-	memcpy(&DSPAR(ppi)->parentPortIdentity.clockIdentity,
-		&hdr->sourcePortIdentity.clockIdentity,
-		PP_CLOCK_IDENTITY_LENGTH);
-	DSPAR(ppi)->parentPortIdentity.portNumber =
-		hdr->sourcePortIdentity.portNumber;
-
-	memcpy(&DSPAR(ppi)->grandmasterIdentity,
-		&ann->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
-
-	DSPAR(ppi)->grandmasterClockQuality.clockAccuracy =
-		ann->grandmasterClockQuality.clockAccuracy;
-	DSPAR(ppi)->grandmasterClockQuality.clockClass =
-		ann->grandmasterClockQuality.clockClass;
-	DSPAR(ppi)->grandmasterClockQuality.offsetScaledLogVariance =
-		ann->grandmasterClockQuality.offsetScaledLogVariance;
-	DSPAR(ppi)->grandmasterPriority1 = ann->grandmasterPriority1;
-	DSPAR(ppi)->grandmasterPriority2 = ann->grandmasterPriority2;
+	parent->parentPortIdentity = hdr->sourcePortIdentity;
+	parent->grandmasterIdentity = ann->grandmasterIdentity;
+	parent->grandmasterClockQuality = ann->grandmasterClockQuality;
+	parent->grandmasterPriority1 = ann->grandmasterPriority1;
+	parent->grandmasterPriority2 = ann->grandmasterPriority2;
 
 	/* Timeproperties DS */
-	DSPRO(ppi)->currentUtcOffset = ann->currentUtcOffset;
-	/* "Valid" is bit 2 in second octet of flagfield */
-	DSPRO(ppi)->currentUtcOffsetValid = ((hdr->flagField[1] & FFB_UTCV)
-		!= 0);
+	prop->timeSource = ann->timeSource;
+	prop->currentUtcOffset = ann->currentUtcOffset;
 
-	DSPRO(ppi)->leap59 = ((hdr->flagField[1] & FFB_LI59) != 0);
-	DSPRO(ppi)->leap61 = ((hdr->flagField[1] & FFB_LI61) != 0);
-	DSPRO(ppi)->timeTraceable = ((hdr->flagField[1] & FFB_TTRA) != 0);
-	DSPRO(ppi)->frequencyTraceable = ((hdr->flagField[1] & FFB_FTRA) != 0);
-	DSPRO(ppi)->ptpTimescale = ((hdr->flagField[1] & FFB_PTP) != 0);
-	DSPRO(ppi)->timeSource = ann->timeSource;
+	/* FIXME: can't we just copy the bit keeping values? */
+	prop->currentUtcOffsetValid = ((hdr->flagField[1] & FFB_UTCV)	!= 0);
+	prop->leap59 = ((hdr->flagField[1] & FFB_LI59) != 0);
+	prop->leap61 = ((hdr->flagField[1] & FFB_LI61) != 0);
+	prop->timeTraceable = ((hdr->flagField[1] & FFB_TTRA) != 0);
+	prop->frequencyTraceable = ((hdr->flagField[1] & FFB_FTRA) != 0);
+	prop->ptpTimescale = ((hdr->flagField[1] & FFB_PTP) != 0);
 
 	if (pp_hooks.s1)
 		pp_hooks.s1(ppi, hdr, ann);
