@@ -2,7 +2,6 @@
  * Alessandro Rubini for CERN, 2013 -- LGPL 2.1 or later
  */
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "bare-linux.h"
 
 static int bare_time_get(TimeInternal *t)

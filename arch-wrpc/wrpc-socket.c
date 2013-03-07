@@ -6,7 +6,6 @@
 #include <syscon.h>
 #include <pps_gen.h>
 #include <minic.h>
-#include <ppsi/diag.h>
 #include <pps_gen.h>
 #include <softpll_ng.h>
 #include <ptpd_netif.h>

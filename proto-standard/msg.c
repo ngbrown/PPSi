@@ -4,7 +4,6 @@
  */
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "common-fun.h"
 
 static void Integer64_display(const char *label, Integer64 *bigint)

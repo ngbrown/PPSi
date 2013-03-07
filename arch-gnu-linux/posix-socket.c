@@ -17,7 +17,6 @@
 #include <arpa/inet.h>
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "posix.h"
 
 /* posix_recv_msg uses recvmsg for timestamp query */

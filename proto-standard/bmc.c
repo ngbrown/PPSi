@@ -4,7 +4,6 @@
  */
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 
 /* Flag Field bits symbolic names (table 57, pag. 151) */
 #define FFB_LI61	0x01

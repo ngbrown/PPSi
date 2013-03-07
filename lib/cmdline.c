@@ -4,7 +4,6 @@
 
 #define CONFIG_PPSI_RUNTIME_VERBOSITY 1
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 
 #define CMD_LINE_SEPARATOR {"", ""}
 

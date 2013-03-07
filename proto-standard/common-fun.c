@@ -3,7 +3,6 @@
  * Based on PTPd project v. 2.1.0 (see AUTHORS for details)
  */
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "common-fun.h"
 
 static void *__align_pointer(void *p)

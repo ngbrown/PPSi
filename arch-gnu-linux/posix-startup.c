@@ -12,7 +12,6 @@
 #include <errno.h>
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "posix.h"
 
 CONST_VERBOSITY int pp_diag_verbosity = 0;

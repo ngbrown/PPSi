@@ -4,7 +4,6 @@
  */
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "common-fun.h"
 
 int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)

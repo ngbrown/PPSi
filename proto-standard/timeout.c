@@ -2,7 +2,6 @@
  * Alessandro Rubini for CERN, 2013 -- GNU LGPL v2.1 or later
  */
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include <ppsi/diag-macros.h>
 
 #define N(n) [n] = #n

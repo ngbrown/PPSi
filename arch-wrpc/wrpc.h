@@ -6,7 +6,6 @@
 #define __WRPC_H
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include <hw/memlayout.h>
 /*
  * These are the functions provided by the various bare files

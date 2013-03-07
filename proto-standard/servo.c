@@ -4,7 +4,6 @@
  */
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 
 void pp_init_clock(struct pp_instance *ppi)
 {

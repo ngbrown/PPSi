@@ -2,7 +2,6 @@
  * Alessandro Rubini for CERN, 2011 -- public domain
  */
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 
 unsigned long pp_global_flags; /* This is the only "global" file in ppsi */
 

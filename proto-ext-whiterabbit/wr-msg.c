@@ -4,7 +4,6 @@
  */
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "wr-api.h"
 #include "../proto-standard/common-fun.h"
 

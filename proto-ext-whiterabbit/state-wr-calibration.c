@@ -4,7 +4,6 @@
  */
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "wr-api.h"
 
 int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)

@@ -7,7 +7,6 @@
 #define __COMMON_FUN_H
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 
 /* Contains all functions common to more than one state */
 

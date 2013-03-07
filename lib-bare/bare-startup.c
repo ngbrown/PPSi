@@ -7,7 +7,6 @@
  * It must also clear the BSS as I'm too lazy to do that in asm
  */
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "bare-linux.h"
 
 

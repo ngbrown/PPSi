@@ -3,7 +3,6 @@
  */
 
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 
 /*
  * This file deals with opening and closing an instance. The channel

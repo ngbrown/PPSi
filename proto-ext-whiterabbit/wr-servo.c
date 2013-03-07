@@ -1,6 +1,5 @@
 #include <arch/arch.h>
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "wr-api.h"
 
 #define WR_SYNC_NSEC 1

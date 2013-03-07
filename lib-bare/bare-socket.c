@@ -4,7 +4,6 @@
 
 /* Socket interface for bare Linux */
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 #include "bare-linux.h"
 
 /* FIXME: which socket we receive and send with? */

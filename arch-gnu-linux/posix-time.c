@@ -8,7 +8,6 @@
 #include <time.h>
 #include <sys/timex.h>
 #include <ppsi/ppsi.h>
-#include <ppsi/diag.h>
 
 static void clock_fatal_error(char *context)
 {
