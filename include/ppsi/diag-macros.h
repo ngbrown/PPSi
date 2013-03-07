@@ -2,9 +2,6 @@
  * Macros for diagnostic prints. The thing is not trivial because
  * we need to remove all strings and parameter passing when running
  * wrpc-sw with all its options enabled, for space reasons.
- *
- * Note that by building with PPSI_NO_DIAG (see diag/Makefile) no message
- * at all is there (and it can save quite some binary space).
  */
 
 /*
