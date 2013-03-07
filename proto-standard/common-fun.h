@@ -41,14 +41,12 @@ static inline int __send_and_log(struct pp_instance *ppi, int msglen,
 {
 	if (ppi->n_ops->send(ppi, ppi->tx_frame, msglen + NP(ppi)->ptp_offset,
 			    &ppi->last_snt_time, chtype, 0) < msglen) {
-		if (pp_verbose_frames)
-			PP_PRINTF("%s(%d) Message can't be sent\n",
+		pp_diag(ppi, frames, 1, "%s(%d) Message can't be sent\n",
 			pp_msg_names[msgtype], msgtype);
 		return -1;
 	}
-	/* FIXME: verbose_frames should be looped back in the send method */
-	if (pp_verbose_frames)
-		PP_VPRINTF("SENT %02d %d.%09d %s\n", msglen,
+	/* FIXME: diagnosticst should be looped back in the send method */
+	pp_diag(ppi, frames, 1, "SENT %02d bytes at %d.%09d (%s)\n", msglen,
 			ppi->last_snt_time.seconds,
 			ppi->last_snt_time.nanoseconds,
 			pp_msg_names[msgtype]);
