@@ -56,7 +56,7 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		sock = sys_socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
 		if (sock < 0) {
 			pp_diag_error(ppi, bare_errno);
-			pp_diag_fatal(ppi, "socket()", "");
+			pp_diag_error_str2(ppi, "socket()", "");
 			sys_close(sock);
 			return -1;
 		}
@@ -66,7 +66,7 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		strcpy(ifr.ifr_ifrn.ifrn_name, ifname);
 		if (sys_ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
 			pp_diag_error(ppi, bare_errno);
-			pp_diag_fatal(ppi, "ioctl(GIFINDEX)", "");
+			pp_diag_error_str2(ppi, "ioctl(GIFINDEX)", "");
 			sys_close(sock);
 			return -1;
 		}
@@ -74,7 +74,7 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		iindex = ifr.ifr_ifru.index;
 		if (sys_ioctl(sock, SIOCGIFHWADDR, &ifr) < 0) {
 			pp_diag_error(ppi, bare_errno);
-			pp_diag_fatal(ppi, "ioctl(GIFHWADDR)", "");
+			pp_diag_error_str2(ppi, "ioctl(GIFHWADDR)", "");
 			sys_close(sock);
 			return -1;
 		}
@@ -92,7 +92,7 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		if (sys_bind(sock, (struct bare_sockaddr *)&addr_ll,
 							sizeof(addr_ll)) < 0) {
 			pp_diag_error(ppi, bare_errno);
-			pp_diag_fatal(ppi, "bind", "");
+			pp_diag_error_str2(ppi, "bind", "");
 			sys_close(sock);
 			return -1;
 		}
