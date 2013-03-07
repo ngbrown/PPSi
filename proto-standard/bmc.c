@@ -158,19 +158,19 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 					if (ann_a->grandmasterPriority2 == ann_b->grandmasterPriority2)
 						return memcmp(&ann_a->grandmasterIdentity, &ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
 					/* Priority2 are not identical */
-					return memcmp(&ann_a->grandmasterPriority2, &ann_b->grandmasterPriority2, 1);
+					return ann_a->grandmasterPriority2 - ann_b->grandmasterPriority2;
 				}
 				/* offsetScaledLogVariance are not identical */
-				return memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
+				return ann_a->grandmasterClockQuality.clockClass - ann_b->grandmasterClockQuality.clockClass;
 			}
 			/*  Accuracy are not identitcal */
-			return memcmp(&ann_a->grandmasterClockQuality.clockAccuracy, &ann_b->grandmasterClockQuality.clockAccuracy, 1);
+			return ann_a->grandmasterClockQuality.clockAccuracy - ann_b->grandmasterClockQuality.clockAccuracy;
 		}
 		/* ClockClass are not identical */
-		return memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
+		return ann_a->grandmasterClockQuality.clockClass - ann_b->grandmasterClockQuality.clockClass;
 	}
 	/*  Priority1 are not identical */
-	return memcmp(&ann_a->grandmasterPriority1, &ann_b->grandmasterPriority1, 1);
+	return ann_a->grandmasterPriority1 - ann_b->grandmasterPriority1;
 }
 
 /* State decision algorithm 9.3.3 Fig 26 */
