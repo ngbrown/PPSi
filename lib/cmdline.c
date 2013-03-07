@@ -21,6 +21,7 @@ static struct cmd_line_opt cmd_line_list[] = {
 	//{"-D", "display stats in .csv format"},
 	//{"-R", "record data about sync packets in a file"},
 	{"-V", "run in verbose mode"},
+	{"-d STRING", "diagnostic level (see diag-macros.h)"},
 	CMD_LINE_SEPARATOR,
 	{"-x", "do not reset the clock if off by more than one second"},
 	{"-O NUMBER", "do not reset the clock if offset is more than NUMBER nanoseconds"},
@@ -103,6 +104,11 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 			switch (a[1]) {
 			case 'V':
 				pp_diag_verbosity++;
+				break;
+			case 'd':
+				/* Use the general flags, per-instance TBD */
+				a = argv[++i];
+				pp_global_flags = pp_diag_parse(a);
 				break;
 			case 'x':
 				OPTS(ppi)->no_rst_clk = 1;
