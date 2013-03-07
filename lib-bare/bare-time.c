@@ -4,7 +4,7 @@
 #include <ppsi/ppsi.h>
 #include "bare-linux.h"
 
-static int bare_time_get(TimeInternal *t)
+static int bare_time_get(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct bare_timeval tv;
 
@@ -19,7 +19,7 @@ static int bare_time_get(TimeInternal *t)
 	return 0;
 }
 
-static int bare_time_set(TimeInternal *t)
+static int bare_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct bare_timeval tv;
 
@@ -35,7 +35,7 @@ static int bare_time_set(TimeInternal *t)
 	return 0;
 }
 
-static int bare_time_adjust(long offset_ns, long freq_ppm)
+static int bare_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 {
 	struct bare_timex t;
 	int ret;
@@ -55,7 +55,7 @@ static int bare_time_adjust(long offset_ns, long freq_ppm)
 	return ret;
 }
 
-static unsigned long bare_calc_timeout(int millisec)
+static unsigned long bare_calc_timeout(struct pp_instance *ppi, int millisec)
 {
 	struct bare_timespec now;
 	uint64_t now_ms;

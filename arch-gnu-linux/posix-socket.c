@@ -84,7 +84,7 @@ static int posix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 		 * spike in the offset signal sent to the clock servo
 		 */
 		PP_VPRINTF("no receive time stamp, getting it in user space\n");
-		ppi->t_ops->get(t);
+		ppi->t_ops->get(ppi, t);
 	}
 	return ret;
 }
@@ -135,7 +135,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
 
 		if (t)
-			ppi->t_ops->get(t);
+			ppi->t_ops->get(ppi, t);
 
 		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr, len, 0);
 	}
@@ -147,7 +147,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 	addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
 
 	if (t)
-		ppi->t_ops->get(t);
+		ppi->t_ops->get(ppi, t);
 
 	return sendto(NP(ppi)->ch[chtype].fd, pkt, len, 0,
 		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));

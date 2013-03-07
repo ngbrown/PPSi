@@ -11,7 +11,7 @@ static int bare_net_recv(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t)
 {
 	if (t)
-		ppi->t_ops->get(t);
+		ppi->t_ops->get(ppi, t);
 
 	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
 }
@@ -29,7 +29,7 @@ static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
 	memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, 6);
 
 	if (t)
-		ppi->t_ops->get(t);
+		ppi->t_ops->get(ppi, t);
 
 	return sys_send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
 }

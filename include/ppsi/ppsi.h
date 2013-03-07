@@ -132,11 +132,12 @@ struct pp_network_operations {
  * Maybe this structure will need updating, to pass ppi as well
  */
 struct pp_time_operations {
-	int (*get)(TimeInternal *t); /* returns error code */
-	int (*set)(TimeInternal *t); /* returns error code */
+	int (*get)(struct pp_instance *ppi, TimeInternal *t);
+	int (*set)(struct pp_instance *ppi, TimeInternal *t);
 	/* freq_ppm is "scaled-ppm" like the argument of adjtimex(2) */
-	int (*adjust)(long offset_ns, long freq_ppm);
-	unsigned long (*calc_timeout)(int millisec); /* cannot return zero */
+	int (*adjust)(struct pp_instance *ppi, long offset_ns, long freq_ppm);
+	/* calc_timeout cannot return zero */
+	unsigned long (*calc_timeout)(struct pp_instance *ppi, int millisec);
 };
 
 /* IF the configuration prevents jumps, this is the max jump (0.5ms) */
@@ -157,7 +158,7 @@ struct pp_time_operations {
 static inline void pp_timeout_set(struct pp_instance *ppi, int index,
 				  int millisec)
 {
-	ppi->timeouts[index] = ppi->t_ops->calc_timeout(millisec);
+	ppi->timeouts[index] = ppi->t_ops->calc_timeout(ppi, millisec);
 }
 
 extern void pp_timeout_rand(struct pp_instance *ppi, int index, int logval);
@@ -172,7 +173,7 @@ extern void pp_timeout_log(struct pp_instance *ppi, int index);
 static inline int pp_timeout(struct pp_instance *ppi, int index)
 {
 	int ret = ppi->timeouts[index] &&
-		time_after_eq(ppi->t_ops->calc_timeout(0),
+		time_after_eq(ppi->t_ops->calc_timeout(ppi, 0),
 			      ppi->timeouts[index]);
 
 	if (ret && pp_verbose_time)
@@ -197,7 +198,7 @@ static inline int pp_ms_to_timeout(struct pp_instance *ppi, int index)
 	if (!ppi->timeouts[index]) /* not pending, nothing to wait for */
 		return 0;
 
-	ret = ppi->timeouts[index] - ppi->t_ops->calc_timeout(0);
+	ret = ppi->timeouts[index] - ppi->t_ops->calc_timeout(ppi, 0);
 	return ret <= 0 ? 0 : ret;
 }
 

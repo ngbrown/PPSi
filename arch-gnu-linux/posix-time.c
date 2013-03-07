@@ -16,7 +16,7 @@ static void clock_fatal_error(char *context)
 	exit(1);
 }
 
-static int posix_time_get(TimeInternal *t)
+static int posix_time_get(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec tp;
 	if (clock_gettime(CLOCK_REALTIME, &tp) < 0)
@@ -28,7 +28,7 @@ static int posix_time_get(TimeInternal *t)
 	return 0;
 }
 
-int32_t posix_time_set(TimeInternal *t)
+int32_t posix_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec tp;
 
@@ -41,7 +41,7 @@ int32_t posix_time_set(TimeInternal *t)
 	return 0;
 }
 
-int posix_time_adjust(long offset_ns, long freq_ppm)
+int posix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 {
 	struct timex t;
 	int ret;
@@ -61,7 +61,7 @@ int posix_time_adjust(long offset_ns, long freq_ppm)
 	return ret;
 }
 
-static unsigned long posix_calc_timeout(int millisec)
+static unsigned long posix_calc_timeout(struct pp_instance *ppi, int millisec)
 {
 	struct timespec now;
 	uint64_t now_ms;
