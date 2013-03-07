@@ -169,32 +169,26 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	struct ip_mreq imr;
 	struct packet_mreq pmr;
 	char addr_str[INET_ADDRSTRLEN];
+	char *context;
 
 	if (OPTS(ppi)->ethernet_mode) {
 		/* open socket */
+		context = "socket()";
 		sock = socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
-		if (sock < 0) {
-			pp_diag_error_str2(ppi, "socket()", strerror(errno));
-			return -1;
-		}
+		if (sock < 0)
+			goto err_out;
 
 		/* hw interface information */
 		memset(&ifr, 0, sizeof(ifr));
 		strcpy(ifr.ifr_name, ifname);
-		if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
-			pp_diag_error_str2(ppi, "SIOCGIFINDEX",
-					   strerror(errno));
-			close(sock);
-			return -1;
-		}
+		context = "ioctl(SIOCGIFINDEX)";
+		if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
+			goto err_out;
 
 		iindex = ifr.ifr_ifindex;
-		if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0) {
-			pp_diag_error_str2(ppi, "SIOCGIFHWADDR",
-					   strerror(errno));
-			close(sock);
-			return -1;
-		}
+		context = "ioctl(SIOCGIFHWADDR)";
+		if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
+			goto err_out;
 
 		memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
 
@@ -203,12 +197,10 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 		addr_ll.sll_family = AF_PACKET;
 		addr_ll.sll_protocol = htons(ETH_P_1588);
 		addr_ll.sll_ifindex = iindex;
+		context = "bind()";
 		if (bind(sock, (struct sockaddr *)&addr_ll,
-			 sizeof(addr_ll)) < 0) {
-			pp_diag_error_str2(ppi, "bind", strerror(errno));
-			close(sock);
-			return -1;
-		}
+			 sizeof(addr_ll)) < 0)
+			goto err_out;
 
 		/* accept the multicast address for raw-ethernet ptp */
 		memset(&pmr, 0, sizeof(pmr));
@@ -229,37 +221,29 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	}
 
 	/* else: UDP */
+	context = "socket()";
 	sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (sock < 0) {
-		pp_diag_error_str2(ppi, "socket()", strerror(errno));
-		return -1;
-	}
+	if (sock < 0)
+		goto err_out;
 
 	NP(ppi)->ch[chtype].fd = sock;
 
 	/* hw interface information */
 	memset(&ifr, 0, sizeof(ifr));
 	strcpy(ifr.ifr_name, ifname);
-	if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
-		pp_diag_error_str2(ppi, "SIOCGIFINDEX", strerror(errno));
-		close(sock);
-		return -1;
-	}
+	context = "ioctl(SIOCGIFINDEX)";
+	if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
+		goto err_out;
 
 	iindex = ifr.ifr_ifindex;
-	if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0) {
-		pp_diag_error_str2(ppi, "SIOCGIFHWADDR", strerror(errno));
-		close(sock);
-		return -1;
-	}
+	context = "ioctl(SIOCGIFHWADDR)";
+	if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
+		goto err_out;
 
 	memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
-
-	if (ioctl(sock, SIOCGIFADDR, &ifr) < 0) {
-		pp_diag_error_str2(ppi, "SIOCGIFADDR", strerror(errno));
-		PP_PRINTF("Tip: did you  run ppsi as super user?\n");
-		return -1;
-	}
+	context = "ioctl(SIOCGIFADDR)";
+	if (ioctl(sock, SIOCGIFADDR, &ifr) < 0)
+		goto err_out;
 
 	iface_addr.s_addr =
 		((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
@@ -267,11 +251,10 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	PP_VPRINTF("Local IP address used : %s\n", inet_ntoa(iface_addr));
 
 	temp = 1; /* allow address reuse */
-
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-		       &temp, sizeof(int)) < 0) {
-		pp_diag_error_str2(ppi, "SO_REUSEADDR", strerror(errno));
-	}
+		       &temp, sizeof(int)) < 0)
+		pp_printf("%s: ioctl(SO_REUSEADDR): %s\n", __func__,
+			  strerror(errno));
 
 	/* bind sockets */
 	/* need INADDR_ANY to allow receipt of multi-cast and uni-cast
@@ -279,62 +262,61 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	addr.sin_port = htons(chtype == PP_NP_GEN ? PP_GEN_PORT : PP_EVT_PORT);
+	context = "bind()";
 	if (bind(sock, (struct sockaddr *)&addr,
-			sizeof(struct sockaddr_in)) < 0) {
-		pp_diag_error_str2(ppi, "bind()", strerror(errno));
-		return -1;
-	}
+		 sizeof(struct sockaddr_in)) < 0)
+		goto err_out;
 
 	/* Init General multicast IP address */
 	memcpy(addr_str, PP_DEFAULT_DOMAIN_ADDRESS, INET_ADDRSTRLEN);
 
-	if (!inet_aton(addr_str, &net_addr)) {
-		pp_diag_error_str2(ppi, "inet_aton\n", strerror(errno));
-		return -1;
-	}
+	context = addr_str; errno = EINVAL;
+	if (!inet_aton(addr_str, &net_addr))
+		goto err_out;
 	NP(ppi)->mcast_addr = net_addr.s_addr;
 
 	/* multicast sends only on specified interface */
 	imr.imr_multiaddr.s_addr = net_addr.s_addr;
 	imr.imr_interface.s_addr = iface_addr.s_addr;
+	context = "setsockopt(IP_MULTICAST_IF)";
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF,
-		       &imr.imr_interface.s_addr, sizeof(struct in_addr)) < 0) {
-		pp_diag_error_str2(ppi, "IP_MULTICAST_IF", strerror(errno));
-		return -1;
-	}
+		       &imr.imr_interface.s_addr, sizeof(struct in_addr)) < 0)
+		goto err_out;
 
 	/* join multicast group (for receiving) on specified interface */
+	context = "setsockopt(IP_ADD_MEMBERSHIP)";
 	if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-		       &imr, sizeof(struct ip_mreq)) < 0) {
-		pp_diag_error_str2(ppi, "IP_ADD_MEMBERSHIP", strerror(errno));
-		return -1;
-	}
+		       &imr, sizeof(struct ip_mreq)) < 0)
+		goto err_out;
 	/* End of General multicast Ip address init */
 
 	/* set socket time-to-live */
+	context = "setsockopt(IP_MULTICAST_TTL)";
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL,
-		       &OPTS(ppi)->ttl, sizeof(int)) < 0) {
-		pp_diag_error_str2(ppi, "IP_MULTICAST_TTL", strerror(errno));
-		return -1;
-	}
+		       &OPTS(ppi)->ttl, sizeof(int)) < 0)
+		goto err_out;
 
 	/* forcibly disable loopback */
 	temp = 0;
+	context = "setsockopt(IP_MULTICAST_LOOP)";
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP,
-		       &temp, sizeof(int)) < 0) {
-		pp_diag_error_str2(ppi, "IP_MULTICAST_LOOP", strerror(errno));
-		return -1;
-	}
+		       &temp, sizeof(int)) < 0)
+		goto err_out;
 
 	/* make timestamps available through recvmsg() */
+	context = "setsockopt(SO_TIMESTAMP)";
 	if (setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
-		       &temp, sizeof(int)) < 0) {
-		pp_diag_error_str2(ppi, "SO_TIMESTAMP", strerror(errno));
-		return -1;
-	}
+		       &temp, sizeof(int)) < 0)
+		goto err_out;
 
 	NP(ppi)->ch[chtype].fd = sock;
 	return 0;
+
+err_out:
+	pp_printf("%s: %s: %s\n", __func__, context, strerror(errno));
+	if (sock >= 0)
+		close(sock);
+	return -1;
 }
 
 static int posix_net_exit(struct pp_instance *ppi);
