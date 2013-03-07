@@ -36,13 +36,6 @@ void pp_diag_error_str2(struct pp_instance *ppi, char *s1, char *s2)
 	pp_printf("ERR for %p: %s %s\n", ppi, s1, s2);
 }
 
-void pp_diag_fatal(struct pp_instance *ppi, char *s1, char *s2)
-{
-	pp_printf("FATAL for %p: %s %s\n", ppi, s1, s2);
-	while (1)
-		/* nothing more */;
-}
-
 void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...)
 {
 	va_list args;
