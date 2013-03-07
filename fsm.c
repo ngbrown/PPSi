@@ -119,6 +119,6 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		return ppi->next_delay;
 	}
 	/* Unknwon state, can't happen */
-	pp_diag_error_str2(ppi, "Unknown state in FSM", "");
+	pp_printf("fsm: Unknown state for iface %s\n", OPTS(ppi)->iface_name);
 	return 10000; /* No way out. Repeat message every 10s */
 }
