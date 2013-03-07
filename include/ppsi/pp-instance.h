@@ -190,8 +190,4 @@ struct pp_instance {
 		waiting_for_follow:1;
 };
 
-extern unsigned long pp_global_flags; /* Supplement ppi-specific ones */
-
-#define PP_FLAG_NOTIMELOG	1 /* This is for a special case, I'm sorry */
-
 #endif /* __PPSI_PP_INSTANCE_H__ */
