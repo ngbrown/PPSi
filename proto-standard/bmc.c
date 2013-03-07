@@ -16,27 +16,24 @@
 /* Local clock is becoming Master. Table 13 (9.3.5) of the spec. */
 void m1(struct pp_instance *ppi)
 {
+	struct DSParent *parent = DSPAR(ppi);
+	struct DSDefault *defds = DSDEF(ppi);
+
 	/* Current data set update */
 	DSCUR(ppi)->stepsRemoved = 0;
 	clear_TimeInternal(&DSCUR(ppi)->offsetFromMaster);
 	clear_TimeInternal(&DSCUR(ppi)->meanPathDelay);
 
-	/* Parent data set */
-	memcpy(&DSPAR(ppi)->parentPortIdentity.clockIdentity,
-		  &DSDEF(ppi)->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
-	DSPAR(ppi)->parentPortIdentity.portNumber = 0;
-	DSPAR(ppi)->observedParentClockPhaseChangeRate = 0;
-	DSPAR(ppi)->observedParentOffsetScaledLogVariance = 0;
-	memcpy(&DSPAR(ppi)->grandmasterIdentity, &DSDEF(ppi)->clockIdentity,
-		  PP_CLOCK_IDENTITY_LENGTH);
-	DSPAR(ppi)->grandmasterClockQuality.clockAccuracy =
-		DSDEF(ppi)->clockQuality.clockAccuracy;
-	DSPAR(ppi)->grandmasterClockQuality.clockClass =
-		DSDEF(ppi)->clockQuality.clockClass;
-	DSPAR(ppi)->grandmasterClockQuality.offsetScaledLogVariance =
-		DSDEF(ppi)->clockQuality.offsetScaledLogVariance;
-	DSPAR(ppi)->grandmasterPriority1 = DSDEF(ppi)->priority1;
-	DSPAR(ppi)->grandmasterPriority2 = DSDEF(ppi)->priority2;
+	/* Parent data set: we are the parent */
+	memset(parent, 0, sizeof(*parent));
+	parent->parentPortIdentity.clockIdentity = defds->clockIdentity;
+	/* FIXME: the port? */
+
+	/* Copy grandmaster params from our defds (FIXME: is ir right?) */
+	parent->grandmasterIdentity = defds->clockIdentity;
+	parent->grandmasterClockQuality = defds->clockQuality;
+	parent->grandmasterPriority1 = defds->priority1;
+	parent->grandmasterPriority2 = defds->priority2;
 
 	/* Time Properties data set */
 	DSPRO(ppi)->timeSource = INTERNAL_OSCILLATOR;
