@@ -91,11 +91,11 @@ static void copy_d0( struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
  * Data set comparison between two foreign masters (9.3.4 fig 27)
  * return similar to memcmp()
  */
-Integer8 bmc_dataset_cmp(struct pp_instance *ppi,
+static int bmc_dataset_cmp(struct pp_instance *ppi,
 			 MsgHeader *hdr_a, MsgAnnounce *ann_a,
 			 MsgHeader *hdr_b, MsgAnnounce *ann_b)
 {
-	short comp = 0;
+	int comp = 0;
 	Octet *ppci;
 
 	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
