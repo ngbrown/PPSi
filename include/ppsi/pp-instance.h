@@ -55,12 +55,14 @@ struct pp_channel {
 	int pkt_present;
 };
 
+
 /*
  * Foreign master record. Used to manage Foreign masters
  */
 struct pp_frgn_master {
 	PortIdentity port_id;	/* used to identify old/new masters */
-	//This one is not in the spec
+
+	/* We don't need all fields of the following ones */
 	MsgAnnounce ann;
 	MsgHeader hdr;
 };

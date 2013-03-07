@@ -74,9 +74,11 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 
 
 /* Copy local data set into header and ann message. 9.3.4 table 12. */
-static void copy_d0( struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
+static void copy_d0(struct pp_instance *ppi, struct pp_frgn_master *m)
 {
 	struct DSDefault *defds = DSDEF(ppi);
+	struct MsgHeader *hdr = &m->hdr;
+	struct MsgAnnounce *ann = &m->ann;
 
 	ann->grandmasterIdentity = defds->clockIdentity;
 	ann->grandmasterClockQuality = defds->clockQuality;
@@ -92,43 +94,43 @@ static void copy_d0( struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
  * return similar to memcmp()
  */
 static int bmc_dataset_cmp(struct pp_instance *ppi,
-			 MsgHeader *hdr_a, MsgAnnounce *ann_a,
-			 MsgHeader *hdr_b, MsgAnnounce *ann_b)
+			   struct pp_frgn_master *a,
+			   struct pp_frgn_master *b)
 {
 	struct ClockQuality *qa, *qb;
-	Octet *ppci;
+	struct MsgHeader *ha = &a->hdr;
+	struct MsgHeader *hb = &b->hdr;
+	struct MsgAnnounce *aa = &a->ann;
+	struct MsgAnnounce *ab = &b->ann;
+	struct ClockIdentity *ppci;
 
 	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
 
 	/* Identity comparison */
-	if (!memcmp(&ann_a->grandmasterIdentity,
-		       &ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH)) {
+	if (!memcmp(&aa->grandmasterIdentity,
+		       &ab->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH)) {
 
 		/* Algorithm part2 Fig 28 */
-		if (ann_a->stepsRemoved > ann_b->stepsRemoved + 1)
+		if (aa->stepsRemoved > ab->stepsRemoved + 1)
 			return 1;
 
-		if (ann_b->stepsRemoved > ann_a->stepsRemoved + 1)
+		if (ab->stepsRemoved > aa->stepsRemoved + 1)
 			return -1;
 
-		ppci = DSPAR(ppi)->parentPortIdentity.clockIdentity.id;
+		ppci = &DSPAR(ppi)->parentPortIdentity.clockIdentity;
 
-		if (ann_a->stepsRemoved > ann_b->stepsRemoved) {
-			if (!memcmp(
-				    &hdr_a->sourcePortIdentity.clockIdentity,
-				    ppci,
-				    PP_CLOCK_IDENTITY_LENGTH)) {
+		if (aa->stepsRemoved > ab->stepsRemoved) {
+			if (!memcmp(&ha->sourcePortIdentity.clockIdentity,
+				    ppci, PP_CLOCK_IDENTITY_LENGTH)) {
 				PP_PRINTF("Sender=Receiver: Error -1");
 				return 0;
 			}
 			return 1;
 
 		}
-		if (ann_b->stepsRemoved > ann_a->stepsRemoved) {
-			if (!memcmp(
-				    &hdr_b->sourcePortIdentity.clockIdentity,
-				    ppci,
-				    PP_CLOCK_IDENTITY_LENGTH)) {
+		if (ab->stepsRemoved > aa->stepsRemoved) {
+			if (!memcmp(&hb->sourcePortIdentity.clockIdentity,
+				    ppci, PP_CLOCK_IDENTITY_LENGTH)) {
 				PP_PRINTF("Sender=Receiver: Error -3");
 				return 0;
 			}
@@ -136,26 +138,26 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 		}
 
 		if (!memcmp(
-			    &hdr_a->sourcePortIdentity.clockIdentity,
-			    &hdr_b->sourcePortIdentity.clockIdentity,
+			    &ha->sourcePortIdentity.clockIdentity,
+			    &hb->sourcePortIdentity.clockIdentity,
 			    PP_CLOCK_IDENTITY_LENGTH)) {
 			PP_PRINTF("Sender=Receiver: Error -2");
 			return 0;
 		}
 		if ((memcmp(
-			     &hdr_a->sourcePortIdentity.clockIdentity,
-			     &hdr_b->sourcePortIdentity.clockIdentity,
+			     &ha->sourcePortIdentity.clockIdentity,
+			     &hb->sourcePortIdentity.clockIdentity,
 			     PP_CLOCK_IDENTITY_LENGTH)) < 0)
 			return -1;
 		return 1;
 	}
 
 	/* GrandMaster are not identical */
-	qa = &ann_a->grandmasterClockQuality;
-	qb = &ann_b->grandmasterClockQuality;
+	qa = &aa->grandmasterClockQuality;
+	qb = &ab->grandmasterClockQuality;
 
-	if (ann_a->grandmasterPriority1 != ann_b->grandmasterPriority1)
-		return ann_a->grandmasterPriority1 - ann_b->grandmasterPriority1;
+	if (aa->grandmasterPriority1 != ab->grandmasterPriority1)
+		return aa->grandmasterPriority1 - ab->grandmasterPriority1;
 
 	if (qa->clockClass != qb->clockClass)
 		return qa->clockClass - qb->clockClass;
@@ -166,64 +168,59 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 	if (qa->offsetScaledLogVariance != qb->offsetScaledLogVariance)
 		return qa->clockClass - qb->clockClass;
 
-	if (ann_a->grandmasterPriority2 != ann_b->grandmasterPriority2)
-		return ann_a->grandmasterPriority2 - ann_b->grandmasterPriority2;
+	if (aa->grandmasterPriority2 != ab->grandmasterPriority2)
+		return aa->grandmasterPriority2 - ab->grandmasterPriority2;
 
-	return memcmp(&ann_a->grandmasterIdentity, &ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
+	return memcmp(&aa->grandmasterIdentity, &ab->grandmasterIdentity,
+		      PP_CLOCK_IDENTITY_LENGTH);
 }
 
 /* State decision algorithm 9.3.3 Fig 26 */
-int bmc_state_decision(struct pp_instance *ppi,
-		       MsgHeader *hdr, MsgAnnounce *ann)
+static int bmc_state_decision(struct pp_instance *ppi, struct pp_frgn_master *m)
 {
 	int cmpres;
+	struct pp_frgn_master myself;
 
-	if (OPTS(ppi)->master_only) {
-		m1(ppi);
-		return PPS_MASTER;
-	}
+	if (OPTS(ppi)->master_only)
+		goto master;
 
-	if (OPTS(ppi)->slave_only) {
-		s1(ppi, hdr, ann);
-		return PPS_SLAVE;
-	}
+	if (OPTS(ppi)->slave_only)
+		goto slave;
 
 	if ((!ppi->number_foreign_records) && (ppi->state == PPS_LISTENING))
 		return PPS_LISTENING;
 
-	copy_d0(ppi, &ppi->received_ptp_header, &ppi->msg_tmp.announce);
+	/* copy local information to a foreign_master structure */
+	copy_d0(ppi, &myself);
 
-
-	cmpres = bmc_dataset_cmp(ppi,
-				 &ppi->received_ptp_header,
-				 &ppi->msg_tmp.announce,
-				 hdr, ann);
+	cmpres = bmc_dataset_cmp(ppi, &myself, m);
 
 	if (DSDEF(ppi)->clockQuality.clockClass < 128) {
-		if (cmpres < 0) {
-			m1(ppi);
-			return PPS_MASTER;
-		}
+		if (cmpres < 0)
+			goto master;
 		if (cmpres > 0) {
-			s1(ppi, hdr, ann);
+			s1(ppi, &m->hdr, &m->ann);
 			return PPS_PASSIVE;
 		}
 	}
-	if (cmpres < 0) {
-		m1(ppi);
-		return PPS_MASTER;
-	}
-	if (cmpres > 0) {
-		s1(ppi, hdr, ann);
-		return PPS_SLAVE;
-	}
+	if (cmpres < 0)
+		goto master;
+	if (cmpres > 0)
+		goto slave;
 
-	if (cmpres == 0)
-		PP_PRINTF("Error in bmc_state_decision, cmpres=0.\n");
+	PP_PRINTF("Error in bmc_state_decision, cmpres=0.\n");
 
 	/*  MB: Is this the return code below correct? */
 	/*  Anyway, it's a valid return code. */
 	return PPS_FAULTY;
+
+master:
+	m1(ppi);
+	return PPS_MASTER;
+
+slave:
+	s1(ppi, &m->hdr, &m->ann);
+	return PPS_SLAVE;
 }
 
 
@@ -239,16 +236,12 @@ int bmc(struct pp_instance *ppi)
 		}
 
 	for (i = 1, best = 0; i < ppi->number_foreign_records; i++)
-		if (bmc_dataset_cmp(ppi,
-				     &frgn_master[i].hdr,
-				     &frgn_master[i].ann,
-				     &frgn_master[best].hdr,
-				     &frgn_master[best].ann) < 0)
+		if (bmc_dataset_cmp(ppi, &frgn_master[i], &frgn_master[best])
+		    < 0)
 			best = i;
 
 	PP_VPRINTF("bmc, best record : %d\n", best);
 	ppi->foreign_record_best = best;
 
-	return bmc_state_decision(ppi, &frgn_master[best].hdr,
-				   &frgn_master[best].ann);
+	return bmc_state_decision(ppi, &frgn_master[best]);
 }
