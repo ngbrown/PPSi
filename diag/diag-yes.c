@@ -18,16 +18,6 @@ void pp_diag_error_str2(struct pp_instance *ppi, char *s1, char *s2)
 	pp_printf("ERR for %p: %s %s\n", ppi, s1, s2);
 }
 
-void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...)
-{
-	va_list args;
-
-	pp_printf("MESSAGE for %p: ", ppi);
-	va_start(args, fmt);
-	pp_vprintf(fmt, args);
-	va_end(args);
-}
-
 void pp_timed_printf(struct pp_instance *ppi, char *fmt, ...)
 {
 	va_list args;
