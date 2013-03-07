@@ -76,48 +76,38 @@ int st_com_check_record_update(struct pp_instance *ppi)
 /* Called by this file, basically when an announce is got, all states */
 static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 {
-	int i, j;
-	int found = 0;
+	int i;
 	MsgHeader *hdr = &ppi->received_ptp_header;
-
-	j = ppi->foreign_record_best;
 
 	/* Check if foreign master is already known */
 	for (i = 0; i < ppi->number_foreign_records; i++) {
 		if (!memcmp(&hdr->sourcePortIdentity,
-			    &ppi->frgn_master[j].port_id,
+			    &ppi->frgn_master[i].port_id,
 			    sizeof(hdr->sourcePortIdentity))) {
-			/* already in Foreign master data set */
-			found = 1;
-			msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
-			msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
-			break;
+			/* already in Foreign master data set, update info */
+			msg_copy_header(&ppi->frgn_master[i].hdr, hdr);
+			msg_unpack_announce(buf, &ppi->frgn_master[i].ann);
+			return;
 		}
-
-		j = (j + 1) % ppi->number_foreign_records;
 	}
-
-	/* Old foreign master */
-	if (found)
-		return;
 
 	/* New foreign master */
 	if (ppi->number_foreign_records < PP_NR_FOREIGN_RECORDS)
 		ppi->number_foreign_records++;
 
-	j = ppi->foreign_record_i;
+	/* FIXME: replace the worst */
+	i = ppi->foreign_record_i;
 
 	/* Copy new foreign master data set from announce message */
-	memcpy(&ppi->frgn_master[j].port_id,
+	memcpy(&ppi->frgn_master[i].port_id,
 	       &hdr->sourcePortIdentity, sizeof(hdr->sourcePortIdentity));
 
 	/*
 	 * header and announce field of each Foreign Master are
 	 * usefull to run Best Master Clock Algorithm
 	 */
-	msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
-
-	msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
+	msg_copy_header(&ppi->frgn_master[i].hdr, hdr);
+	msg_unpack_announce(buf, &ppi->frgn_master[i].ann);
 
 	PP_VPRINTF("New foreign Master added\n");
 
