@@ -144,7 +144,6 @@ extern unsigned long pp_diag_parse(char *diaglevel);
 #define pp_verbose_error 1
 #define pp_verbose_dump 1
 #define pp_verbose_servo 1
-#define pp_verbose_frames 1
 #define pp_verbose_time 1
 #endif
 
@@ -159,10 +158,6 @@ extern unsigned long pp_diag_parse(char *diaglevel);
 
 #ifdef VERB_SERVO
 #define pp_verbose_servo 1
-#endif
-
-#ifdef VERB_FRAMES
-#define pp_verbose_frames 1
 #endif
 
 #ifdef VERB_TIME
@@ -180,10 +175,6 @@ extern unsigned long pp_diag_parse(char *diaglevel);
 
 #ifndef pp_verbose_servo
 #define pp_verbose_servo 0
-#endif
-
-#ifndef pp_verbose_frames
-#define pp_verbose_frames 0
 #endif
 
 #ifndef pp_verbose_time
