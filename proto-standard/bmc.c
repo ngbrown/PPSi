@@ -108,113 +108,101 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 		if (ann_a->stepsRemoved > ann_b->stepsRemoved + 1)
 			return 1;
 
-		else if (ann_b->stepsRemoved > ann_a->stepsRemoved + 1)
+		if (ann_b->stepsRemoved > ann_a->stepsRemoved + 1)
 			return -1;
 
-		else { /* A within 1 of B */
+		ppci = DSPAR(ppi)->parentPortIdentity.clockIdentity.id;
 
-			ppci = DSPAR(ppi)->parentPortIdentity.clockIdentity.id;
-
-			if (ann_a->stepsRemoved > ann_b->stepsRemoved) {
-				if (!memcmp(
-					&hdr_a->sourcePortIdentity.clockIdentity,
-					ppci,
-					PP_CLOCK_IDENTITY_LENGTH)) {
-					PP_PRINTF("Sender=Receiver: Error -1");
-					return 0;
-				} else
-					return 1;
-
-			} else if (ann_b->stepsRemoved > ann_a->stepsRemoved) {
-				if (!memcmp(
-					&hdr_b->sourcePortIdentity.clockIdentity,
-					ppci,
-					PP_CLOCK_IDENTITY_LENGTH)) {
-					PP_PRINTF("Sender=Receiver: Error -3");
-					return 0;
-				} else {
-					return -1;
-				}
-			} else { /* steps removed A == steps removed B */
-				if (!memcmp(
-					&hdr_a->sourcePortIdentity.clockIdentity,
-					&hdr_b->sourcePortIdentity.clockIdentity,
-					PP_CLOCK_IDENTITY_LENGTH)) {
-					PP_PRINTF("Sender=Receiver: Error -2");
-					return 0;
-				} else if ((memcmp(
-					&hdr_a->sourcePortIdentity.clockIdentity,
-					&hdr_b->sourcePortIdentity.clockIdentity,
-					PP_CLOCK_IDENTITY_LENGTH)) < 0)
-					return -1;
-				else
-					return 1;
+		if (ann_a->stepsRemoved > ann_b->stepsRemoved) {
+			if (!memcmp(
+				    &hdr_a->sourcePortIdentity.clockIdentity,
+				    ppci,
+				    PP_CLOCK_IDENTITY_LENGTH)) {
+				PP_PRINTF("Sender=Receiver: Error -1");
+				return 0;
 			}
+			return 1;
+
 		}
-	} else { /* GrandMaster are not identical */
-		/* FIXME: rewrite in a more readable way */
-		if (ann_a->grandmasterPriority1 == ann_b->grandmasterPriority1) {
-			if (ann_a->grandmasterClockQuality.clockClass ==
-			    ann_b->grandmasterClockQuality.clockClass) {
-				if (ann_a->grandmasterClockQuality.clockAccuracy == ann_b->grandmasterClockQuality.clockAccuracy) {
-					if (ann_a->grandmasterClockQuality.offsetScaledLogVariance == ann_b->grandmasterClockQuality.offsetScaledLogVariance) {
-						if (ann_a->grandmasterPriority2 == ann_b->grandmasterPriority2) {
-							comp = memcmp(&ann_a->grandmasterIdentity, &ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
-							if (comp < 0)
-								return -1;
-							else if (comp > 0)
-								return 1;
-							else
-								return 0;
-						} else {
-						/* Priority2 are not identical */
-							comp = memcmp(&ann_a->grandmasterPriority2, &ann_b->grandmasterPriority2, 1);
-							if (comp < 0)
-								return -1;
-							else if (comp > 0)
-								return 1;
-							else
-								return 0;
-						}
-					} else {
-						/* offsetScaledLogVariance are not identical */
-						comp = memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
+		if (ann_b->stepsRemoved > ann_a->stepsRemoved) {
+			if (!memcmp(
+				    &hdr_b->sourcePortIdentity.clockIdentity,
+				    ppci,
+				    PP_CLOCK_IDENTITY_LENGTH)) {
+				PP_PRINTF("Sender=Receiver: Error -3");
+				return 0;
+			}
+			return -1;
+		}
+
+		if (!memcmp(
+			    &hdr_a->sourcePortIdentity.clockIdentity,
+			    &hdr_b->sourcePortIdentity.clockIdentity,
+			    PP_CLOCK_IDENTITY_LENGTH)) {
+			PP_PRINTF("Sender=Receiver: Error -2");
+			return 0;
+		}
+		if ((memcmp(
+			     &hdr_a->sourcePortIdentity.clockIdentity,
+			     &hdr_b->sourcePortIdentity.clockIdentity,
+			     PP_CLOCK_IDENTITY_LENGTH)) < 0)
+			return -1;
+		return 1;
+	}
+
+	/* GrandMaster are not identical */
+	if (ann_a->grandmasterPriority1 == ann_b->grandmasterPriority1) {
+		if (ann_a->grandmasterClockQuality.clockClass ==
+		    ann_b->grandmasterClockQuality.clockClass) {
+			if (ann_a->grandmasterClockQuality.clockAccuracy == ann_b->grandmasterClockQuality.clockAccuracy) {
+				if (ann_a->grandmasterClockQuality.offsetScaledLogVariance == ann_b->grandmasterClockQuality.offsetScaledLogVariance) {
+					if (ann_a->grandmasterPriority2 == ann_b->grandmasterPriority2) {
+						comp = memcmp(&ann_a->grandmasterIdentity, &ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
 						if (comp < 0)
 							return -1;
-						else if (comp > 0)
+						if (comp > 0)
 							return 1;
-						else
-							return 0;
+						return 0;
 					}
-
-				} else { /*  Accuracy are not identitcal */
-					comp = memcmp(&ann_a->grandmasterClockQuality.clockAccuracy, &ann_b->grandmasterClockQuality.clockAccuracy, 1);
+					/* Priority2 are not identical */
+					comp = memcmp(&ann_a->grandmasterPriority2, &ann_b->grandmasterPriority2, 1);
 					if (comp < 0)
 						return -1;
-					else if (comp > 0)
+					if (comp > 0)
 						return 1;
-					else
-						return 0;
+					return 0;
 				}
-			} else { /* ClockClass are not identical */
+				/* offsetScaledLogVariance are not identical */
 				comp = memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
 				if (comp < 0)
 					return -1;
-				else if (comp > 0)
+				if (comp > 0)
 					return 1;
-				else
-					return 0;
+				return 0;
 			}
-		} else { /*  Priority1 are not identical */
-			comp = memcmp(&ann_a->grandmasterPriority1, &ann_b->grandmasterPriority1, 1);
+			/*  Accuracy are not identitcal */
+			comp = memcmp(&ann_a->grandmasterClockQuality.clockAccuracy, &ann_b->grandmasterClockQuality.clockAccuracy, 1);
 			if (comp < 0)
 				return -1;
-			else if (comp > 0)
+			if (comp > 0)
 				return 1;
-			else
-				return 0;
+			return 0;
 		}
+		/* ClockClass are not identical */
+		comp = memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
+		if (comp < 0)
+			return -1;
+		if (comp > 0)
+			return 1;
+		return 0;
 	}
+	/*  Priority1 are not identical */
+	comp = memcmp(&ann_a->grandmasterPriority1, &ann_b->grandmasterPriority1, 1);
+	if (comp < 0)
+		return -1;
+	if (comp > 0)
+		return 1;
+	return 0;
 }
 
 /* State decision algorithm 9.3.3 Fig 26 */
@@ -248,19 +236,19 @@ UInteger8 bmc_state_decision(struct pp_instance *ppi,
 		if (cmpres < 0) {
 			m1(ppi);
 			return PPS_MASTER;
-		} else if (cmpres > 0) {
+		}
+		if (cmpres > 0) {
 			s1(ppi, hdr, ann);
 			return PPS_PASSIVE;
 		}
-
-	} else {
-		if (cmpres < 0) {
-			m1(ppi);
-			return PPS_MASTER;
-		} else if (cmpres > 0) {
-			s1(ppi, hdr, ann);
-			return PPS_SLAVE;
-		}
+	}
+	if (cmpres < 0) {
+		m1(ppi);
+		return PPS_MASTER;
+	}
+	if (cmpres > 0) {
+		s1(ppi, hdr, ann);
+		return PPS_SLAVE;
 	}
 
 	if (cmpres == 0)
