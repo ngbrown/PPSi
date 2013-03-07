@@ -236,8 +236,7 @@ extern void pp_update_clock(struct pp_instance *ppi);
 /* bmc.c */
 extern void m1(struct pp_instance *ppi);
 extern void s1(struct pp_instance *ppi, MsgHeader *header, MsgAnnounce *ann);
-extern UInteger8 bmc(struct pp_instance *ppi,
-		     struct pp_frgn_master *frgn_master);
+extern int bmc(struct pp_instance *ppi);
 
 /* msg.c */
 extern void msg_pack_header(struct pp_instance *ppi, void *buf);

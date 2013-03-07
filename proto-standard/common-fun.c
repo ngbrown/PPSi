@@ -65,7 +65,7 @@ int st_com_check_record_update(struct pp_instance *ppi)
 	if (ppi->record_update) {
 		PP_VPRINTF("event STATE_DECISION_EVENT\n");
 		ppi->record_update = FALSE;
-		ppi->next_state = bmc(ppi, ppi->frgn_master);
+		ppi->next_state = bmc(ppi);
 
 		if (ppi->next_state != ppi->state)
 			return 1;

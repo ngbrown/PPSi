@@ -173,8 +173,8 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 }
 
 /* State decision algorithm 9.3.3 Fig 26 */
-UInteger8 bmc_state_decision(struct pp_instance *ppi,
-			      MsgHeader *hdr, MsgAnnounce *ann)
+int bmc_state_decision(struct pp_instance *ppi,
+		       MsgHeader *hdr, MsgAnnounce *ann)
 {
 	int cmpres;
 
@@ -227,10 +227,10 @@ UInteger8 bmc_state_decision(struct pp_instance *ppi,
 }
 
 
-
-UInteger8 bmc(struct pp_instance *ppi, struct pp_frgn_master *frgn_master)
+int bmc(struct pp_instance *ppi)
 {
-	Integer16 i, best;
+	struct pp_frgn_master *frgn_master = ppi->frgn_master;
+	int i, best;
 
 	if (!ppi->number_foreign_records)
 		if (ppi->state == PPS_MASTER)	{
