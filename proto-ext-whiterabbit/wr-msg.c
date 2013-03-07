@@ -101,7 +101,7 @@ void msg_unpack_announce_wr_tlv(void *buf, MsgAnnounce *ann)
 		tlv_magicNumber == WR_TLV_MAGIC_NUMBER &&
 		tlv_versionNumber == WR_TLV_WR_VERSION_NUMBER &&
 		tlv_wrMessageID == ANN_SUFIX) {
-		ann->wrFlags   = (UInteger16)get_be16(buf+76);
+		ann->ext_specific = (UInteger16)get_be16(buf+76);
 	}
 }
 

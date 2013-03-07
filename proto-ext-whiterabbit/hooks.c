@@ -95,12 +95,12 @@ static int wr_update_delay(struct pp_instance *ppi)
 static void wr_s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 {
 	WR_DSPOR(ppi)->parentIsWRnode =
-		((ann->wrFlags & WR_NODE_MODE) != NON_WR);
+		((ann->ext_specific & WR_NODE_MODE) != NON_WR);
 	WR_DSPOR(ppi)->parentWrModeOn =
-		(ann->wrFlags & WR_IS_WR_MODE) ? TRUE : FALSE;
+		(ann->ext_specific & WR_IS_WR_MODE) ? TRUE : FALSE;
 	WR_DSPOR(ppi)->parentCalibrated =
-			((ann->wrFlags & WR_IS_CALIBRATED) ? 1 : 0);
-	WR_DSPOR(ppi)->parentWrConfig = ann->wrFlags & WR_NODE_MODE;
+			((ann->ext_specific & WR_IS_CALIBRATED) ? 1 : 0);
+	WR_DSPOR(ppi)->parentWrConfig = ann->ext_specific & WR_NODE_MODE;
 	DSCUR(ppi)->primarySlavePortNumber =
 		DSPOR(ppi)->portIdentity.portNumber;
 }

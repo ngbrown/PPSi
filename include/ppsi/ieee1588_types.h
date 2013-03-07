@@ -150,10 +150,7 @@ typedef struct MsgAnnounce {
 	ClockIdentity	grandmasterIdentity;
 	UInteger16	stepsRemoved;
 	Enumeration8	timeSource;
-
-	/* White Rabbit extension begin */
-	UInteger8 wrFlags;
-	/* White Rabbit extension end */
+	unsigned long	ext_specific;	/* used by extension */
 } MsgAnnounce;
 
 /* Sync Message (table 26, page 129) */
