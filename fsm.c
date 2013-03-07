@@ -102,7 +102,8 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 			pp_diag_fsm(ppi, ip->name, STATE_ENTER, plen);
 		err = ip->f1(ppi, packet, plen);
 		if (err)
-			pp_diag_error(ppi, err);
+			pp_printf("fsm for %s: Error %i in %s\n",
+				  OPTS(ppi)->iface_name, err, ip->name);
 
 		/* done: if new state mark it, and enter it now (0 ms) */
 		if (ppi->state != ppi->next_state) {
