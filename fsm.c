@@ -7,6 +7,34 @@
 unsigned long pp_global_flags; /* This is the only "global" file in ppsi */
 
 /*
+ * Diagnostics about state machine, enter, leave, remain
+ */
+enum {
+	STATE_ENTER,
+	STATE_LOOP,
+	STATE_LEAVE
+};
+
+static void pp_diag_fsm(struct pp_instance *ppi, char *name, int sequence,
+			int plen)
+{
+	if (sequence == STATE_ENTER) {
+		/* enter with or without a packet len */
+		pp_timed_printf(ppi, "fsm: ENTER %s, packet len %i\n",
+			  name, plen);
+		return;
+	}
+	if (sequence == STATE_LOOP) {
+		pp_timed_printf(ppi, "fsm: %s: reenter in %i ms\n", name,
+				ppi->next_delay);
+		return;
+	}
+	/* leave has one \n more, so different states are separate */
+	pp_timed_printf(ppi, "fsm: LEAVE %s (next: %3i in %i ms)\n\n",
+		name, ppi->next_state, ppi->next_delay);
+}
+
+/*
  * This is the state machine code. i.e. the extension-independent
  * function that runs the machine. Errors are managed and reported
  * here (based on the diag module). The returned value is the time

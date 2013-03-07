@@ -8,24 +8,6 @@
  * This has diagnostics. It calls pp_printf (which one, we don't know)
  */
 
-void pp_diag_fsm(struct pp_instance *ppi, char *name, int sequence, int plen)
-{
-	if (sequence == STATE_ENTER) {
-		/* enter with or without a packet len */
-		pp_timed_printf(ppi, "fsm: ENTER %s, packet len %i\n",
-			  name, plen);
-		return;
-	}
-	if (sequence == STATE_LOOP) {
-		pp_timed_printf(ppi, "fsm: %s: reenter in %i ms\n", name,
-				ppi->next_delay);
-		return;
-	}
-	/* leave has one \n more, so different states are separate */
-	pp_timed_printf(ppi, "fsm: LEAVE %s (next: %3i in %i ms)\n\n",
-		name, ppi->next_state, ppi->next_delay);
-}
-
 void pp_diag_error(struct pp_instance *ppi, int err)
 {
 	pp_printf("ERR for %p: %i\n", ppi, err);

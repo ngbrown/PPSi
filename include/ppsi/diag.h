@@ -12,13 +12,6 @@
  * strerror(errno) together with the explanation. Avoid diag_printf if
  * possible, for size reasons, but here it is anyways.
  */
-enum {
-	STATE_ENTER,
-	STATE_LOOP,
-	STATE_LEAVE
-};
-
-extern void pp_diag_fsm(struct pp_instance *ppi, char *name, int seq, int plen);
 extern void pp_diag_error(struct pp_instance *ppi, int err);
 extern void pp_diag_error_str2(struct pp_instance *ppi, char *s1, char *s2);
 extern void pp_diag_printf(struct pp_instance *ppi, char *fmt, ...);
