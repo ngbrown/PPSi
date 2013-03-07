@@ -31,16 +31,15 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 		&ppi->delay_req_send_time);
 
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
-		if (s_to_m_dly.seconds && pp_verbose_servo)
-			PP_VPRINTF("pp_update_delay aborted, delay "
-				   "greater than 1 second\n");
+		pp_diag(ppi, servo, 1, "%s aborted, delay "
+				   "greater than 1 second\n", __func__);
 		if (s_to_m_dly.seconds)
 			return;
 
-		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly
-		    && pp_verbose_servo)
-			PP_VPRINTF("pp_update_delay aborted, delay %d greater "
+		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
+			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
 				   "than administratively set maximum %d\n",
+				   __func__,
 				   s_to_m_dly.nanoseconds,
 				   OPTS(ppi)->max_dly);
 		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
@@ -113,20 +112,19 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 	sub_TimeInternal(&m_to_s_dly, recv_time, send_time);
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
-		if (m_to_s_dly.seconds && pp_verbose_servo)
-			PP_PRINTF("pp_update_offset aborted, delay greater "
-			     "than 1 second\n");
-		if (m_to_s_dly.seconds)
+		if (m_to_s_dly.seconds) {
+			pp_diag(ppi, servo, 1, "%s aborted, delay greater "
+				"than 1 second\n", __func__);
 			return;
-
-		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly
-		    && pp_verbose_servo)
-			PP_PRINTF("updateDelay aborted, delay %d greater than "
-				  "administratively set maximum %d\n",
+		}
+		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly) {
+			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
+			     "than administratively set maximum %d\n",
+			     __func__,
 			     m_to_s_dly.nanoseconds,
 			     OPTS(ppi)->max_dly);
-		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly)
 			return;
+		}
 	}
 
 	SRV(ppi)->m_to_s_dly = m_to_s_dly;
@@ -166,17 +164,17 @@ void pp_update_clock(struct pp_instance *ppi)
 	TimeInternal time_tmp;
 
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
-		if (DSCUR(ppi)->offsetFromMaster.seconds
-		    && pp_verbose_servo) {
-			PP_PRINTF("pp_update_clock aborted, offset greater "
-				   "than 1 second\n");
+		if (DSCUR(ppi)->offsetFromMaster.seconds) {
+			pp_diag(ppi, servo, 1, "%s aborted, offset greater "
+				"than 1 second\n", __func__);
 			goto display;
 		}
 
-		if (DSCUR(ppi)->offsetFromMaster.nanoseconds >
-		    OPTS(ppi)->max_rst && pp_verbose_servo) {
-			PP_VPRINTF("pp_update_clock aborted, offset %d greater than "
-			     "administratively set maximum %d\n",
+		if ((DSCUR(ppi)->offsetFromMaster.nanoseconds) >
+		    OPTS(ppi)->max_rst) {
+			pp_diag(ppi, servo, 1, "%s aborted, offset %d greater "
+			     "than administratively set maximum %d\n",
+			     __func__,
 			     DSCUR(ppi)->offsetFromMaster.nanoseconds,
 			     OPTS(ppi)->max_rst);
 			goto display;
@@ -233,7 +231,7 @@ void pp_update_clock(struct pp_instance *ppi)
 	}
 
 display:
-	if (pp_verbose_servo) {
+	if (__PP_DIAG_ALLOW_FLAGS(pp_global_flags, pp_dt_servo, 1)) {
 		PP_VPRINTF("\n--Offset Correction--\n");
 		PP_VPRINTF("Raw offset from master:  %10ds %11dns\n",
 			   SRV(ppi)->m_to_s_dly.seconds,

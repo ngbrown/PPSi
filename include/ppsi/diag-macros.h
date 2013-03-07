@@ -146,24 +146,15 @@ extern unsigned long pp_diag_parse(char *diaglevel);
  * constants instead, to avoid the hairyness of ifdef.
  */
 #ifdef VERB_LOG_MSGS
-#define pp_verbose_servo 1
 #define pp_verbose_time 1
 #endif
 
 /* Accept individual flags to turn on each of them */
-#ifdef VERB_SERVO
-#define pp_verbose_servo 1
-#endif
-
 #ifdef VERB_TIME
 #define pp_verbose_time 1
 #endif
 
 /* Provide 0 as default for all such values */
-#ifndef pp_verbose_servo
-#define pp_verbose_servo 0
-#endif
-
 #ifndef pp_verbose_time
 #define pp_verbose_time 0
 #endif
