@@ -75,17 +75,16 @@ static int posix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	if (tv) {
 		t->seconds = tv->tv_sec;
 		t->nanoseconds = tv->tv_usec * 1000;
-		if (pp_verbose_time)
-			pp_printf("%s: %9li.%06li\n", __func__, tv->tv_sec,
-				  tv->tv_usec);
 	} else {
 		/*
 		 * get the recording time here, even though it may  put a big
 		 * spike in the offset signal sent to the clock servo
 		 */
-		PP_VPRINTF("no receive time stamp, getting it in user space\n");
 		ppi->t_ops->get(ppi, t);
 	}
+	/* This is not really hw... */
+	pp_diag(ppi, time, 2, "recv stamp: %i.%09i (%s)\n",
+		(int)t->seconds, (int)t->nanoseconds, tv ? "kernel" : "user");
 	return ret;
 }
 

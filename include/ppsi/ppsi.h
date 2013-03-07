@@ -176,7 +176,7 @@ static inline int pp_timeout(struct pp_instance *ppi, int index)
 		time_after_eq(ppi->t_ops->calc_timeout(ppi, 0),
 			      ppi->timeouts[index]);
 
-	if (ret && pp_verbose_time)
+	if (ret)
 		pp_timeout_log(ppi, index);
 	return ret;
 }

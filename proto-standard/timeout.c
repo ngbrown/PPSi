@@ -21,7 +21,7 @@ static char *timeout_names[__PP_TO_ARRAY_SIZE] __attribute__((used)) = {
  */
 void pp_timeout_log(struct pp_instance *ppi, int index)
 {
-	PP_VPRINTF("timeout expire event: %s\n", timeout_names[index]);
+	pp_diag(ppi, time, 1, "timeout expired: %s\n", timeout_names[index]);
 }
 
 /*

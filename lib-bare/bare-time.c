@@ -14,8 +14,9 @@ static int bare_time_get(struct pp_instance *ppi, TimeInternal *t)
 	}
 	t->seconds = tv.tv_sec;
 	t->nanoseconds = tv.tv_usec * 1000;
-	if (pp_verbose_time && !(pp_global_flags & PP_FLAG_NOTIMELOG))
-		pp_printf("%s: %9li.%06li\n", __func__, tv.tv_sec, tv.tv_usec);
+	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
+		pp_diag(ppi, time, 2, "%s: %9li.%06li\n", __func__,
+			tv.tv_sec, tv.tv_usec);
 	return 0;
 }
 
@@ -30,12 +31,13 @@ static int bare_time_set(struct pp_instance *ppi, TimeInternal *t)
 		PP_PRINTF("settimeofday error");
 		sys_exit(1);
 	}
-	if (pp_verbose_time)
-		pp_printf("%s: %9li.%06li\n", __func__, tv.tv_sec, tv.tv_usec);
+	pp_diag(ppi, time, 1, "%s: %9li.%06li\n", __func__, tv.tv_sec,
+		tv.tv_usec);
 	return 0;
 }
 
-static int bare_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
+static int bare_time_adjust(struct pp_instance *ppi, long offset_ns,
+			    long freq_ppm)
 {
 	struct bare_timex t;
 	int ret;
@@ -50,8 +52,7 @@ static int bare_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_p
 	t.modes = MOD_FREQUENCY | MOD_OFFSET;
 
 	ret = sys_adjtimex(&t);
-	if (pp_verbose_time)
-		pp_printf("%s: %li %li\n", __func__, offset_ns, freq_ppm);
+	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppm);
 	return ret;
 }
 
