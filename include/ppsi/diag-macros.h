@@ -133,28 +133,3 @@ extern void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
  * to set the value to 0xfffffff0 to be compatible with previous usage.
  */
 extern unsigned long pp_diag_parse(char *diaglevel);
-
-
-/*
- * The following stuff is being removed in a few commits. It's stuff that
- * I did but don't like any more (because we really need per-instance bits
- */
-
-
-/*
- * Then, we have this VERB_LOG_MSGS that used to be an ifdef. Provide
- * constants instead, to avoid the hairyness of ifdef.
- */
-#ifdef VERB_LOG_MSGS
-#define pp_verbose_time 1
-#endif
-
-/* Accept individual flags to turn on each of them */
-#ifdef VERB_TIME
-#define pp_verbose_time 1
-#endif
-
-/* Provide 0 as default for all such values */
-#ifndef pp_verbose_time
-#define pp_verbose_time 0
-#endif
