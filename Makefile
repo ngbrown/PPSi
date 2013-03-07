@@ -46,8 +46,6 @@ pp_printf/pp-printf.o: $(wildcard pp_printf/*.[ch])
 	$(MAKE) -C pp_printf pp-printf.o
 endif
 
-include diag/Makefile
-
 # proto-standard is always included, as it provides default function
 # so the extension can avoid duplication of code.
 ifdef PROTO_EXT
