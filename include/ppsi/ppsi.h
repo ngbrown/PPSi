@@ -14,6 +14,14 @@
 #include <ppsi/constants.h>
 #include <ppsi/jiffies.h>
 
+/* We can't include pp-printf.h when building freestading, so have it here */
+extern int pp_printf(const char *fmt, ...)
+	__attribute__((format(printf, 1, 2)));
+extern int pp_vprintf(const char *fmt, va_list args)
+	__attribute__((format(printf, 1, 0)));
+extern int pp_vsprintf(char *buf, const char *, va_list)
+	__attribute__ ((format (printf, 2, 0)));
+
 /*
  * Runtime options. Default values can be overridden by command line.
  */

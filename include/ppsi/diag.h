@@ -6,14 +6,6 @@
 
 #include <ppsi/ppsi.h>
 
-/* Our printf, that is implemented internally */
-extern int pp_printf(const char *fmt, ...)
-	__attribute__((format(printf, 1, 2)));
-extern int pp_vprintf(const char *fmt, va_list args)
-	__attribute__((format(printf, 1, 0)));
-extern int pp_vsprintf(char *buf, const char *, va_list)
-	__attribute__ ((format (printf, 2, 0)));
-
 /*
  * The diagnostic functions
  *
