@@ -60,8 +60,6 @@ struct pp_channel {
  */
 struct pp_frgn_master {
 	PortIdentity port_identity;
-	UInteger16 ann_messages;
-
 	//This one is not in the spec
 	MsgAnnounce ann;
 	MsgHeader hdr;

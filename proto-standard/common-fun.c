@@ -92,11 +92,7 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 		     ppi->frgn_master[j].port_identity.portNumber)) {
 			/* Foreign Master is already in Foreign master data set
 			 */
-			ppi->frgn_master[j].ann_messages++;
 			found = 1;
-			PP_VPRINTF("st_com_add_foreign: ann_messages: %d\n",
-				ppi->frgn_master[j].ann_messages);
-
 			msg_copy_header(&ppi->frgn_master[j].hdr, hdr);
 			msg_unpack_announce(buf, &ppi->frgn_master[j].ann);
 			break;
@@ -121,7 +117,6 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 		PP_CLOCK_IDENTITY_LENGTH);
 	ppi->frgn_master[j].port_identity.portNumber =
 		hdr->sourcePortIdentity.portNumber;
-	ppi->frgn_master[j].ann_messages = 0;
 
 	/*
 	 * header and announce field of each Foreign Master are
