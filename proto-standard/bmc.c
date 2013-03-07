@@ -95,7 +95,6 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 			 MsgHeader *hdr_a, MsgAnnounce *ann_a,
 			 MsgHeader *hdr_b, MsgAnnounce *ann_b)
 {
-	int comp = 0;
 	Octet *ppci;
 
 	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
@@ -156,53 +155,22 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 		    ann_b->grandmasterClockQuality.clockClass) {
 			if (ann_a->grandmasterClockQuality.clockAccuracy == ann_b->grandmasterClockQuality.clockAccuracy) {
 				if (ann_a->grandmasterClockQuality.offsetScaledLogVariance == ann_b->grandmasterClockQuality.offsetScaledLogVariance) {
-					if (ann_a->grandmasterPriority2 == ann_b->grandmasterPriority2) {
-						comp = memcmp(&ann_a->grandmasterIdentity, &ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
-						if (comp < 0)
-							return -1;
-						if (comp > 0)
-							return 1;
-						return 0;
-					}
+					if (ann_a->grandmasterPriority2 == ann_b->grandmasterPriority2)
+						return memcmp(&ann_a->grandmasterIdentity, &ann_b->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH);
 					/* Priority2 are not identical */
-					comp = memcmp(&ann_a->grandmasterPriority2, &ann_b->grandmasterPriority2, 1);
-					if (comp < 0)
-						return -1;
-					if (comp > 0)
-						return 1;
-					return 0;
+					return memcmp(&ann_a->grandmasterPriority2, &ann_b->grandmasterPriority2, 1);
 				}
 				/* offsetScaledLogVariance are not identical */
-				comp = memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
-				if (comp < 0)
-					return -1;
-				if (comp > 0)
-					return 1;
-				return 0;
+				return memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
 			}
 			/*  Accuracy are not identitcal */
-			comp = memcmp(&ann_a->grandmasterClockQuality.clockAccuracy, &ann_b->grandmasterClockQuality.clockAccuracy, 1);
-			if (comp < 0)
-				return -1;
-			if (comp > 0)
-				return 1;
-			return 0;
+			return memcmp(&ann_a->grandmasterClockQuality.clockAccuracy, &ann_b->grandmasterClockQuality.clockAccuracy, 1);
 		}
 		/* ClockClass are not identical */
-		comp = memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
-		if (comp < 0)
-			return -1;
-		if (comp > 0)
-			return 1;
-		return 0;
+		return memcmp(&ann_a->grandmasterClockQuality.clockClass, &ann_b->grandmasterClockQuality.clockClass, 1);
 	}
 	/*  Priority1 are not identical */
-	comp = memcmp(&ann_a->grandmasterPriority1, &ann_b->grandmasterPriority1, 1);
-	if (comp < 0)
-		return -1;
-	if (comp > 0)
-		return 1;
-	return 0;
+	return memcmp(&ann_a->grandmasterPriority1, &ann_b->grandmasterPriority1, 1);
 }
 
 /* State decision algorithm 9.3.3 Fig 26 */
