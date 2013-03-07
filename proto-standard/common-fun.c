@@ -84,8 +84,8 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 
 	/* Check if foreign master is already known */
 	for (i = 0; i < ppi->number_foreign_records; i++) {
-		if (!memcmp(hdr->sourcePortIdentity.clockIdentity,
-			    ppi->frgn_master[j].port_identity.
+		if (!memcmp(&hdr->sourcePortIdentity.clockIdentity,
+			    &ppi->frgn_master[j].port_identity.
 			    clockIdentity,
 			    PP_CLOCK_IDENTITY_LENGTH) &&
 		    (hdr->sourcePortIdentity.portNumber ==
@@ -116,8 +116,8 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 	j = ppi->foreign_record_i;
 
 	/* Copy new foreign master data set from announce message */
-	memcpy(ppi->frgn_master[j].port_identity.clockIdentity,
-		hdr->sourcePortIdentity.clockIdentity,
+	memcpy(&ppi->frgn_master[j].port_identity.clockIdentity,
+		&hdr->sourcePortIdentity.clockIdentity,
 		PP_CLOCK_IDENTITY_LENGTH);
 	ppi->frgn_master[j].port_identity.portNumber =
 		hdr->sourcePortIdentity.portNumber;

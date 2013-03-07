@@ -42,7 +42,7 @@ void pp_timeout_rand(struct pp_instance *ppi, int index, int logval)
 	if (!seed) {
 		uint32_t *p;
 		/* use the least 32 bits of the mac address as seed */
-		p = (void *)(DSDEF(ppi)->clockIdentity)
+		p = (void *)(&DSDEF(ppi)->clockIdentity)
 			+ sizeof(ClockIdentity) - 4;
 		seed = *p;
 	}

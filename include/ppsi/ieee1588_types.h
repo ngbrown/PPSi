@@ -82,7 +82,9 @@ static inline void clear_TimeInternal(struct TimeInternal *t)
 	memset(t, 0, sizeof(*t));
 }
 
-typedef Octet	ClockIdentity[8]; /* page 13 (33) */
+typedef struct ClockIdentity { /* page 13 (33) */
+	Octet id[8];
+} ClockIdentity;
 #define PP_CLOCK_IDENTITY_LENGTH	sizeof(ClockIdentity)
 
 typedef struct PortIdentity { /* page 13 (33) */

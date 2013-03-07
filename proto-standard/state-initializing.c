@@ -27,7 +27,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	 */
 	def->twoStepFlag = TRUE;
 	/* Clock identity comes from mac address with 0xff:0xfe intermixed */
-	id = def->clockIdentity;
+	id = (unsigned char *)&def->clockIdentity;
 	mac = NP(ppi)->ch[PP_NP_GEN].addr;
 	id[0] = mac[0];
 	id[1] = mac[1];
@@ -50,8 +50,8 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	/*
 	 * Initialize port data set
 	 */
-	memcpy(port->portIdentity.clockIdentity,
-		def->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
+	memcpy(&port->portIdentity.clockIdentity,
+		&def->clockIdentity, PP_CLOCK_IDENTITY_LENGTH);
 	port->portIdentity.portNumber = 1;
 	port->logMinDelayReqInterval = PP_DEFAULT_DELAYREQ_INTERVAL;
 	port->logAnnounceInterval = opt->announce_intvl;
