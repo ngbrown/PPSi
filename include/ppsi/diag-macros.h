@@ -52,7 +52,7 @@ extern CONST_VERBOSITY int pp_diag_verbosity;
  * CONFIG_PPSI_RUNTIME_VERBOSITY
  */
 #define pp_error(...) \
-	if (pp_verbose_error && pp_diag_verbosity) pp_printf(__VA_ARGS__)
+	if (pp_diag_verbosity) pp_printf("ERROR: " __VA_ARGS__)
 
 #define pp_Vprintf(...) \
 	if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
@@ -141,17 +141,12 @@ extern unsigned long pp_diag_parse(char *diaglevel);
  * constants instead, to avoid the hairyness of ifdef.
  */
 #ifdef VERB_LOG_MSGS
-#define pp_verbose_error 1
 #define pp_verbose_dump 1
 #define pp_verbose_servo 1
 #define pp_verbose_time 1
 #endif
 
-/* Accept 5 individual flags to turn on each of them */
-#ifdef VERB_ERR
-#define pp_verbose_error 1
-#endif
-
+/* Accept individual flags to turn on each of them */
 #ifdef VERB_DUMP
 #define pp_verbose_dump 1
 #endif
@@ -165,10 +160,6 @@ extern unsigned long pp_diag_parse(char *diaglevel);
 #endif
 
 /* Provide 0 as default for all such values */
-#ifndef pp_verbose_error
-#define pp_verbose_error 0
-#endif
-
 #ifndef pp_verbose_dump
 #define pp_verbose_dump 0
 #endif
