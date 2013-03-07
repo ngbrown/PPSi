@@ -95,6 +95,7 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 			 MsgHeader *hdr_a, MsgAnnounce *ann_a,
 			 MsgHeader *hdr_b, MsgAnnounce *ann_b)
 {
+	struct ClockQuality *qa, *qb;
 	Octet *ppci;
 
 	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
@@ -150,18 +151,20 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 	}
 
 	/* GrandMaster are not identical */
+	qa = &ann_a->grandmasterClockQuality;
+	qb = &ann_b->grandmasterClockQuality;
 
 	if (ann_a->grandmasterPriority1 != ann_b->grandmasterPriority1)
 		return ann_a->grandmasterPriority1 - ann_b->grandmasterPriority1;
 
-	if (ann_a->grandmasterClockQuality.clockClass != ann_b->grandmasterClockQuality.clockClass)
-		return ann_a->grandmasterClockQuality.clockClass - ann_b->grandmasterClockQuality.clockClass;
+	if (qa->clockClass != qb->clockClass)
+		return qa->clockClass - qb->clockClass;
 
-	if (ann_a->grandmasterClockQuality.clockAccuracy != ann_b->grandmasterClockQuality.clockAccuracy)
-		return ann_a->grandmasterClockQuality.clockAccuracy - ann_b->grandmasterClockQuality.clockAccuracy;
+	if (qa->clockAccuracy != qb->clockAccuracy)
+		return qa->clockAccuracy - qb->clockAccuracy;
 
-	if (ann_a->grandmasterClockQuality.offsetScaledLogVariance != ann_b->grandmasterClockQuality.offsetScaledLogVariance)
-		return ann_a->grandmasterClockQuality.clockClass - ann_b->grandmasterClockQuality.clockClass;
+	if (qa->offsetScaledLogVariance != qb->offsetScaledLogVariance)
+		return qa->clockClass - qb->clockClass;
 
 	if (ann_a->grandmasterPriority2 != ann_b->grandmasterPriority2)
 		return ann_a->grandmasterPriority2 - ann_b->grandmasterPriority2;
