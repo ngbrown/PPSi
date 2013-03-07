@@ -26,11 +26,6 @@ void pp_diag_fsm(struct pp_instance *ppi, char *name, int sequence, int plen)
 		name, ppi->next_state, ppi->next_delay);
 }
 
-void pp_diag_trace(struct pp_instance *ppi, const char *f, int line)
-{
-	pp_printf("TRACE for %p: %s:%i\n", ppi, f, line);
-}
-
 void pp_diag_error(struct pp_instance *ppi, int err)
 {
 	pp_printf("ERR for %p: %i\n", ppi, err);
