@@ -35,7 +35,7 @@ CFLAGS = $(USER_CFLAGS)
 CFLAGS += -Wall -O2 -ggdb -Iinclude
 
 # to avoid ifdef as much as possible, I use the kernel trick for OBJ variables
-OBJ-y := fsm.o
+OBJ-y := fsm.o diag.o
 
 # include pp_printf code, by default the "full" version. Please
 # set CONFIG_PRINTF_NONE or CONFIG_PRINTF_XINT if needed.
