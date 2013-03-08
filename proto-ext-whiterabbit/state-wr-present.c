@@ -18,7 +18,7 @@ int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		WR_DSPOR(ppi)->wrMode = WR_SLAVE;
 		pp_timeout_set(ppi, PP_TO_EXT_0,
 			       WR_WRS_PRESENT_TIMEOUT_MS);
-		st_com_restart_annrec_timer(ppi);
+		pp_timeout_restart_annrec(ppi);
 		e = msg_issue_wrsig(ppi, SLAVE_PRESENT);
 	}
 
