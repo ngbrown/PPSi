@@ -305,7 +305,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	s->delta_ms = delay_ms_fix;
 
-	tics = wr_timer_get_msec_tics();
+	tics = ppi->t_ops->calc_timeout(ppi, 0);
 
 	if (s->state != WR_WAIT_SYNC_IDLE) {
 		PP_PRINTF("servo:state: %d (%s)\n", s->state,

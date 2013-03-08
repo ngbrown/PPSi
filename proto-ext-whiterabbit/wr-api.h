@@ -95,8 +95,6 @@ int wr_enable_ptracker(struct pp_instance *ppi);
 
 int wr_enable_timing_output(struct pp_instance *ppi, int enable);
 
-uint32_t wr_timer_get_msec_tics(void);
-
 int wr_adjust_in_progress(void);
 int wr_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec);
 int wr_adjust_phase(int32_t phase_ps);
