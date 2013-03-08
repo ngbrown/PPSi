@@ -66,14 +66,14 @@ typedef struct TimeInternal {
 	int 		correct;	/* 0 or 1 */
 #if 0
 	/*
-	 * The following three fields may be used for diagnostics, but
+	 * The following two fields may be used for diagnostics, but
 	 * they cost space. So remove them but keep the code around just
 	 * in case it is useful again (they are only set, never read)
 	 */
 	int32_t raw_phase;
 	int32_t raw_nsec;
-	int32_t raw_ahead;
 #endif
+	int32_t raw_ahead;	/* raw_ahead is used during calibration */
 	/* White Rabbit extension end */
 } TimeInternal;
 
