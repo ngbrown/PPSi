@@ -59,20 +59,6 @@ int st_com_execute_slave(struct pp_instance *ppi)
 	return 0;
 }
 
-/* Called by listening, master, passive, slave */
-int st_com_check_record_update(struct pp_instance *ppi)
-{
-	if (ppi->record_update) {
-		PP_VPRINTF("event STATE_DECISION_EVENT\n");
-		ppi->record_update = FALSE;
-		ppi->next_state = bmc(ppi);
-
-		if (ppi->next_state != ppi->state)
-			return 1;
-	}
-	return 0;
-}
-
 /* Called by this file, basically when an announce is got, all states */
 static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 {
@@ -126,12 +112,6 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	if (len < PP_ANNOUNCE_LENGTH)
 		return -1;
 
-	/*
-	 * Valid announce message is received : BMC algorithm
-	 * will be executed
-	 */
-	ppi->record_update = TRUE;
-
 	if (ppi->is_from_cur_par) {
 		msg_unpack_announce(buf, &ann);
 		s1(ppi, hdr, &ann);
@@ -145,6 +125,8 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 
 	if (pp_hooks.handle_announce)
 		pp_hooks.handle_announce(ppi);
+
+	ppi->next_state = bmc(ppi); /* got a new announce: run bmc */
 
 	return 0;
 }
@@ -269,9 +251,7 @@ int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	PP_VPRINTF("Announce message from another foreign master\n");
 
 	st_com_add_foreign(ppi, buf);
-
-	ppi->record_update = TRUE;
-
+	ppi->next_state = bmc(ppi); /* got a new announce: run bmc */
 	return 0;
 }
 

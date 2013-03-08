@@ -162,7 +162,6 @@ struct pp_instance {
 	UInteger16 number_foreign_records;
 	Integer16  foreign_record_i;
 	Integer16  foreign_record_best;
-	Boolean  record_update;
 	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
 	TimeInternal sync_receive_time;
 	UInteger16 recv_sync_sequence_id;

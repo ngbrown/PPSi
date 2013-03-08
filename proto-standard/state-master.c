@@ -25,9 +25,6 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			goto out;
 	}
 
-	if (st_com_check_record_update(ppi))
-		goto state_updated;
-
 	if (pp_timeout_z(ppi, PP_TO_SYNC)) {
 		if ((e = msg_issue_sync(ppi) < 0))
 			goto out;
@@ -107,7 +104,6 @@ out:
 		ppi->next_state = PPS_FAULTY;
 	}
 
-state_updated:
 	d1 = pp_ms_to_timeout(ppi, PP_TO_ANN_INTERVAL);
 	d2 = pp_ms_to_timeout(ppi, PP_TO_SYNC);
 	ppi->next_delay = d1 < d2 ? d1 : d2;

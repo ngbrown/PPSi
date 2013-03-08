@@ -30,9 +30,6 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				DSPOR(ppi)->logMinDelayReqInterval);
 	}
 
-	if (st_com_check_record_update(ppi))
-		goto state_updated;
-
 	if (plen == 0)
 		goto out;
 
@@ -128,8 +125,6 @@ out:
 		ppi->next_state = PPS_FAULTY;
 		return 0;
 	}
-
-state_updated:
 
 	/* Leaving this state */
 	if (ppi->next_state != ppi->state) {

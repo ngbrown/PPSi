@@ -18,9 +18,6 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (ppi->is_new_state)
 		pp_timeout_restart_annrec(ppi);
 
-	if (st_com_check_record_update(ppi))
-		goto state_updated;
-
 	if (plen == 0)
 		goto out;
 
@@ -46,7 +43,6 @@ out:
 	if (e != 0)
 		ppi->next_state = PPS_FAULTY;
 
-state_updated:
 	/* Leaving this state */
 	if (ppi->next_state != ppi->state)
 		pp_timeout_clr(ppi, PP_TO_ANN_RECEIPT);
