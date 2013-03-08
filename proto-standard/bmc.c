@@ -102,11 +102,11 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 			   struct pp_frgn_master *b)
 {
 	struct ClockQuality *qa, *qb;
-	struct MsgHeader *ha = &a->hdr;
-	struct MsgHeader *hb = &b->hdr;
 	struct MsgAnnounce *aa = &a->ann;
 	struct MsgAnnounce *ab = &b->ann;
-	struct ClockIdentity *ppci;
+	struct ClockIdentity *ida = &a->hdr.sourcePortIdentity.clockIdentity;
+	struct ClockIdentity *idb = &b->hdr.sourcePortIdentity.clockIdentity;
+	struct ClockIdentity *idparent;
 
 	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
 
@@ -120,10 +120,10 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 		if (ab->stepsRemoved > aa->stepsRemoved + 1)
 			return -1;
 
-		ppci = &DSPAR(ppi)->parentPortIdentity.clockIdentity;
+		idparent = &DSPAR(ppi)->parentPortIdentity.clockIdentity;
 
 		if (aa->stepsRemoved > ab->stepsRemoved) {
-			if (!idcmp(&ha->sourcePortIdentity.clockIdentity, ppci)) {
+			if (!idcmp(ida, idparent)) {
 				PP_PRINTF("Sender=Receiver: Error -1");
 				return 0;
 			}
@@ -131,20 +131,18 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 
 		}
 		if (ab->stepsRemoved > aa->stepsRemoved) {
-			if (!idcmp(&hb->sourcePortIdentity.clockIdentity, ppci)) {
+			if (!idcmp(idb, idparent)) {
 				PP_PRINTF("Sender=Receiver: Error -3");
 				return 0;
 			}
 			return -1;
 		}
 
-		if (!idcmp(&ha->sourcePortIdentity.clockIdentity,
-			   &hb->sourcePortIdentity.clockIdentity)) {
+		if (!idcmp(ida, idb)) {
 			PP_PRINTF("Sender=Receiver: Error -2");
 			return 0;
 		}
-		if (idcmp(&ha->sourcePortIdentity.clockIdentity,
-			   &hb->sourcePortIdentity.clockIdentity) < 0)
+		if (idcmp(ida, idb) < 0)
 			return -1;
 		return 1;
 	}
