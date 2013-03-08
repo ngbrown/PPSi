@@ -94,8 +94,9 @@ static int idcmp(struct ClockIdentity *a, struct ClockIdentity *b)
 }
 
 /*
- * Data set comparison between two foreign masters (9.3.4 fig 27)
- * return similar to memcmp()
+ * Data set comparison between two foreign masters. Return similar to
+ * memcmp().  However, lower values take precedence, so in A-B (like
+ * in comparisons,   > 0 means B wins (and < 0 means A wins).
  */
 static int bmc_dataset_cmp(struct pp_instance *ppi,
 			   struct pp_frgn_master *a,
@@ -107,22 +108,21 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 	struct ClockIdentity *ida = &a->hdr.sourcePortIdentity.clockIdentity;
 	struct ClockIdentity *idb = &b->hdr.sourcePortIdentity.clockIdentity;
 	struct ClockIdentity *idparent;
+	int diff;
 
 	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
 
-	/* Identity comparison */
 	if (!idcmp(&aa->grandmasterIdentity, &ab->grandmasterIdentity)) {
 
-		/* Algorithm part2 Fig 28 */
-		if (aa->stepsRemoved > ab->stepsRemoved + 1)
-			return 1;
+		/* The grandmaster is the same: part 2, fig 28, page 90. */
 
-		if (ab->stepsRemoved > aa->stepsRemoved + 1)
-			return -1;
+		diff = aa->stepsRemoved - ab->stepsRemoved;
+		if (diff > 1 || diff < -1)
+			return diff;
 
 		idparent = &DSPAR(ppi)->parentPortIdentity.clockIdentity;
 
-		if (aa->stepsRemoved > ab->stepsRemoved) {
+		if (diff > 0) {
 			if (!idcmp(ida, idparent)) {
 				PP_PRINTF("Sender=Receiver: Error -1");
 				return 0;
@@ -130,24 +130,23 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 			return 1;
 
 		}
-		if (ab->stepsRemoved > aa->stepsRemoved) {
+		if (diff < 0) {
 			if (!idcmp(idb, idparent)) {
 				PP_PRINTF("Sender=Receiver: Error -3");
 				return 0;
 			}
 			return -1;
 		}
-
-		if (!idcmp(ida, idb)) {
+		/* stepsRemoved is equal, compare identities */
+		diff = idcmp(ida, idb);
+		if (!diff) {
 			PP_PRINTF("Sender=Receiver: Error -2");
 			return 0;
 		}
-		if (idcmp(ida, idb) < 0)
-			return -1;
-		return 1;
+		return diff;
 	}
 
-	/* GrandMaster are not identical */
+	/* The grandmasters are different: part 1, fig 27, page 89. */
 	qa = &aa->grandmasterClockQuality;
 	qb = &ab->grandmasterClockQuality;
 
@@ -187,6 +186,7 @@ static int bmc_state_decision(struct pp_instance *ppi, struct pp_frgn_master *m)
 	/* copy local information to a foreign_master structure */
 	copy_d0(ppi, &myself);
 
+	/* dataset_cmp is "a - b" but lower values win */
 	cmpres = bmc_dataset_cmp(ppi, &myself, m);
 
 	if (DSDEF(ppi)->clockQuality.clockClass < 128) {
