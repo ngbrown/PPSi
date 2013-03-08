@@ -176,12 +176,6 @@ struct pp_instance {
 	TimeInternal delay_req_receive_time;
 	Integer8 log_min_delay_req_interval;
 
-	union {
-		MsgSync  sync;
-		MsgFollowUp  follow;
-		MsgDelayResp resp;
-		MsgAnnounce  announce;
-	} msg_tmp;
 	UInteger16 sent_seq[__PP_NR_MESSAGES_TYPES]; /* last sent this type */
 	MsgHeader received_ptp_header;
 	MsgHeader delay_req_hdr;

@@ -11,6 +11,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int e = 0; /* error var, to check errors in msg handling */
 	TimeInternal correction_field;
 	MsgHeader *hdr = &ppi->received_ptp_header;
+	MsgDelayResp resp;
 	int d1, d2;
 
 	if (ppi->is_new_state) {
@@ -62,19 +63,19 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if (e)
 			break;
 
-		msg_unpack_delay_resp(pkt, &ppi->msg_tmp.resp);
+		msg_unpack_delay_resp(pkt, &resp);
 
 		if ((memcmp(&DSPOR(ppi)->portIdentity.clockIdentity,
-			&ppi->msg_tmp.resp.requestingPortIdentity.clockIdentity,
+			&resp.requestingPortIdentity.clockIdentity,
 			PP_CLOCK_IDENTITY_LENGTH) == 0) &&
 			((ppi->sent_seq[PPM_DELAY_REQ]) ==
 				hdr->sequenceId) &&
 			(DSPOR(ppi)->portIdentity.portNumber ==
-			ppi->msg_tmp.resp.requestingPortIdentity.portNumber)
+			resp.requestingPortIdentity.portNumber)
 			&& ppi->is_from_cur_par) {
 
 			to_TimeInternal(&ppi->delay_req_receive_time,
-					&ppi->msg_tmp.resp.receiveTimestamp);
+					&resp.receiveTimestamp);
 
 			int64_to_TimeInternal(
 				hdr->correctionfield,

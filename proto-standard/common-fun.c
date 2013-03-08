@@ -121,6 +121,7 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 				 int len)
 {
 	MsgHeader *hdr = &ppi->received_ptp_header;
+	MsgAnnounce ann;
 
 	if (len < PP_ANNOUNCE_LENGTH)
 		return -1;
@@ -132,8 +133,8 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	ppi->record_update = TRUE;
 
 	if (ppi->is_from_cur_par) {
-		msg_unpack_announce(buf, &ppi->msg_tmp.announce);
-		s1(ppi, hdr, &ppi->msg_tmp.announce);
+		msg_unpack_announce(buf, &ann);
+		s1(ppi, hdr, &ann);
 	} else {
 		/* st_com_add_foreign takes care of announce unpacking */
 		st_com_add_foreign(ppi, buf);
@@ -156,6 +157,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	TimeInternal origin_tstamp;
 	TimeInternal correction_field;
 	MsgHeader *hdr = &ppi->received_ptp_header;
+	MsgSync sync;
 
 	if (len < PP_SYNC_LENGTH)
 		return -1;
@@ -177,7 +179,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			ppi->last_sync_corr_field.nanoseconds =
 				correction_field.nanoseconds;
 		} else {
-			msg_unpack_sync(buf, &ppi->msg_tmp.sync);
+			msg_unpack_sync(buf, &sync);
 			int64_to_TimeInternal(
 				ppi->received_ptp_header.correctionfield,
 				&correction_field);
@@ -187,7 +189,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 
 			ppi->waiting_for_follow = FALSE;
 			to_TimeInternal(&origin_tstamp,
-					&ppi->msg_tmp.sync.originTimestamp);
+					&sync.originTimestamp);
 			pp_update_offset(ppi, &origin_tstamp,
 					&ppi->sync_receive_time,
 					&correction_field);
@@ -203,6 +205,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 {
 	TimeInternal precise_orig_timestamp;
 	TimeInternal correction_field;
+	MsgFollowUp follow;
 	int ret = 0;
 
 	MsgHeader *hdr = &ppi->received_ptp_header;
@@ -228,10 +231,10 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 		return 0;
 	}
 
-	msg_unpack_follow_up(buf, &ppi->msg_tmp.follow);
+	msg_unpack_follow_up(buf, &follow);
 	ppi->waiting_for_follow = FALSE;
 	to_TimeInternal(&precise_orig_timestamp,
-			&ppi->msg_tmp.follow.preciseOriginTimestamp);
+			&follow.preciseOriginTimestamp);
 
 	int64_to_TimeInternal(ppi->received_ptp_header.correctionfield,
 					&correction_field);
