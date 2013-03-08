@@ -88,6 +88,10 @@ static void copy_d0(struct pp_instance *ppi, struct pp_frgn_master *m)
 	hdr->sourcePortIdentity.clockIdentity = defds->clockIdentity;
 }
 
+static int idcmp(struct ClockIdentity *a, struct ClockIdentity *b)
+{
+	return memcmp(a, b, sizeof(*a));
+}
 
 /*
  * Data set comparison between two foreign masters (9.3.4 fig 27)
@@ -107,8 +111,7 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
 
 	/* Identity comparison */
-	if (!memcmp(&aa->grandmasterIdentity,
-		       &ab->grandmasterIdentity, PP_CLOCK_IDENTITY_LENGTH)) {
+	if (!idcmp(&aa->grandmasterIdentity, &ab->grandmasterIdentity)) {
 
 		/* Algorithm part2 Fig 28 */
 		if (aa->stepsRemoved > ab->stepsRemoved + 1)
@@ -120,8 +123,7 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 		ppci = &DSPAR(ppi)->parentPortIdentity.clockIdentity;
 
 		if (aa->stepsRemoved > ab->stepsRemoved) {
-			if (!memcmp(&ha->sourcePortIdentity.clockIdentity,
-				    ppci, PP_CLOCK_IDENTITY_LENGTH)) {
+			if (!idcmp(&ha->sourcePortIdentity.clockIdentity, ppci)) {
 				PP_PRINTF("Sender=Receiver: Error -1");
 				return 0;
 			}
@@ -129,25 +131,20 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 
 		}
 		if (ab->stepsRemoved > aa->stepsRemoved) {
-			if (!memcmp(&hb->sourcePortIdentity.clockIdentity,
-				    ppci, PP_CLOCK_IDENTITY_LENGTH)) {
+			if (!idcmp(&hb->sourcePortIdentity.clockIdentity, ppci)) {
 				PP_PRINTF("Sender=Receiver: Error -3");
 				return 0;
 			}
 			return -1;
 		}
 
-		if (!memcmp(
-			    &ha->sourcePortIdentity.clockIdentity,
-			    &hb->sourcePortIdentity.clockIdentity,
-			    PP_CLOCK_IDENTITY_LENGTH)) {
+		if (!idcmp(&ha->sourcePortIdentity.clockIdentity,
+			   &hb->sourcePortIdentity.clockIdentity)) {
 			PP_PRINTF("Sender=Receiver: Error -2");
 			return 0;
 		}
-		if ((memcmp(
-			     &ha->sourcePortIdentity.clockIdentity,
-			     &hb->sourcePortIdentity.clockIdentity,
-			     PP_CLOCK_IDENTITY_LENGTH)) < 0)
+		if (idcmp(&ha->sourcePortIdentity.clockIdentity,
+			   &hb->sourcePortIdentity.clockIdentity) < 0)
 			return -1;
 		return 1;
 	}
@@ -171,8 +168,7 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 	if (aa->grandmasterPriority2 != ab->grandmasterPriority2)
 		return aa->grandmasterPriority2 - ab->grandmasterPriority2;
 
-	return memcmp(&aa->grandmasterIdentity, &ab->grandmasterIdentity,
-		      PP_CLOCK_IDENTITY_LENGTH);
+	return idcmp(&aa->grandmasterIdentity, &ab->grandmasterIdentity);
 }
 
 /* State decision algorithm 9.3.3 Fig 26 */
