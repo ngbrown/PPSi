@@ -110,7 +110,8 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 	struct ClockIdentity *idparent;
 	int diff;
 
-	PP_VPRINTF("BMC: in bmc_dataset_cmp\n");
+	/* dataset_cmp is called several times, so report only at level 2 */
+	pp_diag(ppi, bmc, 2,"%s\n", __func__);
 
 	if (!idcmp(&aa->grandmasterIdentity, &ab->grandmasterIdentity)) {
 
@@ -124,7 +125,8 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 
 		if (diff > 0) {
 			if (!idcmp(ida, idparent)) {
-				PP_PRINTF("Sender=Receiver: Error -1");
+				pp_diag(ppi, bmc, 1,"%s:%i: Error 1\n",
+					__func__, __LINE__);
 				return 0;
 			}
 			return 1;
@@ -132,7 +134,8 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 		}
 		if (diff < 0) {
 			if (!idcmp(idb, idparent)) {
-				PP_PRINTF("Sender=Receiver: Error -3");
+				pp_diag(ppi, bmc, 1,"%s:%i: Error 1\n",
+					__func__, __LINE__);
 				return 0;
 			}
 			return -1;
@@ -140,7 +143,7 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 		/* stepsRemoved is equal, compare identities */
 		diff = idcmp(ida, idb);
 		if (!diff) {
-			PP_PRINTF("Sender=Receiver: Error -2");
+			pp_diag(ppi, bmc, 1,"%s:%i: Error 2\n", __func__, __LINE__);
 			return 0;
 		}
 		return diff;
@@ -202,7 +205,7 @@ static int bmc_state_decision(struct pp_instance *ppi, struct pp_frgn_master *m)
 	if (cmpres > 0)
 		goto slave;
 
-	PP_PRINTF("Error in bmc_state_decision, cmpres=0.\n");
+	pp_diag(ppi, bmc, 1,"%s: error\n", __func__);
 
 	/*  MB: Is this the return code below correct? */
 	/*  Anyway, it's a valid return code. */
@@ -210,10 +213,12 @@ static int bmc_state_decision(struct pp_instance *ppi, struct pp_frgn_master *m)
 
 master:
 	m1(ppi);
+	pp_diag(ppi, bmc, 1,"%s: master\n", __func__);
 	return PPS_MASTER;
 
 slave:
 	s1(ppi, &m->hdr, &m->ann);
+	pp_diag(ppi, bmc, 1,"%s: slave\n", __func__);
 	return PPS_SLAVE;
 }
 
@@ -234,7 +239,7 @@ int bmc(struct pp_instance *ppi)
 		    < 0)
 			best = i;
 
-	PP_VPRINTF("bmc, best record : %d\n", best);
+	pp_diag(ppi, bmc, 1,"Best foreign master is %i\n", best);
 	ppi->foreign_record_best = best;
 
 	return bmc_state_decision(ppi, &frgn_master[best]);
