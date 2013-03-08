@@ -14,7 +14,6 @@ int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	MsgSignaling wrsig_msg;
 
 	if (ppi->is_new_state) {
-		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
 		WR_DSPOR(ppi)->wrPortState = WRS_PRESENT;
 		WR_DSPOR(ppi)->wrMode = WR_SLAVE;
 		pp_timeout_set(ppi, PP_TO_EXT_0,

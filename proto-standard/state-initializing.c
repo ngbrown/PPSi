@@ -20,8 +20,6 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (ppi->n_ops->init(ppi) < 0) /* it must handle being called twice */
 		goto failure;
 
-	port->portState = PPS_INITIALIZING;
-
 	/*
 	 * Initialize default data set
 	 */

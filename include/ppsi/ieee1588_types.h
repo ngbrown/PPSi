@@ -252,7 +252,7 @@ typedef struct DSPort {			/* page 72 */
 	/* Static */
 	PortIdentity	portIdentity;
 	/* Dynamic */
-	Enumeration8	portState;
+	/* Enumeration8	portState; -- not used */
 	Integer8	logMinDelayReqInterval; /* note: never changed */
 	/* TimeInternal	peerMeanPathDelay; -- not used */
 	/* Configurable */

@@ -10,7 +10,6 @@ int wr_s_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0;
 	if (ppi->is_new_state) {
-		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
 		WR_DSPOR(ppi)->wrPortState = WRS_S_LOCK;
 		wr_locking_enable(ppi);
 		pp_timeout_set(ppi, PP_TO_EXT_0, WR_S_LOCK_TIMEOUT_MS);

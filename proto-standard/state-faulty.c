@@ -12,7 +12,6 @@
 
 int pp_faulty(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	DSPOR(ppi)->portState = PPS_FAULTY;
 	PP_PRINTF("Faulty state detected\n");
 	ppi->next_state = PPS_INITIALIZING;
 	return 0;

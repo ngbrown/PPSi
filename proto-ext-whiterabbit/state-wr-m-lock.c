@@ -12,7 +12,6 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	MsgSignaling wrsig_msg;
 
 	if (ppi->is_new_state) {
-		DSPOR(ppi)->portState = PPS_MASTER;
 		WR_DSPOR(ppi)->wrPortState = WRS_M_LOCK;
 		WR_DSPOR(ppi)->wrMode = WR_MASTER;
 		e = msg_issue_wrsig(ppi, LOCK);

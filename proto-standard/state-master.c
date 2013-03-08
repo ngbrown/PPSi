@@ -16,7 +16,6 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	time = &ppi->last_rcv_time;
 
 	if (ppi->is_new_state) {
-		DSPOR(ppi)->portState = PPS_MASTER;
 		pp_timeout_rand(ppi, PP_TO_SYNC, DSPOR(ppi)->logSyncInterval);
 		pp_timeout_rand(ppi, PP_TO_ANN_INTERVAL,
 				DSPOR(ppi)->logAnnounceInterval);

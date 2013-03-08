@@ -15,10 +15,8 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (e)
 		goto out;
 
-	if (ppi->is_new_state) {
-		DSPOR(ppi)->portState = PPS_LISTENING;
+	if (ppi->is_new_state)
 		pp_timeout_restart_annrec(ppi);
-	}
 
 	if (st_com_check_record_update(ppi))
 		goto state_updated;

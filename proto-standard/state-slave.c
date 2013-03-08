@@ -15,8 +15,6 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int d1, d2;
 
 	if (ppi->is_new_state) {
-		DSPOR(ppi)->portState = PPS_SLAVE;
-
 		pp_init_clock(ppi);
 
 		if (pp_hooks.new_slave)

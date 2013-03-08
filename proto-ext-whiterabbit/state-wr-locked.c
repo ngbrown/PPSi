@@ -12,7 +12,6 @@ int wr_locked(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	MsgSignaling wrsig_msg;
 
 	if (ppi->is_new_state) {
-		DSPOR(ppi)->portState = PPS_UNCALIBRATED;
 		WR_DSPOR(ppi)->wrPortState = WRS_LOCKED;
 		pp_timeout_set(ppi, PP_TO_EXT_0,
 			       WR_DSPOR(ppi)->wrStateTimeout);
