@@ -7,7 +7,7 @@
 
 void pp_init_clock(struct pp_instance *ppi)
 {
-	PP_PRINTF("SERVO init clock\n");
+	pp_diag(ppi, servo, 1, "Initializing\n");
 
 	/* clear vars */
 	clear_TimeInternal(&SRV(ppi)->m_to_s_dly);
@@ -21,6 +21,7 @@ void pp_init_clock(struct pp_instance *ppi)
 		ppi->t_ops->adjust(ppi, 0, 0);
 }
 
+/* called by slave states */
 void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 {
 	TimeInternal s_to_m_dly;
@@ -97,11 +98,12 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 		owd_fltr->nsec_prev = DSCUR(ppi)->meanPathDelay.nanoseconds;
 		DSCUR(ppi)->meanPathDelay.nanoseconds = owd_fltr->y;
 
-		PP_VPRINTF("delay filter %d, %d\n",
-			   owd_fltr->y, owd_fltr->s_exp);
+		pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
+			owd_fltr->y, owd_fltr->s_exp);
 	}
 }
 
+/* called by slave and uncalib. (through common function handle_sync/followup) */
 void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 		      TimeInternal *recv_time, TimeInternal *correction_field)
 {
@@ -158,6 +160,7 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 		OPTS(ppi)->ofst_first_updated = 1;
 }
 
+/* called only *exactly* after calling pp_update_offset above */
 void pp_update_clock(struct pp_instance *ppi)
 {
 	Integer32 adj;
@@ -221,32 +224,24 @@ void pp_update_clock(struct pp_instance *ppi)
 
 		dc++;
 		if (dc % 2 == 0) { /* Prints statistics every 8s */
-				PP_PRINTF("ofst %d, raw ofst %d, mean-dly %d, adj %d\n",
-					DSCUR(ppi)->offsetFromMaster.nanoseconds,
-					SRV(ppi)->m_to_s_dly.nanoseconds,
-					DSCUR(ppi)->meanPathDelay.nanoseconds,
-					adj);
-
+			pp_diag(ppi, servo, 1,
+				"ofst %d, raw ofst %d, mean-dly %d, adj %d\n",
+				DSCUR(ppi)->offsetFromMaster.nanoseconds,
+				SRV(ppi)->m_to_s_dly.nanoseconds,
+				DSCUR(ppi)->meanPathDelay.nanoseconds,
+				adj);
 		}
 	}
 
 display:
-	if (__PP_DIAG_ALLOW_FLAGS(pp_global_flags, pp_dt_servo, 1)) {
-		PP_VPRINTF("\n--Offset Correction--\n");
-		PP_VPRINTF("Raw offset from master:  %10ds %11dns\n",
-			   SRV(ppi)->m_to_s_dly.seconds,
-			   SRV(ppi)->m_to_s_dly.nanoseconds);
-
-		PP_VPRINTF("\n--Offset and Delay filtered--\n");
-
-		PP_VPRINTF("one-way delay averaged (E2E): %9i.%09i\n",
-			   DSCUR(ppi)->meanPathDelay.seconds,
-			   DSCUR(ppi)->meanPathDelay.nanoseconds);
-
-		PP_VPRINTF("offset from master:       %9i.%09i\n",
-			   DSCUR(ppi)->offsetFromMaster.seconds,
-			   DSCUR(ppi)->offsetFromMaster.nanoseconds);
-		PP_VPRINTF("observed drift:          %10d\n",
-			   SRV(ppi)->obs_drift);
-	}
+	pp_diag(ppi, servo, 2, "Raw offset from master: %9i.%09i\n",
+		SRV(ppi)->m_to_s_dly.seconds,
+		SRV(ppi)->m_to_s_dly.nanoseconds);
+	pp_diag(ppi, servo, 2, "One-way delay averaged: %9i.%09i\n",
+		DSCUR(ppi)->meanPathDelay.seconds,
+		DSCUR(ppi)->meanPathDelay.nanoseconds);
+	pp_diag(ppi, servo, 2, "Offset from master:     %9i.%09i\n",
+		DSCUR(ppi)->offsetFromMaster.seconds,
+		DSCUR(ppi)->offsetFromMaster.nanoseconds);
+	pp_diag(ppi, servo, 2, "Observed drift: %9i\n", SRV(ppi)->obs_drift);
 }
