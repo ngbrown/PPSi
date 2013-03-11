@@ -1,0 +1,298 @@
+\input texinfo    @c -*-texinfo-*-
+%
+% ppsi-manual.in - main file for the documentation
+%
+%%%%
+
+%------------------------------------------------------------------------------
+%
+%                         NOTE FOR THE UNAWARE USER
+%                         =========================
+%
+%    This file is a texinfo source. It isn't the binary file of some strange
+%    editor of mine. If you want ASCII, you should "make ppsi-manual.txt".
+%
+%------------------------------------------------------------------------------
+
+%
+% This is not a conventional info file...
+% I use three extra features:
+%   - The '%' as a comment marker, if at beginning of line ("\%" -> "%")
+%   - leading blanks are allowed (this is something I can't live without)
+%   - braces are automatically escaped when they appear in example blocks
+%
+
+@comment %**start of header
+@documentlanguage en
+@documentencoding ISO-8859-1
+@setfilename ppsi-manual.info
+@settitle ppsi-manual
+@iftex
+@afourpaper
+@end iftex
+@paragraphindent none
+@comment %**end of header
+
+@setchapternewpage off
+
+@set update-month March 2013
+
+@finalout
+
+@titlepage
+@title PPSi Manual
+@subtitle @value{update-month}
+@subtitle Documentation about ``PTP Ported to Silicon''
+@author Alessandro Rubini and Aurelio Colosimo for CERN (be-co-ht)
+@end titlepage
+@headings single
+
+@c ##########################################################################
+@iftex
+@contents
+@end iftex
+
+@c ##########################################################################
+@node Top
+@top Introduction
+
+PPSi (PTP Ported to Silicon) is an application which, in
+its basic operation, implements @sc{ieee} 1588 specification in a way
+that is portable to several architectures, including OS-less ones.
+Configuration is performed using environment variables, as explained later.
+
+The algorithm and computation routines regarding the basic @sc{ieee} 1588
+are derived from the @i{PTPd} project, v.2.1.0 (see AUTHORS for details
+about copyright). In addition to what available in that package,
+we support raw Ethernet frames (@t{ETH_P_1588}), according to Annex F of the
+specification. (FIXME: this is set up but not working, yet)
+
+The project, when released, includes the extension for the White
+Rabbit protocol, which aims to achieve a sub-ns accuracy over networks
+up to 10km wide, by using proper hardware and ptp extensions.  White
+Rabbit is developed at ohwr.org:
+http://www.ohwr.org/projects/white-rabbit
+
+The home page of PPSi project, and its source files, are located at:
+@example
+   http://www.ohwr.org/projects/ppsi
+   git://ohwr.org/white-rabbit/ppsi.git
+@end example
+
+@c ##########################################################################
+@node Current Status
+@chapter Current Status
+
+This is the status as of August 2012, release @t{v12.08-rc1}.
+
+We currently support arch/extension/net protocol according to the following
+table:
+
+@example
+__________________________________________________________
+          |       PTP PROTOCOL   | NET TRANSPORT PROTOCOL |
+          |   IEEE1588 |  WR-EXT |   UDP  | IEEE802.3     |
+          |            |         |        |               |
+wrpc      |       X    |    X    |        |     X         |
+gnu-linux |       X    |         |    X   |     X         |
+__________|____________|_________|________|_______________|
+@end example
+
+
+In other words, the working architectures are "gnu-linux" and "wrpc":
+@itemize @bullet
+
+@item gnu-linux supports both UDP and @sc{ieee} 802.3 (raw Ethernet)
+transport protocols, but ptp standard protocol only
+
+@item spec supports @sc{ieee} 802.3 protocol only, and ptp or white
+rabbit extension protocol
+
+@end itemize
+
+@c ##########################################################################
+@node Compile-time Configuration
+@chapter Compile-time Configuration
+
+The code is organized in directories and compiled as libraries.
+Each sub-directory has a name that reflects either the arch or
+the extension:
+
+@example
+    arch-gnu-linux/             The default for hosted compile
+    arch-bare-linux/            A freestanding implementation (i386 syscalls)
+    arch-wrpc/                  For WRPC-SW, lm32 processor
+
+    proto-standard/             Standard PTP implementation
+    proto-ext-whiterabbit/      Additional code for White Rabbit
+
+    diag/                       Diagnostic code (none, partial, full)
+@end example
+
+Configuration is set by make variable, that you can pre-set in the
+environment:
+
+@example
+    CROSS_COMPILE               prefix, like "arm-linux-", or empty
+    PROTO_EXT                   "whiterabbit" or empty
+    ARCH                        name of you arch (default: gnu-linux)
+@end example
+
+If none of the variables are specified, the default @t{Makefile} compiles
+with standard @i{gcc}, over gnu-linux architecture, with no protocol
+extension and full diagnostic code (relying on pp_printf).
+
+@c ##########################################################################
+@node Implementation Details
+@chapter Implementation Details
+
+The main Makefile builds directory names from @t{$ARCH} and @t{$PROTO_EXT},
+each sub-Makefile then can augment @t{CFLAGS} with "@t{-ffreestanding}" or
+whatever is needed. Similarly, @t{CROSS_COMPILE} may be set by sub-Makefiles
+but please let the environment override it (as no custom pathnames
+should be edited before building and the pristine package can be used).
+
+The basic state machine is in @i{./fsm.c}. It's a simple file released in
+the public domain as we'd like the idea to be reused and the code
+itself is not worth copylefting.  Please note that the ppsi as a whole
+is LGPL-2.1 or later.
+
+All the rest of the package is built as libraries. The link order
+of libraries selects which object files are picked up and which are not.
+Additionally, "@t{CONFIG_PRINTF_XINT}" or one of the other @i{pp_printf}
+configurations can be set to override the default (which selects the
+most complete @i{printf} implementation from the package).
+
+This state-machine source has three undefined symbols: two for
+diagnostics and the "@i{pp_state_table}".  The table is picked by a
+library: either the extension being selected or the @i{proto-standard} one.
+The table includes pointers to functions, so those undefined symbols
+will select which other object files are picked up.
+
+Individual architectures can add files to the "@t{OBJ-y}" make variable,
+in order to add their own stuff (like the main() functions or @i{crt0.S}
+for freestanding stuff).  Similarly, architectures can add targets
+to the "all" target (the main Makefile only builds "ppsi.o",
+leaving the final link to the chosen architecture).
+
+Since code and data space is a problem in the freestanding world (for
+example, the whole ptp may need to fit in 64kB RAM including data and
+stack), each state in the state machine of the standard protocol must
+be implemented as a separate file. This allows an extension not using
+that particular function to save the overhead of binary size -- this
+happens because the linker pulls whole object files from libraries.
+Clearly an extension may implement several functions in the same file,
+as they are known to be all used in the final binary.
+
+
+@c ##########################################################################
+@node Licensing
+@chapter Licensing
+
+The code is licensed according to the GNU LGPL, version 2.1 or later.
+Some files are individually released to the public domain, when we
+think they are especially simple or generic.
+
+Both the full and the partial printf code is distributed according to
+the GPL-2, as it comes from the Linux kernel.  This means that any
+code using our diagnostics fall under the GPL requirements; you may
+compile and use the diagnostic code internally with your own
+proprietary code but you can't distribute binaries with diagnostics
+without the complete source code and associated rights. You may avoid
+the GPL requirements by using different printf implementations; if so
+we'd love to have them contributed back in the package.
+
+For binaries without diagnostic code, the LGPL applies, as detailed
+below.
+
+For licensing purposes, any `arch-name' or `timer-name' subdirectory
+"can be reasonably considered independent and separate works in
+themselves". While code in the directories provided here is all LGPL,
+you may add your own drop-in subdirectories. The LGPL requirements for
+source distribution and associated permissions won't apply to any such
+subdirectory that you may add, even if technically such code si not
+linked as a library.
+
+Currently, there is no `timer-' support, it will be added in a way
+similar to what you already see for `arch-'.
+
+
+@c ##########################################################################
+@node Diagnostics
+@chapter Diagnostics
+
+Diagnostic functions may call @i{pp_printf}.  They should not call
+@i{printf} because it is not available when building from freestanding
+environments.  You can use the Kconfig-like environment variables
+to choose which @i{pp_printf} implementation to build. The default is
+the full function and should be good for everyone. If you have
+size problems, please check @i{pp_printf/README} about the options.
+
+ppsi up to 2013-01 had no diagnostics by default and used the
+environment variables @t{HAS_DIAG} and @t{HAS_FULL_DIAG}. They are not
+used any more and the Makefile warns about them, to ease previous
+users.
+
+
+@c ##########################################################################
+@node Command Line
+@chapter Command Line
+
+The hosted architecture includes command line support:
+
+@example
+     ./ppsi --help
+@end example
+
+will print help about command line options (we also support the
+question-mark like the original ptp, but it's a bad choice because
+it's a shell wildcard). Actually, all multi-char options will
+print the help at this point in time, but this will be fixed.
+
+For standard operation, simply run @t{./ppsi} with no options. It will
+work like the PTPd executable, with the automatic choice of
+master/slave defined in @sc{ieee} specification (announce/timeout mechanism).
+
+@b{Note}: you'll need super user privileges to run the program.
+
+@c ##########################################################################
+@node Coding Style and Conventions
+@chapter Coding Style and Conventions
+
+The coding style is the one inherited from Linux kernel project (see
+@i{Documentation/CodingStyle} in the kernel sources).  However,
+structures, constants and field names defined by @sc{ieee} 1588 are kept in
+the suggested "CamelCase" form. Similarly, the typedefs are left, even
+if they are really a pain to deal with.  Most of this stuff is in
+include/ppsi/ieee1588_types.h file.
+
+The mostly used prefix is @t{pp_}, the short prefix for 'Portable PTP',
+which is used for every function related to the algorithm itself (but
+not in the architecture-specific code).
+
+Some prefixes to the @sc{ieee} naming are added, in order to improve
+readability:
+
+@t{EN} means "enumeration type". For instance, Enumeration Time Source
+(defined in the spec at table 7, page 57) becomes @t{ENTimeSource}.
+
+@t{PPM_} means "ppsi message", and is used for message types.
+
+@t{Msg} means "message" and is used for message structures.
+
+@t{PPS_} means "ppsi state" and is used for state machine's states
+definition.
+
+@t{DS} means "data set", and is used for the standard Data Sets (e.g.
+@i{DSCurrent} is the "Current Data Set"). The concept of data sets is
+defined in the specification at chapter 8, page 63.
+
+
+@c ##########################################################################
+@bye
+
+
+@c  LocalWords:  gnudd titlepage iftex texinfo CERN documentlanguage settitle
+@c  LocalWords:  documentencoding setfilename afourpaper paragraphindent ppsi
+@c  LocalWords:  setchapternewpage finalout PPSi Alessandro Rubini Colosimo
+@c  LocalWords:  ieee ohwr http PTPd wrpc linux proto whiterabbit printf LGPL
