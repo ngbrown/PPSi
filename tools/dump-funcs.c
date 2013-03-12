@@ -6,7 +6,7 @@
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 #include <linux/if_ether.h>
-#include <ieee1588_types.h> /* from ../include/ppsi */
+#include <ppsi/ieee1588_types.h> /* from ../include */
 #include "decent_types.h"
 #include "ptpdump.h"
 

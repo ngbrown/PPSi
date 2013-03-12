@@ -18,7 +18,7 @@
 #include <net/if_arp.h>
 #include <netpacket/packet.h>
 
-#include <ieee1588_types.h> /* from ../include/ppsi */
+#include <ppsi/ieee1588_types.h> /* from ../include */
 #include "decent_types.h"
 #include "ptpdump.h"
 
