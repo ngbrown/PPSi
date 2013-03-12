@@ -10,7 +10,7 @@
 #include "decent_types.h"
 #include "ptpdump.h"
 
-int dumpstruct(char *prefix, char *name, void *ptr, int size)
+static int dumpstruct(char *prefix, char *name, void *ptr, int size)
 {
 	int ret, i;
 	unsigned char *p = ptr;
@@ -28,8 +28,7 @@ int dumpstruct(char *prefix, char *name, void *ptr, int size)
 	return ret;
 }
 
-
-void dump_eth(struct ethhdr *eth)
+static void dump_eth(struct ethhdr *eth)
 {
 	struct timeval tv;
 	static struct timeval prev;
@@ -60,7 +59,7 @@ void dump_eth(struct ethhdr *eth)
 	       d[0], d[1], d[2], d[3], d[4], d[5]);
 }
 
-void dump_ip(struct iphdr *ip)
+static void dump_ip(struct iphdr *ip)
 {
 	uint32_t s = ntohl(ip->saddr);
 	uint32_t d = ntohl(ip->daddr);
@@ -71,14 +70,14 @@ void dump_ip(struct iphdr *ip)
 	       ntohs(ip->tot_len));
 }
 
-void dump_udp(struct udphdr *udp)
+static void dump_udp(struct udphdr *udp)
 {
 	printf("UDP: (%i -> %i) len %i\n",
 	       ntohs(udp->source), ntohs(udp->dest), ntohs(udp->len));
 }
 
 /* Helpers for fucking data structures */
-void dump_1stamp(char *s, struct stamp *t)
+static void dump_1stamp(char *s, struct stamp *t)
 {
 	uint64_t  sec = (uint64_t)(ntohs(t->sec.msb)) << 32;
 
@@ -86,20 +85,20 @@ void dump_1stamp(char *s, struct stamp *t)
 	printf("%s%lli.%09i\n", s, sec, ntohl(t->nsec));
 }
 
-void dump_1quality(char *s, ClockQuality *q)
+static void dump_1quality(char *s, ClockQuality *q)
 {
 	printf("%s%02x-%02x-%04x\n", s, q->clockClass, q->clockAccuracy,
 	       q->offsetScaledLogVariance);
 }
 
-void dump_1clockid(char *s, ClockIdentity i)
+static void dump_1clockid(char *s, ClockIdentity i)
 {
 	printf("%s%02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x\n", s,
 	       i.id[0], i.id[1], i.id[2], i.id[3],
 	       i.id[4], i.id[5], i.id[6], i.id[7]);
 }
 
-void dump_1port(char *s, unsigned char *p)
+static void dump_1port(char *s, unsigned char *p)
 {
 	printf("%s%02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x\n", s,
 	       p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]);
@@ -107,7 +106,7 @@ void dump_1port(char *s, unsigned char *p)
 
 
 /* Helpers for each message types */
-void dump_msg_announce(struct ptp_announce *p)
+static void dump_msg_announce(struct ptp_announce *p)
 {
 	dump_1stamp("MSG-ANNOUNCE: stamp ", &p->originTimestamp);
 	dump_1quality("MSG-ANNOUNCE: grandmaster-quality ",
@@ -118,19 +117,19 @@ void dump_msg_announce(struct ptp_announce *p)
 		      p->grandmasterIdentity);
 }
 
-void dump_msg_sync_etc(char *s, struct ptp_sync_etc *p)
+static void dump_msg_sync_etc(char *s, struct ptp_sync_etc *p)
 {
 	dump_1stamp(s, &p->stamp);
 }
 
-void dump_msg_resp_etc(char *s, struct ptp_sync_etc *p)
+static void dump_msg_resp_etc(char *s, struct ptp_sync_etc *p)
 {
 	dump_1stamp(s, &p->stamp);
 	dump_1port(s, p->port);
 }
 
 /* TLV dumper, not yet white-rabbit aware */
-int dump_tlv(struct ptp_tlv *tlv, int totallen)
+static int dump_tlv(struct ptp_tlv *tlv, int totallen)
 {
 	/* the field includes 6 bytes of the header, ecludes 4 of them. Bah! */
 	int explen = ntohs(tlv->len) + 4;
@@ -153,7 +152,7 @@ int dump_tlv(struct ptp_tlv *tlv, int totallen)
 }
 
 /* A big function to dump the ptp information */
-void dump_payload(void *pl, int len)
+static void dump_payload(void *pl, int len)
 {
 	struct ptp_header *h = pl;
 	void *msg_specific = (void *)(h + 1);
