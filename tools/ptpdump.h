@@ -1,5 +1,5 @@
 
-int dumpstruct(FILE *dest, char *prefix, char *name, void *ptr, int size);
+int dumpstruct(char *prefix, char *name, void *ptr, int size);
 void dump_eth(struct ethhdr *eth);
 void dump_ip(struct iphdr *ip);
 void dump_udp(struct udphdr *udp);

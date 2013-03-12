@@ -10,21 +10,21 @@
 #include "decent_types.h"
 #include "ptpdump.h"
 
-int dumpstruct(FILE *dest, char *prefix, char *name, void *ptr, int size)
+int dumpstruct(char *prefix, char *name, void *ptr, int size)
 {
 	int ret, i;
 	unsigned char *p = ptr;
 
-	ret = fprintf(dest, "%s%s (size %i)\n", prefix, name, size);
+	ret = printf("%s%s (size %i)\n", prefix, name, size);
 	for (i = 0; i < size; ) {
 		if ((i & 0xf) == 0)
-			ret += fprintf(dest, "%s", prefix);
-		ret += fprintf(dest, "%02x", p[i]);
+			ret += printf("%s", prefix);
+		ret += printf("%02x", p[i]);
 		i++;
-		ret += fprintf(dest, i & 3 ? " " : i & 0xf ? "  " : "\n");
+		ret += printf(i & 3 ? " " : i & 0xf ? "  " : "\n");
 	}
 	if (i & 0xf)
-		ret += fprintf(dest, "\n");
+		ret += printf("\n");
 	return ret;
 }
 
@@ -147,7 +147,7 @@ int dump_tlv(struct ptp_tlv *tlv, int totallen)
 	/* later:  if (memcmp(tlv->oui, "\x08\x00\x30", 3)) ... */
 
 	/* Now dump non-wr tlv in binary, count only payload */
-	dumpstruct(stdout, "TLV: ", "tlv-content", tlv->data,
+	dumpstruct("TLV: ", "tlv-content", tlv->data,
 		   explen - sizeof(*tlv));
 	return explen;
 }
@@ -235,7 +235,7 @@ void dump_payload(void *pl, int len)
 	}
 
 	/* Finally, binary dump of it all */
-	dumpstruct(stdout, "DUMP: ", "payload", pl, len);
+	dumpstruct("DUMP: ", "payload", pl, len);
 }
 
 int dump_udppkt(void *buf, int len)
