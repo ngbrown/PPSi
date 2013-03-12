@@ -36,6 +36,11 @@ for var in HAS_DIAG HAS_FULL_DIAG CROSS_COMPILE ARCH CC LD; do
     unset $var
 done
 
+# Build tools first, we must be sure they work
+echo "###### Build ./tools"
+make -s -C tools clean; make -s -C tools
+make -s -C tools/mtp clean; make -s -C tools/mtp
+
 # Variables to set up proper stuff for the various architectures
 PREFIX_gnu_linux=""
 PREFIX_bare_i386=""
