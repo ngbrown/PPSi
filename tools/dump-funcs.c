@@ -95,7 +95,8 @@ void dump_1quality(char *s, ClockQuality *q)
 void dump_1clockid(char *s, ClockIdentity i)
 {
 	printf("%s%02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x\n", s,
-	       i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7]);
+	       i.id[0], i.id[1], i.id[2], i.id[3],
+	       i.id[4], i.id[5], i.id[6], i.id[7]);
 }
 
 void dump_1port(char *s, unsigned char *p)
