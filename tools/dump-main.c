@@ -68,6 +68,8 @@ int main(int argc, char **argv)
 		static unsigned char prev[1500];
 		static int prevlen;
 		unsigned char buf[1500];
+		struct TimeInternal ti;
+		struct timeval tv;
 
 		struct sockaddr_in from;
 		socklen_t fromlen = sizeof(from);
@@ -75,6 +77,12 @@ int main(int argc, char **argv)
 
 		len = recvfrom(sock, buf, sizeof(buf), MSG_TRUNC,
 			       (struct sockaddr *) &from, &fromlen);
+
+		/* Get the receive time, copy it to TimeInternal */
+		gettimeofday(&tv, NULL);
+		ti.seconds = tv.tv_sec;
+		ti.nanoseconds = tv.tv_usec * 1000;
+
 		if (len > sizeof(buf))
 			len = sizeof(buf);
 		/* for some reasons, we receive it three times, check dups */
@@ -93,10 +101,10 @@ int main(int argc, char **argv)
 				continue;
 			if (ip->protocol != IPPROTO_UDP)
 				continue;
-			dump_udppkt(buf, len);
+			dump_udppkt(buf, len, &ti);
 			break;
 		case ETH_P_1588:
-			dump_1588pkt(buf, len);
+			dump_1588pkt(buf, len, &ti);
 			break;
 		default:
 			continue;

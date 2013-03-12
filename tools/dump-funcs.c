@@ -1,11 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <netinet/udp.h>
-#include <linux/if_ether.h>
 #include <ppsi/ieee1588_types.h> /* from ../include */
 #include "decent_types.h"
 #include "ptpdump.h"
@@ -28,31 +22,43 @@ static int dumpstruct(char *prefix, char *name, void *ptr, int size)
 	return ret;
 }
 
-static void dump_eth(struct ethhdr *eth)
+static void dump_eth(struct ethhdr *eth, struct TimeInternal *ti)
 {
-	struct timeval tv;
-	static struct timeval prev;
-	struct tm tm;
+	static struct TimeInternal prev_ti;
 	unsigned char *d = eth->h_dest;
 	unsigned char *s = eth->h_source;
 
-	gettimeofday(&tv, NULL);
-	if (prev.tv_sec) {
+	if (prev_ti.seconds) {
 		int i;
 		int diffms;
 
-		diffms = (tv.tv_sec - prev.tv_sec) * 1000
-			+ (signed)(tv.tv_usec + 500 - prev.tv_usec) / 1000;
+		diffms = (ti->seconds - prev_ti.seconds) * 1000
+			+ (ti->nanoseconds / 1000 / 1000)
+			- (prev_ti.nanoseconds / 1000 / 1000);
 		/* empty lines, one every .25 seconds, at most 10 of them */
 		for (i = 250; i < 2500 && i < diffms; i += 250)
 			printf("\n");
 		printf("TIMEDELTA: %i ms\n", diffms);
 	}
-	prev = tv;
-	localtime_r(&tv.tv_sec, &tm);
-	printf("TIME: (%li - 0x%lx) %02i:%02i:%02i.%06li\n",
-	       tv.tv_sec, tv.tv_sec,
-	       tm.tm_hour, tm.tm_min, tm.tm_sec, (long)tv.tv_usec);
+	prev_ti = *ti;
+
+#if __STDC_HOSTED__
+	{
+		struct timeval tv;
+		struct tm tm;
+
+		tv.tv_sec = ti->seconds;
+		tv.tv_usec = ti->nanoseconds / 1000;
+		localtime_r(&tv.tv_sec, &tm);
+		printf("TIME: (%li - 0x%lx) %02i:%02i:%02i.%06li\n",
+		       tv.tv_sec, tv.tv_sec,
+		       tm.tm_hour, tm.tm_min, tm.tm_sec, (long)tv.tv_usec);
+	}
+#else
+	printf("TIME: (%li - 0x%lx) %li.%06li\n", (long)ti->seconds,
+	       (long)ti->seconds, (long)ti->seconds, (long)ti->nanoseconds);
+#endif
+
 	printf("ETH: %04x (%02x:%02x:%02x:%02x:%02x:%02x -> "
 	       "%02x:%02x:%02x:%02x:%02x:%02x)\n", ntohs(eth->h_proto),
 	       s[0], s[1], s[2], s[3], s[4], s[5],
@@ -237,7 +243,7 @@ static void dump_payload(void *pl, int len)
 	dumpstruct("DUMP: ", "payload", pl, len);
 }
 
-int dump_udppkt(void *buf, int len)
+int dump_udppkt(void *buf, int len, struct TimeInternal *ti)
 {
 	struct ethhdr *eth = buf;
 	struct iphdr *ip = buf + ETH_HLEN;
@@ -253,7 +259,7 @@ int dump_udppkt(void *buf, int len)
 	if (udpdest != 319 && udpdest != 320)
 		return -1;
 
-	dump_eth(eth);
+	dump_eth(eth, ti);
 	dump_ip(ip);
 	dump_udp(udp);
 	dump_payload(payload, len - (payload - buf));
@@ -261,12 +267,12 @@ int dump_udppkt(void *buf, int len)
 	return 0;
 }
 
-int dump_1588pkt(void *buf, int len)
+int dump_1588pkt(void *buf, int len, struct TimeInternal *ti)
 {
 	struct ethhdr *eth = buf;
 	void *payload = (void *)(eth + 1);
 
-	dump_eth(eth);
+	dump_eth(eth, ti);
 	dump_payload(payload, len - (payload - buf));
 	putchar('\n');
 	return 0;
