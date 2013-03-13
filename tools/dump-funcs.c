@@ -188,16 +188,6 @@ static void dump_payload(void *pl, int len)
 		donelen = 44;
 		break;
 
-		CASE(E, PDELAY_REQ);
-		dump_msg_sync_etc("MSG-PDELAY_REQ: ", msg_specific);
-		donelen = 54;
-		break;
-
-		CASE(E, PDELAY_RESP);
-		dump_msg_resp_etc("MSG-PDELAY_RESP: ", msg_specific);
-		donelen = 54;
-		break;
-
 		CASE(G, FOLLOW_UP);
 		dump_msg_sync_etc("MSG-FOLLOW_UP: ", msg_specific);
 		donelen = 44;
@@ -205,11 +195,6 @@ static void dump_payload(void *pl, int len)
 
 		CASE(G, DELAY_RESP);
 		dump_msg_resp_etc("MSG-DELAY_RESP: ", msg_specific);
-		donelen = 54;
-		break;
-
-		CASE(G, PDELAY_RESP_FOLLOW_UP);
-		dump_msg_resp_etc("MSG-PDELAY_RESP_FOLLOWUP: ", msg_specific);
 		donelen = 54;
 		break;
 
@@ -223,9 +208,26 @@ static void dump_payload(void *pl, int len)
 		donelen = 44;
 		break;
 
+#if __STDC_HOSTED__ /* Avoid pdelay dump withing ppsi, we don't use it */
+		CASE(E, PDELAY_REQ);
+		dump_msg_sync_etc("MSG-PDELAY_REQ: ", msg_specific);
+		donelen = 54;
+		break;
+
+		CASE(E, PDELAY_RESP);
+		dump_msg_resp_etc("MSG-PDELAY_RESP: ", msg_specific);
+		donelen = 54;
+		break;
+
+		CASE(G, PDELAY_RESP_FOLLOW_UP);
+		dump_msg_resp_etc("MSG-PDELAY_RESP_FOLLOWUP: ", msg_specific);
+		donelen = 54;
+		break;
+
 		CASE(G, MANAGEMENT);
 		/* FIXME */
 		break;
+#endif
 	}
 
 	/* Dump any trailing TLV */
