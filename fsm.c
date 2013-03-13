@@ -87,7 +87,7 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 	 */
 	if (plen) {
 		if (plen >= PP_HEADER_LENGTH)
-			err = msg_unpack_header(ppi, packet);
+			err = msg_unpack_header(ppi, packet, plen);
 		else
 			err = 1;
 		if (err) {

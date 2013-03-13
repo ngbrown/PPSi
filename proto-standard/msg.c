@@ -88,7 +88,7 @@ static void msg_display_announce(MsgAnnounce *announce)
 }
 
 /* Unpack header from in buffer to msg_tmp_header field */
-int msg_unpack_header(struct pp_instance *ppi, void *buf)
+int msg_unpack_header(struct pp_instance *ppi, void *buf, int plen)
 {
 	MsgHeader *hdr = &ppi->received_ptp_header;
 
