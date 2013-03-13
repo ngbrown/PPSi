@@ -46,7 +46,7 @@ typedef struct UInteger64 {
 
 struct TimeInterval { /* page 12 (32) -- never used */
 	Integer64	scaledNanoseconds;
-} TimeInterval;
+};
 
 /* White Rabbit extension */
 typedef struct FixedDelta {
@@ -108,12 +108,12 @@ struct TLV { /* page 14 (34) -- never used */
 	Enumeration16	tlvType;
 	UInteger16	lengthField;
 	Octet		*valueField;
-} TLV;
+};
 
 struct PTPText { /* page 14 (34) -- never used */
 	UInteger8	lengthField;
 	Octet		*textField;
-} PTPText;
+};
 
 struct FaultRecord { /* page 14 (34) -- never used */
 	UInteger16	faultRecordLength;
@@ -122,7 +122,7 @@ struct FaultRecord { /* page 14 (34) -- never used */
 	struct PTPText	faultName;
 	struct PTPText	faultValue;
 	struct PTPText	faultDescription;
-} FaultRecord;
+};
 
 
 /* Common Message header (table 18, page 124) */
@@ -179,19 +179,19 @@ typedef struct MsgDelayResp {
 struct MsgPDelayReq {
 	Timestamp	originTimestamp;
 
-} MsgPDelayReq;
+};
 
 /* PdelayResp Message (table 30, page 131) -- not used in ppsi */
 struct MsgPDelayResp {
 	Timestamp	requestReceiptTimestamp;
 	PortIdentity	requestingPortIdentity;
-} MsgPDelayResp;
+};
 
 /* PdelayRespFollowUp Message (table 31, page 132) -- not used in ppsi */
 struct MsgPDelayRespFollowUp {
 	Timestamp	responseOriginTimestamp;
 	PortIdentity	requestingPortIdentity;
-} MsgPDelayRespFollowUp;
+};
 
 /* Signaling Message (table 33, page 133) */
 typedef struct MsgSignaling {
