@@ -32,7 +32,7 @@ all: $(TARGET).o
 
 # CFLAGS to use. Both this Makefile (later) and app-makefile may grow CFLAGS
 CFLAGS = $(USER_CFLAGS)
-CFLAGS += -Wall -O2 -ggdb -Iinclude
+CFLAGS += -Wall -O2 -ggdb -Iinclude -fno-common
 
 # to avoid ifdef as much as possible, I use the kernel trick for OBJ variables
 OBJ-y := fsm.o diag.o
