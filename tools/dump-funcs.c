@@ -24,23 +24,8 @@ static int dumpstruct(char *prefix, char *name, void *ptr, int size)
 
 static void dump_eth(struct ethhdr *eth, struct TimeInternal *ti)
 {
-	static struct TimeInternal prev_ti;
 	unsigned char *d = eth->h_dest;
 	unsigned char *s = eth->h_source;
-
-	if (prev_ti.seconds) {
-		int i;
-		int diffms;
-
-		diffms = (ti->seconds - prev_ti.seconds) * 1000
-			+ (ti->nanoseconds / 1000 / 1000)
-			- (prev_ti.nanoseconds / 1000 / 1000);
-		/* empty lines, one every .25 seconds, at most 10 of them */
-		for (i = 250; i < 2500 && i < diffms; i += 250)
-			printf("\n");
-		printf("TIMEDELTA: %i ms\n", diffms);
-	}
-	prev_ti = *ti;
 
 #if __STDC_HOSTED__
 	{
@@ -265,7 +250,6 @@ int dump_udppkt(void *buf, int len, struct TimeInternal *ti)
 	dump_ip(ip);
 	dump_udp(udp);
 	dump_payload(payload, len - (payload - buf));
-	putchar('\n');
 	return 0;
 }
 
@@ -276,6 +260,5 @@ int dump_1588pkt(void *buf, int len, struct TimeInternal *ti)
 
 	dump_eth(eth, ti);
 	dump_payload(payload, len - (payload - buf));
-	putchar('\n');
 	return 0;
 }

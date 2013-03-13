@@ -26,9 +26,28 @@
 #define ETH_P_1588     0x88F7
 #endif
 
+void print_spaces(struct TimeInternal *ti)
+{
+	static struct TimeInternal prev_ti;
+	int i, diffms;
+
+	if (prev_ti.seconds) {
+
+		diffms = (ti->seconds - prev_ti.seconds) * 1000
+			+ (ti->nanoseconds / 1000 / 1000)
+			- (prev_ti.nanoseconds / 1000 / 1000);
+		/* empty lines, one every .25 seconds, at most 10 of them */
+		for (i = 250; i < 2500 && i < diffms; i += 250)
+			printf("\n");
+		printf("TIMEDELTA: %i ms\n", diffms);
+	}
+	prev_ti = *ti;
+}
+
+
 int main(int argc, char **argv)
 {
-	int sock;
+	int sock, ret;
 	struct packet_mreq req;
 	struct ifreq ifr;
 	char *ifname = "eth0";
@@ -101,14 +120,19 @@ int main(int argc, char **argv)
 				continue;
 			if (ip->protocol != IPPROTO_UDP)
 				continue;
-			dump_udppkt(buf, len, &ti);
+			print_spaces(&ti);
+			ret = dump_udppkt(buf, len, &ti);
 			break;
 		case ETH_P_1588:
-			dump_1588pkt(buf, len, &ti);
+			print_spaces(&ti);
+			ret = dump_1588pkt(buf, len, &ti);
 			break;
 		default:
+			ret = -1;
 			continue;
 		}
+		if (ret == 0)
+			putchar('\n');
 		fflush(stdout);
 	}
 
