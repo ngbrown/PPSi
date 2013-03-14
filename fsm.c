@@ -16,7 +16,7 @@ static void pp_fsm_printf(struct pp_instance *ppi, char *fmt, ...)
 	TimeInternal t;
 	unsigned long oflags = pp_global_flags;
 
-	if (!__PP_DIAG_ALLOW(ppi, pp_dt_fsm, 1))
+	if (!pp_diag_allow(ppi, fsm, 1))
 		return;
 
 	/* temporarily set NOTIMELOG, as we'll print the time ourselves */

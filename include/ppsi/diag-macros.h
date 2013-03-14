@@ -128,6 +128,9 @@ extern void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 	PP_HAS_DIAG; /* return 1 if done, 0 if not done */		\
 	})
 
+#define pp_diag_allow(ppi_, th_, level_) \
+		(PP_HAS_DIAG && __PP_DIAG_ALLOW(ppi_,  pp_dt_ ## th_, level_))
+
 /*
  * And this is the parser of the string. Internally it obeys VERB_LOG_MESGS
  * to set the value to 0xfffffff0 to be compatible with previous usage.
