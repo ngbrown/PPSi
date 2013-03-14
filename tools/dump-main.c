@@ -116,13 +116,25 @@ int main(int argc, char **argv)
 		ip = (void *)(buf + ETH_HLEN);
 		switch(ntohs(eth->h_proto)) {
 		case ETH_P_IP:
-			if (len < ETH_HLEN + sizeof(*ip))
+		{
+			struct udphdr *udp = (void *)(ip + 1);
+			int udpdest = ntohs(udp->dest);
+
+			/*
+			 * Filter before calling the dump function, otherwise
+			 * we'll report TIMEDELAY for not-relevant frames
+			 */
+			if (len < ETH_HLEN + sizeof(*ip) + sizeof(*udp))
 				continue;
 			if (ip->protocol != IPPROTO_UDP)
+				continue;
+			if (udpdest != 319 && udpdest != 320)
 				continue;
 			print_spaces(&ti);
 			ret = dump_udppkt(buf, len, &ti);
 			break;
+		}
+
 		case ETH_P_1588:
 			print_spaces(&ti);
 			ret = dump_1588pkt(buf, len, &ti);

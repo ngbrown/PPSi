@@ -22,27 +22,31 @@ static int dumpstruct(char *prefix, char *name, void *ptr, int size)
 	return ret;
 }
 
-static void dump_eth(struct ethhdr *eth, struct TimeInternal *ti)
+#if __STDC_HOSTED__
+static void dump_time(struct TimeInternal *ti)
+{
+	struct timeval tv;
+	struct tm tm;
+
+	tv.tv_sec = ti->seconds;
+	tv.tv_usec = ti->nanoseconds / 1000;
+	localtime_r(&tv.tv_sec, &tm);
+	printf("TIME: (%li - 0x%lx) %02i:%02i:%02i.%06li\n",
+	       tv.tv_sec, tv.tv_sec,
+	       tm.tm_hour, tm.tm_min, tm.tm_sec, (long)tv.tv_usec);
+}
+#else
+static void dump_time(struct TimeInternal *ti)
+{
+	printf("TIME: (%li - 0x%lx) %li.%06li\n", (long)ti->seconds,
+	       (long)ti->seconds, (long)ti->seconds, (long)ti->nanoseconds);
+}
+#endif
+
+static void dump_eth(struct ethhdr *eth)
 {
 	unsigned char *d = eth->h_dest;
 	unsigned char *s = eth->h_source;
-
-#if __STDC_HOSTED__
-	{
-		struct timeval tv;
-		struct tm tm;
-
-		tv.tv_sec = ti->seconds;
-		tv.tv_usec = ti->nanoseconds / 1000;
-		localtime_r(&tv.tv_sec, &tm);
-		printf("TIME: (%li - 0x%lx) %02i:%02i:%02i.%06li\n",
-		       tv.tv_sec, tv.tv_sec,
-		       tm.tm_hour, tm.tm_min, tm.tm_sec, (long)tv.tv_usec);
-	}
-#else
-	printf("TIME: (%li - 0x%lx) %li.%06li\n", (long)ti->seconds,
-	       (long)ti->seconds, (long)ti->seconds, (long)ti->nanoseconds);
-#endif
 
 	printf("ETH: %04x (%02x:%02x:%02x:%02x:%02x:%02x -> "
 	       "%02x:%02x:%02x:%02x:%02x:%02x)\n", ntohs(eth->h_proto),
@@ -73,7 +77,7 @@ static void dump_1stamp(char *s, struct stamp *t)
 	uint64_t  sec = (uint64_t)(ntohs(t->sec.msb)) << 32;
 
 	sec |= (uint64_t)(ntohl(t->sec.lsb));
-	printf("%s%lli.%09i\n", s, sec, ntohl(t->nsec));
+	printf("%s%lu.%09i\n", s, (unsigned long)sec, ntohl(t->nsec));
 }
 
 static void dump_1quality(char *s, ClockQuality *q)
@@ -156,8 +160,8 @@ static void dump_payload(void *pl, int len)
 	printf("VERSION: %i (type %i, len %i, domain %i)\n",
 	       h->versionPTP, h->messageType,
 	       ntohs(h->messageLength), h->domainNumber);
-	printf("FLAGS: 0x%04x (correction 0x%08llx)\n", h->flagField,
-	       h->correctionField);
+	printf("FLAGS: 0x%04x (correction 0x%08lu)\n", h->flagField,
+	       (unsigned long)h->correctionField);
 	dump_1port("PORT: ", h->sourcePortIdentity);
 	printf("REST: seq %i, ctrl %i, log-interval %i\n",
 	       ntohs(h->sequenceId), h->controlField, h->logMessageInterval);
@@ -230,35 +234,41 @@ static void dump_payload(void *pl, int len)
 	dumpstruct("DUMP: ", "payload", pl, len);
 }
 
+/* This dumps a complete udp frame, starting from the eth header */
 int dump_udppkt(void *buf, int len, struct TimeInternal *ti)
 {
 	struct ethhdr *eth = buf;
 	struct iphdr *ip = buf + ETH_HLEN;
 	struct udphdr *udp = (void *)(ip + 1);
 	void *payload = (void *)(udp + 1);
-	int udpdest = ntohs(udp->dest);
 
-	if (len < ETH_HLEN + sizeof(*ip) + sizeof(*udp))
-		return -1;
-
-	/* page 239 and following */
-
-	if (udpdest != 319 && udpdest != 320)
-		return -1;
-
-	dump_eth(eth, ti);
+	if (ti)
+		dump_time(ti);
+	dump_eth(eth);
 	dump_ip(ip);
 	dump_udp(udp);
 	dump_payload(payload, len - (payload - buf));
 	return 0;
 }
 
+/* This dumps the payload only, used for udp frames without headers */
+int dump_payloadpkt(void *buf, int len, struct TimeInternal *ti)
+{
+	if (ti)
+		dump_time(ti);
+	dump_payload(buf, len);
+	return 0;
+}
+
+/* This dumps everything, used for raw frames with headers and ptp payload */
 int dump_1588pkt(void *buf, int len, struct TimeInternal *ti)
 {
 	struct ethhdr *eth = buf;
 	void *payload = (void *)(eth + 1);
 
-	dump_eth(eth, ti);
+	if (ti)
+		dump_time(ti);
+	dump_eth(eth);
 	dump_payload(payload, len - (payload - buf));
 	return 0;
 }
