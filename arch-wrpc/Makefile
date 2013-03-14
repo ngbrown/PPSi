@@ -3,6 +3,7 @@
 CFLAGS += -ffreestanding -Os \
 	-ffunction-sections -fdata-sections \
 	-mmultiply-enabled -mbarrel-shift-enabled \
+	-Itools
 
 ARCH_LDFLAGS = -nostdlib -static -T $(ARCH).lds
 
@@ -31,6 +32,7 @@ OBJ-libarch := $A/wrpc-socket.o \
 	$A/wrpc-io.o \
 	$A/wrpc-spll.o \
 	$A/wrpc-calibration.o \
+	lib/dump-funcs.o \
 	lib/div64.o
 
 $(LIBARCH): $(OBJ-libarch)

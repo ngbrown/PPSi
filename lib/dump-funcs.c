@@ -1,0 +1,1 @@
+../tools/dump-funcs.c

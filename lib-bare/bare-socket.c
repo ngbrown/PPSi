@@ -4,22 +4,28 @@
 
 /* Socket interface for bare Linux */
 #include <ppsi/ppsi.h>
+#include "ptpdump.h"
 #include "bare-linux.h"
 
 /* FIXME: which socket we receive and send with? */
 static int bare_net_recv(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t)
 {
+	int ret;
 	if (t)
 		ppi->t_ops->get(ppi, t);
 
-	return sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
+	ret = sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
+	if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+		dump_1588pkt("recv: ", pkt, ret, t);
+	return ret;
 }
 
 static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
 			    TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct bare_ethhdr *hdr = pkt;
+	int ret;
 
 	hdr->h_proto = htons(ETH_P_1588);
 
@@ -31,7 +37,10 @@ static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
 	if (t)
 		ppi->t_ops->get(ppi, t);
 
-	return sys_send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
+	ret = sys_send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
+	if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+		dump_1588pkt("send: ", pkt, len, t);
+	return ret;
 }
 
 #define SHUT_RD		0

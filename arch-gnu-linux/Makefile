@@ -3,7 +3,7 @@
 # All files are under A (short for ARCH): I'm lazy
 A := arch-$(ARCH)
 
-CFLAGS += -DCONFIG_PPSI_RUNTIME_VERBOSITY
+CFLAGS += -DCONFIG_PPSI_RUNTIME_VERBOSITY -Itools
 
 
 LIBARCH := $A/libarch.a
@@ -15,6 +15,7 @@ OBJ-libarch := $A/posix-startup.o \
 	$A/posix-time.o \
 	lib/cmdline.o \
 	lib/libc-functions.o \
+	lib/dump-funcs.o \
 	lib/div64.o
 
 $(LIBARCH): $(OBJ-libarch)

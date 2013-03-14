@@ -9,7 +9,7 @@ STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
-CFLAGS = -Wall -ggdb -I../include/ppsi
+CFLAGS = -Wall -ggdb -I../include
 
 PROGS = ptpdump adjtime jmptime chktime
 LDFLAGS += -lrt

@@ -6,89 +6,8 @@
 #include <ppsi/ppsi.h>
 #include "common-fun.h"
 
-/*
- * Temporarily, use the diagnostic level to set a fake pp_verbose_dump.
- * We can't use ppi-specific flags at this point, but I plan to fix
- * this msg.c overall -- ARub
- */
-#define pp_verbose_dump \
-	__PP_DIAG_ALLOW_FLAGS(pp_global_flags, pp_dt_frames, 2)
-
-static void Integer64_display(const char *label, Integer64 *bigint)
-{
-	if (pp_verbose_dump) {
-		pp_Vprintf("%s:\n", label);
-		pp_Vprintf("LSB: %u\n", bigint->lsb);
-		pp_Vprintf("MSB: %d\n", bigint->msb);
-	}
-}
-
-static void UInteger48_display(const char *label, UInteger48 *bigint)
-{
-	if (pp_verbose_dump) {
-		pp_Vprintf("%s:\n", label);
-		pp_Vprintf("LSB: %u\n", bigint->lsb);
-		pp_Vprintf("MSB: %u\n", bigint->msb);
-	}
-}
-
-static void timestamp_display(const char *label, Timestamp *timestamp)
-{
-	if (pp_verbose_dump) {
-		pp_Vprintf("%s:\n", label);
-		UInteger48_display("seconds", &timestamp->secondsField);
-		pp_Vprintf("nanoseconds: %u\n", timestamp->nanosecondsField);
-	}
-}
-
-static void msg_display_header(MsgHeader *header)
-{
-	if (pp_verbose_dump) {
-		pp_Vprintf("Message header:\n");
-		pp_Vprintf("\n");
-		pp_Vprintf("transportSpecific: %d\n",
-			   header->transportSpecific);
-		pp_Vprintf("messageType: %d\n", header->messageType);
-		pp_Vprintf("versionPTP: %d\n", header->versionPTP);
-		pp_Vprintf("messageLength: %d\n", header->messageLength);
-		pp_Vprintf("domainNumber: %d\n", header->domainNumber);
-		pp_Vprintf("FlagField %02x:%02x\n", header->flagField[0],
-			   header->flagField[1]);
-		Integer64_display("correctionfield", &header->correctionfield);
-		/* FIXME diag portIdentity_display(&h->sourcePortIdentity); */
-		pp_Vprintf("sequenceId: %d\n", header->sequenceId);
-		pp_Vprintf("controlField: %d\n", header->controlField);
-		pp_Vprintf("logMessageInterval: %d\n",
-			   header->logMessageInterval);
-		pp_Vprintf("\n");
-	}
-}
-
-static void msg_display_announce(MsgAnnounce *announce)
-{
-	if (pp_verbose_dump) {
-		pp_Vprintf("Message ANNOUNCE:\n");
-		timestamp_display("Origin Timestamp",
-				  &announce->originTimestamp);
-		pp_Vprintf("currentUtcOffset: %d\n",
-			   announce->currentUtcOffset);
-		pp_Vprintf("grandMasterPriority1: %d\n",
-			   announce->grandmasterPriority1);
-		pp_Vprintf("grandMasterClockQuality:\n");
-		/* FIXME diag clockQuality_display(&ann->gmasterQuality); */
-		pp_Vprintf("grandMasterPriority2: %d\n",
-			   announce->grandmasterPriority2);
-		pp_Vprintf("grandMasterIdentity:\n");
-		/* FIXME diag clockIdentity_display(ann->gmasterIdentity); */
-		pp_Vprintf("stepsRemoved: %d\n", announce->stepsRemoved);
-		pp_Vprintf("timeSource: %d\n", announce->timeSource);
-		pp_Vprintf("\n");
-		/* FIXME: diagnostic for extension */
-	}
-}
-
 /* Unpack header from in buffer to msg_tmp_header field */
-int msg_unpack_header(struct pp_instance *ppi, void *buf)
+int msg_unpack_header(struct pp_instance *ppi, void *buf, int plen)
 {
 	MsgHeader *hdr = &ppi->received_ptp_header;
 
@@ -134,8 +53,6 @@ int msg_unpack_header(struct pp_instance *ppi, void *buf)
 		ppi->is_from_cur_par = 1;
 	else
 		ppi->is_from_cur_par = 0;
-
-	msg_display_header(hdr);
 	return 0;
 }
 
@@ -202,12 +119,6 @@ void msg_unpack_sync(void *buf, MsgSync *sync)
 		htonl(*(UInteger32 *) (buf + 36));
 	sync->originTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
-
-	if (pp_verbose_dump) {
-		PP_VPRINTF("Message SYNC\n");
-		timestamp_display("Origin Timestamp", &sync->originTimestamp);
-		PP_VPRINTF("\n");
-	}
 }
 
 /* Pack Announce message into out buffer of ppi */
@@ -271,7 +182,6 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 
 	if (pp_hooks.unpack_announce)
 		pp_hooks.unpack_announce(buf, ann);
-	msg_display_announce(ann);
 }
 
 /* Pack Follow Up message into out buffer of ppi*/
@@ -314,13 +224,6 @@ void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup)
 		htonl(*(UInteger32 *) (buf + 36));
 	flwup->preciseOriginTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
-
-	if (pp_verbose_dump) {
-		PP_VPRINTF("Message FOLLOW_UP\n");
-		timestamp_display("Precise Origin Timestamp",
-				  &flwup->preciseOriginTimestamp);
-		PP_VPRINTF("\n");
-	}
 }
 
 /* pack DelayReq message into out buffer of ppi */
@@ -403,13 +306,6 @@ void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req)
 		htonl(*(UInteger32 *) (buf + 36));
 	delay_req->originTimestamp.nanosecondsField =
 		htonl(*(UInteger32 *) (buf + 40));
-
-	if (pp_verbose_dump) {
-		PP_VPRINTF("Message DELAY_REQ\n");
-		timestamp_display("Origin Timestamp",
-				  &delay_req->originTimestamp);
-		PP_VPRINTF("\n");
-	}
 }
 
 /* Unpack delayResp message from IN buffer of ppi to msgtmp.presp */
@@ -425,14 +321,6 @@ void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp)
 	       (buf + 44), PP_CLOCK_IDENTITY_LENGTH);
 	resp->requestingPortIdentity.portNumber =
 		htons(*(UInteger16 *) (buf + 52));
-
-	if (pp_verbose_dump) {
-		PP_VPRINTF("Message DELAY_RESP\n");
-		timestamp_display("Receive Timestamp",
-				  &resp->receiveTimestamp);
-		/* FIXME diag display requestingPortIdentity */
-		PP_VPRINTF("\n");
-	}
 }
 
 const char const *pp_msg_names[] = {

@@ -18,7 +18,7 @@
 #include <net/if_arp.h>
 #include <netpacket/packet.h>
 
-#include <ieee1588_types.h> /* from ../include/ppsi */
+#include <ppsi/ieee1588_types.h> /* from ../include */
 #include "decent_types.h"
 #include "ptpdump.h"
 
@@ -26,9 +26,28 @@
 #define ETH_P_1588     0x88F7
 #endif
 
+void print_spaces(struct TimeInternal *ti)
+{
+	static struct TimeInternal prev_ti;
+	int i, diffms;
+
+	if (prev_ti.seconds) {
+
+		diffms = (ti->seconds - prev_ti.seconds) * 1000
+			+ (ti->nanoseconds / 1000 / 1000)
+			- (prev_ti.nanoseconds / 1000 / 1000);
+		/* empty lines, one every .25 seconds, at most 10 of them */
+		for (i = 250; i < 2500 && i < diffms; i += 250)
+			printf("\n");
+		printf("TIMEDELTA: %i ms\n", diffms);
+	}
+	prev_ti = *ti;
+}
+
+
 int main(int argc, char **argv)
 {
-	int sock;
+	int sock, ret;
 	struct packet_mreq req;
 	struct ifreq ifr;
 	char *ifname = "eth0";
@@ -68,6 +87,8 @@ int main(int argc, char **argv)
 		static unsigned char prev[1500];
 		static int prevlen;
 		unsigned char buf[1500];
+		struct TimeInternal ti;
+		struct timeval tv;
 
 		struct sockaddr_in from;
 		socklen_t fromlen = sizeof(from);
@@ -75,6 +96,12 @@ int main(int argc, char **argv)
 
 		len = recvfrom(sock, buf, sizeof(buf), MSG_TRUNC,
 			       (struct sockaddr *) &from, &fromlen);
+
+		/* Get the receive time, copy it to TimeInternal */
+		gettimeofday(&tv, NULL);
+		ti.seconds = tv.tv_sec;
+		ti.nanoseconds = tv.tv_usec * 1000;
+
 		if (len > sizeof(buf))
 			len = sizeof(buf);
 		/* for some reasons, we receive it three times, check dups */
@@ -89,18 +116,35 @@ int main(int argc, char **argv)
 		ip = (void *)(buf + ETH_HLEN);
 		switch(ntohs(eth->h_proto)) {
 		case ETH_P_IP:
-			if (len < ETH_HLEN + sizeof(*ip))
+		{
+			struct udphdr *udp = (void *)(ip + 1);
+			int udpdest = ntohs(udp->dest);
+
+			/*
+			 * Filter before calling the dump function, otherwise
+			 * we'll report TIMEDELAY for not-relevant frames
+			 */
+			if (len < ETH_HLEN + sizeof(*ip) + sizeof(*udp))
 				continue;
 			if (ip->protocol != IPPROTO_UDP)
 				continue;
-			dump_udppkt(buf, len);
+			if (udpdest != 319 && udpdest != 320)
+				continue;
+			print_spaces(&ti);
+			ret = dump_udppkt("", buf, len, &ti);
 			break;
+		}
+
 		case ETH_P_1588:
-			dump_1588pkt(buf, len);
+			print_spaces(&ti);
+			ret = dump_1588pkt("", buf, len, &ti);
 			break;
 		default:
+			ret = -1;
 			continue;
 		}
+		if (ret == 0)
+			putchar('\n');
 		fflush(stdout);
 	}
 
