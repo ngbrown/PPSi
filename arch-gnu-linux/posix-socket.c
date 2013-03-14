@@ -17,6 +17,7 @@
 #include <arpa/inet.h>
 
 #include <ppsi/ppsi.h>
+#include "ptpdump.h"
 #include "posix.h"
 
 /* posix_recv_msg uses recvmsg for timestamp query */
@@ -93,11 +94,15 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
 	struct pp_channel *ch1, *ch2;
+	int ret;
 
 	if (OPTS(ppi)->ethernet_mode) {
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
-		return posix_recv_msg(ppi, fd, pkt, len, t);
+		ret = posix_recv_msg(ppi, fd, pkt, len, t);
+		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+			dump_1588pkt("recv: ", pkt, ret, t);
+		return ret;
 	}
 
 	/* else: UDP, we can return one frame only, so swap priority */
@@ -111,13 +116,15 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 
 	POSIX_ARCH(ppi)->rcv_switch = !POSIX_ARCH(ppi)->rcv_switch;
 
+	ret = -1;
 	if (ch1->pkt_present)
-		return posix_recv_msg(ppi, ch1->fd, pkt, len, t);
+		ret = posix_recv_msg(ppi, ch1->fd, pkt, len, t);
+	else if (ch2->pkt_present)
+		ret = posix_recv_msg(ppi, ch2->fd, pkt, len, t);
 
-	if (ch2->pkt_present)
-		return posix_recv_msg(ppi, ch2->fd, pkt, len, t);
-
-	return -1;
+	if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+		dump_payloadpkt("recv: ", pkt, ret, t);
+	return ret;
 }
 
 static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
@@ -125,6 +132,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 {
 	struct sockaddr_in addr;
 	struct ethhdr *hdr = pkt;
+	int ret;
 
 	if (OPTS(ppi)->ethernet_mode) {
 		hdr->h_proto = htons(ETH_P_1588);
@@ -136,7 +144,10 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 		if (t)
 			ppi->t_ops->get(ppi, t);
 
-		return send(NP(ppi)->ch[PP_NP_GEN].fd, hdr, len, 0);
+		ret = send(NP(ppi)->ch[PP_NP_GEN].fd, hdr, len, 0);
+		if (pp_diag_allow(ppi, frames, 2))
+			dump_1588pkt("send: ", pkt, len, t);
+		return ret;
 	}
 
 	/* else: UDP */
@@ -148,10 +159,11 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 	if (t)
 		ppi->t_ops->get(ppi, t);
 
-	return sendto(NP(ppi)->ch[chtype].fd, pkt, len, 0,
+	ret = sendto(NP(ppi)->ch[chtype].fd, pkt, len, 0,
 		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-
-	return -1;
+	if (pp_diag_allow(ppi, frames, 2))
+		dump_payloadpkt("send: ", pkt, len, t);
+	return ret;
 }
 
 /* To open a channel we must bind to an interface and so on */
