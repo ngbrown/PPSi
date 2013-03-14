@@ -1,6 +1,6 @@
 # Alessandro Rubini for CERN, 2011 -- public domain
 
-CFLAGS += -ffreestanding -Os -fno-stack-protector
+CFLAGS += -ffreestanding -Os -fno-stack-protector -Itools
 ARCH_LDFLAGS = -nostdlib -static -T $(ARCH).lds
 
 # All files are under A (short for ARCH) or L (short for lib): I'm lazy
@@ -19,6 +19,7 @@ OBJ-libarch := $L/bare-startup.o \
 	$A/syscall.o \
 	$A/syscalls.o \
 	lib/libc-functions.o \
+	lib/dump-funcs.o \
 	lib/cmdline.o \
 	lib/div64.o
 
