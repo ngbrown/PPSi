@@ -13,9 +13,12 @@
 #include <ppsi/ppsi.h>
 #include "posix.h"
 
-void posix_main_loop(struct pp_instance *ppi)
+void posix_main_loop(struct pp_globals *ppg)
 {
 	int delay_ms;
+	struct pp_instance *ppi;
+
+	ppi = &ppg->pp_instances[0];
 
 	/*
 	 * If we are sending or receiving raw ethernet frames,

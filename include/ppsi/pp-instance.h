@@ -183,4 +183,13 @@ struct pp_instance {
 		waiting_for_follow:1;
 };
 
+/*
+ * Structure for the multi-port ppsi instance.
+ */
+struct pp_globals {
+	int nports;
+	struct pp_instance *pp_instances;
+	/* FIXME Here include all is common to many interfaces */
+};
+
 #endif /* __PPSI_PP_INSTANCE_H__ */

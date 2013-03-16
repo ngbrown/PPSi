@@ -18,47 +18,74 @@ CONST_VERBOSITY int pp_diag_verbosity = 0;
 
 int main(int argc, char **argv)
 {
+	struct pp_globals *ppg;
 	struct pp_instance *ppi;
-	char *ifname;
+	char *ifname, *nports;
+	char tmp[16];
+	int i = 0;
 
 	setbuf(stdout, NULL);
-	/*
-	 * Here, we may fork or whatever for each interface.
-	 * To keep things simple, just run one thing for one interface.
-	 */
-	ifname = getenv("PPROTO_IF");
-	if (!ifname)
-		ifname = "eth0";
 
 	/* We are hosted, so we can allocate */
-	ppi = calloc(1, sizeof(*ppi));
-	if (!ppi)
+	ppg = calloc(1, sizeof(*ppg));
+	if (!ppg)
 		exit(__LINE__);
 
-	ppi->defaultDS = calloc(1, sizeof(*ppi->defaultDS));
-	ppi->currentDS = calloc(1, sizeof(*ppi->currentDS));
-	ppi->parentDS = calloc(1, sizeof(*ppi->parentDS));
-	ppi->portDS = calloc(1, sizeof(*ppi->portDS));
-	ppi->timePropertiesDS = calloc(1, sizeof(*ppi->timePropertiesDS));
-	ppi->servo = calloc(1, sizeof(*ppi->servo));
-	ppi->arch_data = calloc(1, sizeof(struct posix_arch_data));
+	nports = getenv("PPROTO_IF_NUM");
+	if (nports)
+		ppg->nports = atoi(nports);
+	else
+		ppg->nports = 1;
 
-	ppi->n_ops = &posix_net_ops;
-	ppi->t_ops = &posix_time_ops;
+	ppg->pp_instances = calloc(ppg->nports, sizeof(struct pp_instance));
 
-	if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
-	    || (!ppi->portDS) || (!ppi->timePropertiesDS)
-	    || (!ppi->frgn_master) || (!ppi->arch_data)
-	   )
+	if (!ppg->pp_instances)
 		exit(__LINE__);
 
-	pp_open_instance(ppi, NULL);
+	for (; i < ppg->nports; i++) {
 
-	OPTS(ppi)->iface_name = ifname;
+		sprintf(tmp, "PPROTO_IF_%02d", i);
 
-	if (pp_parse_cmdline(ppi, argc, argv) != 0)
+		ifname = getenv(tmp);
+
+		if (!ifname) {
+			sprintf(tmp, "eth%d", i);
+			ifname = tmp;
+		}
+
+		ppi = &ppg->pp_instances[i];
+
+		/* FIXME check all of these calloc's, since some stuff will be
+		 * part of pp_globals */
+		ppi->defaultDS = calloc(1, sizeof(*ppi->defaultDS));
+		ppi->currentDS = calloc(1, sizeof(*ppi->currentDS));
+		ppi->parentDS = calloc(1, sizeof(*ppi->parentDS));
+		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
+		ppi->timePropertiesDS = calloc(1, sizeof(*ppi->timePropertiesDS));
+		ppi->servo = calloc(1, sizeof(*ppi->servo));
+		ppi->arch_data = calloc(1, sizeof(struct posix_arch_data));
+
+		ppi->n_ops = &posix_net_ops;
+		ppi->t_ops = &posix_time_ops;
+
+		if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
+			|| (!ppi->portDS) || (!ppi->timePropertiesDS)
+			|| (!ppi->frgn_master) || (!ppi->arch_data)
+		)
+			exit(__LINE__);
+
+		pp_open_instance(ppi, NULL);
+
+		/* FIXME temporary workaround to make the first interface work as in the past */
+		if (i == 0)
+			OPTS(ppi)->iface_name = strdup(ifname);
+	}
+
+
+	/* FIXME temporary workaround: pp_parse_cmdline will receive ppg */
+	if (pp_parse_cmdline(&ppg->pp_instances[0], argc, argv) != 0)
 		return -1;
 
-	posix_main_loop(ppi);
+	posix_main_loop(ppg);
 	return 0; /* never reached */
 }
