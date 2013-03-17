@@ -135,7 +135,6 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			     int len)
 {
-	TimeInternal origin_tstamp;
 	TimeInternal correction_field;
 	MsgHeader *hdr = &ppi->received_ptp_header;
 	MsgSync sync;
@@ -163,10 +162,9 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 					     &correction_field);
 
 			ppi->waiting_for_follow = FALSE;
-			to_TimeInternal(&origin_tstamp,
+			to_TimeInternal(&ppi->t1,
 					&sync.originTimestamp);
-			pp_update_offset(ppi, &origin_tstamp,
-					&ppi->t2,
+			pp_update_offset(ppi, &ppi->t1,	&ppi->t2,
 					&correction_field);
 			pp_update_clock(ppi);
 		}
@@ -178,7 +176,6 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 				 int len)
 {
-	TimeInternal precise_orig_timestamp;
 	TimeInternal correction_field;
 	MsgFollowUp follow;
 	int ret = 0;
@@ -208,8 +205,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 
 	msg_unpack_follow_up(buf, &follow);
 	ppi->waiting_for_follow = FALSE;
-	to_TimeInternal(&precise_orig_timestamp,
-			&follow.preciseOriginTimestamp);
+	to_TimeInternal(&ppi->t1, &follow.preciseOriginTimestamp);
 
 	int64_to_TimeInternal(ppi->received_ptp_header.correctionfield,
 					&correction_field);
@@ -219,16 +215,14 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 
 	/* Call the extension; it may do it all and ask to return */
 	if (pp_hooks.handle_followup)
-		ret = pp_hooks.handle_followup(ppi, &precise_orig_timestamp,
+		ret = pp_hooks.handle_followup(ppi, &ppi->t1,
 					       &correction_field);
 	if (ret == 1)
 		return 0;
 	if (ret < 0)
 		return ret;
 
-	pp_update_offset(ppi, &precise_orig_timestamp,
-			&ppi->t2,
-			&correction_field);
+	pp_update_offset(ppi, &ppi->t1,	&ppi->t2, &correction_field);
 
 	pp_update_clock(ppi);
 	return 0;
