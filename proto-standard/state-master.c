@@ -8,12 +8,9 @@
 
 int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	TimeInternal *time;
 	TimeInternal *time_snt;
 	int msgtype, d1, d2;
 	int e = 0; /* error var, to check errors in msg handling */
-
-	time = &ppi->last_rcv_time;
 
 	if (ppi->is_new_state) {
 		pp_timeout_rand(ppi, PP_TO_SYNC, DSPOR(ppi)->logSyncInterval);
@@ -80,7 +77,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	case PPM_DELAY_REQ:
 		msg_copy_header(&ppi->delay_req_hdr,
 				&ppi->received_ptp_header);
-		msg_issue_delay_resp(ppi, time);
+		msg_issue_delay_resp(ppi, &ppi->last_rcv_time);
 		break;
 
 	/*
