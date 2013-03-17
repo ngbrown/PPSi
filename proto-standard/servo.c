@@ -100,15 +100,17 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 	}
 }
 
-/* called by slave and uncalib. (through common function handle_sync/followup) */
-void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
-		      TimeInternal *recv_time, TimeInternal *correction_field)
+/*
+ * Called by slave and uncalib.
+ * Please note that it only uses t1 and t2, so I think it needs review - ARub
+ */
+void pp_update_offset(struct pp_instance *ppi, TimeInternal *correction_field)
 {
 	TimeInternal m_to_s_dly;
 	struct pp_ofm_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
 
 	/* calc 'master_to_slave_delay' */
-	sub_TimeInternal(&m_to_s_dly, recv_time, send_time);
+	sub_TimeInternal(&m_to_s_dly, &ppi->t2, &ppi->t1);
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
 		if (m_to_s_dly.seconds) {
@@ -128,7 +130,7 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *send_time,
 
 	SRV(ppi)->m_to_s_dly = m_to_s_dly;
 
-	sub_TimeInternal(&SRV(ppi)->delay_ms, recv_time, send_time);
+	sub_TimeInternal(&SRV(ppi)->delay_ms, &ppi->t2, &ppi->t1);
 	/* Used just for End to End mode. */
 
 	/* Take care about correctionField */

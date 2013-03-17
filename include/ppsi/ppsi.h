@@ -225,8 +225,6 @@ extern void pp_init_clock(struct pp_instance *ppi);
 extern void pp_update_delay(struct pp_instance *ppi,
 			    TimeInternal *correction_field);
 extern void pp_update_offset(struct pp_instance *ppi,
-			     TimeInternal *send_time,
-			     TimeInternal *recv_time,
 			     TimeInternal *correctionField);
 extern void pp_update_clock(struct pp_instance *ppi);
 

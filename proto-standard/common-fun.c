@@ -164,8 +164,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			ppi->waiting_for_follow = FALSE;
 			to_TimeInternal(&ppi->t1,
 					&sync.originTimestamp);
-			pp_update_offset(ppi, &ppi->t1,	&ppi->t2,
-					&correction_field);
+			pp_update_offset(ppi, &correction_field);
 			pp_update_clock(ppi);
 		}
 	}
@@ -222,8 +221,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	if (ret < 0)
 		return ret;
 
-	pp_update_offset(ppi, &ppi->t1,	&ppi->t2, &correction_field);
-
+	pp_update_offset(ppi, &correction_field);
 	pp_update_clock(ppi);
 	return 0;
 }
