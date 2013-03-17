@@ -152,27 +152,25 @@ struct pp_instance {
 	/* The net_path used to be allocated separately, but there's no need */
 	struct pp_net_path np;
 
+	/* Times, for the various offset computations */
+	TimeInternal t1, t2, t3, t4;			/* *the* stamps */
+	TimeInternal last_rcv_time, last_snt_time;	/* two temporaries */
+	TimeInternal last_sync_corr_field;
+
 	/* Data sets */
 	DSDefault *defaultDS;			/* page 65 */
 	DSCurrent *currentDS;			/* page 67 */
 	DSParent *parentDS;			/* page 68 */
 	DSPort *portDS;				/* page 72 */
 	DSTimeProperties *timePropertiesDS;	/* page 70 */
+
 	unsigned long timeouts[__PP_TO_ARRAY_SIZE];
 	UInteger16 number_foreign_records;
 	Integer16  foreign_record_i;
 	Integer16  foreign_record_best;
 	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
-	TimeInternal t2;
 	UInteger16 recv_sync_sequence_id;
 
-	TimeInternal last_rcv_time; /* used to store timestamp retreived from
-				     * received packet */
-	TimeInternal last_snt_time; /* used to store timestamp retreived from
-				     * sent packet */
-	TimeInternal last_sync_corr_field;
-	TimeInternal t3;
-	TimeInternal t4;
 	Integer8 log_min_delay_req_interval;
 
 	UInteger16 sent_seq[__PP_NR_MESSAGES_TYPES]; /* last sent this type */
