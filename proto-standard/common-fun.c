@@ -152,11 +152,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			/* Save correctionField of Sync message */
 			int64_to_TimeInternal(
 				hdr->correctionfield,
-				&correction_field);
-			ppi->last_sync_corr_field.seconds =
-				correction_field.seconds;
-			ppi->last_sync_corr_field.nanoseconds =
-				correction_field.nanoseconds;
+				&ppi->last_sync_corr_field);
 		} else {
 			msg_unpack_sync(buf, &sync);
 			int64_to_TimeInternal(
