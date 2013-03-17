@@ -224,8 +224,6 @@ extern int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv);
 extern void pp_init_clock(struct pp_instance *ppi);
 extern void pp_update_delay(struct pp_instance *ppi,
 			    TimeInternal *correction_field);
-extern void pp_update_peer_delay(struct pp_instance *ppi,
-			  TimeInternal *correction_field, int two_step);
 extern void pp_update_offset(struct pp_instance *ppi,
 			     TimeInternal *send_time,
 			     TimeInternal *recv_time,
