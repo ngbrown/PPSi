@@ -151,15 +151,13 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 		ppi->waiting_for_follow = TRUE;
 		ppi->recv_sync_sequence_id = hdr->sequenceId;
 		/* Save correctionField of Sync message */
-		int64_to_TimeInternal(
-			hdr->correctionfield,
-			&ppi->last_sync_corr_field);
+		cField_to_TimeInternal(&ppi->last_sync_corr_field,
+				      hdr->correctionfield);
 		return 0;
 	}
 	msg_unpack_sync(buf, &sync);
-	int64_to_TimeInternal(
-		ppi->received_ptp_header.correctionfield,
-		&correction_field);
+	cField_to_TimeInternal(&correction_field,
+			      ppi->received_ptp_header.correctionfield);
 
 	display_TimeInternal("Correction field",
 			     &correction_field);
@@ -207,9 +205,8 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	ppi->waiting_for_follow = FALSE;
 	to_TimeInternal(&ppi->t1, &follow.preciseOriginTimestamp);
 
-	int64_to_TimeInternal(ppi->received_ptp_header.correctionfield,
-					&correction_field);
-
+	cField_to_TimeInternal(&correction_field,
+			      ppi->received_ptp_header.correctionfield);
 	add_TimeInternal(&correction_field, &correction_field,
 		&ppi->last_sync_corr_field);
 

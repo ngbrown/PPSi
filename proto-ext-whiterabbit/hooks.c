@@ -80,7 +80,8 @@ static int wr_update_delay(struct pp_instance *ppi)
 	MsgHeader *hdr = &ppi->received_ptp_header;
 	TimeInternal correction_field;
 
-	int64_to_TimeInternal(hdr->correctionfield, &correction_field);
+	/* FIXME: check sub-nano relevance of correction filed */
+	cField_to_TimeInternal(&correction_field, hdr->correctionfield);
 
 	/* If no WR mode is on, run normal code */
 	if (!WR_DSPOR(ppi)->wrModeOn) {

@@ -263,7 +263,7 @@ extern int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time);
 
 /* Functions for timestamp handling (internal to protocol format conversion*/
 /* FIXME: add prefix in function name? */
-extern void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal);
+extern void cField_to_TimeInternal(TimeInternal *internal, Integer64 bigint);
 extern int from_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern int to_TimeInternal(TimeInternal *internal, Timestamp *external);
 extern void add_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y);

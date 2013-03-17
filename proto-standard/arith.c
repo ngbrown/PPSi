@@ -6,19 +6,29 @@
 #include <limits.h>
 #include <ppsi/ppsi.h>
 
-void int64_to_TimeInternal(Integer64 bigint, TimeInternal *internal)
+void cField_to_TimeInternal(TimeInternal *internal, Integer64 cField)
 {
-	uint64_t bigint_val;
+	uint64_t i64;
 
-	if (bigint.msb < 0)
-		PP_PRINTF("BUG: %s doesn't support negatives\n", __func__);
+	i64 = cField.lsb;
+	i64 |= ((int64_t)cField.msb) << 32;
 
-	bigint_val = bigint.lsb;
-	bigint_val += ((int64_t)bigint.msb) << 32;
+	if ((int32_t)cField.msb < 0)
+		pp_error("BUG: %s doesn't support negatives\n", __func__);
 
+	/*
+	 * the correctionField is nanoseconds scaled by 16 bits.
+	 * It is updated by transparent clocks and may be used to count
+	 * for asymmetry. Since we support no better than nanosecond with
+	 * the standard protocol and WR (which is better than nanosecond)
+	 * doesn't use this field, just approximate to nanoseconds.
+	 * and the WR extension uses its own methods for asymmetry,
+	 */
+	i64 += 0x8000;
+	i64 >>= 16;
 	/* Use __div64_32 from library, to avoid libgcc on small targets */
-	internal->nanoseconds = __div64_32(&bigint_val, PP_NSEC_PER_SEC);
-	internal->seconds = bigint_val;
+	internal->nanoseconds = __div64_32(&i64, PP_NSEC_PER_SEC);
+	internal->seconds = i64;
 }
 
 int from_TimeInternal(TimeInternal *internal, Timestamp *external)

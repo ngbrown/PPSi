@@ -71,9 +71,8 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 			to_TimeInternal(&ppi->t4, &resp.receiveTimestamp);
 
-			int64_to_TimeInternal(
-				hdr->correctionfield,
-				&correction_field);
+			cField_to_TimeInternal(&correction_field,
+					      hdr->correctionfield);
 
 			if (pp_hooks.update_delay)
 				e = pp_hooks.update_delay(ppi);
