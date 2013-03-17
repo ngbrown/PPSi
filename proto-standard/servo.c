@@ -26,6 +26,7 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 {
 	TimeInternal s_to_m_dly;
 	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
+	int s;
 
 	/* calc 'slave to master' delay */
 	sub_TimeInternal(&s_to_m_dly, &ppi->t4,	&ppi->t3);
@@ -46,58 +47,57 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 			return;
 	}
 
-	if (OPTS(ppi)->ofst_first_updated) {
-		Integer16 s;
+	if (!OPTS(ppi)->ofst_first_updated)
+		return;
 
-		/* calc 'slave to_master' delay (master to slave delay is
-		 * already computed in pp_update_offset)
-		 */
-		sub_TimeInternal(&SRV(ppi)->delay_sm, &ppi->t4,	&ppi->t3);
+	/* calc 'slave to_master' delay (master to slave delay is
+	 * already computed in pp_update_offset)
+	 */
+	sub_TimeInternal(&SRV(ppi)->delay_sm, &ppi->t4,	&ppi->t3);
 
-		/* update 'one_way_delay' */
-		add_TimeInternal(&DSCUR(ppi)->meanPathDelay,
-				 &SRV(ppi)->delay_sm, &SRV(ppi)->delay_ms);
+	/* update 'one_way_delay' */
+	add_TimeInternal(&DSCUR(ppi)->meanPathDelay,
+			 &SRV(ppi)->delay_sm, &SRV(ppi)->delay_ms);
 
-		/* Subtract correction_field */
-		sub_TimeInternal(&DSCUR(ppi)->meanPathDelay,
-				 &DSCUR(ppi)->meanPathDelay, correction_field);
+	/* Subtract correction_field */
+	sub_TimeInternal(&DSCUR(ppi)->meanPathDelay,
+			 &DSCUR(ppi)->meanPathDelay, correction_field);
 
-		/* Compute one-way delay */
-		div2_TimeInternal(&DSCUR(ppi)->meanPathDelay);
+	/* Compute one-way delay */
+	div2_TimeInternal(&DSCUR(ppi)->meanPathDelay);
 
 
-		if (DSCUR(ppi)->meanPathDelay.seconds) {
-			/* cannot filter with secs, clear filter */
-			owd_fltr->s_exp = 0;
-			owd_fltr->nsec_prev = 0;
-			return;
-		}
-
-		/* avoid overflowing filter */
-		s = OPTS(ppi)->s;
-		while (abs(owd_fltr->y) >> (31 - s))
-			--s;
-
-		/* crank down filter cutoff by increasing 's_exp' */
-		if (owd_fltr->s_exp < 1)
-			owd_fltr->s_exp = 1;
-		else if (owd_fltr->s_exp < 1 << s)
-			++owd_fltr->s_exp;
-		else if (owd_fltr->s_exp > 1 << s)
-			owd_fltr->s_exp = 1 << s;
-
-		/* filter 'meanPathDelay' */
-		owd_fltr->y = (owd_fltr->s_exp - 1) *
-			owd_fltr->y / owd_fltr->s_exp +
-			(DSCUR(ppi)->meanPathDelay.nanoseconds / 2 +
-			 owd_fltr->nsec_prev / 2) / owd_fltr->s_exp;
-
-		owd_fltr->nsec_prev = DSCUR(ppi)->meanPathDelay.nanoseconds;
-		DSCUR(ppi)->meanPathDelay.nanoseconds = owd_fltr->y;
-
-		pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
-			owd_fltr->y, owd_fltr->s_exp);
+	if (DSCUR(ppi)->meanPathDelay.seconds) {
+		/* cannot filter with secs, clear filter */
+		owd_fltr->s_exp = 0;
+		owd_fltr->nsec_prev = 0;
+		return;
 	}
+
+	/* avoid overflowing filter */
+	s = OPTS(ppi)->s;
+	while (abs(owd_fltr->y) >> (31 - s))
+		--s;
+
+	/* crank down filter cutoff by increasing 's_exp' */
+	if (owd_fltr->s_exp < 1)
+		owd_fltr->s_exp = 1;
+	else if (owd_fltr->s_exp < 1 << s)
+		++owd_fltr->s_exp;
+	else if (owd_fltr->s_exp > 1 << s)
+		owd_fltr->s_exp = 1 << s;
+
+	/* filter 'meanPathDelay' */
+	owd_fltr->y = (owd_fltr->s_exp - 1) *
+		owd_fltr->y / owd_fltr->s_exp +
+		(DSCUR(ppi)->meanPathDelay.nanoseconds / 2 +
+		 owd_fltr->nsec_prev / 2) / owd_fltr->s_exp;
+
+	owd_fltr->nsec_prev = DSCUR(ppi)->meanPathDelay.nanoseconds;
+	DSCUR(ppi)->meanPathDelay.nanoseconds = owd_fltr->y;
+
+	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
+		owd_fltr->y, owd_fltr->s_exp);
 }
 
 /*

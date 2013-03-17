@@ -142,32 +142,33 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	if (len < PP_SYNC_LENGTH)
 		return -1;
 
-	if (ppi->is_from_cur_par) {
-		ppi->t2 = ppi->last_rcv_time;
+	if (!ppi->is_from_cur_par)
+		return 0;
 
-		if ((hdr->flagField[0] & PP_TWO_STEP_FLAG) != 0) {
-			ppi->waiting_for_follow = TRUE;
-			ppi->recv_sync_sequence_id = hdr->sequenceId;
-			/* Save correctionField of Sync message */
-			int64_to_TimeInternal(
-				hdr->correctionfield,
-				&ppi->last_sync_corr_field);
-		} else {
-			msg_unpack_sync(buf, &sync);
-			int64_to_TimeInternal(
-				ppi->received_ptp_header.correctionfield,
-				&correction_field);
+	ppi->t2 = ppi->last_rcv_time;
 
-			display_TimeInternal("Correction field",
-					     &correction_field);
-
-			ppi->waiting_for_follow = FALSE;
-			to_TimeInternal(&ppi->t1,
-					&sync.originTimestamp);
-			pp_update_offset(ppi, &correction_field);
-			pp_update_clock(ppi);
-		}
+	if ((hdr->flagField[0] & PP_TWO_STEP_FLAG) != 0) {
+		ppi->waiting_for_follow = TRUE;
+		ppi->recv_sync_sequence_id = hdr->sequenceId;
+		/* Save correctionField of Sync message */
+		int64_to_TimeInternal(
+			hdr->correctionfield,
+			&ppi->last_sync_corr_field);
+		return 0;
 	}
+	msg_unpack_sync(buf, &sync);
+	int64_to_TimeInternal(
+		ppi->received_ptp_header.correctionfield,
+		&correction_field);
+
+	display_TimeInternal("Correction field",
+			     &correction_field);
+
+	ppi->waiting_for_follow = FALSE;
+	to_TimeInternal(&ppi->t1,
+			&sync.originTimestamp);
+	pp_update_offset(ppi, &correction_field);
+	pp_update_clock(ppi);
 	return 0;
 }
 
