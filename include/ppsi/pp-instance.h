@@ -155,7 +155,6 @@ struct pp_instance {
 	/* Times, for the various offset computations */
 	TimeInternal t1, t2, t3, t4;			/* *the* stamps */
 	TimeInternal last_rcv_time, last_snt_time;	/* two temporaries */
-	TimeInternal last_sync_corr_field;
 
 	/* Data sets */
 	DSDefault *defaultDS;			/* page 65 */

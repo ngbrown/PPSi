@@ -150,9 +150,6 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	if ((hdr->flagField[0] & PP_TWO_STEP_FLAG) != 0) {
 		ppi->waiting_for_follow = TRUE;
 		ppi->recv_sync_sequence_id = hdr->sequenceId;
-		/* Save correctionField of Sync message */
-		cField_to_TimeInternal(&ppi->last_sync_corr_field,
-				      hdr->correctionfield);
 		return 0;
 	}
 	msg_unpack_sync(buf, &sync);
@@ -207,8 +204,6 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 
 	cField_to_TimeInternal(&correction_field,
 			      ppi->received_ptp_header.correctionfield);
-	add_TimeInternal(&correction_field, &correction_field,
-		&ppi->last_sync_corr_field);
 
 	/* Call the extension; it may do it all and ask to return */
 	if (pp_hooks.handle_followup)
