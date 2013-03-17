@@ -69,8 +69,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			resp.requestingPortIdentity.portNumber)
 			&& ppi->is_from_cur_par) {
 
-			to_TimeInternal(&ppi->delay_req_receive_time,
-					&resp.receiveTimestamp);
+			to_TimeInternal(&ppi->t4, &resp.receiveTimestamp);
 
 			int64_to_TimeInternal(
 				hdr->correctionfield,
@@ -113,11 +112,11 @@ out:
 	if (pp_timeout_z(ppi, PP_TO_DELAYREQ)) {
 		e = msg_issue_delay_req(ppi);
 
-		ppi->delay_req_send_time = ppi->last_snt_time;
+		ppi->t3 = ppi->last_snt_time;
 
 		/* Add latency */
-		add_TimeInternal(&ppi->delay_req_send_time,
-				 &ppi->delay_req_send_time,
+		add_TimeInternal(&ppi->t3,
+				 &ppi->t3,
 				 &OPTS(ppi)->outbound_latency);
 	}
 

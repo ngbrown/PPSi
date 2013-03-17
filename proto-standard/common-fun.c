@@ -135,7 +135,6 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			     int len)
 {
-	TimeInternal *time;
 	TimeInternal origin_tstamp;
 	TimeInternal correction_field;
 	MsgHeader *hdr = &ppi->received_ptp_header;
@@ -144,10 +143,8 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	if (len < PP_SYNC_LENGTH)
 		return -1;
 
-	time = &ppi->last_rcv_time;
-
 	if (ppi->is_from_cur_par) {
-		ppi->sync_receive_time = *time;
+		ppi->t2 = ppi->last_rcv_time;
 
 		if ((hdr->flagField[0] & PP_TWO_STEP_FLAG) != 0) {
 			ppi->waiting_for_follow = TRUE;
@@ -173,7 +170,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			to_TimeInternal(&origin_tstamp,
 					&sync.originTimestamp);
 			pp_update_offset(ppi, &origin_tstamp,
-					&ppi->sync_receive_time,
+					&ppi->t2,
 					&correction_field);
 			pp_update_clock(ppi);
 		}
@@ -234,7 +231,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 		return ret;
 
 	pp_update_offset(ppi, &precise_orig_timestamp,
-			&ppi->sync_receive_time,
+			&ppi->t2,
 			&correction_field);
 
 	pp_update_clock(ppi);

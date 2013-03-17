@@ -28,8 +28,7 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
 
 	/* calc 'slave to master' delay */
-	sub_TimeInternal(&s_to_m_dly, &ppi->delay_req_receive_time,
-		&ppi->delay_req_send_time);
+	sub_TimeInternal(&s_to_m_dly, &ppi->t4,	&ppi->t3);
 
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
 		pp_diag(ppi, servo, 1, "%s aborted, delay "
@@ -53,9 +52,7 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 		/* calc 'slave to_master' delay (master to slave delay is
 		 * already computed in pp_update_offset)
 		 */
-		sub_TimeInternal(&SRV(ppi)->delay_sm,
-			&ppi->delay_req_receive_time,
-			&ppi->delay_req_send_time);
+		sub_TimeInternal(&SRV(ppi)->delay_sm, &ppi->t4,	&ppi->t3);
 
 		/* update 'one_way_delay' */
 		add_TimeInternal(&DSCUR(ppi)->meanPathDelay,

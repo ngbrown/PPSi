@@ -163,7 +163,7 @@ struct pp_instance {
 	Integer16  foreign_record_i;
 	Integer16  foreign_record_best;
 	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
-	TimeInternal sync_receive_time;
+	TimeInternal t2;
 	UInteger16 recv_sync_sequence_id;
 
 	TimeInternal last_rcv_time; /* used to store timestamp retreived from
@@ -171,8 +171,8 @@ struct pp_instance {
 	TimeInternal last_snt_time; /* used to store timestamp retreived from
 				     * sent packet */
 	TimeInternal last_sync_corr_field;
-	TimeInternal delay_req_send_time;
-	TimeInternal delay_req_receive_time;
+	TimeInternal t3;
+	TimeInternal t4;
 	Integer8 log_min_delay_req_interval;
 
 	UInteger16 sent_seq[__PP_NR_MESSAGES_TYPES]; /* last sent this type */

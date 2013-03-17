@@ -232,9 +232,9 @@ int wr_servo_got_delay(struct pp_instance *ppi, Integer32 cf)
 	struct wr_servo_state_t *s =
 			&((struct wr_data_t *)ppi->ext_data)->servo_state;
 
-	s->t3 = ppi->delay_req_send_time;
+	s->t3 = ppi->t3;
 	/*  s->t3.phase = 0; */
-	s->t4 = timeint_to_wr(ppi->delay_req_receive_time);
+	s->t4 = timeint_to_wr(ppi->t4);
 	s->t4.correct = 1; /* clock->delay_req_receive_time.correct; */
 	s->t4.phase = (int64_t) cf * 1000LL / 65536LL;
 
