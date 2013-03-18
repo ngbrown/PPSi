@@ -159,8 +159,8 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *correction_field)
 		OPTS(ppi)->ofst_first_updated = 1;
 }
 
-/* called only *exactly* after calling pp_update_offset above */
-void pp_update_clock(struct pp_instance *ppi)
+/* This internal code is used to avoid "goto display" and always have diags */
+static void __pp_update_clock(struct pp_instance *ppi)
 {
 	Integer32 adj;
 	TimeInternal time_tmp;
@@ -169,7 +169,7 @@ void pp_update_clock(struct pp_instance *ppi)
 		if (DSCUR(ppi)->offsetFromMaster.seconds) {
 			pp_diag(ppi, servo, 1, "%s aborted, offset greater "
 				"than 1 second\n", __func__);
-			goto display;
+			return;
 		}
 
 		if ((DSCUR(ppi)->offsetFromMaster.nanoseconds) >
@@ -179,7 +179,7 @@ void pp_update_clock(struct pp_instance *ppi)
 			     __func__,
 			     DSCUR(ppi)->offsetFromMaster.nanoseconds,
 			     OPTS(ppi)->max_rst);
-			goto display;
+			return;
 		}
 	}
 
@@ -199,40 +199,35 @@ void pp_update_clock(struct pp_instance *ppi)
 				ppi->t_ops->adjust(ppi, -adj, 0);
 			}
 		}
-	} else {
-		static int dc = 0;
-		/* the PI controller */
-
-		/* the accumulator for the I component */
-		SRV(ppi)->obs_drift +=
-			DSCUR(ppi)->offsetFromMaster.nanoseconds /
-			OPTS(ppi)->ai;
-
-		/* clamp the accumulator to PP_ADJ_FREQ_MAX for sanity */
-		if (SRV(ppi)->obs_drift > PP_ADJ_FREQ_MAX)
-			SRV(ppi)->obs_drift = PP_ADJ_FREQ_MAX;
-		else if (SRV(ppi)->obs_drift < -PP_ADJ_FREQ_MAX)
-			SRV(ppi)->obs_drift = -PP_ADJ_FREQ_MAX;
-
-		adj = DSCUR(ppi)->offsetFromMaster.nanoseconds / OPTS(ppi)->ap +
-			SRV(ppi)->obs_drift;
-
-		/* apply controller output as a clock tick rate adjustment */
-		if (!OPTS(ppi)->no_adjust)
-			ppi->t_ops->adjust(ppi, 0, -adj);
-
-		dc++;
-		if (dc % 2 == 0) { /* Prints statistics every 8s */
-			pp_diag(ppi, servo, 1,
-				"ofst %d, raw ofst %d, mean-dly %d, adj %d\n",
-				DSCUR(ppi)->offsetFromMaster.nanoseconds,
-				SRV(ppi)->m_to_s_dly.nanoseconds,
-				DSCUR(ppi)->meanPathDelay.nanoseconds,
-				adj);
-		}
+		return;
 	}
 
-display:
+	/* the PI controller */
+
+	/* the accumulator for the I component */
+	SRV(ppi)->obs_drift +=
+		DSCUR(ppi)->offsetFromMaster.nanoseconds /
+		OPTS(ppi)->ai;
+
+	/* clamp the accumulator to PP_ADJ_FREQ_MAX for sanity */
+	if (SRV(ppi)->obs_drift > PP_ADJ_FREQ_MAX)
+		SRV(ppi)->obs_drift = PP_ADJ_FREQ_MAX;
+	else if (SRV(ppi)->obs_drift < -PP_ADJ_FREQ_MAX)
+		SRV(ppi)->obs_drift = -PP_ADJ_FREQ_MAX;
+
+	adj = DSCUR(ppi)->offsetFromMaster.nanoseconds / OPTS(ppi)->ap +
+		SRV(ppi)->obs_drift;
+
+	/* apply controller output as a clock tick rate adjustment */
+	if (!OPTS(ppi)->no_adjust)
+		ppi->t_ops->adjust(ppi, 0, -adj);
+}
+
+/* called only *exactly* after calling pp_update_offset above */
+void pp_update_clock(struct pp_instance *ppi)
+{
+	__pp_update_clock(ppi);
+
 	pp_diag(ppi, servo, 2, "Raw offset from master: %9i.%09i\n",
 		SRV(ppi)->m_to_s_dly.seconds,
 		SRV(ppi)->m_to_s_dly.nanoseconds);
