@@ -134,7 +134,6 @@ struct pp_instance {
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
 	struct pp_runtime_opts *rt_opts;
-	struct pp_servo *servo;
 	unsigned long flags;		/* ppi-specific flags (diag mainly) */
 
 	/* Pointer to global instance owning this pp_instance*/
@@ -190,6 +189,8 @@ struct pp_globals {
 	Integer16  frgn_rec_i;
 	Integer16  frgn_rec_best;
 	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
+
+	struct pp_servo *servo;
 	/* FIXME Here include all is common to many interfaces */
 };
 

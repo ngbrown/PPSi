@@ -68,7 +68,7 @@ static inline struct pp_net_path *NP(struct pp_instance *ppi)
 
 static inline struct pp_servo *SRV(struct pp_instance *ppi)
 {
-	return ppi->servo;
+	return GLBS(ppi)->servo;
 }
 
 

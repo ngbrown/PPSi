@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 		ppi->parentDS = calloc(1, sizeof(*ppi->parentDS));
 		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
 		ppi->timePropertiesDS = calloc(1, sizeof(*ppi->timePropertiesDS));
-		ppi->servo = calloc(1, sizeof(*ppi->servo));
+		GLBS(ppi)->servo = calloc(1, sizeof(*GLBS(ppi)->servo));
 		ppi->arch_data = calloc(1, sizeof(struct posix_arch_data));
 
 		ppi->n_ops = &posix_net_ops;
