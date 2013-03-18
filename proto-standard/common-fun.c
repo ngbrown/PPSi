@@ -135,17 +135,17 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 			     int len)
 {
-	TimeInternal correction_field;
 	MsgHeader *hdr = &ppi->received_ptp_header;
 	MsgSync sync;
 
 	if (len < PP_SYNC_LENGTH)
 		return -1;
-
 	if (!ppi->is_from_cur_par)
 		return 0;
 
+	/* t2 may be overriden by follow-up, cField is always valid */
 	ppi->t2 = ppi->last_rcv_time;
+	cField_to_TimeInternal(&ppi->cField, hdr->correctionfield);
 
 	if ((hdr->flagField[0] & PP_TWO_STEP_FLAG) != 0) {
 		ppi->waiting_for_follow = TRUE;
@@ -153,16 +153,10 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 		return 0;
 	}
 	msg_unpack_sync(buf, &sync);
-	cField_to_TimeInternal(&correction_field,
-			      ppi->received_ptp_header.correctionfield);
-
-	display_TimeInternal("Correction field",
-			     &correction_field);
-
 	ppi->waiting_for_follow = FALSE;
 	to_TimeInternal(&ppi->t1,
 			&sync.originTimestamp);
-	pp_update_offset(ppi, &correction_field);
+	pp_update_offset(ppi, &ppi->cField);
 	pp_update_clock(ppi);
 	return 0;
 }
@@ -171,7 +165,6 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 				 int len)
 {
-	TimeInternal correction_field;
 	MsgFollowUp follow;
 	int ret = 0;
 
@@ -202,19 +195,15 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	ppi->waiting_for_follow = FALSE;
 	to_TimeInternal(&ppi->t1, &follow.preciseOriginTimestamp);
 
-	cField_to_TimeInternal(&correction_field,
-			      ppi->received_ptp_header.correctionfield);
-
 	/* Call the extension; it may do it all and ask to return */
 	if (pp_hooks.handle_followup)
-		ret = pp_hooks.handle_followup(ppi, &ppi->t1,
-					       &correction_field);
+		ret = pp_hooks.handle_followup(ppi, &ppi->t1, &ppi->cField);
 	if (ret == 1)
 		return 0;
 	if (ret < 0)
 		return ret;
 
-	pp_update_offset(ppi, &correction_field);
+	pp_update_offset(ppi, &ppi->cField);
 	pp_update_clock(ppi);
 	return 0;
 }

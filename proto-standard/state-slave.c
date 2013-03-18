@@ -9,7 +9,6 @@
 int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0; /* error var, to check errors in msg handling */
-	TimeInternal correction_field;
 	MsgHeader *hdr = &ppi->received_ptp_header;
 	MsgDelayResp resp;
 	int d1, d2;
@@ -71,13 +70,16 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 			to_TimeInternal(&ppi->t4, &resp.receiveTimestamp);
 
-			cField_to_TimeInternal(&correction_field,
-					      hdr->correctionfield);
+			/*
+			 * FIXME: how is correctionField handled in t3/t4?
+			 * I think the master should consider it when
+			 * generating t4, and report back a modified t4
+			 */
 
 			if (pp_hooks.update_delay)
 				e = pp_hooks.update_delay(ppi);
 			else
-				pp_update_delay(ppi, &correction_field);
+				pp_update_delay(ppi, &ppi->cField);
 			if (e)
 				goto out;
 
