@@ -183,7 +183,7 @@ static int bmc_state_decision(struct pp_instance *ppi, struct pp_frgn_master *m)
 	if (OPTS(ppi)->slave_only)
 		goto slave;
 
-	if ((!ppi->frgn_rec_num) && (ppi->state == PPS_LISTENING))
+	if ((!GLBS(ppi)->frgn_rec_num) && (ppi->state == PPS_LISTENING))
 		return PPS_LISTENING;
 
 	/* copy local information to a foreign_master structure */
@@ -225,22 +225,22 @@ slave:
 
 int bmc(struct pp_instance *ppi)
 {
-	struct pp_frgn_master *frgn_master = ppi->frgn_master;
+	struct pp_frgn_master *frgn_master = GLBS(ppi)->frgn_master;
 	int i, best;
 
-	if (!ppi->frgn_rec_num)
+	if (!GLBS(ppi)->frgn_rec_num)
 		if (ppi->state == PPS_MASTER)	{
 			m1(ppi);
 			return ppi->state;
 		}
 
-	for (i = 1, best = 0; i < ppi->frgn_rec_num; i++)
+	for (i = 1, best = 0; i < GLBS(ppi)->frgn_rec_num; i++)
 		if (bmc_dataset_cmp(ppi, &frgn_master[i], &frgn_master[best])
 		    < 0)
 			best = i;
 
 	pp_diag(ppi, bmc, 1,"Best foreign master is %i\n", best);
-	ppi->frgn_rec_best = best;
+	GLBS(ppi)->frgn_rec_best = best;
 
 	return bmc_state_decision(ppi, &frgn_master[best]);
 }

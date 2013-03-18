@@ -168,10 +168,6 @@ struct pp_instance {
 	DSTimeProperties *timePropertiesDS;	/* page 70 */
 
 	unsigned long timeouts[__PP_TO_ARRAY_SIZE];
-	UInteger16 frgn_rec_num;
-	Integer16  frgn_rec_i;
-	Integer16  frgn_rec_best;
-	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
 	UInteger16 recv_sync_sequence_id;
 
 	Integer8 log_min_delay_req_interval;
@@ -190,6 +186,10 @@ struct pp_instance {
 struct pp_globals {
 	int nports;
 	struct pp_instance *pp_instances;
+	UInteger16 frgn_rec_num;
+	Integer16  frgn_rec_i;
+	Integer16  frgn_rec_best;
+	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
 	/* FIXME Here include all is common to many interfaces */
 };
 

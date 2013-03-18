@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 
 		if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
 			|| (!ppi->portDS) || (!ppi->timePropertiesDS)
-			|| (!ppi->frgn_master) || (!ppi->arch_data)
+			|| (!GLBS(ppi)->frgn_master) || (!ppi->arch_data)
 		)
 			exit(__LINE__);
 
