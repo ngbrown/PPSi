@@ -168,9 +168,9 @@ struct pp_instance {
 	DSTimeProperties *timePropertiesDS;	/* page 70 */
 
 	unsigned long timeouts[__PP_TO_ARRAY_SIZE];
-	UInteger16 number_foreign_records;
-	Integer16  foreign_record_i;
-	Integer16  foreign_record_best;
+	UInteger16 frgn_rec_num;
+	Integer16  frgn_rec_i;
+	Integer16  frgn_rec_best;
 	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
 	UInteger16 recv_sync_sequence_id;
 
