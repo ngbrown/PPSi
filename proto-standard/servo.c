@@ -86,13 +86,14 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 	else if (owd_fltr->s_exp > 1 << s)
 		owd_fltr->s_exp = 1 << s;
 
-	/* filter 'meanPathDelay' */
-	owd_fltr->y = (owd_fltr->s_exp - 1) *
-		owd_fltr->y / owd_fltr->s_exp +
-		(mpd->nanoseconds / 2 +
-		 owd_fltr->nsec_prev / 2) / owd_fltr->s_exp;
-
+	/* Use the average between current value and previous one */
+	mpd->nanoseconds = (mpd->nanoseconds + owd_fltr->nsec_prev) / 2;
 	owd_fltr->nsec_prev = mpd->nanoseconds;
+
+	/* filter 'meanPathDelay' (running average) */
+	owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1) + mpd->nanoseconds)
+		/ owd_fltr->s_exp;
+
 	mpd->nanoseconds = owd_fltr->y;
 
 	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
