@@ -137,6 +137,9 @@ struct pp_instance {
 	struct pp_servo *servo;
 	unsigned long flags;		/* ppi-specific flags (diag mainly) */
 
+	/* Pointer to global instance owning this pp_instance*/
+	struct pp_globals *glbs;
+
 	/* Operations that may be different in each instance */
 	struct pp_network_operations *n_ops;
 	struct pp_time_operations *t_ops;

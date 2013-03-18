@@ -19,6 +19,7 @@ void ppsi_clear_bss(void)
 		*ptr = 0;
 }
 
+static struct pp_globals ppg_static;
 static struct pp_instance ppi_static;
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
@@ -32,10 +33,12 @@ static struct pp_servo servo;
 
 int ppsi_main(int argc, char **argv)
 {
+	struct pp_globals *ppg = &ppg_static;
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
 
 	PP_PRINTF("bare: starting. Compiled on %s\n", __DATE__);
 
+	ppi->glbs        = ppg;
 	ppi->defaultDS   = &defaultDS;
 	ppi->currentDS   = &currentDS;
 	ppi->parentDS    = &parentDS;

@@ -54,6 +54,7 @@ int main(int argc, char **argv)
 		}
 
 		ppi = &ppg->pp_instances[i];
+		ppi->glbs = ppg;
 
 		/* FIXME check all of these calloc's, since some stuff will be
 		 * part of pp_globals */
