@@ -25,6 +25,7 @@ void pp_init_clock(struct pp_instance *ppi)
 void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 {
 	TimeInternal s_to_m_dly;
+	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
 	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
 	int s;
 
@@ -56,18 +57,16 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 	sub_TimeInternal(&SRV(ppi)->delay_sm, &ppi->t4,	&ppi->t3);
 
 	/* update 'one_way_delay' */
-	add_TimeInternal(&DSCUR(ppi)->meanPathDelay,
-			 &SRV(ppi)->delay_sm, &SRV(ppi)->delay_ms);
+	add_TimeInternal(mpd, &SRV(ppi)->delay_sm, &SRV(ppi)->delay_ms);
 
 	/* Subtract correction_field */
-	sub_TimeInternal(&DSCUR(ppi)->meanPathDelay,
-			 &DSCUR(ppi)->meanPathDelay, correction_field);
+	sub_TimeInternal(mpd, mpd, correction_field);
 
 	/* Compute one-way delay */
-	div2_TimeInternal(&DSCUR(ppi)->meanPathDelay);
+	div2_TimeInternal(mpd);
 
 
-	if (DSCUR(ppi)->meanPathDelay.seconds) {
+	if (mpd->seconds) {
 		/* cannot filter with secs, clear filter */
 		owd_fltr->s_exp = 0;
 		owd_fltr->nsec_prev = 0;
@@ -90,11 +89,11 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 	/* filter 'meanPathDelay' */
 	owd_fltr->y = (owd_fltr->s_exp - 1) *
 		owd_fltr->y / owd_fltr->s_exp +
-		(DSCUR(ppi)->meanPathDelay.nanoseconds / 2 +
+		(mpd->nanoseconds / 2 +
 		 owd_fltr->nsec_prev / 2) / owd_fltr->s_exp;
 
-	owd_fltr->nsec_prev = DSCUR(ppi)->meanPathDelay.nanoseconds;
-	DSCUR(ppi)->meanPathDelay.nanoseconds = owd_fltr->y;
+	owd_fltr->nsec_prev = mpd->nanoseconds;
+	mpd->nanoseconds = owd_fltr->y;
 
 	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
 		owd_fltr->y, owd_fltr->s_exp);
