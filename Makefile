@@ -57,6 +57,7 @@ include proto-standard/Makefile
 # we need this -I so <arch/arch.h> can be found
 CFLAGS += -Iarch-$(ARCH)/include
 include arch-$(ARCH)/Makefile
+export CFLAGS
 
 # And this is the rule to build our target.o file. The architecture may
 # build more stuff. Please note that ./MAKEALL looks for $(TARGET)

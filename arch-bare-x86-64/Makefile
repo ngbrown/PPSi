@@ -3,6 +3,11 @@
 CFLAGS += -ffreestanding -Os -fno-stack-protector -Itools
 ARCH_LDFLAGS = -nostdlib -static -T $(ARCH).lds
 
+# We need to undefine _FORTIFY_SOURCE, to prevent picking up external
+# symbols in the inline versions of strcpy etc. This is documented in
+# "man gcc" in the Ubuntu version.
+CFLAGS += -U_FORTIFY_SOURCE
+
 # All files are under A (short for ARCH) or L (short for lib): I'm lazy
 A := arch-$(ARCH)
 L := lib-bare
