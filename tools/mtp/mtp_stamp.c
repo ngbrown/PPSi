@@ -29,13 +29,10 @@ static void run_passive_host(int argc, char **argv, int sock,
 			     unsigned char *ourmac)
 {
 	int i;
-	socklen_t slen;
-	struct sockaddr_ll addr;
 	struct timespec ts1[4], ts2[4];
 	struct eth_packet pkt;
 
 	/* get forward packet and stamp it */
-	slen = sizeof(addr);
 	i = recv_and_stamp(sock, &pkt, sizeof(pkt), MSG_TRUNC);
 	if (i < 0) {
 		fprintf(stderr, "%s: recvfrom(): %s\n", argv[0],

@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 			gettimeofday(&tv, NULL);
 			localtime_r(&tv.tv_sec, &tm);
 			strftime(s, sizeof(s), "%y-%m-%d-%H:%M:%S", &tm);
-			printf("%s: %10lli us\n", s, newdiff / 1000);
+			printf("%s: %10lli us\n", s, (long long)newdiff / 1000);
 			prevprint = newdiff;
 			fflush(stdout); /* for our outgoing pipe */
 		}

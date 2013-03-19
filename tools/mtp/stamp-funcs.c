@@ -162,7 +162,7 @@ static void __collect_data(struct msghdr *msgp)
 		if (0) {
 			unsigned char *data;
 			printf("level %i, type %i, len %i\n", cmsg->cmsg_level,
-			       cmsg->cmsg_type, cmsg->cmsg_len);
+			       cmsg->cmsg_type, (int)cmsg->cmsg_len);
 			data = CMSG_DATA(cmsg);
 			for (i = 0; i < cmsg->cmsg_len; i++)
 				printf (" %02x", data[i]);
