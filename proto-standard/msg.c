@@ -97,7 +97,8 @@ void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp)
 
 	/* Table 19 */
 	*(UInteger16 *) (buf + 2) = htons(PP_SYNC_LENGTH);
-	*(UInteger16 *) (buf + 30) = htons(++(ppi->sent_seq[PPM_SYNC]));
+	ppi->sent_seq[PPM_SYNC]++;
+	*(UInteger16 *) (buf + 30) = htons(ppi->sent_seq[PPM_SYNC]);
 	*(UInteger8 *) (buf + 32) = 0x00;
 
 	/* Table 23 */
@@ -133,7 +134,8 @@ int msg_pack_announce(struct pp_instance *ppi)
 	*(char *)(buf + 0) = *(char *)(buf + 0) | 0x0B;
 	/* Table 19 */
 	*(UInteger16 *) (buf + 2) = htons(PP_ANNOUNCE_LENGTH);
-	*(UInteger16 *) (buf + 30) = htons(++(ppi->sent_seq[PPM_ANNOUNCE]));
+	ppi->sent_seq[PPM_ANNOUNCE]++;
+	*(UInteger16 *) (buf + 30) = htons(ppi->sent_seq[PPM_ANNOUNCE]);
 	*(UInteger8 *) (buf + 32) = 0x05;
 	/* Table 23 */
 	*(Integer8 *) (buf + 33) = DSPOR(ppi)->logAnnounceInterval;
@@ -240,7 +242,8 @@ void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 
 	/* Table 19 */
 	*(UInteger16 *) (buf + 2) = htons(PP_DELAY_REQ_LENGTH);
-	*(UInteger16 *) (buf + 30) = htons(++(ppi->sent_seq[PPM_DELAY_REQ]));
+	ppi->sent_seq[PPM_DELAY_REQ]++;
+	*(UInteger16 *) (buf + 30) = htons(ppi->sent_seq[PPM_DELAY_REQ]);
 	*(UInteger8 *) (buf + 32) = 0x01;
 
 	/* Table 23 */
