@@ -112,6 +112,9 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 
 		return 0;
 	}
+	pp_printf("%s: can't init UDP channels yet\n", __func__);
+	return -1;
+
 err_out:
 	pp_printf("%s: %s: fatal error, errno = %i\n", __func__, context,
 		  bare_errno);
