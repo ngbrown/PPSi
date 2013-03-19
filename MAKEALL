@@ -93,7 +93,7 @@ done
 for a in $ARCHS; do
     export ARCH=$a
     eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
-    eval export CC="\${CC_$(echo $ARCH | sed 's/-/_/g')}"
-    eval export LD="\${LD_$(echo $ARCH | sed 's/-/_/g')}"
+    eval export CC=\""\${CC_$(echo $ARCH | sed 's/-/_/g')}"\"
+    eval export LD=\""\${LD_$(echo $ARCH | sed 's/-/_/g')}"\"
     build_ext
 done
