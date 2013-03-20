@@ -6,20 +6,19 @@
  *
  * Released according to the GNU GPL, version 2 or any later version.
  */
-#include <stdio.h>
-#include <inttypes.h>
+#include <stdint.h>
 #include <errno.h>
-#include <wrc.h>
-#include <minic.h>
-#include <wrpc.h>
 
 #include <ppsi/ppsi.h>
-#include <../proto-ext-whiterabbit/wr-api.h>
-#include <wr-constants.h>
+#include "wrpc.h"
+#include "../proto-ext-whiterabbit/wr-api.h"
+#include "../proto-ext-whiterabbit/wr-constants.h"
+
+/* All of these live in wrpc-sw/include */
+#include "minic.h"
 #include "syscon.h"
 #include "endpoint.h"
 #include "softpll_ng.h"
-#include "wrc_ptp.h"
 #include "pps_gen.h"
 #include "uart.h"
 
@@ -27,7 +26,7 @@ int ptp_mode = WRC_MODE_UNKNOWN;
 static int ptp_enabled = 0, ptp_forced_stop = 0;
 struct pp_instance ppi_static; /* FIXME: no more static, because used in
 				   tests/measure_t24p.c */
-CONST_VERBOSITY int pp_diag_verbosity = CONFIG_PPSI_VERBOSITY;
+CONST_VERBOSITY int pp_diag_verbosity = 0;
 
 /*ppi fields*/
 static DSDefault  defaultDS;
@@ -42,9 +41,15 @@ static int delay_ms = PP_DEFAULT_NEXT_DELAY_MS;
 static int start_tics = 0;
 static int last_link_up = 0;
 
+/* We now have a structure with all globals, and multiple ppi inside */
+static struct pp_globals ppg_static;
+
+
 int wrc_ptp_init()
 {
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
+	struct pp_globals *ppg = &ppg_static; /* no malloc, one instance */
+
 	sdb_find_devices();
 	uart_init();
 
@@ -56,8 +61,11 @@ int wrc_ptp_init()
 	portDS.ext_dsport = &wr_dsport;
 	ppi->portDS      = &portDS;
 	ppi->timePropertiesDS = &timePropertiesDS;
-	ppi->servo       = &servo;
 	ppi->arch_data   = NULL;
+
+	ppg->nports       = 1;
+	ppg->pp_instances = ppi;
+	ppg->servo        = &servo;
 
 	return 0;
 }
