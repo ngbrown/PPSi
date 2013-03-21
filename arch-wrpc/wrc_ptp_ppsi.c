@@ -193,24 +193,21 @@ int wrc_ptp_update()
 		}
 	}
 
-	if (ptp_enabled) {
-		static unsigned char packet[500];
+	if (!ptp_enabled)
+		return 0;
 
-		/*
-		 * We got a packet. If it's not ours, continue consuming
-		 * the pending timeout
-		 */
-		i = ppi->n_ops->recv(ppi, packet, sizeof(packet),
-				     &ppi->last_rcv_time);
-		if ((!i) && (timer_get_tics() - start_tics < delay_ms))
-			return 0;
-		if (!i) {
-			/* Nothing received, but timeout elapsed */
-			start_tics = timer_get_tics();
-			delay_ms = pp_state_machine(ppi, NULL, 0);
-			return 0;
-		}
-		delay_ms = pp_state_machine(ppi, packet, i);
+	i = ppi->n_ops->recv(ppi, ppi->rx_frame, PP_MAX_FRAME_LENGTH - 4,
+			     &ppi->last_rcv_time);
+
+	if ((!i) && (timer_get_tics() - start_tics < delay_ms))
+		return 0;
+
+	if (!i) {
+		/* Nothing received, but timeout elapsed */
+		start_tics = timer_get_tics();
+		delay_ms = pp_state_machine(ppi, NULL, 0);
+		return 0;
 	}
+	delay_ms = pp_state_machine(ppi, ppi->rx_ptp, i);
 	return 0;
 }
