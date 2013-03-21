@@ -3,12 +3,10 @@
  */
 #include <ppsi/ppsi.h>
 #include "wrpc.h"
-#include <syscon.h>
-#include <pps_gen.h>
-#include <minic.h>
-#include <pps_gen.h>
-#include <softpll_ng.h>
-#include <ptpd_netif.h>
+#include "ptpdump.h"
+
+#include <ptpd_netif.h> /* wrpc-sw */
+
 
 /* This function should init the minic and get the mac address */
 static int wrpc_open_ch(struct pp_instance *ppi)
