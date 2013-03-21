@@ -210,18 +210,6 @@ int wrc_ptp_update()
 			delay_ms = pp_state_machine(ppi, NULL, 0);
 			return 0;
 		}
-		if (pp_diag_verbosity > 1) {
-			int j;
-			pp_printf("recvd: %i\n", i);
-			for (j = 0; j < i; j++) {
-				pp_printf("%02x ", packet[j]);
-				if( (j+1)%16==0 )
-					pp_printf("\n");
-			}
-			pp_printf("\n");
-		}
-		/* Warning: PP_ETHERTYPE is endian-agnostic by design */
-
 		delay_ms = pp_state_machine(ppi, packet, i);
 	}
 	return 0;

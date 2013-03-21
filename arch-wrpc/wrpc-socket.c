@@ -45,8 +45,6 @@ static int wrpc_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	sock = NP(ppi)->ch[PP_NP_EVT].custom;
 	got = ptpd_netif_recvfrom(sock, &addr, pkt, len, &wr_ts);
 
-	/* FIXME check mac of received packet? */
-
 	if (t) {
 		t->seconds = wr_ts.sec;
 		t->nanoseconds = wr_ts.nsec;
@@ -58,6 +56,11 @@ static int wrpc_net_recv(struct pp_instance *ppi, void *pkt, int len,
 #endif
 		t->raw_ahead = wr_ts.raw_ahead;
 	}
+
+	/* The header is separate, so dump payload only */
+	if (got > 0 && pp_diag_allow(ppi, frames, 2))
+		dump_payloadpkt("recv: ", pkt, got, t);
+
 	return got;
 }
 
@@ -69,17 +72,6 @@ static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
 	wr_timestamp_t wr_ts;
 	wr_sockaddr_t addr;
 	sock = NP(ppi)->ch[PP_NP_EVT].custom;
-
-	if (pp_diag_verbosity > 1) {
-		int j;
-		pp_printf("sent: %i\n", len);
-		for (j = 0; j < len; j++) {
-			pp_printf("%02x ", ((char *)pkt)[j]);
-			if( (j + 1) % 16 == 0 )
-				pp_printf("\n");
-		}
-		pp_printf("\n");
-	}
 
 	addr.ethertype = ETH_P_1588;
 	memcpy(&addr.mac, PP_MCAST_MACADDRESS, sizeof(mac_addr_t));
@@ -95,6 +87,9 @@ static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
 		PP_VPRINTF("%s: snt=%d, sec=%d, nsec=%d\n", __func__, snt,
 			   t->seconds, t->nanoseconds);
 	}
+	/* The header is separate, so dump payload only */
+	if (snt >0 && pp_diag_allow(ppi, frames, 2))
+		dump_payloadpkt("send: ", pkt, len, t);
 
 	return snt;
 }
