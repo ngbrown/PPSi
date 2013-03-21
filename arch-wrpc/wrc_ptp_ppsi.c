@@ -24,48 +24,50 @@
 
 int ptp_mode = WRC_MODE_UNKNOWN;
 static int ptp_enabled = 0, ptp_forced_stop = 0;
-struct pp_instance ppi_static; /* FIXME: no more static, because used in
-				   tests/measure_t24p.c */
+
+
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
 /*ppi fields*/
 static DSDefault  defaultDS;
 static DSCurrent  currentDS;
 static DSParent   parentDS;
-static DSPort     portDS;
-static DSTimeProperties timePropertiesDS;
 static struct wr_dsport wr_dsport;
+static DSPort     portDS = {.ext_dsport = &wr_dsport};
+static DSTimeProperties timePropertiesDS;
 static struct pp_servo servo;
 
 static int delay_ms = PP_DEFAULT_NEXT_DELAY_MS;
 static int start_tics = 0;
 static int last_link_up = 0;
 
-/* We now have a structure with all globals, and multiple ppi inside */
-static struct pp_globals ppg_static;
+static struct pp_globals ppg_static; /* forward declaration */
 
+/* despite the name, ppi_static is not static: tests/measure_t24p.c uses it */
+struct pp_instance ppi_static = {
+	.glbs			= &ppg_static,
+	.defaultDS		= &defaultDS,
+	.currentDS		= &currentDS,
+	.parentDS		= &parentDS,
+	.portDS			= &portDS,
+	.timePropertiesDS	= &timePropertiesDS,
+	.n_ops			= &wrpc_net_ops,
+	.t_ops			= &wrpc_time_ops,
+};
+
+/* We now have a structure with all globals, and multiple ppi inside */
+static struct pp_globals ppg_static = {
+	.nports			= 1,
+	.pp_instances		= &ppi_static,
+	.servo			= &servo,
+};
 
 int wrc_ptp_init()
 {
-	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
-	struct pp_globals *ppg = &ppg_static; /* no malloc, one instance */
-
 	sdb_find_devices();
 	uart_init();
 
-	pp_printf("Spec: starting. Compiled on " __DATE__ "\n");
-
-	ppi->defaultDS   = &defaultDS;
-	ppi->currentDS   = &currentDS;
-	ppi->parentDS    = &parentDS;
-	portDS.ext_dsport = &wr_dsport;
-	ppi->portDS      = &portDS;
-	ppi->timePropertiesDS = &timePropertiesDS;
-	ppi->arch_data   = NULL;
-
-	ppg->nports       = 1;
-	ppg->pp_instances = ppi;
-	ppg->servo        = &servo;
+	pp_printf("PPSi for WRPC. Compiled on " __DATE__ "\n");
 
 	return 0;
 }
@@ -113,7 +115,6 @@ int wrc_ptp_set_mode(int mode)
 	start_tics = timer_get_tics();
 
 	pp_printf("Locking PLL");
-
 	shw_pps_gen_enable_output(0);
 
 	while (!spll_check_lock(0) && lock_timeout) {
