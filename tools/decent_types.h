@@ -1,21 +1,15 @@
 
-/* copied from /usr/include/netinet/ip.h */
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-#elif __BYTE_ORDER == __BIG_ENDIAN
-# error "big endian not supported, yet"
-#else
-# error "Please fix <bits/endian.h>"
-#endif
-
+/*
+ * I used to have bit fields, but endianness detection failed. Let's be
+ * honest: bit fields must die. I use masks at run time instead
+ */
 
 /* Common Message header (table 18, page 124) -- was "MsgHeader */
 struct ptp_header {
 	/* 0 */
-	unsigned int	messageType:4;
-	unsigned int	transportSpecific:4;
+	uint8_t		type_and_transport_specific; /* LSB = type */
 	/* 1 */
-	unsigned int	versionPTP:4;
-	unsigned int	reserved1:4;
+	uint8_t		versionPTP_and_reserved; /* LSB = version */
 	/* 2 */
 	uint16_t	messageLength;
 	/* 4 */

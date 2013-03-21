@@ -156,13 +156,15 @@ static void dump_payload(char *prefix, void *pl, int len)
 	struct ptp_header *h = pl;
 	void *msg_specific = (void *)(h + 1);
 	int donelen = 34; /* packet length before tlv */
+	int version = h->versionPTP_and_reserved & 0xf;
+	int messageType = h->type_and_transport_specific & 0xf;
 
-	if (h->versionPTP != 2) {
-		printf("%sVERSION: unsupported (%i)\n", prefix, h->versionPTP);
+	if (version != 2) {
+		printf("%sVERSION: unsupported (%i)\n", prefix, version);
 		return;
 	}
 	printf("%sVERSION: %i (type %i, len %i, domain %i)\n", prefix,
-	       h->versionPTP, h->messageType,
+	       version, messageType,
 	       ntohs(h->messageLength), h->domainNumber);
 	printf("%sFLAGS: 0x%04x (correction 0x%08lu)\n", prefix, h->flagField,
 	       (unsigned long)h->correctionField);
@@ -170,7 +172,7 @@ static void dump_payload(char *prefix, void *pl, int len)
 	printf("%sREST: seq %i, ctrl %i, log-interval %i\n", prefix,
 	       ntohs(h->sequenceId), h->controlField, h->logMessageInterval);
 #define CASE(t, x) case PPM_ ##x: printf("%sMESSAGE: (" #t ") " #x "\n", prefix)
-	switch(h->messageType) {
+	switch(messageType) {
 		CASE(E, SYNC);
 		dump_msg_sync_etc(prefix, "MSG-SYNC: ", msg_specific);
 		donelen = 44;
