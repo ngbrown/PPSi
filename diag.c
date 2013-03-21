@@ -46,7 +46,6 @@ unsigned long pp_diag_parse(char *diaglevel)
 	}
 	if (*diaglevel)
 		pp_printf("%s: error parsing \"%s\"\n", __func__, diaglevel);
-	pp_printf("diag level: %08lx\n", res);
 
 	return res;
 }
