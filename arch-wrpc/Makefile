@@ -30,6 +30,7 @@ LIBS += -L$A -larch
 
 OBJ-libarch := $A/wrpc-socket.o \
 	$A/wrpc-io.o \
+	$A/wrpc-time.o \
 	$A/wrpc-spll.o \
 	$A/wrpc-calibration.o \
 	$A/wrc_ptp_ppsi.o \
