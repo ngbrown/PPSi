@@ -32,6 +32,7 @@ OBJ-libarch := $A/wrpc-socket.o \
 	$A/wrpc-io.o \
 	$A/wrpc-spll.o \
 	$A/wrpc-calibration.o \
+	$A/wrc_ptp_ppsi.o \
 	lib/dump-funcs.o \
 	lib/div64.o
 
