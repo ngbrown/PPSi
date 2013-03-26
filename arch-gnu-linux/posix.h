@@ -9,7 +9,6 @@
 #define POSIX_ARCH(ppi) ((struct posix_arch_data *)(ppi->arch_data))
 struct posix_arch_data {
 	struct timeval tv;
-	int rcv_switch; /* flag for event / general receive order */
 };
 
 extern int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms);

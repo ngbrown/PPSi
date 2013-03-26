@@ -105,16 +105,10 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		return ret;
 	}
 
-	/* else: UDP, we can return one frame only, so swap priority */
-	if (POSIX_ARCH(ppi)->rcv_switch) {
-		ch1 = &(NP(ppi)->ch[PP_NP_GEN]);
-		ch2 = &(NP(ppi)->ch[PP_NP_EVT]);
-	} else {
-		ch1 = &(NP(ppi)->ch[PP_NP_EVT]);
-		ch2 = &(NP(ppi)->ch[PP_NP_GEN]);
-	}
-
-	POSIX_ARCH(ppi)->rcv_switch = !POSIX_ARCH(ppi)->rcv_switch;
+	/* else: UDP, we can return one frame only, always handle EVT msgs
+	 * before GEN */
+	ch1 = &(NP(ppi)->ch[PP_NP_EVT]);
+	ch2 = &(NP(ppi)->ch[PP_NP_GEN]);
 
 	ret = -1;
 	if (ch1->pkt_present)
