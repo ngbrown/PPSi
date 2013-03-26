@@ -115,6 +115,10 @@ out:
 
 		ppi->t3 = ppi->last_snt_time;
 
+		/* Restart the timeout for next time */
+		pp_timeout_rand(ppi, PP_TO_DELAYREQ,
+				DSPOR(ppi)->logMinDelayReqInterval);
+
 		/* Add latency */
 		add_TimeInternal(&ppi->t3,
 				 &ppi->t3,
