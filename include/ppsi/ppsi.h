@@ -145,12 +145,12 @@ struct pp_time_operations {
 	unsigned long (*calc_timeout)(struct pp_instance *ppi, int millisec);
 };
 
-/* IF the configuration prevents jumps, this is the max jump (0.5ms) */
+/* FIXME this define is no more used; check whether it should be
+ * introduced again */
 #define  PP_ADJ_NS_MAX		(500*1000)
 
-/* In geeneral, we can't adjust the rate by more than 200ppm */
-#define  PP_ADJ_FREQ_MAX	(200 << 16)
-
+/* FIXME Restored to value of ptpd. What does this stand for, exactly? */
+#define  PP_ADJ_FREQ_MAX	512000
 
 /*
  * Timeouts. I renamed from "timer" to "timeout" to avoid

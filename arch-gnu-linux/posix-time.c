@@ -52,9 +52,13 @@ int posix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 	if (freq_ppm < -PP_ADJ_FREQ_MAX)
 		freq_ppm = -PP_ADJ_FREQ_MAX;
 
-	t.offset = offset_ns / 1000;
-	t.freq = freq_ppm; /* was: "adj * ((1 << 16) / 1000)" */
-	t.modes = MOD_FREQUENCY | MOD_OFFSET;
+	t.freq = freq_ppm * ((1 << 16) / 1000);
+	t.modes = MOD_FREQUENCY;
+
+	if (offset_ns) {
+		t.offset = offset_ns / 1000;
+		t.modes |= MOD_OFFSET;
+	}
 
 	ret = adjtimex(&t);
 	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppm);
