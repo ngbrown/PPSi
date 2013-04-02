@@ -24,7 +24,7 @@ void posix_main_loop(struct pp_globals *ppg)
 	 * If we are sending or receiving raw ethernet frames,
 	 * the ptp payload is one-eth-header bytes into the frame
 	 */
-	if (OPTS(ppi)->ethernet_mode)
+	if (ppi->ethernet_mode)
 		NP(ppi)->ptp_offset = ETH_HLEN;
 
 	/*

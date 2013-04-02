@@ -25,7 +25,6 @@ struct pp_runtime_opts default_rt_opts = {
 	.ap =			PP_DEFAULT_AP,
 	.ai =			PP_DEFAULT_AI,
 	.s =			PP_DEFAULT_DELAY_S,
-	.ethernet_mode =	PP_DEFAULT_ETHERNET_MODE,
 	.ofst_first_updated =	0, /* FIXME: is it a option or a state var? */
 	.announce_intvl =	PP_DEFAULT_ANNOUNCE_INTERVAL,
 	.sync_intvl =		PP_DEFAULT_SYNC_INTERVAL,

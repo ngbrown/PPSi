@@ -15,7 +15,7 @@ static int wrpc_read_calibration_data(struct pp_instance *ppi,
 {
   hexp_port_state_t state;
 
-  halexp_get_port_state(&state, OPTS(ppi)->iface_name);
+  halexp_get_port_state(&state, ppi->iface_name);
 
   // check if the data is available
   if(state.valid)

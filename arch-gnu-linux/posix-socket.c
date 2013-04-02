@@ -96,7 +96,7 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	struct pp_channel *ch1, *ch2;
 	int ret;
 
-	if (OPTS(ppi)->ethernet_mode) {
+	if (ppi->ethernet_mode) {
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
 		ret = posix_recv_msg(ppi, fd, pkt, len, t);
@@ -128,7 +128,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 	struct ethhdr *hdr = pkt;
 	int ret;
 
-	if (OPTS(ppi)->ethernet_mode) {
+	if (ppi->ethernet_mode) {
 		hdr->h_proto = htons(ETH_P_1588);
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
@@ -175,7 +175,7 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	char addr_str[INET_ADDRSTRLEN];
 	char *context;
 
-	if (OPTS(ppi)->ethernet_mode) {
+	if (ppi->ethernet_mode) {
 		/* open socket */
 		context = "socket()";
 		sock = socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
@@ -340,17 +340,17 @@ int posix_net_init(struct pp_instance *ppi)
 	/* The buffer is inside ppi, but we need to set pointers and align */
 	pp_prepare_pointers(ppi);
 
-	if (OPTS(ppi)->ethernet_mode) {
+	if (ppi->ethernet_mode) {
 		PP_PRINTF("posix_net_init IEEE 802.3\n");
 
 		/* raw sockets implementation always use gen socket */
-		return posix_open_ch(ppi, OPTS(ppi)->iface_name, PP_NP_GEN);
+		return posix_open_ch(ppi, ppi->iface_name, PP_NP_GEN);
 	}
 
 	/* else: UDP */
 	PP_PRINTF("posix_net_init UDP\n");
 	for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
-		if (posix_open_ch(ppi, OPTS(ppi)->iface_name, i))
+		if (posix_open_ch(ppi, ppi->iface_name, i))
 			return -1;
 	}
 	return 0;
@@ -365,7 +365,7 @@ static int posix_net_exit(struct pp_instance *ppi)
 	int fd;
 	int i;
 
-	if (OPTS(ppi)->ethernet_mode) {
+	if (ppi->ethernet_mode) {
 		close(NP(ppi)->ch[PP_NP_GEN].fd);
 		return 0;
 	}
@@ -412,7 +412,7 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 	NP(ppi)->ch[PP_NP_GEN].pkt_present = 0;
 	NP(ppi)->ch[PP_NP_EVT].pkt_present = 0;
 
-	if (OPTS(ppi)->ethernet_mode) {
+	if (ppi->ethernet_mode) {
 		maxfd = NP(ppi)->ch[PP_NP_GEN].fd;
 		FD_ZERO(&set);
 		FD_SET(NP(ppi)->ch[PP_NP_GEN].fd, &set);

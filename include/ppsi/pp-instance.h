@@ -20,10 +20,10 @@ struct pp_runtime_opts {
 	Integer32 max_rst; /* Maximum number of nanoseconds to reset */
 	Integer32 max_dly; /* Maximum number of nanoseconds of delay */
 	Integer32 ttl;
-	UInteger32	slave_only:1,
-			master_only:1,
+	UInteger32	/* slave_only:1, -- moved to ppsi, is no more global */
+			/* master_only:1, -- moved to ppsi, is no more global */
 			no_adjust:1,
-			ethernet_mode:1,
+			/* ethernet_mode:1, -- moved to ppsi, is no more global */
 			/* e2e_mode:1, -- no more: we only support e2e */
 			/* gptp_mode:1, -- no more: peer-to-peer unsupported */
 			ofst_first_updated:1,
@@ -35,7 +35,6 @@ struct pp_runtime_opts {
 	UInteger8 prio1;
 	UInteger8 prio2;
 	UInteger8 domain_number;
-	char *iface_name;
 	void *arch_opts;
 };
 extern struct pp_runtime_opts default_rt_opts; /* preinited with defaults */
@@ -171,7 +170,11 @@ struct pp_instance {
 	MsgHeader delay_req_hdr;
 	UInteger32
 		is_from_cur_par:1,
-		waiting_for_follow:1;
+		waiting_for_follow:1,
+		slave_only:1,
+		master_only:1,
+		ethernet_mode:1;
+	char *iface_name;
 };
 
 /*

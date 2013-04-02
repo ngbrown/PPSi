@@ -74,18 +74,17 @@ int main(int argc, char **argv)
 			|| (!GLBS(ppi)->frgn_master) || (!ppi->arch_data)
 		)
 			exit(__LINE__);
-
-		pp_open_instance(ppi, NULL);
-
-		/* FIXME temporary workaround to make the first interface work as in the past */
-		if (i == 0)
-			OPTS(ppi)->iface_name = strdup(ifname);
 	}
 
-
-	/* FIXME temporary workaround: pp_parse_cmdline will receive ppg */
-	if (pp_parse_cmdline(&ppg->pp_instances[0], argc, argv) != 0)
-		return -1;
+	/* FIXME temporary workaround to make the first interface work as in the past */
+	if (ppg->nports == 1) {
+		struct pp_instance *ppi = &ppg->pp_instances[0];
+		ppi->iface_name = strdup(ifname);
+		ppi->ethernet_mode = PP_DEFAULT_ETHERNET_MODE;
+		pp_open_instance(ppi, NULL);
+		if (pp_parse_cmdline(ppi, argc, argv) != 0)
+			return -1;
+	}
 
 	posix_main_loop(ppg);
 	return 0; /* never reached */

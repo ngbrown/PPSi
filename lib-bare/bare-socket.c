@@ -60,7 +60,7 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 	struct bare_packet_mreq pmr;
 	char *context;
 
-	if (OPTS(ppi)->ethernet_mode) {
+	if (ppi->ethernet_mode) {
 		/* open socket */
 		context = "socket()";
 		sock = sys_socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
@@ -138,11 +138,11 @@ static int bare_net_init(struct pp_instance *ppi)
 	/* The buffer is inside ppi, but we need to set pointers and align */
 	pp_prepare_pointers(ppi);
 
-	if (OPTS(ppi)->ethernet_mode) {
+	if (ppi->ethernet_mode) {
 		PP_PRINTF("bare_net_init IEEE 802.3\n");
 
 		/* raw sockets implementation always use gen socket */
-		return bare_open_ch(ppi, OPTS(ppi)->iface_name);
+		return bare_open_ch(ppi, ppi->iface_name);
 	}
 
 	/* else: UDP -- not supported */

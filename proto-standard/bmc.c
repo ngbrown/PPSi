@@ -177,10 +177,10 @@ static int bmc_state_decision(struct pp_instance *ppi, struct pp_frgn_master *m)
 	int cmpres;
 	struct pp_frgn_master myself;
 
-	if (OPTS(ppi)->master_only)
+	if (ppi->master_only)
 		goto master;
 
-	if (OPTS(ppi)->slave_only)
+	if (ppi->slave_only)
 		goto slave;
 
 	if ((!GLBS(ppi)->frgn_rec_num) && (ppi->state == PPS_LISTENING))

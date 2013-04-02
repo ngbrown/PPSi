@@ -22,7 +22,7 @@ static int wr_open(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
 {
 	static struct wr_data_t wr_data; /* WR-specific global data */
 
-	rt_opts->iface_name = "wr1";
+	ppi->iface_name = "wr1";
 	ppi->ext_data = &wr_data;
 	return 0;
 }

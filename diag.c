@@ -22,7 +22,7 @@ void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 	if (!__PP_DIAG_ALLOW(ppi, th, level))
 		return;
 
-	pp_printf("%s-%i-%s: ", thing_name[th], level, OPTS(ppi)->iface_name);
+	pp_printf("%s-%i-%s: ", thing_name[th], level, ppi->iface_name);
 	va_start(args, fmt);
 	pp_vprintf(fmt, args);
 	va_end(args);

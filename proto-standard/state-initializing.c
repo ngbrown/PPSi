@@ -41,8 +41,8 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	def->priority1 = opt->prio1;
 	def->priority2 = opt->prio2;
 	def->domainNumber = opt->domain_number;
-	def->slaveOnly = opt->slave_only;
-	if (opt->slave_only)
+	def->slaveOnly = ppi->slave_only;
+	if (def->slaveOnly)
 		def->clockQuality.clockClass = 255;
 
 	/*
@@ -74,7 +74,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	msg_pack_header(ppi, ppi->tx_ptp); /* This is used for all tx */
 
-	if (!opt->master_only)
+	if (!ppi->master_only)
 		ppi->next_state = PPS_LISTENING;
 	else
 		ppi->next_state = PPS_MASTER;

@@ -149,7 +149,7 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				break;
 			case 'b':
 				a = argv[++i];
-				OPTS(ppi)->iface_name = a;
+				ppi->iface_name = a;
 				break;
 			case 'l':
 				a = argv[++i];
@@ -175,7 +175,7 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 					OPTS(ppi)->announce_intvl = 4;
 				break;
 			case 'g':
-				OPTS(ppi)->slave_only = 1;
+				ppi->slave_only = 1;
 				break;
 			case 'v':
 				a = argv[++i];
@@ -204,7 +204,7 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				/* ignored: was "OPTS(ppi)->e2e_mode = 1;" */
 				break;
 			case 'e':
-				OPTS(ppi)->ethernet_mode = 1;
+				ppi->ethernet_mode = 1;
 				break;
 			case 'G':
 				/* gptp_mode not supported: fall through */
