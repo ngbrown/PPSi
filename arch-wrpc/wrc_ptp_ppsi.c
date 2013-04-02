@@ -146,7 +146,7 @@ int wrc_ptp_start()
 {
 	struct pp_instance *ppi = &ppi_static;
 
-	pp_open_instance(ppi, 0 /* no opts */);
+	pp_open_instance(&ppg_static, 0 /* no opts */);
 
 	/* Call the state machine. Being it in "Initializing" state, make
 	 * ppsi initialize what is necessary */

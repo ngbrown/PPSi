@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 		struct pp_instance *ppi = &ppg->pp_instances[0];
 		ppi->iface_name = strdup(ifname);
 		ppi->ethernet_mode = PP_DEFAULT_ETHERNET_MODE;
-		pp_open_instance(ppi, NULL);
+		pp_open_instance(ppg, NULL);
 		if (pp_parse_cmdline(ppi, argc, argv) != 0)
 			return -1;
 	}

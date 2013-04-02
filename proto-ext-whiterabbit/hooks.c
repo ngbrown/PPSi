@@ -18,12 +18,13 @@ static int wr_init(struct pp_instance *ppi, unsigned char *pkt, int plen)
 }
 
 /* This currently only works with one interface (i.e. WR Node) */
-static int wr_open(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
+static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 {
 	static struct wr_data_t wr_data; /* WR-specific global data */
 
-	ppi->iface_name = "wr1";
-	ppi->ext_data = &wr_data;
+	/* FIXME handle more ports */
+	ppg->pp_instances[0].iface_name = "wr1";
+	ppg->pp_instances[0].ext_data = &wr_data;
 	return 0;
 }
 

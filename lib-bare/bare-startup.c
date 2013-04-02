@@ -53,7 +53,7 @@ int ppsi_main(int argc, char **argv)
 	ppi->iface_name = "eth0";
 
 	/* This just llocates the stuff */
-	pp_open_instance(ppi, NULL);
+	pp_open_instance(ppg, NULL);
 
 	if (pp_parse_cmdline(ppi, argc, argv) != 0)
 		return -1;

@@ -95,8 +95,8 @@ extern void pp_prepare_pointers(struct pp_instance *ppi);
  * allow NULL pointers.
  */
 struct pp_ext_hooks {
-	int (*init)(struct pp_instance *ppi, unsigned char *pkt, int plen);
-	int (*open)(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts);
+	int (*init)(struct pp_instance *ppg, unsigned char *pkt, int plen);
+	int (*open)(struct pp_globals *ppi, struct pp_runtime_opts *rt_opts);
 	int (*close)(struct pp_instance *ppi);
 	int (*listening)(struct pp_instance *ppi, unsigned char *pkt, int plen);
 	int (*master_msg)(struct pp_instance *ppi, unsigned char *pkt,
@@ -218,7 +218,7 @@ static inline void pp_timeout_restart_annrec(struct pp_instance *ppi)
 
 
 /* The channel for an instance must be created and possibly destroyed. */
-extern int pp_open_instance(struct pp_instance *ppi,
+extern int pp_open_instance(struct pp_globals *ppg,
 			    struct pp_runtime_opts *rt_opts);
 
 extern int pp_close_instance(struct pp_instance *ppi);

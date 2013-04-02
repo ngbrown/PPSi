@@ -34,17 +34,39 @@ struct pp_runtime_opts default_rt_opts = {
 	.ttl =			PP_DEFAULT_TTL,
 };
 
-int pp_open_instance(struct pp_instance *ppi, struct pp_runtime_opts *rt_opts)
+int pp_open_instance(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 {
-	if (rt_opts)
-		ppi->rt_opts = rt_opts;
-	else
-		ppi->rt_opts = &default_rt_opts;
+	/*
+	 * Initialize default data set
+	 */
+	int i;
+	struct DSDefault *def = ppg->defaultDS;
+	def->twoStepFlag = TRUE;
+	def->numberPorts = ppg->nports;
+	memcpy(&def->clockQuality, &rt_opts->clock_quality, sizeof(ClockQuality));
+	def->priority1 = rt_opts->prio1;
+	def->priority2 = rt_opts->prio2;
+	def->domainNumber = rt_opts->domain_number;
 
-	ppi->state = PPS_INITIALIZING;
+	if (ppg->nports == 1) {
+		def->slaveOnly = ppg->pp_instances[0].slave_only;
+		if (def->slaveOnly)
+			def->clockQuality.clockClass = 255;
+	}
+	else {
+		/* FIXME set def stuff when nports > 1 too */
+	}
+
+	if (rt_opts)
+		ppg->rt_opts = rt_opts;
+	else
+		ppg->rt_opts = &default_rt_opts;
+
+	for (i = 0; i < ppg->nports; i++)
+		ppg->pp_instances[i].state = PPS_INITIALIZING;
 
 	if (pp_hooks.open)
-		return pp_hooks.open(ppi, ppi->rt_opts);
+		return pp_hooks.open(ppg, rt_opts);
 	return 0;
 }
 
