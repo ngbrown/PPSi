@@ -159,12 +159,7 @@ struct pp_instance {
 	TimeInternal cField;				/* transp. clocks */
 	TimeInternal last_rcv_time, last_snt_time;	/* two temporaries */
 
-	/* Data sets */
-	DSDefault *defaultDS;			/* page 65 */
-	DSCurrent *currentDS;			/* page 67 */
-	DSParent *parentDS;			/* page 68 */
 	DSPort *portDS;				/* page 72 */
-	DSTimeProperties *timePropertiesDS;	/* page 70 */
 
 	unsigned long timeouts[__PP_TO_ARRAY_SIZE];
 	UInteger16 recv_sync_sequence_id;
@@ -191,6 +186,13 @@ struct pp_globals {
 	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
 
 	struct pp_servo *servo;
+
+	/* Data sets */
+	DSDefault *defaultDS;			/* page 65 */
+	DSCurrent *currentDS;			/* page 67 */
+	DSParent *parentDS;			/* page 68 */
+	DSTimeProperties *timePropertiesDS;	/* page 70 */
+
 	/* FIXME Here include all is common to many interfaces */
 };
 

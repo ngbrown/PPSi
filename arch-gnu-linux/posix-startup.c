@@ -58,19 +58,19 @@ int main(int argc, char **argv)
 
 		/* FIXME check all of these calloc's, since some stuff will be
 		 * part of pp_globals */
-		ppi->defaultDS = calloc(1, sizeof(*ppi->defaultDS));
-		ppi->currentDS = calloc(1, sizeof(*ppi->currentDS));
-		ppi->parentDS = calloc(1, sizeof(*ppi->parentDS));
+		GLBS(ppi)->defaultDS = calloc(1, sizeof(*GLBS(ppi)->defaultDS));
+		GLBS(ppi)->currentDS = calloc(1, sizeof(*GLBS(ppi)->currentDS));
+		GLBS(ppi)->parentDS = calloc(1, sizeof(*GLBS(ppi)->parentDS));
 		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
-		ppi->timePropertiesDS = calloc(1, sizeof(*ppi->timePropertiesDS));
+		GLBS(ppi)->timePropertiesDS = calloc(1, sizeof(*GLBS(ppi)->timePropertiesDS));
 		GLBS(ppi)->servo = calloc(1, sizeof(*GLBS(ppi)->servo));
 		ppi->arch_data = calloc(1, sizeof(struct posix_arch_data));
 
 		ppi->n_ops = &posix_net_ops;
 		ppi->t_ops = &posix_time_ops;
 
-		if ((!ppi->defaultDS) || (!ppi->currentDS) || (!ppi->parentDS)
-			|| (!ppi->portDS) || (!ppi->timePropertiesDS)
+		if ((!GLBS(ppi)->defaultDS) || (!GLBS(ppi)->currentDS) || (!GLBS(ppi)->parentDS)
+			|| (!ppi->portDS) || (!GLBS(ppi)->timePropertiesDS)
 			|| (!GLBS(ppi)->frgn_master) || (!ppi->arch_data)
 		)
 			exit(__LINE__);

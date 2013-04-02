@@ -46,11 +46,7 @@ static struct pp_globals ppg_static; /* forward declaration */
 /* despite the name, ppi_static is not static: tests/measure_t24p.c uses it */
 struct pp_instance ppi_static = {
 	.glbs			= &ppg_static,
-	.defaultDS		= &defaultDS,
-	.currentDS		= &currentDS,
-	.parentDS		= &parentDS,
 	.portDS			= &portDS,
-	.timePropertiesDS	= &timePropertiesDS,
 	.n_ops			= &wrpc_net_ops,
 	.t_ops			= &wrpc_time_ops,
 };
@@ -60,6 +56,10 @@ static struct pp_globals ppg_static = {
 	.nports			= 1,
 	.pp_instances		= &ppi_static,
 	.servo			= &servo,
+	.defaultDS		= &defaultDS,
+	.currentDS		= &currentDS,
+	.parentDS		= &parentDS,
+	.timePropertiesDS	= &timePropertiesDS,
 };
 
 int wrc_ptp_init()

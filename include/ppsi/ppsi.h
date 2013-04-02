@@ -38,17 +38,17 @@ static inline struct pp_globals *GLBS(struct pp_instance *ppi)
 
 static inline struct DSDefault *DSDEF(struct pp_instance *ppi)
 {
-	return ppi->defaultDS;
+	return GLBS(ppi)->defaultDS;
 }
 
 static inline struct DSCurrent *DSCUR(struct pp_instance *ppi)
 {
-	return ppi->currentDS;
+	return GLBS(ppi)->currentDS;
 }
 
 static inline struct DSParent *DSPAR(struct pp_instance *ppi)
 {
-	return ppi->parentDS;
+	return GLBS(ppi)->parentDS;
 }
 
 static inline struct DSPort *DSPOR(struct pp_instance *ppi)
@@ -58,7 +58,7 @@ static inline struct DSPort *DSPOR(struct pp_instance *ppi)
 
 static inline struct DSTimeProperties *DSPRO(struct pp_instance *ppi)
 {
-	return ppi->timePropertiesDS;
+	return GLBS(ppi)->timePropertiesDS;
 }
 
 static inline struct pp_net_path *NP(struct pp_instance *ppi)
