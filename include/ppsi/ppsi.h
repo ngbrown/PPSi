@@ -26,14 +26,14 @@ extern int pp_vsprintf(char *buf, const char *, va_list)
 
 
 /* We use data sets a lot, so have these helpers */
-static inline struct pp_runtime_opts *OPTS(struct pp_instance *ppi)
-{
-	return ppi->rt_opts;
-}
-
 static inline struct pp_globals *GLBS(struct pp_instance *ppi)
 {
 	return ppi->glbs;
+}
+
+static inline struct pp_runtime_opts *OPTS(struct pp_instance *ppi)
+{
+	return GLBS(ppi)->rt_opts;
 }
 
 static inline struct DSDefault *DSDEF(struct pp_instance *ppi)

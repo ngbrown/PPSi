@@ -132,7 +132,6 @@ struct pp_instance {
 	int next_state, next_delay, is_new_state; /* set by state processing */
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
-	struct pp_runtime_opts *rt_opts;
 	unsigned long flags;		/* ppi-specific flags (diag mainly) */
 
 	/* Pointer to global instance owning this pp_instance*/
@@ -189,6 +188,9 @@ struct pp_globals {
 	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
 
 	struct pp_servo *servo;
+
+	/* Real time options */
+	struct pp_runtime_opts *rt_opts;
 
 	/* Data sets */
 	DSDefault *defaultDS;			/* page 65 */
