@@ -225,6 +225,8 @@ extern int pp_close_instance(struct pp_instance *ppi);
 
 extern int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv);
 
+extern int pp_parse_conf(struct pp_globals *ppg, char *conf, int len);
+
 /* Servo */
 extern void pp_init_clock(struct pp_instance *ppi);
 extern void pp_update_delay(struct pp_instance *ppi,
