@@ -14,6 +14,7 @@ OBJ-libarch := $A/posix-startup.o \
 	$A/posix-io.o \
 	$A/posix-time.o \
 	lib/cmdline.o \
+	lib/conf.o \
 	lib/libc-functions.o \
 	lib/dump-funcs.o \
 	lib/div64.o

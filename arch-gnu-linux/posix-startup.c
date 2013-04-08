@@ -10,19 +10,32 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 
 #include <ppsi/ppsi.h>
 #include "posix.h"
 
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
+/* FIXME: make MAX_LINKS and conf_path definable at compile time */
+#define MAX_LINKS 32
+#define CONF_PATH "/etc/ppsi.conf"
+
 int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
-	char *ifname, *nports;
+	char *ifname;
 	char tmp[16];
 	int i = 0;
+	struct stat conf_fs;
+	char *conf_buf;
+	int conf_fd;
+	int conf_len = 0;
 
 	setbuf(stdout, NULL);
 
@@ -31,22 +44,40 @@ int main(int argc, char **argv)
 	if (!ppg)
 		exit(__LINE__);
 
-	nports = getenv("PPROTO_IF_NUM");
-	if (nports)
-		ppg->nports = atoi(nports);
-	else
-		ppg->nports = 1;
+	ppg->max_links = MAX_LINKS;
+	ppg->links = calloc(ppg->max_links, sizeof(struct pp_link));
 
-	ppg->pp_instances = calloc(ppg->nports, sizeof(struct pp_instance));
+	if ((stat(CONF_PATH, &conf_fs) < 0) ||
+	    (conf_fd = open(CONF_PATH, O_RDONLY) < 0)) {
+		pp_printf("Warning: could not open %s, default to one-link built-in "
+					"config\n", CONF_PATH);
+		conf_buf = "link 0\niface eth0";
+		conf_len = strlen(conf_buf);
+	}
+	else {
+		int r = 0, next_r;
+		conf_buf = calloc(1, conf_fs.st_size) + 1;
+
+		do {
+			next_r = strlen(conf_buf) - r;
+			r = read(conf_fd, &conf_buf[conf_len], next_r);
+			if (r <= 0)
+				break;
+		} while (conf_len < conf_fs.st_size);
+
+		close(conf_fd);
+	}
+
+	pp_parse_conf(ppg, conf_buf, conf_len);
+
+	ppg->pp_instances = calloc(ppg->nlinks, sizeof(struct pp_instance));
 
 	if (!ppg->pp_instances)
 		exit(__LINE__);
 
-	for (; i < ppg->nports; i++) {
+	for (; i < ppg->nlinks; i++) {
 
-		sprintf(tmp, "PPROTO_IF_%02d", i);
-
-		ifname = getenv(tmp);
+		ifname = ppg->links[i].iface_name;
 
 		if (!ifname) {
 			sprintf(tmp, "eth%d", i);
@@ -55,6 +86,7 @@ int main(int argc, char **argv)
 
 		ppi = &ppg->pp_instances[i];
 		ppi->glbs = ppg;
+		/* FIXME set ppi proto and ext as defined in its pp_link */
 
 		/* FIXME check all of these calloc's, since some stuff will be
 		 * part of pp_globals */
@@ -77,7 +109,7 @@ int main(int argc, char **argv)
 	}
 
 	/* FIXME temporary workaround to make the first interface work as in the past */
-	if (ppg->nports == 1) {
+	if (ppg->nlinks == 1) {
 		struct pp_instance *ppi = &ppg->pp_instances[0];
 		ppi->iface_name = strdup(ifname);
 		ppi->ethernet_mode = PP_DEFAULT_ETHERNET_MODE;
