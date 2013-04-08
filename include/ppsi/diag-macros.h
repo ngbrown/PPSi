@@ -22,7 +22,6 @@
   #define CONST_VERBOSITY /* nothing: use "int pp_diag_verbosity" */
 
   #define PP_PRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
-  #define PP_VPRINTF(...) if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
 
 #else /* no runtime verbosity */
 
@@ -35,10 +34,8 @@
 
   #if CONFIG_PPSI_VERBOSITY > 0
     #define PP_PRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
-    #define PP_VPRINTF(...) if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
   #else
     #define PP_PRINTF(...)
-    #define PP_VPRINTF(...)
   #endif /* CONFIG_PPSI_VERBOSITY > 0 */
 
 #endif /* CONFIG_PPSI_RUNTIME_VERBOSITY */
