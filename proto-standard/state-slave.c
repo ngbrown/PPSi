@@ -87,7 +87,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				hdr->logMessageInterval;
 
 		} else {
-			PP_VPRINTF("pp_slave : "
+			pp_diag(ppi, frames, 2, "pp_slave : "
 			     "Delay Resp doesn't match Delay Req\n");
 		}
 

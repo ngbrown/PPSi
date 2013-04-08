@@ -12,7 +12,7 @@
 
 int pp_faulty(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	PP_PRINTF("Faulty state detected\n");
+	pp_diag(ppi, fsm, 1, "Faulty state detected\n");
 	ppi->next_state = PPS_INITIALIZING;
 	return 0;
 }

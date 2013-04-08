@@ -45,7 +45,7 @@ int from_TimeInternal(TimeInternal *internal, Timestamp *external)
 
 	if ((internal->seconds & ~INT_MAX) ||
 	    (internal->nanoseconds & ~INT_MAX)) {
-		PP_PRINTF("Error: Negative value cannot be converted into "
+		pp_error("Negative value cannot be converted into "
 			  "timestamp\n");
 		return -1;
 	} else {
@@ -64,7 +64,7 @@ int to_TimeInternal(TimeInternal *internal, Timestamp *external)
 		internal->nanoseconds = external->nanosecondsField;
 		return 0;
 	} else {
-		PP_PRINTF("to_TimeInternal: "
+		pp_error("to_TimeInternal: "
 		    "seconds field is higher than signed integer (32bits)\n");
 		return -1;
 	}
@@ -111,7 +111,7 @@ void div2_TimeInternal(TimeInternal *r)
 
 void display_TimeInternal(const char *label, TimeInternal *t)
 {
-	PP_VPRINTF("%s: %s%d.%09d\n", label,
+	pp_Vprintf("%s: %s%d.%09d\n", label,
 		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0))
 		   ? "-" : " ",
 		   abs(t->seconds), abs(t->nanoseconds));

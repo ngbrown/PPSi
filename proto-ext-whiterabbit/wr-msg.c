@@ -112,7 +112,8 @@ int msg_pack_wrsig(struct pp_instance *ppi, Enumeration16 wr_msg_id)
 	UInteger16 len = 0;
 
 	if ((WR_DSPOR(ppi)->wrMode == NON_WR) || (wr_msg_id == ANN_SUFIX)) {
-		PP_PRINTF("BUG: Trying to send invalid wr_msg mode=%x id=%x",
+		pp_diag(ppi, frames, 1,
+			  "BUG: Trying to send invalid wr_msg mode=%x id=%x",
 			  WR_DSPOR(ppi)->wrMode, wr_msg_id);
 		return 0;
 	}
@@ -204,25 +205,25 @@ void msg_unpack_wrsig(struct pp_instance *ppi, void *buf,
 	tlv_versionNumber = 0xFF & htons(*(UInteger16 *)(buf + 52));
 
 	if (tlv_type != TLV_TYPE_ORG_EXTENSION) {
-		PP_PRINTF("handle Signaling msg, failed, This is not "
+		pp_diag(ppi, frames, 1, "handle Signaling msg, failed, This is not "
 			"organization extension TLV = 0x%x\n", tlv_type);
 		return;
 	}
 
 	if (tlv_organizationID != WR_TLV_ORGANIZATION_ID) {
-		PP_PRINTF("handle Signaling msg, failed, not CERN's "
+		pp_diag(ppi, frames, 1, "handle Signaling msg, failed, not CERN's "
 			"OUI = 0x%x\n", tlv_organizationID);
 		return;
 	}
 
 	if (tlv_magicNumber != WR_TLV_MAGIC_NUMBER) {
-		PP_PRINTF("handle Signaling msg, failed, "
+		pp_diag(ppi, frames, 1, "handle Signaling msg, failed, "
 		"not White Rabbit magic number = 0x%x\n", tlv_magicNumber);
 		return;
 	}
 
 	if (tlv_versionNumber  != WR_TLV_WR_VERSION_NUMBER ) {
-		PP_PRINTF("handle Signaling msg, failed, not supported "
+		pp_diag(ppi, frames, 1, "handle Signaling msg, failed, not supported "
 			"version number = 0x%x\n", tlv_versionNumber);
 		return;
 	}

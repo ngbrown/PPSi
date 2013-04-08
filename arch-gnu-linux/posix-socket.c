@@ -252,7 +252,8 @@ static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	iface_addr.s_addr =
 		((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
 
-	PP_VPRINTF("Local IP address used : %s\n", inet_ntoa(iface_addr));
+	pp_diag(ppi, frames, 2, "Local IP address used : %s\n",
+			inet_ntoa(iface_addr));
 
 	temp = 1; /* allow address reuse */
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
@@ -341,14 +342,14 @@ int posix_net_init(struct pp_instance *ppi)
 	pp_prepare_pointers(ppi);
 
 	if (ppi->ethernet_mode) {
-		PP_PRINTF("posix_net_init IEEE 802.3\n");
+		pp_diag(ppi, frames, 1, "posix_net_init IEEE 802.3\n");
 
 		/* raw sockets implementation always use gen socket */
 		return posix_open_ch(ppi, ppi->iface_name, PP_NP_GEN);
 	}
 
 	/* else: UDP */
-	PP_PRINTF("posix_net_init UDP\n");
+	pp_diag(ppi, frames, 1, "posix_net_init UDP\n");
 	for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
 		if (posix_open_ch(ppi, ppi->iface_name, i))
 			return -1;

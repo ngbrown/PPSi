@@ -11,7 +11,7 @@
 
 static void clock_fatal_error(char *context)
 {
-	PP_PRINTF("failure in \"%s\": %s\n.Exiting.\n", context,
+	pp_error("failure in \"%s\": %s\n.Exiting.\n", context,
 		  strerror(errno));
 	exit(1);
 }

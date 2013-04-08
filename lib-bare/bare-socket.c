@@ -139,14 +139,14 @@ static int bare_net_init(struct pp_instance *ppi)
 	pp_prepare_pointers(ppi);
 
 	if (ppi->ethernet_mode) {
-		PP_PRINTF("bare_net_init IEEE 802.3\n");
+		pp_diag(ppi, frames, 1, "bare_net_init IEEE 802.3\n");
 
 		/* raw sockets implementation always use gen socket */
 		return bare_open_ch(ppi, ppi->iface_name);
 	}
 
 	/* else: UDP -- not supported */
-	PP_PRINTF("bare_net_init UDP\n");
+	pp_diag(ppi, frames, 1, "bare_net_init UDP\n");
 	return -1;
 }
 

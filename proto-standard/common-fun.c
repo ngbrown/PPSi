@@ -95,7 +95,7 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 	msg_copy_header(&GLBS(ppi)->frgn_master[i].hdr, hdr);
 	msg_unpack_announce(buf, &GLBS(ppi)->frgn_master[i].ann);
 
-	PP_VPRINTF("New foreign Master added\n");
+	pp_diag(ppi, bmc, 2, "New foreign Master added\n");
 
 	GLBS(ppi)->frgn_rec_i = (GLBS(ppi)->frgn_rec_i+1) %
 		PP_NR_FOREIGN_RECORDS;
@@ -215,7 +215,7 @@ int st_com_master_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	if (len < PP_ANNOUNCE_LENGTH)
 		return -1;
 
-	PP_VPRINTF("Announce message from another foreign master\n");
+	pp_diag(ppi, bmc, 2, "Announce message from another foreign master\n");
 
 	st_com_add_foreign(ppi, buf);
 	ppi->next_state = bmc(ppi); /* got a new announce: run bmc */

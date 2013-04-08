@@ -82,8 +82,8 @@ static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
 		t->phase = 0;
 		t->correct = wr_ts.correct;
 
-		PP_VPRINTF("%s: snt=%d, sec=%d, nsec=%d\n", __func__, snt,
-			   t->seconds, t->nanoseconds);
+		pp_diag(ppi, frames, 2, "%s: snt=%d, sec=%d, nsec=%d\n",
+				__func__, snt, t->seconds, t->nanoseconds);
 	}
 	/* The header is separate, so dump payload only */
 	if (snt >0 && pp_diag_allow(ppi, frames, 2))

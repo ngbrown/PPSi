@@ -60,7 +60,7 @@ void posix_main_loop(struct pp_globals *ppg)
 		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
 		if (i < PP_MINIMUM_LENGTH) {
-			PP_PRINTF("Error or short packet: %d < %d\n", i,
+			pp_diag(ppi, frames, 1, "Error or short packet: %d < %d\n", i,
 				PP_MINIMUM_LENGTH
 			);
 			delay_ms = -1;
