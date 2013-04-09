@@ -29,9 +29,7 @@ int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
-	char *ifname;
-	char tmp[16];
-	int i = 0;
+	int i = 0, ret;
 	struct stat conf_fs;
 	char *conf_buf;
 	int conf_fd;
@@ -47,8 +45,10 @@ int main(int argc, char **argv)
 	ppg->max_links = MAX_LINKS;
 	ppg->links = calloc(ppg->max_links, sizeof(struct pp_link));
 
+	conf_fd = open(CONF_PATH, O_RDONLY);
+
 	if ((stat(CONF_PATH, &conf_fs) < 0) ||
-	    (conf_fd = open(CONF_PATH, O_RDONLY) < 0)) {
+	    (conf_fd < 0)) {
 		pp_printf("Warning: could not open %s, default to one-link built-in "
 					"config\n", CONF_PATH);
 		conf_buf = "link 0\niface eth0";
@@ -59,16 +59,20 @@ int main(int argc, char **argv)
 		conf_buf = calloc(1, conf_fs.st_size) + 1;
 
 		do {
-			next_r = strlen(conf_buf) - r;
+			next_r = conf_fs.st_size - r;
 			r = read(conf_fd, &conf_buf[conf_len], next_r);
 			if (r <= 0)
 				break;
+			conf_len = strlen(conf_buf);
 		} while (conf_len < conf_fs.st_size);
 
 		close(conf_fd);
 	}
 
-	pp_parse_conf(ppg, conf_buf, conf_len);
+	if ((ret = pp_parse_conf(ppg, conf_buf, conf_len)) < 0) {
+		pp_printf("Fatal: Error in %s file at line %d\n", CONF_PATH, -ret);
+		exit(__LINE__);
+	}
 
 	ppg->pp_instances = calloc(ppg->nlinks, sizeof(struct pp_instance));
 
@@ -77,16 +81,22 @@ int main(int argc, char **argv)
 
 	for (; i < ppg->nlinks; i++) {
 
-		ifname = ppg->links[i].iface_name;
-
-		if (!ifname) {
-			sprintf(tmp, "eth%d", i);
-			ifname = tmp;
-		}
+		struct pp_link *lnk = &ppg->links[i];
 
 		ppi = &ppg->pp_instances[i];
 		ppi->glbs = ppg;
-		/* FIXME set ppi proto and ext as defined in its pp_link */
+		ppi->iface_name = lnk->iface_name;
+		ppi->ethernet_mode = (lnk->proto == 0) ? 1 : 0;
+		if (lnk->proto == 1) {
+			ppi->master_only = 1;
+			ppi->slave_only = 0;
+		}
+		else if (lnk->proto == 2) {
+			ppi->master_only = 0;
+			ppi->slave_only = 1;
+		}
+
+		/* FIXME set ppi ext enable as defined in its pp_link */
 
 		/* FIXME check all of these calloc's, since some stuff will be
 		 * part of pp_globals */
@@ -111,8 +121,6 @@ int main(int argc, char **argv)
 	/* FIXME temporary workaround to make the first interface work as in the past */
 	if (ppg->nlinks == 1) {
 		struct pp_instance *ppi = &ppg->pp_instances[0];
-		ppi->iface_name = strdup(ifname);
-		ppi->ethernet_mode = PP_DEFAULT_ETHERNET_MODE;
 		pp_open_instance(ppg, NULL);
 		if (pp_parse_cmdline(ppi, argc, argv) != 0)
 			return -1;
