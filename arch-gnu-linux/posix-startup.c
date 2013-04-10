@@ -118,13 +118,12 @@ int main(int argc, char **argv)
 			exit(__LINE__);
 	}
 
-	/* FIXME temporary workaround to make the first interface work as in the past */
-	if (ppg->nlinks == 1) {
-		struct pp_instance *ppi = &ppg->pp_instances[0];
-		pp_open_globals(ppg, NULL);
-		if (pp_parse_cmdline(ppi, argc, argv) != 0)
-			return -1;
-	}
+	pp_open_globals(ppg, NULL);
+
+	/* FIXME cmdline shall receive a pp_globals
+	if (pp_parse_cmdline(ppi, argc, argv) != 0)
+		return -1;
+	*/
 
 	posix_main_loop(ppg);
 	return 0; /* never reached */
