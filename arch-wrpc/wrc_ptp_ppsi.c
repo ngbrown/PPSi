@@ -164,7 +164,7 @@ int wrc_ptp_stop()
 {
 	ptp_enabled = 0;
 	wr_servo_reset();
-	pp_close_instance(&ppi_static);
+	pp_close_globals(&ppg_static);
 	return 0;
 }
 

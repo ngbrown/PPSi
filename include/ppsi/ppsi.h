@@ -97,7 +97,7 @@ extern void pp_prepare_pointers(struct pp_instance *ppi);
 struct pp_ext_hooks {
 	int (*init)(struct pp_instance *ppg, unsigned char *pkt, int plen);
 	int (*open)(struct pp_globals *ppi, struct pp_runtime_opts *rt_opts);
-	int (*close)(struct pp_instance *ppi);
+	int (*close)(struct pp_globals *ppg);
 	int (*listening)(struct pp_instance *ppi, unsigned char *pkt, int plen);
 	int (*master_msg)(struct pp_instance *ppi, unsigned char *pkt,
 			  int plen, int msgtype);
@@ -221,7 +221,7 @@ static inline void pp_timeout_restart_annrec(struct pp_instance *ppi)
 extern int pp_open_globals(struct pp_globals *ppg,
 			    struct pp_runtime_opts *rt_opts);
 
-extern int pp_close_instance(struct pp_instance *ppi);
+extern int pp_close_globals(struct pp_globals *ppg);
 
 extern int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv);
 

@@ -70,9 +70,9 @@ int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 	return 0;
 }
 
-int pp_close_instance(struct pp_instance *ppi)
+int pp_close_globals(struct pp_globals *ppg)
 {
 	if (pp_hooks.close)
-		return pp_hooks.close(ppi);
+		return pp_hooks.close(ppg);
 	return 0;
 }
