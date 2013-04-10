@@ -213,6 +213,7 @@ struct pp_globals {
 	int max_links;
 	struct pp_link *links;
 
+	void *arch_data;		/* if arch needs it */
 	/* FIXME Here include all is common to many interfaces */
 };
 
