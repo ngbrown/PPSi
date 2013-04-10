@@ -34,7 +34,7 @@ struct pp_runtime_opts default_rt_opts = {
 	.ttl =			PP_DEFAULT_TTL,
 };
 
-int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
+int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *_rt_opts)
 {
 	/*
 	 * Initialize default data set
@@ -42,28 +42,40 @@ int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 	int i;
 	struct DSDefault *def = ppg->defaultDS;
 	def->twoStepFlag = TRUE;
-	def->numberPorts = ppg->nports;
-	memcpy(&def->clockQuality, &rt_opts->clock_quality, sizeof(ClockQuality));
+	def->numberPorts = ppg->nlinks;
+	struct pp_runtime_opts *rt_opts;
+
+	if (_rt_opts)
+		rt_opts = _rt_opts;
+	else
+		rt_opts = &default_rt_opts;
+
+	ppg->rt_opts = rt_opts;
+
+	memcpy(&def->clockQuality, &rt_opts->clock_quality,
+		   sizeof(ClockQuality));
+
+	if (ppg->nlinks == 1) {
+		def->slaveOnly = ppg->pp_instances[0].slave_only;
+	}
+	else
+		def->slaveOnly = 1; /* the for cycle below will set it to 0 if not
+							 * ports are not all slave_only */
+
 	def->priority1 = rt_opts->prio1;
 	def->priority2 = rt_opts->prio2;
 	def->domainNumber = rt_opts->domain_number;
 
-	if (ppg->nports == 1) {
-		def->slaveOnly = ppg->pp_instances[0].slave_only;
-		if (def->slaveOnly)
-			def->clockQuality.clockClass = 255;
-	}
-	else {
-		/* FIXME set def stuff when nports > 1 too */
-	}
+	for (i = 0; i < ppg->nlinks; i++) {
 
-	if (rt_opts)
-		ppg->rt_opts = rt_opts;
-	else
-		ppg->rt_opts = &default_rt_opts;
+		if (def->slaveOnly && !ppg->pp_instances[i].slave_only)
+			def->slaveOnly = 0;
 
-	for (i = 0; i < ppg->nports; i++)
 		ppg->pp_instances[i].state = PPS_INITIALIZING;
+	}
+
+	if (def->slaveOnly)
+		def->clockQuality.clockClass = 255;
 
 	if (pp_hooks.open)
 		return pp_hooks.open(ppg, rt_opts);
