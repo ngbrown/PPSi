@@ -34,7 +34,7 @@ struct pp_runtime_opts default_rt_opts = {
 	.ttl =			PP_DEFAULT_TTL,
 };
 
-int pp_open_instance(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
+int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 {
 	/*
 	 * Initialize default data set

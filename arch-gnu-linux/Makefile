@@ -25,7 +25,7 @@ $(LIBARCH): $(OBJ-libarch)
 all: $(TARGET)
 
 # to build the target, we need -lstd again, in case we call functions that
-# were not selected yet (e.g., pp_open_instance() ).
+# were not selected yet (e.g., pp_open_globals() ).
 $(TARGET): $(TARGET).o $(LIBARCH)
 	$(CC) -Wl,-Map,$(TARGET).map2 -o $@ $(TARGET).o \
 		-L$A -larch -L$D -lstd -lrt

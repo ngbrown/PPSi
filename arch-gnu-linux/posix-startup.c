@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 	/* FIXME temporary workaround to make the first interface work as in the past */
 	if (ppg->nlinks == 1) {
 		struct pp_instance *ppi = &ppg->pp_instances[0];
-		pp_open_instance(ppg, NULL);
+		pp_open_globals(ppg, NULL);
 		if (pp_parse_cmdline(ppi, argc, argv) != 0)
 			return -1;
 	}
