@@ -53,7 +53,7 @@ struct pp_instance ppi_static = {
 
 /* We now have a structure with all globals, and multiple ppi inside */
 static struct pp_globals ppg_static = {
-	.nports			= 1,
+	.nlinks			= 1,
 	.pp_instances		= &ppi_static,
 	.servo			= &servo,
 	.defaultDS		= &defaultDS,
