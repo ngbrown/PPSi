@@ -31,9 +31,14 @@ static inline struct pp_globals *GLBS(struct pp_instance *ppi)
 	return ppi->glbs;
 }
 
+static inline struct pp_runtime_opts *GOPTS(struct pp_globals *ppg)
+{
+	return ppg->rt_opts;
+}
+
 static inline struct pp_runtime_opts *OPTS(struct pp_instance *ppi)
 {
-	return GLBS(ppi)->rt_opts;
+	return GOPTS(GLBS(ppi));
 }
 
 static inline struct DSDefault *DSDEF(struct pp_instance *ppi)
