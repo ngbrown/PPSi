@@ -192,7 +192,6 @@ struct pp_link {
  * Structure for the multi-port ppsi instance.
  */
 struct pp_globals {
-	int nports; /* FIXME: obsolete, remove it */
 	struct pp_instance *pp_instances;
 	UInteger16 frgn_rec_num;
 	Integer16  frgn_rec_i;
