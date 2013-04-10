@@ -45,7 +45,7 @@ int ppsi_main(int argc, char **argv)
 	ppi->portDS      = &portDS;
 	GLBS(ppi)->timePropertiesDS = &timePropertiesDS;
 	GLBS(ppi)->servo = &servo;
-	ppi->arch_data   = NULL;
+	GLBS(ppi)->arch_data   = NULL;
 	ppi->n_ops       = &bare_net_ops;
 	ppi->t_ops       = &bare_time_ops;
 

@@ -394,15 +394,13 @@ static int posix_net_exit(struct pp_instance *ppi)
 	return 0;
 }
 
-int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
+int posix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 {
-
 	fd_set set;
-	int i;
+	int i, j;
 	int ret = 0;
-	int maxfd;
-	struct posix_arch_data *arch_data =
-		(struct posix_arch_data *)ppi->arch_data;
+	int maxfd = 0;
+	struct posix_arch_data *arch_data = POSIX_ARCH(ppg);
 
 	if (delay_ms != -1) {
 		/* Wait for a packet or for the timeout */
@@ -410,35 +408,37 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 		arch_data->tv.tv_usec = (delay_ms % 1000) * 1000;
 	}
 
-	NP(ppi)->ch[PP_NP_GEN].pkt_present = 0;
-	NP(ppi)->ch[PP_NP_EVT].pkt_present = 0;
+	/* Detect general timeout with no needs for select stuff */
+	if ((arch_data->tv.tv_sec == 0) && (arch_data->tv.tv_usec == 0))
+		return 0;
 
-	if (ppi->ethernet_mode) {
-		maxfd = NP(ppi)->ch[PP_NP_GEN].fd;
-		FD_ZERO(&set);
-		FD_SET(NP(ppi)->ch[PP_NP_GEN].fd, &set);
+	FD_ZERO(&set);
 
-		i = select(maxfd + 1, &set, NULL, NULL, &arch_data->tv);
+	for (j = 0; j < ppg->nlinks; j++) {
+		struct pp_instance *ppi = &ppg->pp_instances[j];
+		int fd_to_set;
 
-		if (i < 0 && errno != EINTR)
-			exit(__LINE__);
+		NP(ppi)->ch[PP_NP_GEN].pkt_present = 0;
+		NP(ppi)->ch[PP_NP_EVT].pkt_present = 0;
 
-		if (i < 0)
-			return -1;
+		if (ppi->ethernet_mode) {
 
-		if (i == 0)
-			return 0;
+			fd_to_set = NP(ppi)->ch[PP_NP_GEN].fd;
+			FD_SET(fd_to_set, &set);
+			maxfd = fd_to_set > maxfd ? fd_to_set : maxfd;
+			continue;
+		}
 
-		NP(ppi)->ch[PP_NP_GEN].pkt_present = 1;
-		return 1;
+		/* else: UDP */
+		fd_to_set = NP(ppi)->ch[PP_NP_GEN].fd;
+		FD_SET(fd_to_set, &set);
+		maxfd = fd_to_set > maxfd ? fd_to_set : maxfd;
+
+		fd_to_set = NP(ppi)->ch[PP_NP_EVT].fd;
+		FD_SET(fd_to_set, &set);
+		maxfd = fd_to_set > maxfd ? fd_to_set : maxfd;
 	}
 
-	/* else: UDP */
-	maxfd = (NP(ppi)->ch[PP_NP_GEN].fd > NP(ppi)->ch[PP_NP_EVT].fd) ?
-		 NP(ppi)->ch[PP_NP_GEN].fd : NP(ppi)->ch[PP_NP_EVT].fd;
-	FD_ZERO(&set);
-	FD_SET(NP(ppi)->ch[PP_NP_GEN].fd, &set);
-	FD_SET(NP(ppi)->ch[PP_NP_EVT].fd, &set);
 	i = select(maxfd + 1, &set, NULL, NULL, &arch_data->tv);
 
 	if (i < 0 && errno != EINTR)
@@ -450,16 +450,19 @@ int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms)
 	if (i == 0)
 		return 0;
 
-	if (FD_ISSET(NP(ppi)->ch[PP_NP_GEN].fd, &set)) {
-		ret++;
-		NP(ppi)->ch[PP_NP_GEN].pkt_present = 1;
-	}
+	for (j = 0; j < ppg->nlinks; j++) {
+		struct pp_instance *ppi = &ppg->pp_instances[j];
 
-	if (FD_ISSET(NP(ppi)->ch[PP_NP_EVT].fd, &set)) {
-		ret++;
-		NP(ppi)->ch[PP_NP_EVT].pkt_present = 1;
-	}
+		if (FD_ISSET(NP(ppi)->ch[PP_NP_GEN].fd, &set)) {
+			ret++;
+			NP(ppi)->ch[PP_NP_GEN].pkt_present = 1;
+		}
 
+		if (FD_ISSET(NP(ppi)->ch[PP_NP_EVT].fd, &set)) {
+			ret++;
+			NP(ppi)->ch[PP_NP_EVT].pkt_present = 1;
+		}
+	}
 	return ret;
 }
 

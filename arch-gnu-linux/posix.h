@@ -11,7 +11,7 @@ struct posix_arch_data {
 	struct timeval tv;
 };
 
-extern int posix_net_check_pkt(struct pp_instance *ppi, int delay_ms);
+extern int posix_net_check_pkt(struct pp_globals *ppg, int delay_ms);
 
 extern void posix_main_loop(struct pp_globals *ppg);
 
