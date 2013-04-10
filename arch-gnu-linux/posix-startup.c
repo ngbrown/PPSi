@@ -74,10 +74,19 @@ int main(int argc, char **argv)
 		exit(__LINE__);
 	}
 
+	ppg->defaultDS = calloc(1, sizeof(*ppg->defaultDS));
+	ppg->currentDS = calloc(1, sizeof(*ppg->currentDS));
+	ppg->parentDS = calloc(1, sizeof(*ppg->parentDS));
+	ppg->timePropertiesDS = calloc(1, sizeof(*ppg->timePropertiesDS));
+	ppg->arch_data = calloc(1, sizeof(struct posix_arch_data));
 	ppg->pp_instances = calloc(ppg->nlinks, sizeof(struct pp_instance));
 
-	if (!ppg->pp_instances)
+	if ((!ppg->defaultDS) || (!ppg->currentDS) || (!ppg->parentDS)
+		|| (!ppg->timePropertiesDS) || (!ppg->frgn_master)
+		|| (!ppg->arch_data) || (!ppg->pp_instances))
 		exit(__LINE__);
+
+	ppg->servo = calloc(1, sizeof(*ppg->servo));
 
 	for (; i < ppg->nlinks; i++) {
 
@@ -98,23 +107,11 @@ int main(int argc, char **argv)
 
 		/* FIXME set ppi ext enable as defined in its pp_link */
 
-		/* FIXME check all of these calloc's, since some stuff will be
-		 * part of pp_globals */
-		GLBS(ppi)->defaultDS = calloc(1, sizeof(*GLBS(ppi)->defaultDS));
-		GLBS(ppi)->currentDS = calloc(1, sizeof(*GLBS(ppi)->currentDS));
-		GLBS(ppi)->parentDS = calloc(1, sizeof(*GLBS(ppi)->parentDS));
 		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
-		GLBS(ppi)->timePropertiesDS = calloc(1, sizeof(*GLBS(ppi)->timePropertiesDS));
-		GLBS(ppi)->servo = calloc(1, sizeof(*GLBS(ppi)->servo));
-		ppg->arch_data = calloc(1, sizeof(struct posix_arch_data));
-
 		ppi->n_ops = &posix_net_ops;
 		ppi->t_ops = &posix_time_ops;
 
-		if ((!GLBS(ppi)->defaultDS) || (!GLBS(ppi)->currentDS) || (!GLBS(ppi)->parentDS)
-			|| (!ppi->portDS) || (!GLBS(ppi)->timePropertiesDS)
-			|| (!GLBS(ppi)->frgn_master) || (!ppg->arch_data)
-		)
+		if (!ppi->portDS)
 			exit(__LINE__);
 	}
 
