@@ -41,9 +41,14 @@ static inline struct pp_runtime_opts *OPTS(struct pp_instance *ppi)
 	return GOPTS(GLBS(ppi));
 }
 
+static inline struct DSDefault *GDSDEF(struct pp_globals *ppg)
+{
+	return ppg->defaultDS;
+}
+
 static inline struct DSDefault *DSDEF(struct pp_instance *ppi)
 {
-	return GLBS(ppi)->defaultDS;
+	return GDSDEF(GLBS(ppi));
 }
 
 static inline struct DSCurrent *DSCUR(struct pp_instance *ppi)
