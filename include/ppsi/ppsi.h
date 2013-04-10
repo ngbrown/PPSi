@@ -233,7 +233,7 @@ extern int pp_open_globals(struct pp_globals *ppg,
 
 extern int pp_close_globals(struct pp_globals *ppg);
 
-extern int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv);
+extern int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv);
 
 extern int pp_parse_conf(struct pp_globals *ppg, char *conf, int len);
 

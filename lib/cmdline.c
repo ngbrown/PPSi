@@ -82,9 +82,10 @@ static void cmd_line_parse_two(char *a, int *n1, int *n2)
 	a[comma] = ',';
 }
 
-int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
+int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 {
 	int i, err = 0;
+	int j;
 	char *a; /* cmd line argument */
 	int n1, n2; /* used by cmd_line_parse_two */
 
@@ -111,12 +112,12 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				pp_global_flags = pp_diag_parse(a);
 				break;
 			case 'x':
-				OPTS(ppi)->no_rst_clk = 1;
+				GOPTS(ppg)->no_rst_clk = 1;
 				break;
 			case 'O':
 				a = argv[++i];
-				OPTS(ppi)->max_rst = atoi(a);
-				if(OPTS(ppi)->max_rst < PP_NSEC_PER_SEC) {
+				GOPTS(ppg)->max_rst = atoi(a);
+				if (GOPTS(ppg)->max_rst < PP_NSEC_PER_SEC) {
 					pp_printf("Use -x to prevent jumps of"
 					" more than one second\n");
 					return -1;
@@ -124,15 +125,15 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				break;
 			case 'M':
 				a = argv[++i];
-				OPTS(ppi)->max_dly = atoi(a);
-				if(OPTS(ppi)->max_dly < PP_NSEC_PER_SEC) {
+				GOPTS(ppg)->max_dly = atoi(a);
+				if (GOPTS(ppg)->max_dly < PP_NSEC_PER_SEC) {
 					pp_printf("Use -x to prevent jumps of"
 						" more than one second\n");
 					return -1;
 				}
 				break;
 			case 't':
-				OPTS(ppi)->no_adjust = 1;
+				GOPTS(ppg)->no_adjust = 1;
 				break;
 			case 'a':
 				a = argv[++i];
@@ -140,71 +141,83 @@ int pp_parse_cmdline(struct pp_instance *ppi, int argc, char **argv)
 				/* no negative or zero attenuation */
 				if (n1 < 1 || n2 < 1)
 					return -1;
-				OPTS(ppi)->ap = n1;
-				OPTS(ppi)->ai = n2;
+				GOPTS(ppg)->ap = n1;
+				GOPTS(ppg)->ai = n2;
 				break;
 			case 'w':
 				a = argv[++i];
-				OPTS(ppi)->s = atoi(a);
+				GOPTS(ppg)->s = atoi(a);
 				break;
 			case 'b':
 				a = argv[++i];
-				ppi->iface_name = a;
+				if (ppg->nlinks == 1)
+					ppg->pp_instances[0].iface_name = a;
+				else {
+					/* If ppsi.conf exists and more than one link is
+					 * configured, it makes no sense trying to set an iface
+					 * name */
+					pp_printf("Can not use -b option in multi-link conf");
+					return -1;
+				}
 				break;
 			case 'l':
 				a = argv[++i];
 				cmd_line_parse_two(a, &n1, &n2);
-				OPTS(ppi)->inbound_latency.nanoseconds = n1;
-				OPTS(ppi)->outbound_latency.nanoseconds = n2;
+				GOPTS(ppg)->inbound_latency.nanoseconds = n1;
+				GOPTS(ppg)->outbound_latency.nanoseconds = n2;
 				break;
 			case 'i':
 				a = argv[++i];
-				OPTS(ppi)->domain_number = atoi(a);
+				GOPTS(ppg)->domain_number = atoi(a);
 				break;
 			case 'y':
 				a = argv[++i];
-				OPTS(ppi)->sync_intvl = atoi(a);
+				GOPTS(ppg)->sync_intvl = atoi(a);
 				break;
 			case 'n':
 				a = argv[++i];
 				/* Page 237 says 0 to 4 (1s .. 16s) */
-				OPTS(ppi)->announce_intvl = atoi(a);
-				if (OPTS(ppi)->announce_intvl < 0)
-					OPTS(ppi)->announce_intvl = 0;
-				if (OPTS(ppi)->announce_intvl > 4)
-					OPTS(ppi)->announce_intvl = 4;
+				GOPTS(ppg)->announce_intvl = atoi(a);
+				if (GOPTS(ppg)->announce_intvl < 0)
+					GOPTS(ppg)->announce_intvl = 0;
+				if (GOPTS(ppg)->announce_intvl > 4)
+					GOPTS(ppg)->announce_intvl = 4;
 				break;
 			case 'g':
-				ppi->slave_only = 1;
+				/* Apply -g option globally, to each configured link */
+				for (j = 0; j < ppg->nlinks; j++)
+					ppg->pp_instances[j].slave_only = 1;
 				break;
 			case 'v':
 				a = argv[++i];
-				DSDEF(ppi)->clockQuality.
+				GDSDEF(ppg)->clockQuality.
 					offsetScaledLogVariance = atoi(a);
 				break;
 			case 'r':
 				a = argv[++i];
-				DSDEF(ppi)->clockQuality.clockAccuracy =
+				GDSDEF(ppg)->clockQuality.clockAccuracy =
 					atoi(a);
 				break;
 			case 's':
 				a = argv[++i];
-				DSDEF(ppi)->clockQuality.clockClass =
+				GDSDEF(ppg)->clockQuality.clockClass =
 					atoi(a);
 				break;
 			case 'p':
 				a = argv[++i];
-				OPTS(ppi)->prio1 = atoi(a);
+				GOPTS(ppg)->prio1 = atoi(a);
 				break;
 			case 'q':
 				a = argv[++i];
-				OPTS(ppi)->prio2 = atoi(a);
+				GOPTS(ppg)->prio2 = atoi(a);
 				break;
 			case 'h':
-				/* ignored: was "OPTS(ppi)->e2e_mode = 1;" */
+				/* ignored: was "GOPTS(ppg)->e2e_mode = 1;" */
 				break;
 			case 'e':
-				ppi->ethernet_mode = 1;
+				/* Apply -e option globally, to each configured link */
+				for (j = 0; j < ppg->nlinks; j++)
+					ppg->pp_instances[j].ethernet_mode = 1;
 				break;
 			case 'G':
 				/* gptp_mode not supported: fall through */

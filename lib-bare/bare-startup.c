@@ -55,7 +55,7 @@ int ppsi_main(int argc, char **argv)
 	/* This just llocates the stuff */
 	pp_open_globals(ppg, NULL);
 
-	if (pp_parse_cmdline(ppi, argc, argv) != 0)
+	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;
 
 	/* The actual sockets are opened in state-initializing */

@@ -120,10 +120,8 @@ int main(int argc, char **argv)
 
 	pp_open_globals(ppg, NULL);
 
-	/* FIXME cmdline shall receive a pp_globals
-	if (pp_parse_cmdline(ppi, argc, argv) != 0)
+	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;
-	*/
 
 	posix_main_loop(ppg);
 	return 0; /* never reached */
