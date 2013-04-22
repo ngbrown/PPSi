@@ -7,7 +7,6 @@
 #include <softpll_ng.h>
 #include "wrpc.h"
 #include "../proto-ext-whiterabbit/wr-constants.h"
-#include "hal_exports.h" /* wrpc-sw */
 
 static int wrpc_read_calibration_data(struct pp_instance *ppi,
   uint32_t *deltaTx, uint32_t *deltaRx, int32_t *fix_alpha,
