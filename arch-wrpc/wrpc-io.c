@@ -1,6 +1,7 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- public domain
  */
+#define __REGS_H
 #include <ppsi/ppsi.h>
 #include "wrpc.h"
 #include "uart.h" /* wrpc-sw */

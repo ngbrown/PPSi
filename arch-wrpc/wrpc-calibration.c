@@ -2,9 +2,11 @@
  * Aurelio Colosimo for CERN, 2012 -- public domain
  */
 
+#define __REGS_H
 #include <endpoint.h>
 #include <ppsi/ppsi.h>
 #include <softpll_ng.h>
+#include <hal_exports.h>
 #include "wrpc.h"
 #include "../proto-ext-whiterabbit/wr-constants.h"
 

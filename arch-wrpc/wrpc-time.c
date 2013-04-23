@@ -2,6 +2,7 @@
  * Alessandro Rubini for CERN, 2013 -- LGPL 2.1 or later
  * (Mostly code by Tomasz Wlostowski in wrpc-sw)
  */
+#define __REGS_H
 #include <ppsi/ppsi.h>
 #include "wrpc.h"
 #include "pps_gen.h" /* in wrpc-sw */
