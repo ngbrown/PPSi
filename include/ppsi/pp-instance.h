@@ -215,6 +215,10 @@ struct pp_globals {
 	DSParent *parentDS;			/* page 68 */
 	DSTimeProperties *timePropertiesDS;	/* page 70 */
 
+	/* Index of the pp_instance receiving the "Ebest" clock */
+	int ebest_idx;
+	int ebest_updated; /* set to 1 when ebest_idx changes */
+
 	int nlinks;
 	int max_links;
 	struct pp_link *links;

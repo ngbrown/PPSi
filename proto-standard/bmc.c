@@ -72,6 +72,12 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 		pp_hooks.s1(ppi, hdr, ann);
 }
 
+void p1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
+{
+	/* In the default implementation, nothing should be done when a port goes
+	 * to passive state. This empty function is a placeholder for
+	 * extension-specific needs, to be implemented as a hook */
+}
 
 /* Copy local data set into header and ann message. 9.3.4 table 12. */
 static void copy_d0(struct pp_instance *ppi, struct pp_frgn_master *m)
@@ -172,7 +178,8 @@ static int bmc_dataset_cmp(struct pp_instance *ppi,
 }
 
 /* State decision algorithm 9.3.3 Fig 26 */
-static int bmc_state_decision(struct pp_instance *ppi, struct pp_frgn_master *m)
+static int bmc_state_decision(struct pp_instance *ppi,
+							  struct pp_frgn_master *m)
 {
 	int cmpres;
 	struct pp_frgn_master myself;
@@ -195,21 +202,40 @@ static int bmc_state_decision(struct pp_instance *ppi, struct pp_frgn_master *m)
 	if (DSDEF(ppi)->clockQuality.clockClass < 128) {
 		if (cmpres < 0)
 			goto master;
-		if (cmpres > 0) {
-			s1(ppi, &m->hdr, &m->ann);
-			return PPS_PASSIVE;
-		}
+		if (cmpres > 0)
+			goto passive;
 	}
 	if (cmpres < 0)
 		goto master;
-	if (cmpres > 0)
-		goto slave;
+	if (cmpres > 0) {
+		if (DSDEF(ppi)->numberPorts == 1)
+			goto slave; /* directly skip to ordinary clock handling */
+		else
+			goto check_boundary_clk;
+	}
 
 	pp_diag(ppi, bmc, 1,"%s: error\n", __func__);
 
 	/*  MB: Is this the return code below correct? */
 	/*  Anyway, it's a valid return code. */
 	return PPS_FAULTY;
+
+check_boundary_clk:
+	if (ppi->port_idx == GLBS(ppi)->ebest_idx) /* This port is the Ebest */
+		goto slave;
+
+	/* If idcmp returns 0, it means that this port is not the best because
+		* Ebest is better by topology than Erbest */
+	if (!idcmp(&myself.ann.grandmasterIdentity,
+			&m->ann.grandmasterIdentity))
+		goto passive;
+	else
+		goto master;
+
+passive:
+	p1(ppi, &m->hdr, &m->ann);
+	pp_diag(ppi, bmc, 1,"%s: passive\n", __func__);
+	return PPS_PASSIVE;
 
 master:
 	m1(ppi);
@@ -220,8 +246,33 @@ slave:
 	s1(ppi, &m->hdr, &m->ann);
 	pp_diag(ppi, bmc, 1,"%s: slave\n", __func__);
 	return PPS_SLAVE;
+
 }
 
+/* Find Ebest, 9.3.2.2 */
+void bmc_update_ebest(struct pp_globals *ppg)
+{
+	int i, best;
+	struct pp_instance *ppi, *ppi_best;
+
+	for (i = 1, best = 0 ; i < ppg->nlinks; i++) {
+
+		ppi_best = &ppg->pp_instances[best];
+		ppi = &ppg->pp_instances[i];
+
+		if ((ppi->frgn_rec_num > 0) &&
+			 (bmc_dataset_cmp(ppi,
+				&ppi_best->frgn_master[ppi_best->frgn_rec_best],
+				&ppi->frgn_master[ppi->frgn_rec_best])
+				< 0))
+				best = i;
+	}
+
+	if (ppg->ebest_idx != best) {
+		ppg->ebest_idx = best;
+		ppg->ebest_updated = 1;
+	}
+}
 
 int bmc(struct pp_instance *ppi)
 {
@@ -241,7 +292,10 @@ int bmc(struct pp_instance *ppi)
 			best = i;
 
 	pp_diag(ppi, bmc, 1,"Best foreign master is %i\n", best);
-	ppi->frgn_rec_best = best;
+	if (ppi->frgn_rec_best != best) {
+		ppi->frgn_rec_best = best;
+		bmc_update_ebest(GLBS(ppi));
+	}
 
 	return bmc_state_decision(ppi, &frgn_master[best]);
 }

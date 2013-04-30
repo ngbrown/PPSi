@@ -65,6 +65,22 @@ void posix_main_loop(struct pp_globals *ppg)
 	while (1) {
 		int i;
 
+		if (ppg->ebest_updated) {
+			/* If Ebest was changed in previous loop, run best master
+			 * clock before checking for new packets, which would affect
+			 * port state again */
+			for (j = 0; j < ppg->nlinks; j++) {
+				int new_state;
+				struct pp_instance *ppi = &ppg->pp_instances[j];
+				new_state = bmc(ppi);
+				if (new_state != ppi->state) {
+					ppi->state = new_state;
+					ppi->is_new_state = 1;
+				}
+			}
+			ppg->ebest_updated = 0;
+		}
+
 		i = posix_net_check_pkt(ppg, delay_ms);
 
 		if (i < 0)
