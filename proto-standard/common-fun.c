@@ -90,7 +90,7 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 
 	/*
 	 * header and announce field of each Foreign Master are
-	 * usefull to run Best Master Clock Algorithm
+	 * useful to run Best Master Clock Algorithm
 	 */
 	msg_copy_header(&GLBS(ppi)->frgn_master[i].hdr, hdr);
 	msg_unpack_announce(buf, &GLBS(ppi)->frgn_master[i].ann);

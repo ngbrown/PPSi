@@ -56,7 +56,8 @@ struct pp_channel {
 
 
 /*
- * Foreign master record. Used to manage Foreign masters
+ * Foreign master record. Used to manage Foreign masters. In the specific
+ * it is called foreignMasterDS, see 9.3.2.4
  */
 struct pp_frgn_master {
 	PortIdentity port_id;	/* used to identify old/new masters */
