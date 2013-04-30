@@ -72,6 +72,7 @@ int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *_rt_opts)
 			def->slaveOnly = 0;
 
 		ppg->pp_instances[i].state = PPS_INITIALIZING;
+		ppg->pp_instances[i].port_idx = i;
 	}
 
 	if (def->slaveOnly)

@@ -183,6 +183,7 @@ struct pp_instance {
 		master_only:1,
 		ethernet_mode:1;
 	char *iface_name;
+	int port_idx;
 };
 
 /*
