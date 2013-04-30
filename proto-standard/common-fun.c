@@ -45,8 +45,8 @@ int st_com_execute_slave(struct pp_instance *ppi)
 		return ret;
 
 	if (pp_timeout_z(ppi, PP_TO_ANN_RECEIPT)) {
-		GLBS(ppi)->frgn_rec_num = 0;
-		GLBS(ppi)->frgn_rec_i = 0;
+		ppi->frgn_rec_num = 0;
+		ppi->frgn_rec_i = 0;
 		if (!DSDEF(ppi)->slaveOnly &&
 			DSDEF(ppi)->clockQuality.clockClass != 255) {
 			m1(ppi);
@@ -66,38 +66,38 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 	MsgHeader *hdr = &ppi->received_ptp_header;
 
 	/* Check if foreign master is already known */
-	for (i = 0; i < GLBS(ppi)->frgn_rec_num; i++) {
+	for (i = 0; i < ppi->frgn_rec_num; i++) {
 		if (!memcmp(&hdr->sourcePortIdentity,
-			    &GLBS(ppi)->frgn_master[i].port_id,
+			    &ppi->frgn_master[i].port_id,
 			    sizeof(hdr->sourcePortIdentity))) {
 			/* already in Foreign master data set, update info */
-			msg_copy_header(&GLBS(ppi)->frgn_master[i].hdr, hdr);
-			msg_unpack_announce(buf, &GLBS(ppi)->frgn_master[i].ann);
+			msg_copy_header(&ppi->frgn_master[i].hdr, hdr);
+			msg_unpack_announce(buf, &ppi->frgn_master[i].ann);
 			return;
 		}
 	}
 
 	/* New foreign master */
-	if (GLBS(ppi)->frgn_rec_num < PP_NR_FOREIGN_RECORDS)
-		GLBS(ppi)->frgn_rec_num++;
+	if (ppi->frgn_rec_num < PP_NR_FOREIGN_RECORDS)
+		ppi->frgn_rec_num++;
 
 	/* FIXME: replace the worst */
-	i = GLBS(ppi)->frgn_rec_i;
+	i = ppi->frgn_rec_i;
 
 	/* Copy new foreign master data set from announce message */
-	memcpy(&GLBS(ppi)->frgn_master[i].port_id,
+	memcpy(&ppi->frgn_master[i].port_id,
 	       &hdr->sourcePortIdentity, sizeof(hdr->sourcePortIdentity));
 
 	/*
 	 * header and announce field of each Foreign Master are
 	 * useful to run Best Master Clock Algorithm
 	 */
-	msg_copy_header(&GLBS(ppi)->frgn_master[i].hdr, hdr);
-	msg_unpack_announce(buf, &GLBS(ppi)->frgn_master[i].ann);
+	msg_copy_header(&ppi->frgn_master[i].hdr, hdr);
+	msg_unpack_announce(buf, &ppi->frgn_master[i].ann);
 
 	pp_diag(ppi, bmc, 2, "New foreign Master added\n");
 
-	GLBS(ppi)->frgn_rec_i = (GLBS(ppi)->frgn_rec_i+1) %
+	ppi->frgn_rec_i = (ppi->frgn_rec_i+1) %
 		PP_NR_FOREIGN_RECORDS;
 }
 

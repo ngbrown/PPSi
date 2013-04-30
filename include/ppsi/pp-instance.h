@@ -158,6 +158,14 @@ struct pp_instance {
 	TimeInternal cField;				/* transp. clocks */
 	TimeInternal last_rcv_time, last_snt_time;	/* two temporaries */
 
+	/* Page 85: each port shall maintain an implementation-specific
+	 * foreignMasterDS data set for the purposes of qualifying Announce
+	 * messages */
+	UInteger16 frgn_rec_num;
+	Integer16  frgn_rec_i;
+	Integer16  frgn_rec_best;
+	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
+
 	DSPort *portDS;				/* page 72 */
 
 	unsigned long timeouts[__PP_TO_ARRAY_SIZE];
@@ -194,10 +202,6 @@ struct pp_link {
  */
 struct pp_globals {
 	struct pp_instance *pp_instances;
-	UInteger16 frgn_rec_num;
-	Integer16  frgn_rec_i;
-	Integer16  frgn_rec_best;
-	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
 
 	struct pp_servo *servo;
 

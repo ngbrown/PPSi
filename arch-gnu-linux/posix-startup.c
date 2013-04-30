@@ -82,8 +82,8 @@ int main(int argc, char **argv)
 	ppg->pp_instances = calloc(ppg->nlinks, sizeof(struct pp_instance));
 
 	if ((!ppg->defaultDS) || (!ppg->currentDS) || (!ppg->parentDS)
-		|| (!ppg->timePropertiesDS) || (!ppg->frgn_master)
-		|| (!ppg->arch_data) || (!ppg->pp_instances))
+		|| (!ppg->timePropertiesDS) || (!ppg->arch_data)
+		|| (!ppg->pp_instances))
 		exit(__LINE__);
 
 	ppg->servo = calloc(1, sizeof(*ppg->servo));
