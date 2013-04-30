@@ -13,7 +13,7 @@
 #define FFB_TTRA	0x10
 #define FFB_FTRA	0x20
 
-/* Local clock is becoming Master. Table 13 (9.3.5) of the spec. */
+/* ppi->port_idx port is becoming Master. Table 13 (9.3.5) of the spec. */
 void m1(struct pp_instance *ppi)
 {
 	struct DSParent *parent = DSPAR(ppi);
@@ -40,7 +40,7 @@ void m1(struct pp_instance *ppi)
 }
 
 
-/* Local clock is synchronized to Ebest Table 16 (9.3.5) of the spec. */
+/* ppi->port_idx port is synchronized to Ebest Table 16 (9.3.5) of the spec. */
 void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 {
 	struct DSParent *parent = DSPAR(ppi);
