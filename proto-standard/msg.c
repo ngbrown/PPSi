@@ -326,7 +326,7 @@ void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp)
 		htons(*(UInteger16 *) (buf + 52));
 }
 
-const char const *pp_msg_names[] = {
+const char const *pp_msg_names[16] = {
 	[PPM_SYNC] =			"sync",
 	[PPM_DELAY_REQ] =		"delay_req",
 	[PPM_PDELAY_REQ] =		"pdelay_req",

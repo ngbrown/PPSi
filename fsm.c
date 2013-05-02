@@ -75,10 +75,10 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 
 	if (plen)
 		pp_diag(ppi, frames, 1,
-			"RECV %02d bytes at %d.%09d (type %x)\n", plen,
+			"RECV %02d bytes at %d.%09d (type %x, %s)\n", plen,
 			   (int)ppi->last_rcv_time.seconds,
 			   (int)ppi->last_rcv_time.nanoseconds,
-			   packet[0] & 0xf);
+			   packet[0] & 0xf, pp_msg_names[packet[0] & 0xf]);
 
 	/*
 	 * Since all ptp frames have the same header, parse it now.
