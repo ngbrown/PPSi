@@ -47,7 +47,7 @@ int st_com_execute_slave(struct pp_instance *ppi)
 	if (pp_timeout_z(ppi, PP_TO_ANN_RECEIPT)) {
 		ppi->frgn_rec_num = 0;
 		ppi->frgn_rec_i = 0;
-		if (!DSDEF(ppi)->slaveOnly &&
+		if (!ppi->slave_only &&
 			DSDEF(ppi)->clockQuality.clockClass != 255) {
 			m1(ppi);
 			ppi->next_state = PPS_MASTER;
