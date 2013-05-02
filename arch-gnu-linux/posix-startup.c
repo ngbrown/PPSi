@@ -96,11 +96,11 @@ int main(int argc, char **argv)
 		ppi->glbs = ppg;
 		ppi->iface_name = lnk->iface_name;
 		ppi->ethernet_mode = (lnk->proto == 0) ? 1 : 0;
-		if (lnk->proto == 1) {
+		if (lnk->role == 1) {
 			ppi->master_only = 1;
 			ppi->slave_only = 0;
 		}
-		else if (lnk->proto == 2) {
+		else if (lnk->role == 2) {
 			ppi->master_only = 0;
 			ppi->slave_only = 1;
 		}
