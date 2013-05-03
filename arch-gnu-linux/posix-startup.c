@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 			exit(__LINE__);
 	}
 
-	pp_open_globals(ppg, NULL);
+	pp_open_globals(ppg);
 
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;

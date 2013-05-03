@@ -34,7 +34,7 @@ struct pp_runtime_opts default_rt_opts = {
 	.ttl =			PP_DEFAULT_TTL,
 };
 
-int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *_rt_opts)
+int pp_open_globals(struct pp_globals *ppg)
 {
 	/*
 	 * Initialize default data set
@@ -45,12 +45,10 @@ int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *_rt_opts)
 	def->numberPorts = ppg->nlinks;
 	struct pp_runtime_opts *rt_opts;
 
-	if (_rt_opts)
-		rt_opts = _rt_opts;
-	else
-		rt_opts = &default_rt_opts;
+	if (!ppg->rt_opts)
+		ppg->rt_opts = &default_rt_opts;
 
-	ppg->rt_opts = rt_opts;
+	rt_opts = ppg->rt_opts;
 
 	memcpy(&def->clockQuality, &rt_opts->clock_quality,
 		   sizeof(ClockQuality));
