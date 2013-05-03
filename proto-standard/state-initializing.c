@@ -56,6 +56,11 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 	pp_init_clock(ppi);
 
+	pp_diag(ppi, bmc, 1, "clock class = %d\n",
+			DSDEF(ppi)->clockQuality.clockClass);
+	pp_diag(ppi, bmc, 1, "clock accuracy = %d\n",
+			DSDEF(ppi)->clockQuality.clockAccuracy);
+
 	m1(ppi);
 
 	msg_pack_header(ppi, ppi->tx_ptp); /* This is used for all tx */

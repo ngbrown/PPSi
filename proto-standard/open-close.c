@@ -73,8 +73,10 @@ int pp_open_globals(struct pp_globals *ppg)
 		ppg->pp_instances[i].port_idx = i;
 	}
 
-	if (def->slaveOnly)
+	if (def->slaveOnly) {
+		pp_printf("Slave Only, clock class set to 255\n");
 		def->clockQuality.clockClass = 255;
+	}
 
 	if (pp_hooks.open)
 		return pp_hooks.open(ppg, rt_opts);
