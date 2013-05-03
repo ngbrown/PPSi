@@ -190,17 +190,17 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 				break;
 			case 'v':
 				a = argv[++i];
-				GDSDEF(ppg)->clockQuality.
+				GOPTS(ppg)->clock_quality.
 					offsetScaledLogVariance = atoi(a);
 				break;
 			case 'r':
 				a = argv[++i];
-				GDSDEF(ppg)->clockQuality.clockAccuracy =
+				GOPTS(ppg)->clock_quality.clockAccuracy =
 					atoi(a);
 				break;
 			case 's':
 				a = argv[++i];
-				GDSDEF(ppg)->clockQuality.clockClass =
+				GOPTS(ppg)->clock_quality.clockClass =
 					atoi(a);
 				break;
 			case 'p':
