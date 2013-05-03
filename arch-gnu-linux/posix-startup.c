@@ -69,6 +69,8 @@ int main(int argc, char **argv)
 		close(conf_fd);
 	}
 
+	ppg->rt_opts = &default_rt_opts;
+
 	if ((ret = pp_parse_conf(ppg, conf_buf, conf_len)) < 0) {
 		pp_printf("Fatal: Error in %s file at line %d\n", CONF_PATH, -ret);
 		exit(__LINE__);
@@ -115,10 +117,10 @@ int main(int argc, char **argv)
 			exit(__LINE__);
 	}
 
-	pp_open_globals(ppg);
-
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;
+
+	pp_open_globals(ppg);
 
 	posix_main_loop(ppg);
 	return 0; /* never reached */

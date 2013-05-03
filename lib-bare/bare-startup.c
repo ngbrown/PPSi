@@ -52,11 +52,13 @@ int ppsi_main(int argc, char **argv)
 	ppi->ethernet_mode = PP_DEFAULT_ETHERNET_MODE;
 	ppi->iface_name = "eth0";
 
-	/* This just llocates the stuff */
-	pp_open_globals(ppg);
+	ppg->rt_opts = &default_rt_opts;
 
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;
+
+	/* This just allocates the stuff */
+	pp_open_globals(ppg);
 
 	/* The actual sockets are opened in state-initializing */
 	bare_main_loop(ppi);
