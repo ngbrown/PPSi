@@ -15,6 +15,7 @@ struct keyword_t {
 
 enum {KW_INV = -1, KW_LINK, KW_IFACE, KW_PROTO, KW_RAW, KW_UDP, KW_ROLE,
 			KW_AUTO, KW_MASTER, KW_SLAVE, KW_EXT, KW_NONE, KW_WHITERAB,
+			KW_CLOCK_CLASS, KW_CLOCK_ACCURACY,
 			KW_NUMBER};
 
 static int handle_link(struct pp_globals *ppg, char *val);
@@ -22,6 +23,8 @@ static int handle_iface(struct pp_globals *ppg, char *val);
 static int handle_proto(struct pp_globals *ppg, char *val);
 static int handle_role(struct pp_globals *ppg, char *val);
 static int handle_ext(struct pp_globals *ppg, char *val);
+static int handle_clock_class(struct pp_globals *ppg, char *val);
+static int handle_clock_accuracy(struct pp_globals *ppg, char *val);
 
 static struct keyword_t keywords[KW_NUMBER] = {
 	{KW_LINK, "link", handle_link},
@@ -31,6 +34,8 @@ static struct keyword_t keywords[KW_NUMBER] = {
 		{KW_SLAVE, "slave"},
 	{KW_EXT, "extension", handle_ext}, {KW_NONE, "none"},
 		{KW_WHITERAB, "whiterabbit"},
+	{KW_CLOCK_CLASS, "clock-class", handle_clock_class},
+	{KW_CLOCK_ACCURACY, "clock-accuracy", handle_clock_accuracy},
 };
 
 static int detect_keyword(char *kw)
@@ -57,6 +62,18 @@ static int handle_link(struct pp_globals *ppg, char *val)
 static int handle_iface(struct pp_globals *ppg, char *val)
 {
 	strcpy(ppg->links[ppg->nlinks].iface_name, val); /* FIXME check iface len */
+	return 1;
+}
+
+static int handle_clock_class(struct pp_globals *ppg, char *val)
+{
+	GOPTS(ppg)->clock_quality.clockClass = atoi(val);
+	return 1;
+}
+
+static int handle_clock_accuracy(struct pp_globals *ppg, char *val)
+{
+	GOPTS(ppg)->clock_quality.clockAccuracy = atoi(val);
 	return 1;
 }
 
@@ -121,6 +138,8 @@ static int handle_key_val(struct pp_globals *ppg, char *key, char *val)
 		case KW_PROTO:
 		case KW_ROLE:
 		case KW_EXT:
+		case KW_CLOCK_CLASS:
+		case KW_CLOCK_ACCURACY:
 			return keywords[k_id].handle_key(ppg, val);
 
 		default:
