@@ -68,7 +68,8 @@ static struct pp_globals ppg_static = {
 int wrc_ptp_init()
 {
 	sdb_find_devices();
-	uart_init();
+	uart_init_hw();
+	uart_init_sw();
 
 	pp_printf("PPSi for WRPC. Compiled on " __DATE__ "\n");
 
