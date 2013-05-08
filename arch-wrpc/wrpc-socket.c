@@ -1,7 +1,6 @@
 /*
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
-#define __REGS_H
 #include <ppsi/ppsi.h>
 #include "wrpc.h"
 #include "ptpdump.h"

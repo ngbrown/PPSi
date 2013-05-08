@@ -8,7 +8,6 @@
  */
 #include <stdint.h>
 #include <errno.h>
-#define __REGS_H
 #include <ppsi/ppsi.h>
 #include "wrpc.h"
 #include "../proto-ext-whiterabbit/wr-api.h"
