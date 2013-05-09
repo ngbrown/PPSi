@@ -133,8 +133,6 @@ int wrc_ptp_set_mode(int mode)
 	}
 	pp_printf("\n");
 
-	calib_t24p(mode, &cal_phase_transition);
-
 	if (mode == WRC_MODE_MASTER || mode == WRC_MODE_GM)
 		shw_pps_gen_enable_output(1);
 
