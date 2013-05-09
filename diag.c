@@ -22,10 +22,32 @@ void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 	if (!__PP_DIAG_ALLOW(ppi, th, level))
 		return;
 
+#ifdef DIAG_PUTS
+	/*
+	 * We allow to divert diagnostic messages to a different
+	 * channel. This is done in wrpc-sw, for example.  There, we
+	 * have a FIFO buffer to this aim. This allows running the
+	 * wrpc shell on the only physical uart we have.
+	 */
+	{
+		static char buf[128];
+		extern int DIAG_PUTS(const char *s);
+
+		pp_sprintf(buf, "%s-%i-%s: ",
+			   thing_name[th], level, ppi->iface_name);
+		DIAG_PUTS(buf);
+		va_start(args, fmt);
+		pp_vsprintf(buf, fmt, args);
+		va_end(args);
+		DIAG_PUTS(buf);
+	}
+#else
+	/* Use the normal output channel for diagnostics */
 	pp_printf("%s-%i-%s: ", thing_name[th], level, ppi->iface_name);
 	va_start(args, fmt);
 	pp_vprintf(fmt, args);
 	va_end(args);
+#endif
 }
 
 unsigned long pp_diag_parse(char *diaglevel)
