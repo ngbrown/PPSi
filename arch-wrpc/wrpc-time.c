@@ -36,14 +36,22 @@ static int wrpc_time_set(struct pp_instance *ppi, TimeInternal *t)
 	return 0;
 }
 
-static int wrpc_time_adjust(struct pp_instance *ppi, long offset_ns,
-			    long freq_ppm)
+static int wrpc_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
 {
-	pp_diag(ppi, time, 1, "%s: %li %li\n",
-		__func__, offset_ns, freq_ppm);
+	pp_diag(ppi, time, 1, "%s: %li\n",
+		__func__, offset_ns);
 	if (offset_ns)
 		shw_pps_gen_adjust(PPSG_ADJUST_NSEC, offset_ns);
 	return 0;
+}
+
+static int wrpc_time_adjust(struct pp_instance *ppi, long offset_ns,
+			    long freq_ppm)
+{
+	if (freq_ppm != 0)
+		pp_diag(ppi, time, 1, "Warning: %s: can not adjust freq_ppm %li\n",
+				__func__, freq_ppm);
+	return wrpc_time_adjust_offset(ppi, offset_ns);
 }
 
 static unsigned long wrpc_calc_timeout(struct pp_instance *ppi, int millisec)
@@ -58,5 +66,7 @@ struct pp_time_operations wrpc_time_ops = {
 	.get = wrpc_time_get,
 	.set = wrpc_time_set,
 	.adjust = wrpc_time_adjust,
+	.adjust_offset = wrpc_time_adjust_offset,
+	.adjust_freq = NULL,
 	.calc_timeout = wrpc_calc_timeout,
 };

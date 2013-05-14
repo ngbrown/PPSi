@@ -196,7 +196,11 @@ static void __pp_update_clock(struct pp_instance *ppi)
 			} else {
 				adj = DSCUR(ppi)->offsetFromMaster.nanoseconds
 					> 0 ? PP_ADJ_FREQ_MAX:-PP_ADJ_FREQ_MAX;
-				ppi->t_ops->adjust(ppi, 0, -adj);
+
+				if (ppi->t_ops->adjust_freq)
+					ppi->t_ops->adjust_freq(ppi, -adj);
+				else
+					ppi->t_ops->adjust_offset(ppi, -adj);
 			}
 		}
 		return;
@@ -218,9 +222,14 @@ static void __pp_update_clock(struct pp_instance *ppi)
 	adj = DSCUR(ppi)->offsetFromMaster.nanoseconds / OPTS(ppi)->ap +
 		SRV(ppi)->obs_drift;
 
-	/* apply controller output as a clock tick rate adjustment */
-	if (!OPTS(ppi)->no_adjust)
-		ppi->t_ops->adjust(ppi, 0, -adj);
+	/* apply controller output as a clock tick rate adjustment, if
+	 * provided by arch, or as a raw offset otherwise */
+	if (!OPTS(ppi)->no_adjust) {
+		if (ppi->t_ops->adjust_freq)
+			ppi->t_ops->adjust_freq(ppi, -adj);
+		else
+			ppi->t_ops->adjust_offset(ppi, -adj);
+	}
 }
 
 /* called only *exactly* after calling pp_update_offset above */

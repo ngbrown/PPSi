@@ -47,13 +47,17 @@ int posix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 	struct timex t;
 	int ret;
 
-	if (freq_ppm > PP_ADJ_FREQ_MAX)
-		freq_ppm = PP_ADJ_FREQ_MAX;
-	if (freq_ppm < -PP_ADJ_FREQ_MAX)
-		freq_ppm = -PP_ADJ_FREQ_MAX;
+	t.modes = 0;
 
-	t.freq = freq_ppm * ((1 << 16) / 1000);
-	t.modes = MOD_FREQUENCY;
+	if (freq_ppm) {
+		if (freq_ppm > PP_ADJ_FREQ_MAX)
+			freq_ppm = PP_ADJ_FREQ_MAX;
+		if (freq_ppm < -PP_ADJ_FREQ_MAX)
+			freq_ppm = -PP_ADJ_FREQ_MAX;
+
+		t.freq = freq_ppm * ((1 << 16) / 1000);
+		t.modes = MOD_FREQUENCY;
+	}
 
 	if (offset_ns) {
 		t.offset = offset_ns / 1000;
@@ -63,6 +67,16 @@ int posix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 	ret = adjtimex(&t);
 	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppm);
 	return ret;
+}
+
+int posix_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
+{
+	return posix_time_adjust(ppi, offset_ns, 0);
+}
+
+int posix_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
+{
+	return posix_time_adjust(ppi, 0, freq_ppm);
 }
 
 static unsigned long posix_calc_timeout(struct pp_instance *ppi, int millisec)
@@ -84,5 +98,7 @@ struct pp_time_operations posix_time_ops = {
 	.get = posix_time_get,
 	.set = posix_time_set,
 	.adjust = posix_time_adjust,
+	.adjust_offset = posix_time_adjust_offset,
+	.adjust_freq = posix_time_adjust_freq,
 	.calc_timeout = posix_calc_timeout,
 };

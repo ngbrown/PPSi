@@ -153,6 +153,8 @@ struct pp_time_operations {
 	int (*set)(struct pp_instance *ppi, TimeInternal *t);
 	/* freq_ppm is "scaled-ppm" like the argument of adjtimex(2) */
 	int (*adjust)(struct pp_instance *ppi, long offset_ns, long freq_ppm);
+	int (*adjust_offset)(struct pp_instance *ppi, long offset_ns);
+	int (*adjust_freq)(struct pp_instance *ppi, long freq_ppm);
 	/* calc_timeout cannot return zero */
 	unsigned long (*calc_timeout)(struct pp_instance *ppi, int millisec);
 };

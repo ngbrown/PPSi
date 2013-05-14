@@ -42,6 +42,9 @@ static int bare_time_adjust(struct pp_instance *ppi, long offset_ns,
 	struct bare_timex t;
 	int ret;
 
+	/* FIXME: handle MOD_FREQUENCY and MOD_OFFSET separately, and
+	 * set t.modes only for the mode having non-zero parameter.
+	 * See posix_time_adjust in arch-gnu-linux/posix-time.c */
 	if (freq_ppm > PP_ADJ_FREQ_MAX)
 		freq_ppm = PP_ADJ_FREQ_MAX;
 	if (freq_ppm < -PP_ADJ_FREQ_MAX)
@@ -54,6 +57,16 @@ static int bare_time_adjust(struct pp_instance *ppi, long offset_ns,
 	ret = sys_adjtimex(&t);
 	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppm);
 	return ret;
+}
+
+int bare_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
+{
+	return bare_time_adjust(ppi, offset_ns, 0);
+}
+
+int bare_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
+{
+	return bare_time_adjust(ppi, 0, freq_ppm);
 }
 
 static unsigned long bare_calc_timeout(struct pp_instance *ppi, int millisec)
@@ -75,5 +88,7 @@ struct pp_time_operations bare_time_ops = {
 	.get = bare_time_get,
 	.set = bare_time_set,
 	.adjust = bare_time_adjust,
+	.adjust_offset = bare_time_adjust_offset,
+	.adjust_freq = bare_time_adjust_freq,
 	.calc_timeout = bare_calc_timeout,
 };
