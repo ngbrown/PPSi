@@ -105,7 +105,7 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		/* found: handle this state */
 		ppi->next_state = state;
 		ppi->next_delay = 0;
-		if (pp_diag_verbosity && ppi->is_new_state)
+		if (ppi->is_new_state)
 			pp_diag_fsm(ppi, ip->name, STATE_ENTER, plen);
 		err = ip->f1(ppi, packet, plen);
 		if (err)
@@ -116,13 +116,11 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		if (ppi->state != ppi->next_state) {
 			ppi->state = ppi->next_state;
 			ppi->is_new_state = 1;
-			if (pp_diag_verbosity)
-				pp_diag_fsm(ppi, ip->name, STATE_LEAVE, 0);
+			pp_diag_fsm(ppi, ip->name, STATE_LEAVE, 0);
 			return 0;
 		}
 		ppi->is_new_state = 0;
-		if (pp_diag_verbosity)
-			pp_diag_fsm(ppi, ip->name, STATE_LOOP, 0);
+		pp_diag_fsm(ppi, ip->name, STATE_LOOP, 0);
 		return ppi->next_delay;
 	}
 	/* Unknwon state, can't happen */
