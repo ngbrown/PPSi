@@ -123,10 +123,10 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 	/*Reset Timer handling Announce receipt timeout*/
 	pp_timeout_restart_annrec(ppi);
 
+	ppi->next_state = bmc(ppi); /* got a new announce: run bmc */
+
 	if (pp_hooks.handle_announce)
 		pp_hooks.handle_announce(ppi);
-
-	ppi->next_state = bmc(ppi); /* got a new announce: run bmc */
 
 	return 0;
 }
