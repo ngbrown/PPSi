@@ -107,18 +107,12 @@ int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 				 int len)
 {
 	MsgHeader *hdr = &ppi->received_ptp_header;
-	MsgAnnounce ann;
 
 	if (len < PP_ANNOUNCE_LENGTH)
 		return -1;
 
-	if (ppi->is_from_cur_par) {
-		msg_unpack_announce(buf, &ann);
-		s1(ppi, hdr, &ann);
-	} else {
-		/* st_com_add_foreign takes care of announce unpacking */
-		st_com_add_foreign(ppi, buf);
-	}
+	/* st_com_add_foreign takes care of announce unpacking */
+	st_com_add_foreign(ppi, buf);
 
 	/*Reset Timer handling Announce receipt timeout*/
 	pp_timeout_restart_annrec(ppi);
