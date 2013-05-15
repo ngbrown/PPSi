@@ -32,7 +32,8 @@
 /* White Rabbit package Size */
 #define WR_ANNOUNCE_TLV_LENGTH		0x0A
 
-#define WR_ANNOUNCE_LENGTH    (PP_ANNOUNCE_LENGTH + WR_ANNOUNCE_TLV_LENGTH)
+/* The +4 is for tlvType (2 bytes) and lengthField (2 bytes) */
+#define WR_ANNOUNCE_LENGTH (PP_ANNOUNCE_LENGTH + WR_ANNOUNCE_TLV_LENGTH + 4)
 
 /* memory footprint tweak for WRPC */
 #ifdef WRPC_EXTRA_SLIM
