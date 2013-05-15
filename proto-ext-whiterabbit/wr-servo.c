@@ -307,27 +307,8 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	tics = ppi->t_ops->calc_timeout(ppi, 0);
 
-	if (s->state != WR_WAIT_SYNC_IDLE) {
-		PP_PRINTF("servo:state: %d (%s)\n", s->state,
-			servo_state_str[s->state]);
-
-		PP_PRINTF("Round-trip time (mu):      "); PP_PRINTF("%d ps\n", (int32_t)(cur_servo_state.mu));
-		PP_PRINTF("Master-slave delay:        "); PP_PRINTF("%d ps\n", (int32_t)(cur_servo_state.delay_ms));
-		PP_PRINTF("Master PHY delays:         "); PP_PRINTF("TX: %d ps, RX: %d ps\n", (int32_t)cur_servo_state.delta_tx_m, (int32_t)cur_servo_state.delta_rx_m);
-		PP_PRINTF("Slave PHY delays:          "); PP_PRINTF("TX: %d ps, RX: %d ps\n", (int32_t)cur_servo_state.delta_tx_s, (int32_t)cur_servo_state.delta_rx_s);
-		PP_PRINTF("Total link asymmetry:      "); PP_PRINTF("%d ps\n", (int32_t)(cur_servo_state.total_asymmetry));
-		PP_PRINTF("Cable rtt delay:           "); PP_PRINTF("%d ps\n",
-									(int32_t)(cur_servo_state.mu) - (int32_t)cur_servo_state.delta_tx_m - (int32_t)cur_servo_state.delta_rx_m -
-									(int32_t)cur_servo_state.delta_tx_s - (int32_t)cur_servo_state.delta_rx_s);
-		PP_PRINTF("Clock offset:              "); PP_PRINTF("%d ps\n", (int32_t)(cur_servo_state.cur_offset));
-		PP_PRINTF("Phase setpoint:            "); PP_PRINTF("%d ps\n", (int32_t)(cur_servo_state.cur_setpoint));
-		PP_PRINTF("Skew:                      "); PP_PRINTF("%d ps\n", (int32_t)(cur_servo_state.cur_skew));
-		PP_PRINTF("Update counter:            "); PP_PRINTF("%d \n", (int32_t)(cur_servo_state.update_count));
-
-	}
-
 	if (wr_locking_poll(ppi) != WR_SPLL_READY) {
-		PP_PRINTF("PLL OutOfLock, should restart sync\n");
+		pp_diag(ppi, servo, 1, "PLL OutOfLock, should restart sync\n");
 		wr_enable_timing_output(ppi, 0);
 		/* TODO check
 		 * DSPOR(ppi)->doRestart = TRUE; */
