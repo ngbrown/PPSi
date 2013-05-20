@@ -6,6 +6,7 @@
 #ifndef __WREXT_WR_API_H__
 #define __WREXT_WR_API_H__
 
+#include <ppsi/lib.h>
 #include "wr-constants.h"
 
 /*
@@ -50,9 +51,17 @@ static inline struct wr_dsport *WR_DSPOR(struct pp_instance *ppi)
 
 static inline Integer32 phase_to_cf_units(Integer32 phase)
 {
-	return (Integer32) ((int64_t)phase * 65536LL / 1000LL);
+	uint64_t ph64;
+	if (phase >= 0) {
+		ph64 = phase * 65536LL;
+		__div64_32(&ph64, 1000);
+		return ph64;
+	} else {
+		ph64 = -phase * 65536LL;
+		__div64_32(&ph64, 1000);
+		return -ph64;
+	}
 }
-
 
 /* Pack/Unkpack White rabbit message in the suffix of PTP announce message */
 void msg_pack_announce_wr_tlv(struct pp_instance *ppi);
