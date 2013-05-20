@@ -49,14 +49,14 @@ static int64_t ts_to_picos(TimeInternal ts)
 
 static TimeInternal picos_to_ts(int64_t picos)
 {
-	int64_t nsec, phase;
+	uint64_t nsec, phase;
 	TimeInternal ts;
 
-	phase = picos % 1000;
-	nsec = picos / 1000;
+	nsec = picos;
+	phase = __div64_32(&nsec, 1000);
 
-	ts.seconds = nsec / PP_NSEC_PER_SEC;
-	ts.nanoseconds = nsec % PP_NSEC_PER_SEC;
+	ts.nanoseconds = __div64_32(&nsec, PP_NSEC_PER_SEC);
+	ts.seconds = nsec; /* after the division */
 	ts.phase = phase;
 	return ts;
 }
