@@ -44,7 +44,7 @@ static int bare_time_adjust(struct pp_instance *ppi, long offset_ns,
 
 	/* FIXME: handle MOD_FREQUENCY and MOD_OFFSET separately, and
 	 * set t.modes only for the mode having non-zero parameter.
-	 * See posix_time_adjust in arch-gnu-linux/posix-time.c */
+	 * See unix_time_adjust in arch-unix/unix-time.c */
 	if (freq_ppm > PP_ADJ_FREQ_MAX)
 		freq_ppm = PP_ADJ_FREQ_MAX;
 	if (freq_ppm < -PP_ADJ_FREQ_MAX)

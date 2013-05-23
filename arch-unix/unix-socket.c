@@ -18,10 +18,10 @@
 
 #include <ppsi/ppsi.h>
 #include "ptpdump.h"
-#include "posix.h"
+#include "ppsi-unix.h"
 
-/* posix_recv_msg uses recvmsg for timestamp query */
-static int posix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
+/* unix_recv_msg uses recvmsg for timestamp query */
+static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 			  TimeInternal *t)
 {
 	ssize_t ret;
@@ -90,7 +90,7 @@ static int posix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 }
 
 /* Receive and send is *not* so trivial */
-static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
+static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
 	struct pp_channel *ch1, *ch2;
@@ -99,7 +99,7 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	if (ppi->ethernet_mode) {
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
-		ret = posix_recv_msg(ppi, fd, pkt, len, t);
+		ret = unix_recv_msg(ppi, fd, pkt, len, t);
 		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("recv: ", pkt, ret, t);
 		return ret;
@@ -112,16 +112,16 @@ static int posix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 
 	ret = -1;
 	if (ch1->pkt_present)
-		ret = posix_recv_msg(ppi, ch1->fd, pkt, len, t);
+		ret = unix_recv_msg(ppi, ch1->fd, pkt, len, t);
 	else if (ch2->pkt_present)
-		ret = posix_recv_msg(ppi, ch2->fd, pkt, len, t);
+		ret = unix_recv_msg(ppi, ch2->fd, pkt, len, t);
 
 	if (ret > 0 && pp_diag_allow(ppi, frames, 2))
 		dump_payloadpkt("recv: ", pkt, ret, t);
 	return ret;
 }
 
-static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
+static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct sockaddr_in addr;
@@ -161,7 +161,7 @@ static int posix_net_send(struct pp_instance *ppi, void *pkt, int len,
 }
 
 /* To open a channel we must bind to an interface and so on */
-static int posix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
+static int unix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 {
 
 	int sock = -1;
@@ -324,34 +324,34 @@ err_out:
 	return -1;
 }
 
-static int posix_net_exit(struct pp_instance *ppi);
+static int unix_net_exit(struct pp_instance *ppi);
 
 /*
  * Inits all the network stuff
  */
 
 /* This function must be able to be called twice, and clean-up internally */
-int posix_net_init(struct pp_instance *ppi)
+int unix_net_init(struct pp_instance *ppi)
 {
 	int i;
 
 	if (NP(ppi)->ch[0].fd)
-		posix_net_exit(ppi);
+		unix_net_exit(ppi);
 
 	/* The buffer is inside ppi, but we need to set pointers and align */
 	pp_prepare_pointers(ppi);
 
 	if (ppi->ethernet_mode) {
-		pp_diag(ppi, frames, 1, "posix_net_init IEEE 802.3\n");
+		pp_diag(ppi, frames, 1, "unix_net_init IEEE 802.3\n");
 
 		/* raw sockets implementation always use gen socket */
-		return posix_open_ch(ppi, ppi->iface_name, PP_NP_GEN);
+		return unix_open_ch(ppi, ppi->iface_name, PP_NP_GEN);
 	}
 
 	/* else: UDP */
-	pp_diag(ppi, frames, 1, "posix_net_init UDP\n");
+	pp_diag(ppi, frames, 1, "unix_net_init UDP\n");
 	for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
-		if (posix_open_ch(ppi, ppi->iface_name, i))
+		if (unix_open_ch(ppi, ppi->iface_name, i))
 			return -1;
 	}
 	return 0;
@@ -360,7 +360,7 @@ int posix_net_init(struct pp_instance *ppi)
 /*
  * Shutdown all the network stuff
  */
-static int posix_net_exit(struct pp_instance *ppi)
+static int unix_net_exit(struct pp_instance *ppi)
 {
 	struct ip_mreq imr;
 	int fd;
@@ -394,13 +394,13 @@ static int posix_net_exit(struct pp_instance *ppi)
 	return 0;
 }
 
-int posix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
+int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 {
 	fd_set set;
 	int i, j;
 	int ret = 0;
 	int maxfd = 0;
-	struct posix_arch_data *arch_data = POSIX_ARCH(ppg);
+	struct unix_arch_data *arch_data = POSIX_ARCH(ppg);
 
 	if (delay_ms != -1) {
 		/* Wait for a packet or for the timeout */
@@ -466,9 +466,9 @@ int posix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 	return ret;
 }
 
-struct pp_network_operations posix_net_ops = {
-	.init = posix_net_init,
-	.exit = posix_net_exit,
-	.recv = posix_net_recv,
-	.send = posix_net_send,
+struct pp_network_operations unix_net_ops = {
+	.init = unix_net_init,
+	.exit = unix_net_exit,
+	.recv = unix_net_recv,
+	.send = unix_net_send,
 };

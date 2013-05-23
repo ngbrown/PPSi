@@ -17,7 +17,7 @@
 
 
 #include <ppsi/ppsi.h>
-#include "posix.h"
+#include "ppsi-unix.h"
 
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 	ppg->currentDS = calloc(1, sizeof(*ppg->currentDS));
 	ppg->parentDS = calloc(1, sizeof(*ppg->parentDS));
 	ppg->timePropertiesDS = calloc(1, sizeof(*ppg->timePropertiesDS));
-	ppg->arch_data = calloc(1, sizeof(struct posix_arch_data));
+	ppg->arch_data = calloc(1, sizeof(struct unix_arch_data));
 	ppg->pp_instances = calloc(ppg->nlinks, sizeof(struct pp_instance));
 
 	if ((!ppg->defaultDS) || (!ppg->currentDS) || (!ppg->parentDS)
@@ -110,8 +110,8 @@ int main(int argc, char **argv)
 		/* FIXME set ppi ext enable as defined in its pp_link */
 
 		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
-		ppi->n_ops = &posix_net_ops;
-		ppi->t_ops = &posix_time_ops;
+		ppi->n_ops = &unix_net_ops;
+		ppi->t_ops = &unix_time_ops;
 
 		if (!ppi->portDS)
 			exit(__LINE__);
@@ -122,6 +122,6 @@ int main(int argc, char **argv)
 
 	pp_open_globals(ppg);
 
-	posix_main_loop(ppg);
+	unix_main_loop(ppg);
 	return 0; /* never reached */
 }

@@ -3,7 +3,7 @@
  */
 
 /*
- * This is the main loop for posix stuff.
+ * This is the main loop for unix stuff.
  */
 #include <stdlib.h>
 #include <errno.h>
@@ -11,7 +11,7 @@
 #include <linux/if_ether.h>
 
 #include <ppsi/ppsi.h>
-#include "posix.h"
+#include "ppsi-unix.h"
 
 /* Call pp_state_machine for each instance. To be called periodically,
  * when no packets are incoming */
@@ -34,7 +34,7 @@ static int run_all_state_machines(struct pp_globals *ppg)
 	return delay_ms;
 }
 
-void posix_main_loop(struct pp_globals *ppg)
+void unix_main_loop(struct pp_globals *ppg)
 {
 	struct pp_instance *ppi;
 	int delay_ms;
@@ -81,7 +81,7 @@ void posix_main_loop(struct pp_globals *ppg)
 			ppg->ebest_updated = 0;
 		}
 
-		i = posix_net_check_pkt(ppg, delay_ms);
+		i = unix_net_check_pkt(ppg, delay_ms);
 
 		if (i < 0)
 			continue;
@@ -91,7 +91,7 @@ void posix_main_loop(struct pp_globals *ppg)
 			continue;
 		}
 
-		/* If delay_ms is -1, the above posix_net_check_pkt will continue
+		/* If delay_ms is -1, the above unix_net_check_pkt will continue
 		 * consuming the previous timeout (see its implementation).
 		 * This ensures that every state machine is called at least once
 		 * every delay_ms */

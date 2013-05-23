@@ -8,11 +8,11 @@ CFLAGS += -DCONFIG_PPSI_RUNTIME_VERBOSITY -Itools
 
 LIBARCH := $A/libarch.a
 
-OBJ-libarch := $A/posix-startup.o \
+OBJ-libarch := $A/unix-startup.o \
 	$A/main-loop.o \
-	$A/posix-socket.o \
-	$A/posix-io.o \
-	$A/posix-time.o \
+	$A/unix-socket.o \
+	$A/unix-io.o \
+	$A/unix-time.o \
 	lib/cmdline.o \
 	lib/conf.o \
 	lib/libc-functions.o \

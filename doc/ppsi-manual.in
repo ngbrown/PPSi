@@ -132,10 +132,10 @@ The package currently supports the following architectures:
 
 @table @i
 
-@item gnu-linux
+@item unix
 
 	This is the default architecture and is the normal @i{hosted}
-        environment.  The architecture supports the Linux
+        environment.  The architecture is usually tested over the Linux
         kernel using the standard GNU libraries. Most of the code relies
         on standard @sc{posix} conventions, so this architecture most
         likely works on @sc{bsd} and other variants as well. We may
@@ -640,15 +640,15 @@ for further details.
 This is an example run, limited to hosted compilation:
 
 @example
-   % ./MAKEALL gnu-linux
-   ###### Build for  arch "gnu-linux", ext "", printf xint
+   % ./MAKEALL unix
+   ###### Build for  arch "unix", ext "", printf xint
       text    data     bss     dec     hex filename
-     17681     224     264   18169    46f9 ppsi.o
-     29079     936     512   30527    773f ppsi
-   ###### Build for  arch "gnu-linux", ext "", all messages
+     15801     224     344   16369    3ff1 ppsi.o
+     34370     984     380   35734    8b96 ppsi
+   ###### Build for  arch "unix", ext "", all messages
       text    data     bss     dec     hex filename
-     18695     224     264   19183    4aef ppsi.o
-     30095     936     512   31543    7b37 ppsi
+     16850     224     344   17418    440a ppsi.o
+     35410     984     380   36774    8fa6 ppsi
 @end example
 
 @c ##########################################################################
@@ -685,7 +685,7 @@ in order to add their own stuff (like the @i{main} function or @i{crt0.o}
 for freestanding stuff).  Similarly, architectures can add files
 to the "all" target. The main Makefile only builds @i{ppsi.o},
 leaving the final link to the chosen architecture, so for example
-@i{arch-gnu-linux} adds @t{ppsi} to the @t{all} target.
+@i{arch-unix} adds @t{ppsi} to the @t{all} target.
 
 Since code and data space is a problem in the freestanding world (for
 example, the whole ptp may need to fit in 64kB RAM including data and

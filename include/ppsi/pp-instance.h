@@ -40,7 +40,7 @@ struct pp_runtime_opts {
 extern struct pp_runtime_opts default_rt_opts; /* preinited with defaults */
 
 /*
- * Communication channel. Is the abstraction of a posix socket, so that
+ * Communication channel. Is the abstraction of a unix socket, so that
  * this struct is platform independent
  */
 struct pp_channel {

@@ -16,7 +16,7 @@ static void clock_fatal_error(char *context)
 	exit(1);
 }
 
-static int posix_time_get(struct pp_instance *ppi, TimeInternal *t)
+static int unix_time_get(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec tp;
 	if (clock_gettime(CLOCK_REALTIME, &tp) < 0)
@@ -29,7 +29,7 @@ static int posix_time_get(struct pp_instance *ppi, TimeInternal *t)
 	return 0;
 }
 
-int32_t posix_time_set(struct pp_instance *ppi, TimeInternal *t)
+int32_t unix_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec tp;
 
@@ -42,7 +42,7 @@ int32_t posix_time_set(struct pp_instance *ppi, TimeInternal *t)
 	return 0;
 }
 
-int posix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
+int unix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 {
 	struct timex t;
 	int ret;
@@ -69,17 +69,17 @@ int posix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 	return ret;
 }
 
-int posix_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
+int unix_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
 {
-	return posix_time_adjust(ppi, offset_ns, 0);
+	return unix_time_adjust(ppi, offset_ns, 0);
 }
 
-int posix_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
+int unix_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
 {
-	return posix_time_adjust(ppi, 0, freq_ppm);
+	return unix_time_adjust(ppi, 0, freq_ppm);
 }
 
-static unsigned long posix_calc_timeout(struct pp_instance *ppi, int millisec)
+static unsigned long unix_calc_timeout(struct pp_instance *ppi, int millisec)
 {
 	struct timespec now;
 	uint64_t now_ms;
@@ -94,11 +94,11 @@ static unsigned long posix_calc_timeout(struct pp_instance *ppi, int millisec)
 	return result ? result : 1; /* cannot return 0 */
 }
 
-struct pp_time_operations posix_time_ops = {
-	.get = posix_time_get,
-	.set = posix_time_set,
-	.adjust = posix_time_adjust,
-	.adjust_offset = posix_time_adjust_offset,
-	.adjust_freq = posix_time_adjust_freq,
-	.calc_timeout = posix_calc_timeout,
+struct pp_time_operations unix_time_ops = {
+	.get = unix_time_get,
+	.set = unix_time_set,
+	.adjust = unix_time_adjust,
+	.adjust_offset = unix_time_adjust_offset,
+	.adjust_freq = unix_time_adjust_freq,
+	.calc_timeout = unix_calc_timeout,
 };
