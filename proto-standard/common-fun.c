@@ -106,8 +106,6 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 int st_com_slave_handle_announce(struct pp_instance *ppi, unsigned char *buf,
 				 int len)
 {
-	MsgHeader *hdr = &ppi->received_ptp_header;
-
 	if (len < PP_ANNOUNCE_LENGTH)
 		return -1;
 
