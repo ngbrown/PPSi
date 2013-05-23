@@ -28,14 +28,17 @@ LIBARCH := $A/libarch.a
 LIBS += -L$A -larch
 
 
-OBJ-libarch := $A/wrpc-socket.o \
+OBJ-libarch := \
 	$A/wrpc-io.o \
-	$A/wrpc-time.o \
 	$A/wrpc-spll.o \
 	$A/wrpc-calibration.o \
 	$A/wrc_ptp_ppsi.o \
 	lib/dump-funcs.o \
 	lib/div64.o
+
+# We only support "wrpc" time operations
+TIME := wrpc
+include time-wrpc/Makefile
 
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^

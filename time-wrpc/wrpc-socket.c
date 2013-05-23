@@ -2,7 +2,6 @@
  * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
  */
 #include <ppsi/ppsi.h>
-#include "wrpc.h"
 #include "ptpdump.h"
 
 #include <ptpd_netif.h> /* wrpc-sw */
