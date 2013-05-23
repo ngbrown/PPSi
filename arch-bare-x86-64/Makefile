@@ -18,15 +18,17 @@ LIBARCH := $A/libarch.a
 
 OBJ-libarch := $L/bare-startup.o \
 	$L/main-loop.o \
-	$L/bare-socket.o \
 	$L/bare-io.o \
-	$L/bare-time.o \
 	$A/syscall.o \
 	$A/syscalls.o \
 	lib/libc-functions.o \
 	lib/dump-funcs.o \
 	lib/cmdline.o \
 	lib/div64.o
+
+# We only support "bare" time operations
+TIME := bare
+include time-bare/Makefile
 
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^
