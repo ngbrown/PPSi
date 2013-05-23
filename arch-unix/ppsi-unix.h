@@ -14,6 +14,3 @@ struct unix_arch_data {
 extern int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms);
 
 extern void unix_main_loop(struct pp_globals *ppg);
-
-extern struct pp_network_operations unix_net_ops;
-extern struct pp_time_operations unix_time_ops;
