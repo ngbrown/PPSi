@@ -18,7 +18,7 @@
 
 #include <ppsi/ppsi.h>
 #include "ptpdump.h"
-#include "ppsi-unix.h"
+#include "../arch-unix/ppsi-unix.h"
 
 /* unix_recv_msg uses recvmsg for timestamp query */
 static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,

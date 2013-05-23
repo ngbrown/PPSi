@@ -53,10 +53,16 @@ ifdef PROTO_EXT
 endif
 include proto-standard/Makefile
 
-# Include arch code
-# we need this -I so <arch/arch.h> can be found
+# We need this -I so <arch/arch.h> can be found
 CFLAGS += -Iarch-$(ARCH)/include
+
+# Include arch code. Each arch chooses its own time directory..
 include arch-$(ARCH)/Makefile
+
+# ...and the TIME choice sets the default operations
+CFLAGS += -DDEFAULT_TIME_OPS=$(TIME)_time_ops
+CFLAGS += -DDEFAULT_NET_OPS=$(TIME)_net_ops
+
 export CFLAGS
 
 # And this is the rule to build our target.o file. The architecture may

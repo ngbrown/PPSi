@@ -10,14 +10,20 @@ LIBARCH := $A/libarch.a
 
 OBJ-libarch := $A/unix-startup.o \
 	$A/main-loop.o \
-	$A/unix-socket.o \
 	$A/unix-io.o \
-	$A/unix-time.o \
 	lib/cmdline.o \
 	lib/conf.o \
 	lib/libc-functions.o \
 	lib/dump-funcs.o \
 	lib/div64.o
+
+# The user can set TIME=, but we pick unix time by default
+TIME ?= unix
+
+include time-$(TIME)/Makefile
+
+# Unix time operations are always included as a fallback
+include time-unix/Makefile
 
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^

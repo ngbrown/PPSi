@@ -110,8 +110,10 @@ int main(int argc, char **argv)
 		/* FIXME set ppi ext enable as defined in its pp_link */
 
 		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
-		ppi->n_ops = &unix_net_ops;
-		ppi->t_ops = &unix_time_ops;
+
+		/* The following default names depend on TIME= at build time */
+		ppi->n_ops = &DEFAULT_NET_OPS;
+		ppi->t_ops = &DEFAULT_TIME_OPS;
 
 		if (!ppi->portDS)
 			exit(__LINE__);
