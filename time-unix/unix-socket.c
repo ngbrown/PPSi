@@ -90,7 +90,7 @@ static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 }
 
 /* Receive and send is *not* so trivial */
-static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
+int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
 	struct pp_channel *ch1, *ch2;
@@ -121,7 +121,7 @@ static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	return ret;
 }
 
-static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
+int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct sockaddr_in addr;
@@ -324,7 +324,7 @@ err_out:
 	return -1;
 }
 
-static int unix_net_exit(struct pp_instance *ppi);
+int unix_net_exit(struct pp_instance *ppi);
 
 /*
  * Inits all the network stuff
@@ -360,7 +360,7 @@ int unix_net_init(struct pp_instance *ppi)
 /*
  * Shutdown all the network stuff
  */
-static int unix_net_exit(struct pp_instance *ppi)
+int unix_net_exit(struct pp_instance *ppi)
 {
 	struct ip_mreq imr;
 	int fd;

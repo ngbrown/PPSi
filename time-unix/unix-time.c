@@ -16,7 +16,7 @@ static void clock_fatal_error(char *context)
 	exit(1);
 }
 
-static int unix_time_get(struct pp_instance *ppi, TimeInternal *t)
+int unix_time_get(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec tp;
 	if (clock_gettime(CLOCK_REALTIME, &tp) < 0)
@@ -79,7 +79,7 @@ int unix_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
 	return unix_time_adjust(ppi, 0, freq_ppm);
 }
 
-static unsigned long unix_calc_timeout(struct pp_instance *ppi, int millisec)
+unsigned long unix_calc_timeout(struct pp_instance *ppi, int millisec)
 {
 	struct timespec now;
 	uint64_t now_ms;

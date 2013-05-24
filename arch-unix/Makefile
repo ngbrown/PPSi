@@ -24,6 +24,7 @@ include time-$(TIME)/Makefile
 
 # Unix time operations are always included as a fallback
 include time-unix/Makefile
+CFLAGS += -Itime-unix
 
 $(LIBARCH): $(OBJ-libarch)
 	$(AR) r $@ $^
