@@ -1,0 +1,6 @@
+
+All documentation is now under the ../doc/ directory.
+
+The input file is called doc/mini-ipc.in (it is readable by itself).
+To have all usual output formats you can run "make" withing ./doc
+but you need TexInfo installed.
