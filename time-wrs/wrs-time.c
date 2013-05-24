@@ -4,23 +4,66 @@
 
 #include <ppsi/ppsi.h>
 #include <unix-time.h>
+#include <minipc.h>
+
+#define HAL_EXPORT_STRUCTURES
+#include <hal_exports.h>
+
+#define DEFAULT_TO 200000 /* ms */
+
+extern struct minipc_ch *hal_ch;
 
 int wrs_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
 {
-	/* FIXME wrs_adjust_counters */
-	return 0;
+	hexp_pps_params_t p;
+	int cmd;
+	int ret, rval;
+
+	if (!adjust_nsec && !adjust_sec)
+		return 0;
+
+	if (adjust_sec && adjust_nsec) {
+		pp_printf("FATAL: trying to adjust both the SEC and the NS"
+			" counters simultaneously. \n");
+		exit(-1);
+	}
+
+	p.adjust_sec = adjust_sec;
+	p.adjust_nsec = adjust_nsec;
+	cmd = (adjust_sec ? HEXP_PPSG_CMD_ADJUST_SEC : HEXP_PPSG_CMD_ADJUST_NSEC);
+
+	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_pps_cmd, &rval, cmd, &p);
+
+	if (ret < 0)
+		return ret;
+
+	return rval;
 }
 
 int wrs_adjust_phase(int32_t phase_ps)
 {
-	/* FIXME wrs_adjust_phase */
-	return 0;
+	hexp_pps_params_t p;
+	int ret, rval;
+	p.adjust_phase_shift = phase_ps;
+
+	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_pps_cmd,
+		&rval, HEXP_PPSG_CMD_ADJUST_PHASE, &p);
+
+	if (ret < 0)
+		return ret;
+
+	return rval;
 }
 
 int wrs_adjust_in_progress(void)
 {
-	/* FIXME wrs_adjust_in_progress */
-	return 0;
+	hexp_pps_params_t p;
+	int ret, rval;
+
+	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_pps_cmd,
+		&rval, HEXP_PPSG_CMD_ADJUST_PHASE, &p);
+
+	return (ret == 0) && rval;
 }
 
 int wrs_enable_ptracker(struct pp_instance *ppi)
