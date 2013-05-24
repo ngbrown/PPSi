@@ -141,6 +141,9 @@ struct pp_network_operations {
 		    TimeInternal *t, int chtype, int use_pdelay_addr);
 };
 
+/* This is the struct pp_network_operations to be provided by time- dir */
+extern struct pp_network_operations DEFAULT_NET_OPS;
+
 /* These can be liked and used as fallback by a different timing engine */
 extern struct pp_network_operations unix_net_ops;
 
@@ -161,6 +164,9 @@ struct pp_time_operations {
 	/* calc_timeout cannot return zero */
 	unsigned long (*calc_timeout)(struct pp_instance *ppi, int millisec);
 };
+
+/* This is the struct pp_time_operations to be provided by time- dir */
+extern struct pp_time_operations DEFAULT_TIME_OPS;
 
 /* These can be liked and used as fallback by a different timing engine */
 extern struct pp_time_operations unix_time_ops;
