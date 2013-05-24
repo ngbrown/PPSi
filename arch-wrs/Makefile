@@ -25,7 +25,14 @@ include time-$(TIME)/Makefile
 # Unix time operations are always included as a fallback
 include time-unix/Makefile
 
-$(LIBARCH): $(OBJ-libarch)
+# mini-rpc directory contains minipc library
+MINIPC_DIR := $A/mini-rpc
+MINIPC_LIB := $(MINIPC_DIR)/libminipc.a
+.PHONY: $(MINIPC_LIB)
+$(MINIPC_LIB):
+	make -C $(MINIPC_DIR)
+
+$(LIBARCH): $(OBJ-libarch) $(MINIPC_LIB)
 	$(AR) r $@ $^
 
 all: $(TARGET)
@@ -34,5 +41,5 @@ all: $(TARGET)
 # were not selected yet (e.g., pp_open_globals() ).
 $(TARGET): $(TARGET).o $(LIBARCH)
 	$(CC) -Wl,-Map,$(TARGET).map2 -o $@ $(TARGET).o \
-		-L$A -larch -L$D -lstd -lrt
+		-L$A -larch -L$D -L$(MINIPC_DIR) -lminipc -lstd -lrt
 
