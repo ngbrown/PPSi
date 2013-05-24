@@ -18,8 +18,8 @@ OBJ-libarch := $A/wrs-startup.o \
 	lib/dump-funcs.o \
 	lib/div64.o
 
-# The user can set TIME=, but we pick unix time by default
-TIME ?= unix
+# The user can set TIME=, but wrs is default
+TIME ?= wrs
 
 include time-$(TIME)/Makefile
 
