@@ -124,6 +124,6 @@ int main(int argc, char **argv)
 
 	pp_open_globals(ppg);
 
-	unix_main_loop(ppg);
+	wrs_main_loop(ppg);
 	return 0; /* never reached */
 }

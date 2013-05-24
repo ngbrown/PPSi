@@ -34,7 +34,7 @@ static int run_all_state_machines(struct pp_globals *ppg)
 	return delay_ms;
 }
 
-void unix_main_loop(struct pp_globals *ppg)
+void wrs_main_loop(struct pp_globals *ppg)
 {
 	struct pp_instance *ppi;
 	int delay_ms;
