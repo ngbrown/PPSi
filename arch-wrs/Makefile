@@ -30,6 +30,7 @@ CFLAGS += -Itime-unix
 # mini-rpc directory contains minipc library
 MINIPC_DIR := $A/mini-rpc
 MINIPC_LIB := $(MINIPC_DIR)/libminipc.a
+CFLAGS += -I$(MINIPC_DIR)
 .PHONY: $(MINIPC_LIB)
 $(MINIPC_LIB):
 	make -C $(MINIPC_DIR)

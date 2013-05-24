@@ -15,6 +15,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <minipc.h>
+#include <hal_exports.h>
 
 #include <ppsi/ppsi.h>
 #include "ppsi-wrs.h"
@@ -24,6 +26,8 @@ CONST_VERBOSITY int pp_diag_verbosity = 0;
 /* FIXME: make MAX_LINKS and conf_path definable at compile time */
 #define MAX_LINKS 32
 #define CONF_PATH "/etc/ppsi.conf"
+
+struct minipc_ch *hal_ch;
 
 int main(int argc, char **argv)
 {
@@ -36,6 +40,10 @@ int main(int argc, char **argv)
 	int conf_len = 0;
 
 	setbuf(stdout, NULL);
+
+	hal_ch = minipc_client_create(WRSW_HAL_SERVER_ADDR, MINIPC_FLAG_VERBOSE);
+	if (!hal_ch) /* FIXME should we retry with minipc_client_create? */
+		pp_printf("Fatal: could not connect to HAL");
 
 	/* We are hosted, so we can allocate */
 	ppg = calloc(1, sizeof(*ppg));
