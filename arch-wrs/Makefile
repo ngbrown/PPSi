@@ -11,6 +11,7 @@ LIBARCH := $A/libarch.a
 OBJ-libarch := $A/wrs-startup.o \
 	$A/main-loop.o \
 	$A/wrs-io.o \
+	$A/wrs-calibration.o \
 	lib/cmdline.o \
 	lib/conf.o \
 	lib/libc-functions.o \
