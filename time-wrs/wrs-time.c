@@ -70,32 +70,65 @@ int wrs_adjust_in_progress(void)
 
 int wrs_enable_ptracker(struct pp_instance *ppi)
 {
-	/* FIXME wrs_enable_ptracker */
-	return 0;
+	int ret, rval;
+
+	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_lock_cmd,
+			  &rval, ppi->iface_name, HEXP_LOCK_CMD_ENABLE_TRACKING, 0);
+
+	if ((ret < 0) || (rval < 0))
+		return WR_SPLL_ERROR;
+
+	return WR_SPLL_OK;
 }
 
 int wrs_enable_timing_output(struct pp_instance *ppi, int enable)
 {
-	/* FIXME wrs_enable_timing_output */
-	return 0;
+	int ret, rval;
+
+	hexp_pps_params_t p;
+
+	p.pps_valid = enable;
+
+	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_pps_cmd,
+			&rval, HEXP_PPSG_CMD_SET_VALID, &p);
+
+	if ((ret < 0) || (rval < 0))
+		return WR_SPLL_ERROR;
+
+	return WR_SPLL_OK;
 }
 
 int wrs_locking_disable(struct pp_instance *ppi)
 {
-	/* FIXME wrs_locking_disable */
-	return 0;
+	return WR_SPLL_OK;
 }
 
 int wrs_locking_enable(struct pp_instance *ppi)
 {
-	/* FIXME wrs_locking_enable */
-	return 0;
+	int ret, rval;
+
+	pp_diag(ppi, time, 1, "Start locking\n");
+
+	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_lock_cmd,
+			  &rval, ppi->iface_name, HEXP_LOCK_CMD_START, 0);
+
+	if ((ret < 0) || (rval < 0))
+		return WR_SPLL_ERROR;
+
+	return WR_SPLL_OK;
 }
 
 int wrs_locking_poll(struct pp_instance *ppi)
 {
-	/* FIXME wrs_locking_poll */
-	return 0;
+	int ret, rval;
+
+	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_lock_cmd,
+			  &rval, ppi->iface_name, HEXP_LOCK_CMD_START, 0);
+
+	if (ret != HEXP_LOCK_STATUS_LOCKED)
+		return WR_SPLL_ERROR; /* FIXME should be WR_SPLL_NOT_READY */
+
+	return WR_SPLL_READY;
 }
 
 int wr_locking_enable(struct pp_instance *ppi)
