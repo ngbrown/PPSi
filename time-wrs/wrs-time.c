@@ -4,14 +4,16 @@
 
 #include <ppsi/ppsi.h>
 #include <unix-time.h>
-#include <minipc.h>
+#include "../arch-wrs/ppsi-wrs.h"	/* FIXME include path: move ppsi-wrs.h into
+									* arch-wrs/include ? */
 
-#define HAL_EXPORT_STRUCTURES
 #include <hal_exports.h>
-
-#define DEFAULT_TO 200000 /* ms */
-
-extern struct minipc_ch *hal_ch;
+/* FIXME: these externs are needed here because we can not include
+ * hal_exports.h with HAL_EXPORT_STRUCTURES twice (the first is by
+ * arch-wrs/wrs-calibration.c): structs are declared and
+ * defined in .h file, so this would lead to a multiple definition. */
+extern struct minipc_pd __rpcdef_pps_cmd;
+extern struct minipc_pd __rpcdef_lock_cmd;
 
 int wrs_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
 {

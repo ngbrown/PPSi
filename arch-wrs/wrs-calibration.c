@@ -4,6 +4,11 @@
 
 #include <ppsi/ppsi.h>
 
+#include "ppsi-wrs.h"
+
+#define HAL_EXPORT_STRUCTURES
+#include <hal_exports.h>
+
 static int wrs_read_calibration_data(struct pp_instance *ppi,
   uint32_t *deltaTx, uint32_t *deltaRx, int32_t *fix_alpha,
   int32_t *clock_period)
