@@ -11,7 +11,7 @@
 #include <linux/if_ether.h>
 
 #include <ppsi/ppsi.h>
-#include "ppsi-wrs.h"
+#include <ppsi-wrs.h>
 
 /* Call pp_state_machine for each instance. To be called periodically,
  * when no packets are incoming */

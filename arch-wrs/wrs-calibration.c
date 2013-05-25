@@ -4,7 +4,7 @@
 
 #include <ppsi/ppsi.h>
 
-#include "ppsi-wrs.h"
+#include <ppsi-wrs.h>
 
 #define HAL_EXPORT_STRUCTURES
 #include <hal_exports.h>

@@ -4,8 +4,7 @@
 
 #include <ppsi/ppsi.h>
 #include <unix-time.h>
-#include "../arch-wrs/ppsi-wrs.h"	/* FIXME include path: move ppsi-wrs.h into
-									* arch-wrs/include ? */
+#include <ppsi-wrs.h>
 
 #include <hal_exports.h>
 /* FIXME: these externs are needed here because we can not include

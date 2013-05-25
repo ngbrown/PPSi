@@ -19,7 +19,7 @@
 #include <hal_exports.h>
 
 #include <ppsi/ppsi.h>
-#include "ppsi-wrs.h"
+#include <ppsi-wrs.h>
 
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
