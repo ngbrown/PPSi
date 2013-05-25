@@ -3,7 +3,7 @@
  */
 
 /*
- * These are the functions provided by the various unix files
+ * These are the functions provided by the various wrs files
  */
 
 #define POSIX_ARCH(ppg) ((struct unix_arch_data *)(ppg->arch_data))
