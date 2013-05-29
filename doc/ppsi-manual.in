@@ -35,7 +35,7 @@
 
 @setchapternewpage off
 
-@set update-month March 2013
+@set update-month May 2013
 
 @finalout
 
@@ -110,13 +110,13 @@ The home page of the PPSi project and the source repository are:
 @node Status Features and Bugs
 @chapter Status, Features, Bugs
 
-This document, written in March 2013, tries to summarize the status of
-the project, but this month we are working a lot on the package,
+This document tries to summarize the status of
+the project, but we are working a lot on the package,
 so information here may be slightly out of date with respect to code.
 
-The software package is designed to be modular: both architectures
-and protocols can be replaced by providing a proper subdirectory. This
-will soon apply to time-related functionality as well.
+The software package is designed to be modular: each of architectures,
+protocols and timing engine
+ can be replaced by providing a proper subdirectory.
 
 @c ==========================================================================
 @node Architectures
@@ -141,20 +141,36 @@ The package currently supports the following architectures:
         likely works on @sc{bsd} and other variants as well. We may
         change naming accordingly, after identifying the weak
         (i.e. unportable) points.  This architecture supports the standard
-        protocol on both @sc{udp} and raw Ethernet (but currently not both
-        at the same time).
+        protocol on both @sc{udp} and raw Ethernet, also both at the
+        same time thanks to the per-link split of I/O methods.
+        The architecture relies on @i{time-unix}, but it supports
+        building with different time engines.
+
+@item wrs
+
+	The White Rabbit switch build of PPSi is designed to be a
+        separate architecture, even if the switch itself is a Linux
+        system running on an ARM processor.  The switch is a complex
+        system, with several daemons cooperating through an IPC
+        mechanism: the standard main loop for a standalone Unix daemon
+        doesn't apply to the WR switch, and modelling it as a
+        separate architecture is the simplest and cleanest approach,
+        in our opinion (even if it leads to some code duplication).
+        The architectures relies on @i{time-wrs}.   
 
 @item wrpc
 
 	The @i{White Rabbit PTP Core} architecture is a port of PPSi to
         run on our I/O devices. The @i{wrpc} is a ``@i{core}'', i.e. a
-        logic block, that runs in WR-capable I/O cards; most such cards
-        are developed as open hardware on @i{ohwr.org}.
-        @i{wrpc} includes a soft-core
+        logic block, that runs in WR-capable I/O cards. Most such cards
+        are developed as open hardware on @i{ohwr.org}; examples are
+        the @sc{spec} (a PCIe carrier for FMC devices) and the @sc{svec}
+        (a VME carrier, with two FMC slots driver by the same WR core).
+        The @i{wrpc} includes a soft-core
         @sc{cpu} that runs the @sc{wr-ptp} daemon.  PPSi is designed to
         be able to be linked from @i{wrpc-sw} as its own @i{wr-ptp}
         engine. PPSi in this environment currently supports only raw
-        Ethernet, not @sc{udp}.
+        Ethernet, not @sc{udp}.  The architecture uses @i{time-wrpc}.
 
 @item bare-i386
 
@@ -172,7 +188,8 @@ The package currently supports the following architectures:
 
 	Like @i{bare-i386}, this architectures makes direct system calls
         without relying on external libraries. The host in this case is
-        the a 64-bit PC instead of a 32-bit one.
+        the a 64-bit PC instead of a 32-bit one. Both bare ports use
+        @i{time-bare} for their timing operations.
 
 @end table
 
@@ -190,12 +207,13 @@ selected by setting @t{PROTO_EXT=whiterabbit}, but there's nothing that
 prevents our fellow developers to support their own @i{ptp} extension
 using PPSi.
 
-Each directory lives in a subdirectory called @t{proto-ext-}@i{name}.
+Each extension lives in a subdirectory called @t{proto-ext-}@i{name}.
 Source files in that directory may override the implementation for the
 standard protocol (which lives in @t{proto-standard}) to provide their
-own functionalities.  To simplify extensions, the @i{proto-standard}
-functions already provide @i{hooks} for extensions to provide
-callbacks.  The set of callbacks is currently based on the needs of
+own functionalities.  To simplify writing extensions, the @i{proto-standard}
+functions already provide @i{hooks} so the extension itself can provide
+callbacks while still using the basic PTP engine.
+The set of callbacks is currently based on the needs of
 WR, but we are willing to accept patches to provide more hooks as
 needed.
 
@@ -206,15 +224,31 @@ refer to how @i{proto-ext-whiterabbit} is implemented.
 @node Time Functions and Network Operations
 @section Time Functions and Network Operations
 
-The current code base uses data structures to collect in a single
-entry point all functions related to the time and all functions
-related to the network.
+PPSi supports custom implementations of time functions, so you can
+easily port the daemon to your own timing primitives.
 
-While we still miss @t{time-} and @t{net-} directories to split off
-specific implementations, the code is designed to allow such a split
-at a later time.  For example, the Linux-specific way to interface
-with hardware-timestamping in network cards can be implemented as a
-separate @i{time} module.
+The subdirectories named @i{time-sth} are used to implement timing
+functions; timing includes the methods that are part of two data
+structures: @i{pp_time_operations} and @i{pp_network_operations}.  The
+former structure deals with getting and setting system time, while the
+latter deals with frame tx and rx. Network operations are concerned
+with timestamping the actual I/O, and that's why they are considered
+part of the ``timing'' of PPSi.
+
+Each architecture defines its own @t{TIME=} choice in the specific
+@t{Makefile}.  The user can override the default by either setting the
+variable on the command line of PPSi, or by setting an environment
+variable if the architecture supports it.  For example, the @i{bare}
+architectures force @t{TIME=bare}, while the @i{unix} architecture
+suggests Unix timing code (@t{TIME?=unix}).
+
+If you want to support a different timing engine within the Unix build
+system, you can use ``@t{make TIME=xyz}'' to request building
+the@u{time-xyz} subdirectory.  Please note that the Unix time
+structures are built anyways, so you can piggy-back on those
+functions, either within your own methods or by replacing the
+@t{ppi->t_ops} and @t{ppi->n_ops} for the communications links that do
+not include your own hardware support.
 
 @c ==========================================================================
 @node Features
@@ -243,13 +277,15 @@ unfair to hide them.
 @item Support both hosted and freestanding environments.
 
 	This is already supported, though we still lack a microcontroller
-        implementation.
+        implementation, and our only freestanding environment is @i{wrpc},
+        running on an LM32 processor.
 
 @item Support multi-link operation.
 
-	This is being worked on during March 2013. We currently only
-        run a single link as either master or slave (using the Best Master
-        Clock protocol to select the master).
+	The daemon manages several links at the same time, being master
+        slave or auto-detect independently on each link.
+        The @i{best master clock} algorithm is run globally,
+        but communication and timeouts are managed per-link.
 
 @item Support both @sc{udp} and raw Ethernet.
 
@@ -261,16 +297,15 @@ unfair to hide them.
 
 @item Support fall-back master links.
 
-	This is needed for WR, but it depends on multi-link operation.
+	This is needed for WR, and is being worked on.
         We need to track more than one master in order to switch over
         from one to the other within a few milliseconds and with no
         time glitches.
 
-@item Support hardware timestamping when available.
+@item Support hardware timestamping where available.
 
-	This is not yet implemented for the generic protocol.
-        @i{arch-wrpc} supports hardware timestamping but that's
-        a special case because WR requires its own special hardware.
+	This is not yet implemented for the generic protocol, but we
+        plan to add at least @i{time-linux-tstamp} soon.
 
 @item Support @sc{bsd} specifics.
 
@@ -304,15 +339,11 @@ unfair to hide them.
 @node Bugs
 @section Bugs
 
-As of 2013-03-11 the following known bugs are being worked on:
+As of 2013-05 the project suffers from these known bugs:
 
 @itemize
-@item @i{adjtimex} is not invoked properly on the host. The daemon
-      fixes the slave time when it is off by more than one second by
-      jumping to the proper value, but the smooth adjustment for errors
-      smaller than one second is not currently working.
 @item All frames must be sent according to a pseudo-random distribution;
-      this is not completely verified.
+      this is mostly in place but mut be audited project-wide.
 @item We removed @i{peer-delay} support. Maybe this is a feature, we
       are still shaping our mind about that, but for the time being we
       don't plan to support peer-delay because it would be academic and
@@ -396,26 +427,9 @@ commented.
 We introduced the diagnostic macros described above at the beginning
 of March 2013.  Earlier code used a less-structured approach, which is
 still used in parts of the code and is being slowly phased away.
-
-The older conventions are implemented in the initial par of
-@t{<ppsi/diag-macros.h>}.  Here we have a global @t{pp_diag_verbosity}
-flag, which is incremented by each ``@t{-V}'' flag on the command line,
-and two macros: @t{PP_PRINTF} and @t{PP_VPRINTF}.  The former becomes
-a @i{pp_printf} call if the global verbosity is greater than zero
-and the latter is turned into a message if the global verbosity
-is bigger than 1.
-
-Moreover, you can build the code without all such diagnostic code by
-setting @t{CONFIG_PPSI_VERBOSITY} to zero.  Again, this was meant to
-shrink the resulting binary file, and we really had size issues with
-@i{arch-wrpc}, before a code cleanup that finally solved the problem
-for us.
-
-Finally, PPSi up to 2013-01 had no diagnostics by default and used the
-environment variables @t{HAS_DIAG} and @t{HAS_FULL_DIAG}. They are not
-used any more and the Makefile warns about them, to ease previous
-users.
-
+As of May 2013 we still have a pair of uses of @t{PP_PRINTF},
+but we'll kill them soon.  To help our users not add such calls,
+we are not documenting it any more.
 
 @c ==========================================================================
 @node Printf
@@ -714,20 +728,23 @@ without the complete source code and associated rights. You may avoid
 the GPL requirements by using different printf implementations; if so
 we'd love to have them contributed back in the package.
 
-For binaries without diagnostic code, the LGPL applies, as detailed
-below.
+The same issue about the GPL license applies to the @i{div64_32}
+function.  We need this implementation in our @i{wrpc} code base
+because the default @i{libgcc} division is very big, and we are always
+tight with our in-FPGA memory space.
+
+For binaries without diagnostic code and the size-optimized division,
+the LGPL applies, as detailed below.
 
 For licensing purposes, any `arch-name' or `time-name' subdirectory
 "can be reasonably considered independent and separate works in
-themselves". While code in the directories provided here is all LGPL,
+themselves" (quoting the LPGL text).
+
+Code in the directories provided here is all LGPL, and
 you may add your own drop-in subdirectories. The LGPL requirements for
 source distribution and associated permissions won't apply to any such
-subdirectory that you may add, even if technically such code si not
+subdirectory that you may add, even if technically such code is not
 linked as a library.
-
-Currently, there is no `time-' support, it will be added in a way
-similar to what you already see for `arch-'.
-
 
 @c ##########################################################################
 @node Coding Style and Conventions

@@ -3,7 +3,6 @@
  * (Mostly code by Tomasz Wlostowski in wrpc-sw)
  */
 #include <ppsi/ppsi.h>
-#include "wrpc.h"
 #include "pps_gen.h" /* in wrpc-sw */
 #include "syscon.h" /* in wrpc-sw */
 

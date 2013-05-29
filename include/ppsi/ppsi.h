@@ -141,6 +141,9 @@ struct pp_network_operations {
 		    TimeInternal *t, int chtype, int use_pdelay_addr);
 };
 
+/* These can be liked and used as fallback by a different timing engine */
+extern struct pp_network_operations unix_net_ops;
+
 
 /*
  * Time operations, like network operations above, are encapsulated.
@@ -158,6 +161,10 @@ struct pp_time_operations {
 	/* calc_timeout cannot return zero */
 	unsigned long (*calc_timeout)(struct pp_instance *ppi, int millisec);
 };
+
+/* These can be liked and used as fallback by a different timing engine */
+extern struct pp_time_operations unix_time_ops;
+
 
 /* FIXME this define is no more used; check whether it should be
  * introduced again */
