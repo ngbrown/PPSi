@@ -21,10 +21,37 @@ static int wr_init(struct pp_instance *ppi, unsigned char *pkt, int plen)
 static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 {
 	static struct wr_data_t wr_data; /* WR-specific global data */
+	int i;
 
-	/* FIXME handle more ports */
-	ppg->pp_instances[0].iface_name = "wr1";
-	ppg->pp_instances[0].ext_data = &wr_data;
+	/* FIXME: used by arch-wrpc only; iface_name should be assigned
+	 * in main in every arch*/
+	if ((ppg->nlinks == 1) && (!ppg->pp_instances[0].iface_name))
+		ppg->pp_instances[0].iface_name = "wr1";
+
+	for (i = 0; i < ppg->nlinks; i++) {
+		struct pp_link *lnk = &ppg->links[i];
+		struct pp_instance *ppi = &ppg->pp_instances[i];
+
+		/* FIXME check if correct: assign to each instance the same
+		 * wr_data. May I move it to pp_globals? */
+		ppg->pp_instances[i].ext_data = &wr_data;
+
+		if (lnk->ext) {
+			switch (lnk->role) {
+				case 1:
+					WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
+					break;
+				case 2:
+					WR_DSPOR(ppi)->wrConfig = WR_S_ONLY;
+					break;
+				default:
+					WR_DSPOR(ppi)->wrConfig = WR_M_AND_S;
+			}
+		}
+		else
+			WR_DSPOR(ppi)->wrConfig = NON_WR;
+	}
+
 	return 0;
 }
 

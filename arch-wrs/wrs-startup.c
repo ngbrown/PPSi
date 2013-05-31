@@ -20,6 +20,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi-wrs.h>
+#include "../proto-ext-whiterabbit/wr-api.h"
 
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
@@ -115,16 +116,18 @@ int main(int argc, char **argv)
 			ppi->slave_only = 1;
 		}
 
-		/* FIXME set ppi ext enable as defined in its pp_link */
-
 		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
+		if (!ppi->portDS)
+			exit(__LINE__);
+
+		ppi->portDS->ext_dsport = calloc(1, sizeof(struct wr_dsport));
+		if (!ppi->portDS->ext_dsport)
+			exit(__LINE__);
 
 		/* The following default names depend on TIME= at build time */
 		ppi->n_ops = &DEFAULT_NET_OPS;
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 
-		if (!ppi->portDS)
-			exit(__LINE__);
 	}
 
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
