@@ -46,18 +46,18 @@ pp_printf/pp-printf.o: $(wildcard pp_printf/*.[ch])
 	$(MAKE) -C pp_printf pp-printf.o
 endif
 
+# We need this -I so <arch/arch.h> can be found
+CFLAGS += -Iarch-$(ARCH)/include
+
+# Include arch code. Each arch chooses its own time directory..
+include arch-$(ARCH)/Makefile
+
 # proto-standard is always included, as it provides default function
 # so the extension can avoid duplication of code.
 ifdef PROTO_EXT
   include proto-ext-$(PROTO_EXT)/Makefile
 endif
 include proto-standard/Makefile
-
-# We need this -I so <arch/arch.h> can be found
-CFLAGS += -Iarch-$(ARCH)/include
-
-# Include arch code. Each arch chooses its own time directory..
-include arch-$(ARCH)/Makefile
 
 # ...and the TIME choice sets the default operations
 CFLAGS += -DDEFAULT_TIME_OPS=$(TIME)_time_ops
@@ -73,7 +73,7 @@ export CFLAGS
 # libraries: see proto-standard/Makefile as an example.
 
 $(TARGET).o: $(OBJ-y)
-	$(LD) -Map $(TARGET).map1 -r -o $@ $(OBJ-y) $(LIBS)
+	$(LD) -Map $(TARGET).map1 -r -o $@ $(OBJ-y) --start-group $(LIBS) --end-group
 
 # Finally, "make clean" is expected to work
 clean:
