@@ -29,6 +29,7 @@ CONST_VERBOSITY int pp_diag_verbosity = 0;
 #define CONF_PATH "/etc/ppsi.conf"
 
 struct minipc_ch *hal_ch;
+struct minipc_ch *ppsi_ch;
 
 int main(int argc, char **argv)
 {
@@ -45,6 +46,12 @@ int main(int argc, char **argv)
 	hal_ch = minipc_client_create(WRSW_HAL_SERVER_ADDR, MINIPC_FLAG_VERBOSE);
 	if (!hal_ch) /* FIXME should we retry with minipc_client_create? */
 		pp_printf("Fatal: could not connect to HAL");
+
+	ppsi_ch = minipc_server_create("ptpd", 0);
+	if (!ppsi_ch) /* FIXME should we retry with minipc_server_create? */
+		pp_printf("Fatal: could not create minipc server");
+
+	wrs_init_ipcserver(ppsi_ch);
 
 	/* We are hosted, so we can allocate */
 	ppg = calloc(1, sizeof(*ppg));

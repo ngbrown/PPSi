@@ -12,6 +12,7 @@ OBJ-libarch := $A/wrs-startup.o \
 	$A/main-loop.o \
 	$A/wrs-io.o \
 	$A/wrs-calibration.o \
+	$A/wrs-ipcserver.o \
 	lib/cmdline.o \
 	lib/conf.o \
 	lib/libc-functions.o \

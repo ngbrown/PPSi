@@ -65,6 +65,8 @@ void wrs_main_loop(struct pp_globals *ppg)
 	while (1) {
 		int i;
 
+		minipc_server_action(ppsi_ch, 10 /* ms */);
+
 		if (ppg->ebest_updated) {
 			/* If Ebest was changed in previous loop, run best master
 			 * clock before checking for new packets, which would affect
