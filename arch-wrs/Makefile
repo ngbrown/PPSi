@@ -20,12 +20,13 @@ OBJ-libarch := $A/wrs-startup.o \
 
 # The user can set TIME=, but wrs is default
 TIME ?= wrs
+PROTO_EXT = whiterabbit
 
 include time-$(TIME)/Makefile
 
 # Unix time operations are always included as a fallback
 include time-unix/Makefile
-CFLAGS += -Itime-unix
+CFLAGS += -Itime-unix -Iproto-ext-whiterabbit
 
 # mini-rpc directory contains minipc library
 MINIPC_DIR := $A/mini-rpc
