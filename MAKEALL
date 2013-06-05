@@ -46,21 +46,24 @@ PREFIX_unix=""
 PREFIX_bare_i386=""
 PREFIX_bare_x86_64=""
 PREFIX_wrpc="/opt/gcc-lm32/bin/lm32-elf-"
+PREFIX_wrs="/opt/arm-wrswitch/bin/arm-linux-"
 
 CC_unix="gcc"
 CC_bare_i386="gcc -m32"
 CC_bare_x86_64="gcc -m64"
 CC_wrpc="${PREFIX_wrpc}gcc"
+CC_wrs="${PREFIX_wrs}gcc"
 
 LD_unix="ld"
 LD_bare_i386="ld -m elf_i386"
 LD_bare_x86_64="ld -m elf_x86_64"
 LD_wrpc="${PREFIX_wrpc}ld"
+LD_wrs="${PREFIX_wrs}ld"
 
 # Defaults, overridden by command line, later
 SHOW_UNDEF=false
 
-ARCHS="unix bare-i386 bare-x86-64"
+ARCHS="unix bare-i386 bare-x86-64 wrs"
 if [ "x${WRPCSW_ROOT}" != "x" ]; then
     ARCHS="$ARCHS wrpc"
 fi
@@ -80,6 +83,8 @@ while [ $# -gt 0 ]; do
 	    ARCHS="$1";;
 	bare)
 	    ARCHS="bare-i386 bare-x86-64";;
+	wrs)
+		ARCHS="$1";;
 	*=*)
 	    eval export $1;;
 	-u)
