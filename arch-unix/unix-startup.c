@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	}
 	else {
 		int r = 0, next_r;
-		conf_buf = calloc(1, conf_fs.st_size) + 1;
+		conf_buf = calloc(1, conf_fs.st_size + 1);
 
 		do {
 			next_r = conf_fs.st_size - r;
