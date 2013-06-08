@@ -25,7 +25,7 @@ static int run_all_state_machines(struct pp_globals *ppg)
 		delay_ms_j = pp_state_machine(ppi, NULL, 0);
 
 		/* delay_ms is the least delay_ms among all instances */
-		if (delay_ms == 0)
+		if (j == 0)
 			delay_ms = delay_ms_j;
 		else
 			delay_ms = delay_ms_j < delay_ms ? delay_ms_j : delay_ms;
