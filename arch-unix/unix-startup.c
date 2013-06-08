@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 		conf_buf = calloc(1, conf_fs.st_size + 1);
 
 		do {
-			next_r = conf_fs.st_size - r;
+			next_r = conf_fs.st_size - conf_len;
 			r = read(conf_fd, &conf_buf[conf_len], next_r);
 			if (r <= 0)
 				break;
