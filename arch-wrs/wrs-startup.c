@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 	}
 	else {
 		int r = 0, next_r;
-		conf_buf = calloc(1, conf_fs.st_size + 1);
+		conf_buf = calloc(1, conf_fs.st_size + 2);
 
 		do {
 			next_r = conf_fs.st_size - conf_len;
@@ -84,6 +84,8 @@ int main(int argc, char **argv)
 
 		close(conf_fd);
 	}
+
+	conf_buf[conf_len + 1] = '\n';
 
 	ppg->rt_opts = &default_rt_opts;
 
