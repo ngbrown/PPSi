@@ -72,6 +72,6 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	return 0;
 
 failure:
-	ppi->next_state = PPS_FAULTY;
-	return ret;
+	ppi->next_delay = 1000; /* wait 1s before retrying */
+	return 0;
 }
