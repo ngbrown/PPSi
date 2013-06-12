@@ -35,7 +35,7 @@ MINIPC_LIB := $(MINIPC_DIR)/libminipc.a
 CFLAGS += -I$(MINIPC_DIR)
 .PHONY: $(MINIPC_LIB)
 $(MINIPC_LIB):
-	make -C $(MINIPC_DIR)
+	$(MAKE) -C $(MINIPC_DIR)
 
 $(LIBARCH): $(OBJ-libarch) $(MINIPC_LIB)
 	$(AR) r $@ $^
