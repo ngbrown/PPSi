@@ -68,10 +68,10 @@ int main(int argc, char **argv)
 	conf_fd = open(CONF_PATH, O_RDONLY);
 
 	if ((stat(CONF_PATH, &conf_fs) < 0) || (conf_fd < 0)) {
-		pp_printf("Warning: could not open %s, using one-link "
+		pp_printf("Warning: could not open %s, using wr0 only "
 			  "built-in config\n", CONF_PATH);
-		conf_buf = "link 0\niface eth0";
-		conf_len = strlen(conf_buf);
+		conf_buf = "link 0\niface wr0\n";
+		conf_len = strlen(conf_buf) - 1;
 	} else {
 		int r = 0, next_r;
 		conf_buf = calloc(1, conf_fs.st_size + 2);
