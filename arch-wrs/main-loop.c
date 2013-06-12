@@ -3,7 +3,8 @@
  */
 
 /*
- * This is the main loop for unix stuff.
+ * This is the main loop for the wr-switch architecture. It's amost
+ * the same as the unix main loop, but we must serve RPC calls too
  */
 #include <stdlib.h>
 #include <errno.h>
