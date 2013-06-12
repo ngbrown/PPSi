@@ -27,8 +27,8 @@ static int run_all_state_machines(struct pp_globals *ppg)
 		/* delay_ms is the least delay_ms among all instances */
 		if (j == 0)
 			delay_ms = delay_ms_j;
-		else
-			delay_ms = delay_ms_j < delay_ms ? delay_ms_j : delay_ms;
+		if (delay_ms_j < delay_ms)
+			delay_ms = delay_ms_j;
 	}
 
 	return delay_ms;
@@ -65,10 +65,12 @@ void unix_main_loop(struct pp_globals *ppg)
 	while (1) {
 		int i;
 
+		/*
+		 * If Ebest was changed in previous loop, run best
+		 * master clock before checking for new packets, which
+		 * would affect port state again
+		 */
 		if (ppg->ebest_updated) {
-			/* If Ebest was changed in previous loop, run best master
-			 * clock before checking for new packets, which would affect
-			 * port state again */
 			for (j = 0; j < ppg->nlinks; j++) {
 				int new_state;
 				struct pp_instance *ppi = &ppg->pp_instances[j];
@@ -101,18 +103,19 @@ void unix_main_loop(struct pp_globals *ppg)
 			ppi = &ppg->pp_instances[j];
 
 			if ((NP(ppi)->ch[PP_NP_GEN].pkt_present) ||
-				(NP(ppi)->ch[PP_NP_EVT].pkt_present)) {
-
-				/* We got some packets. If not ours, go on to the next ppi */
+			    (NP(ppi)->ch[PP_NP_EVT].pkt_present)) {
 
 				i = ppi->n_ops->recv(ppi, ppi->rx_frame,
 						PP_MAX_FRAME_LENGTH - 4,
 						&ppi->last_rcv_time);
 
-				ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
+				ppi->last_rcv_time.seconds
+					+= DSPRO(ppi)->currentUtcOffset;
 
 				if (i < PP_MINIMUM_LENGTH) {
-					pp_diag(ppi, frames, 1, "Error or short packet: %d < %d\n", i,
+					pp_diag(ppi, frames, 1,
+						"Error or short frame: "
+						"%d < %d\n", i,
 						PP_MINIMUM_LENGTH
 					);
 					continue;
