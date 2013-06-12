@@ -29,10 +29,10 @@ int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
-	int i = 0, ret;
+	int i, ret;
 	struct stat conf_fs;
 	char *conf_buf;
-	int conf_fd;
+	FILE *f;
 	int conf_len = 0;
 
 	setbuf(stdout, NULL);
@@ -45,36 +45,27 @@ int main(int argc, char **argv)
 	ppg->max_links = MAX_LINKS;
 	ppg->links = calloc(ppg->max_links, sizeof(struct pp_link));
 
-	conf_fd = open(CONF_PATH, O_RDONLY);
+	f = fopen(CONF_PATH, "r");
 
-	if ((stat(CONF_PATH, &conf_fs) < 0) ||
-	    (conf_fd < 0)) {
-		pp_printf("Warning: could not open %s, default to one-link built-in "
-					"config\n", CONF_PATH);
-		conf_buf = "link 0\niface eth0";
+	if (!f || stat(CONF_PATH, &conf_fs) < 0) {
+		fprintf(stderr, "%s: Warning: %s: %s -- default to eth0 only\n",
+			argv[0], CONF_PATH, strerror(errno));
+		conf_buf = "link 0\niface eth0\n";
 		conf_len = strlen(conf_buf);
+	} else {
+		/* The parser needs a trailing newline, add one to be sure */
+		conf_len = conf_fs.st_size + 1;
+		conf_buf = calloc(1, conf_len + 1); /* trailing \0 */
+		i = fread(conf_buf, 1, conf_len, f);
+		if (i > 0) conf_buf[i] = '\n';
+		fclose(f);
 	}
-	else {
-		int r = 0, next_r;
-		conf_buf = calloc(1, conf_fs.st_size + 2);
-
-		do {
-			next_r = conf_fs.st_size - conf_len;
-			r = read(conf_fd, &conf_buf[conf_len], next_r);
-			if (r <= 0)
-				break;
-			conf_len = strlen(conf_buf);
-		} while (conf_len < conf_fs.st_size);
-
-		close(conf_fd);
-	}
-
-	conf_buf[conf_len + 1] = '\n';
 
 	ppg->rt_opts = &default_rt_opts;
 
 	if ((ret = pp_parse_conf(ppg, conf_buf, conf_len)) < 0) {
-		pp_printf("Fatal: Error in %s file at line %d\n", CONF_PATH, -ret);
+		fprintf(stderr, "%s: %s:%d: parse error\n", argv[0],
+			CONF_PATH, -ret);
 		exit(__LINE__);
 	}
 
@@ -92,7 +83,7 @@ int main(int argc, char **argv)
 
 	ppg->servo = calloc(1, sizeof(*ppg->servo));
 
-	for (; i < ppg->nlinks; i++) {
+	for (i = 0; i < ppg->nlinks; i++) {
 
 		struct pp_link *lnk = &ppg->links[i];
 
