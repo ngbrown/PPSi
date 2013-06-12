@@ -43,14 +43,18 @@ int main(int argc, char **argv)
 
 	setbuf(stdout, NULL);
 
-	hal_ch = minipc_client_create(WRSW_HAL_SERVER_ADDR, MINIPC_FLAG_VERBOSE);
-	if (!hal_ch) /* FIXME should we retry with minipc_client_create? */
+	hal_ch = minipc_client_create(WRSW_HAL_SERVER_ADDR,
+				      MINIPC_FLAG_VERBOSE);
+	if (!hal_ch) { /* FIXME should we retry with minipc_client_create? */
 		pp_printf("Fatal: could not connect to HAL");
+		exit(__LINE__);
+	}
 
 	ppsi_ch = minipc_server_create("ptpd", 0);
-	if (!ppsi_ch) /* FIXME should we retry with minipc_server_create? */
+	if (!ppsi_ch) { /* FIXME should we retry with minipc_server_create? */
 		pp_printf("Fatal: could not create minipc server");
-
+		exit(__LINE__);
+	}
 	wrs_init_ipcserver(ppsi_ch);
 
 	/* We are hosted, so we can allocate */
