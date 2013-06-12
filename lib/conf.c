@@ -41,8 +41,8 @@ static struct keyword_t keywords[KW_NUMBER] = {
 static int detect_keyword(char *kw)
 {
 	int i;
-	for (i = KW_LINK; i < KW_NUMBER; i++)
-		if (memcmp(keywords[i].key, kw, strnlen(kw, 16)) == 0)
+	for (i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++)
+		if (!strcmp(keywords[i].key, kw))
 			return i;
 	return KW_INV;
 }
