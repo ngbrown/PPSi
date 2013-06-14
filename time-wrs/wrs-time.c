@@ -3,7 +3,6 @@
  */
 
 #include <ppsi/ppsi.h>
-#include <unix-time.h>
 #include <ppsi-wrs.h>
 
 #include <hal_exports.h>
@@ -154,11 +153,52 @@ int wr_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
 int wr_adjust_phase(int32_t phase_ps)
 	__attribute__((alias("wrs_adjust_phase")));
 
+/*
+ * WRS time operations fall back on unix time operations, for some things
+ */
+
+static int wrs_time_get(struct pp_instance *ppi, TimeInternal *t)
+{
+	/* FIXME */
+	return unix_time_ops.get(ppi, t);
+}
+
+static int32_t wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
+{
+	/* FIXME */
+	return unix_time_ops.set(ppi, t);
+}
+
+static int wrs_time_adjust(struct pp_instance *ppi, long offset_ns,
+			   long freq_ppm)
+{
+	/* FIXME */
+	return unix_time_ops.adjust(ppi, offset_ns, freq_ppm);
+}
+
+static int wrs_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
+{
+	/* FIXME */
+	return unix_time_ops.adjust_offset(ppi, offset_ns);
+}
+
+static int wrs_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
+{
+	/* FIXME */
+	return unix_time_ops.adjust_freq(ppi, freq_ppm);
+}
+
+static unsigned long wrs_calc_timeout(struct pp_instance *ppi,
+				      int millisec)
+{
+	return unix_time_ops.calc_timeout(ppi, millisec);
+}
+
 struct pp_time_operations wrs_time_ops = {
-	.get = unix_time_get,
-	.set = unix_time_set,
-	.adjust = unix_time_adjust,
-	.adjust_offset = unix_time_adjust_offset,
-	.adjust_freq = unix_time_adjust_freq,
-	.calc_timeout = unix_calc_timeout,
+	.get = wrs_time_get,
+	.set = wrs_time_set,
+	.adjust = wrs_time_adjust,
+	.adjust_offset = wrs_time_adjust_offset,
+	.adjust_freq = wrs_time_adjust_freq,
+	.calc_timeout = wrs_calc_timeout,
 };

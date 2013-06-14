@@ -27,7 +27,7 @@ include time-$(TIME)/Makefile
 
 # Unix time operations are always included as a fallback
 include time-unix/Makefile
-CFLAGS += -Itime-unix -Iproto-ext-whiterabbit
+CFLAGS += -Iproto-ext-whiterabbit
 
 # mini-rpc directory contains minipc library
 MINIPC_DIR := $A/mini-rpc

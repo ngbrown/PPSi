@@ -16,7 +16,7 @@ static void clock_fatal_error(char *context)
 	exit(1);
 }
 
-int unix_time_get(struct pp_instance *ppi, TimeInternal *t)
+static int unix_time_get(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec tp;
 	if (clock_gettime(CLOCK_REALTIME, &tp) < 0)
@@ -29,7 +29,7 @@ int unix_time_get(struct pp_instance *ppi, TimeInternal *t)
 	return 0;
 }
 
-int32_t unix_time_set(struct pp_instance *ppi, TimeInternal *t)
+static int32_t unix_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec tp;
 
@@ -42,7 +42,7 @@ int32_t unix_time_set(struct pp_instance *ppi, TimeInternal *t)
 	return 0;
 }
 
-int unix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
+static int unix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 {
 	struct timex t;
 	int ret;
@@ -69,17 +69,17 @@ int unix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 	return ret;
 }
 
-int unix_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
+static int unix_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
 {
 	return unix_time_adjust(ppi, offset_ns, 0);
 }
 
-int unix_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
+static int unix_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
 {
 	return unix_time_adjust(ppi, 0, freq_ppm);
 }
 
-unsigned long unix_calc_timeout(struct pp_instance *ppi, int millisec)
+static unsigned long unix_calc_timeout(struct pp_instance *ppi, int millisec)
 {
 	struct timespec now;
 	uint64_t now_ms;
