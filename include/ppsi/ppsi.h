@@ -308,18 +308,16 @@ extern void div2_TimeInternal(TimeInternal *r);
  * The state machine itself is an array of these structures.
  */
 
+/* Use a typedef, to avoid long prototypes */
+typedef int pp_action(struct pp_instance *ppi, uint8_t *packet, int plen);
+
 struct pp_state_table_item {
 	int state;
 	char *name;
-	int (*f1)(struct pp_instance *ppi, uint8_t *packet, int plen);
+	pp_action *f1;
 };
 
 extern struct pp_state_table_item pp_state_table[]; /* 0-terminated */
-
-
-
-/* Use a typedef, to avoid long prototypes */
-typedef int pp_action(struct pp_instance *ppi, uint8_t *packet, int plen);
 
 /* Standard state-machine functions */
 extern pp_action pp_initializing, pp_faulty, pp_disabled, pp_listening,
