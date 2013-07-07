@@ -25,6 +25,7 @@
  * good compiler would generate better code (and a really good compiler
  * wouldn't care). Gcc is currently neither.
  */
+#ifndef time_after /* Maybe someone else defined them already */
 #define time_after(a,b)		\
 	(typecheck(unsigned long, a) && \
 	 typecheck(unsigned long, b) && \
@@ -36,5 +37,5 @@
 	 typecheck(unsigned long, b) && \
 	 ((long)(a) - (long)(b) >= 0))
 #define time_before_eq(a,b)	time_after_eq(b,a)
-
+#endif /* ifndef */
 #endif
