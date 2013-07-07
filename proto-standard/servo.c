@@ -42,8 +42,8 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
 				   "than administratively set maximum %d\n",
 				   __func__,
-				   s_to_m_dly.nanoseconds,
-				   OPTS(ppi)->max_dly);
+				   (int)s_to_m_dly.nanoseconds,
+				   (int)OPTS(ppi)->max_dly);
 		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
 			return;
 	}
@@ -97,7 +97,7 @@ void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
 	mpd->nanoseconds = owd_fltr->y;
 
 	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
-		owd_fltr->y, owd_fltr->s_exp);
+		(int)owd_fltr->y, (int)owd_fltr->s_exp);
 }
 
 /*
@@ -122,8 +122,8 @@ void pp_update_offset(struct pp_instance *ppi, TimeInternal *correction_field)
 			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
 			     "than administratively set maximum %d\n",
 			     __func__,
-			     m_to_s_dly.nanoseconds,
-			     OPTS(ppi)->max_dly);
+			     (int)m_to_s_dly.nanoseconds,
+			     (int)OPTS(ppi)->max_dly);
 			return;
 		}
 	}
@@ -177,8 +177,8 @@ static void __pp_update_clock(struct pp_instance *ppi)
 			pp_diag(ppi, servo, 1, "%s aborted, offset %d greater "
 			     "than administratively set maximum %d\n",
 			     __func__,
-			     DSCUR(ppi)->offsetFromMaster.nanoseconds,
-			     OPTS(ppi)->max_rst);
+			     (int)DSCUR(ppi)->offsetFromMaster.nanoseconds,
+			     (int)OPTS(ppi)->max_rst);
 			return;
 		}
 	}
@@ -238,13 +238,14 @@ void pp_update_clock(struct pp_instance *ppi)
 	__pp_update_clock(ppi);
 
 	pp_diag(ppi, servo, 2, "Raw offset from master: %9i.%09i\n",
-		SRV(ppi)->m_to_s_dly.seconds,
-		SRV(ppi)->m_to_s_dly.nanoseconds);
+		(int)SRV(ppi)->m_to_s_dly.seconds,
+		(int)SRV(ppi)->m_to_s_dly.nanoseconds);
 	pp_diag(ppi, servo, 2, "One-way delay averaged: %9i.%09i\n",
-		DSCUR(ppi)->meanPathDelay.seconds,
-		DSCUR(ppi)->meanPathDelay.nanoseconds);
+		(int)DSCUR(ppi)->meanPathDelay.seconds,
+		(int)DSCUR(ppi)->meanPathDelay.nanoseconds);
 	pp_diag(ppi, servo, 2, "Offset from master:     %9i.%09i\n",
-		DSCUR(ppi)->offsetFromMaster.seconds,
-		DSCUR(ppi)->offsetFromMaster.nanoseconds);
-	pp_diag(ppi, servo, 2, "Observed drift: %9i\n", SRV(ppi)->obs_drift);
+		(int)DSCUR(ppi)->offsetFromMaster.seconds,
+		(int)DSCUR(ppi)->offsetFromMaster.nanoseconds);
+	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
+		(int)SRV(ppi)->obs_drift);
 }

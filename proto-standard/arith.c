@@ -114,5 +114,5 @@ void display_TimeInternal(const char *label, TimeInternal *t)
 	pp_Vprintf("%s: %s%d.%09d\n", label,
 		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0))
 		   ? "-" : " ",
-		   abs(t->seconds), abs(t->nanoseconds));
+		   (int)abs(t->seconds), (int)abs(t->nanoseconds));
 }

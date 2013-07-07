@@ -43,9 +43,9 @@ static inline int __send_and_log(struct pp_instance *ppi, int msglen,
 	}
 	/* FIXME: diagnosticst should be looped back in the send method */
 	pp_diag(ppi, frames, 1, "SENT %02d bytes at %d.%09d (%s)\n", msglen,
-			ppi->last_snt_time.seconds,
-			ppi->last_snt_time.nanoseconds,
-			pp_msg_names[msgtype]);
+		(int)(ppi->last_snt_time.seconds),
+		(int)(ppi->last_snt_time.nanoseconds),
+		pp_msg_names[msgtype]);
 	return 0;
 }
 
