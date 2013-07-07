@@ -16,7 +16,8 @@ PTPNOPOSIX_ROOT = $(WRPCSW_ROOT)/ptp-noposix
 
 CFLAGS += -I$(PTPNOPOSIX_ROOT)/PTPWRd/dep -I$(PTPNOPOSIX_ROOT)/PTPWRd
 
-
+# Let's use the pp_printf we already have in wrpc-sw
+CONFIG_NO_PRINTF = y
 
 # All files are under A (short for ARCH): I'm lazy
 A := arch-$(ARCH)
