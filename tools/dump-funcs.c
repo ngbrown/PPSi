@@ -56,8 +56,8 @@ static void dump_eth(char *prefix, struct ethhdr *eth)
 
 static void dump_ip(char *prefix, struct iphdr *ip)
 {
-	uint32_t s = ntohl(ip->saddr);
-	uint32_t d = ntohl(ip->daddr);
+	unsigned int s = ntohl(ip->saddr);
+	unsigned int d = ntohl(ip->daddr);
 	printf("%sIP: %i (%i.%i.%i.%i -> %i.%i.%i.%i) len %i\n", prefix,
 	       ip->protocol,
 	       (s >> 24) & 0xff, (s >> 16) & 0xff, (s >> 8) & 0xff, s & 0xff,
@@ -78,7 +78,7 @@ static void dump_1stamp(char *prefix, char *s, struct stamp *t)
 
 	sec |= (uint64_t)(ntohl(t->sec.lsb));
 	printf("%s%s%lu.%09i\n", prefix,
-	       s, (unsigned long)sec, ntohl(t->nsec));
+	       s, (unsigned long)sec, (int)ntohl(t->nsec));
 }
 
 static void dump_1quality(char *prefix, char *s, ClockQuality *q)
