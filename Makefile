@@ -37,6 +37,9 @@ CFLAGS += -Wall -O2 -ggdb -Iinclude -fno-common
 # to avoid ifdef as much as possible, I use the kernel trick for OBJ variables
 OBJ-y := fsm.o diag.o
 
+# Include arch code. Each arch chooses its own time directory..
+include arch-$(ARCH)/Makefile
+
 # include pp_printf code, by default the "full" version. Please
 # set CONFIG_PRINTF_NONE or CONFIG_PRINTF_XINT if needed.
 ifndef CONFIG_NO_PRINTF
@@ -48,9 +51,6 @@ endif
 
 # We need this -I so <arch/arch.h> can be found
 CFLAGS += -Iarch-$(ARCH)/include
-
-# Include arch code. Each arch chooses its own time directory..
-include arch-$(ARCH)/Makefile
 
 # proto-standard is always included, as it provides default function
 # so the extension can avoid duplication of code.
