@@ -5,8 +5,6 @@ CFLAGS += -ffreestanding -Os \
 	-mmultiply-enabled -mbarrel-shift-enabled \
 	-Itools
 
-ARCH_LDFLAGS = -nostdlib -static -T $(ARCH).lds
-
 # Root of wrpc-sw project
 WRPCSW_ROOT ?= ..
 
