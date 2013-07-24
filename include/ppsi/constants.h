@@ -23,10 +23,10 @@
 #define PP_DEFAULT_SYNC_INTERVAL		0	/* -7 in 802.1AS, 1 is ok */
 #define PP_DEFAULT_SYNC_RECEIPT_TIMEOUT		3
 #define PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT	6	/* 3 by default, 3 is ok */
-#define PP_DEFAULT_CLOCK_CLASS			248
+#define PP_DEFAULT_CLOCK_CLASS			187
 #define PP_DEFAULT_CLOCK_ACCURACY		0xFE
-#define PP_DEFAULT_PRIORITY1			248
-#define PP_DEFAULT_PRIORITY2			248
+#define PP_DEFAULT_PRIORITY1			128
+#define PP_DEFAULT_PRIORITY2			128
 #define PP_DEFAULT_CLOCK_VARIANCE		-4000 /* To be determined in
 						       * 802.1AS. We use the
 						       * same value as in ptpdv1
