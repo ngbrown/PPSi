@@ -10,19 +10,19 @@
 #define PP_NSEC_PER_SEC (1000*1000*1000)
 
 /* implementation specific constants */
-#define PP_DEFAULT_INBOUND_LATENCY		0	/* in nsec */
-#define PP_DEFAULT_OUTBOUND_LATENCY		0	/* in nsec */
+#define PP_DEFAULT_INBOUND_LATENCY		0		/* in nsec */
+#define PP_DEFAULT_OUTBOUND_LATENCY		0		/* in nsec */
 #define PP_DEFAULT_NO_RESET_CLOCK		0
 #define PP_DEFAULT_ETHERNET_MODE		0
 #define PP_DEFAULT_DOMAIN_NUMBER		0
 #define PP_DEFAULT_AP				10
 #define PP_DEFAULT_AI				1000
 #define PP_DEFAULT_DELAY_S			6
-#define PP_DEFAULT_ANNOUNCE_INTERVAL		1	/* 0 in 802.1AS, 3 is ok */
+#define PP_DEFAULT_ANNOUNCE_INTERVAL		1		/* 0 in 802.1AS */
 #define PP_DEFAULT_DELAYREQ_INTERVAL		0
-#define PP_DEFAULT_SYNC_INTERVAL		0	/* -7 in 802.1AS, 1 is ok */
+#define PP_DEFAULT_SYNC_INTERVAL		0			/* -7 in 802.1AS */
 #define PP_DEFAULT_SYNC_RECEIPT_TIMEOUT		3
-#define PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT	6	/* 3 by default, 3 is ok */
+#define PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT	6	/* 3 by default */
 #define PP_DEFAULT_CLOCK_CLASS			187
 #define PP_DEFAULT_CLOCK_ACCURACY		0xFE
 #define PP_DEFAULT_PRIORITY1			128
