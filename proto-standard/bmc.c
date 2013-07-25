@@ -255,7 +255,7 @@ void bmc_update_ebest(struct pp_globals *ppg)
 	int i, best;
 	struct pp_instance *ppi, *ppi_best;
 
-	for (i = 1, best = 0 ; i < ppg->nlinks; i++) {
+	for (i = 1, best = 0; i < ppg->defaultDS->numberPorts; i++) {
 
 		ppi_best = &ppg->pp_instances[best];
 		ppi = &ppg->pp_instances[i];

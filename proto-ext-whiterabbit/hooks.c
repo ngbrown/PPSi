@@ -23,10 +23,13 @@ static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 	static struct wr_data_t wr_data; /* WR-specific global data */
 	int i;
 
-	/* FIXME: used by arch-wrpc only; iface_name should be assigned
-	 * in main in every arch*/
-	if ((ppg->nlinks == 1) && (!ppg->pp_instances[0].iface_name))
-		ppg->pp_instances[0].iface_name = "wr1";
+	/* If current arch (e.g. wrpc) is not using the 'pp_links style'
+	 * configuration, just assume there is one ppi instance,
+	 * already configured properly by the arch's main loop */
+	if (ppg->nlinks == 0) {
+		ppg->pp_instances[0].ext_data = &wr_data;
+		return 0;
+	}
 
 	for (i = 0; i < ppg->nlinks; i++) {
 		struct pp_link *lnk = &ppg->links[i];

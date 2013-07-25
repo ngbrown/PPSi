@@ -42,7 +42,10 @@ int pp_open_globals(struct pp_globals *ppg)
 	int i;
 	struct DSDefault *def = ppg->defaultDS;
 	def->twoStepFlag = TRUE;
-	def->numberPorts = ppg->nlinks;
+
+	/* if ppg->nlinks == 0, let's assume that the 'pp_links style'
+	 * configuration was not used, so we have 1 port */
+	def->numberPorts = ppg->nlinks > 0 ? ppg->nlinks : 1;
 	struct pp_runtime_opts *rt_opts;
 
 	if (!ppg->rt_opts)
@@ -53,9 +56,8 @@ int pp_open_globals(struct pp_globals *ppg)
 	memcpy(&def->clockQuality, &rt_opts->clock_quality,
 		   sizeof(ClockQuality));
 
-	if (ppg->nlinks == 1) {
+	if (def->numberPorts == 1)
 		def->slaveOnly = ppg->pp_instances[0].slave_only;
-	}
 	else
 		def->slaveOnly = 1; /* the for cycle below will set it to 0 if not
 							 * ports are not all slave_only */
@@ -64,7 +66,7 @@ int pp_open_globals(struct pp_globals *ppg)
 	def->priority2 = rt_opts->prio2;
 	def->domainNumber = rt_opts->domain_number;
 
-	for (i = 0; i < ppg->nlinks; i++) {
+	for (i = 0; i < def->numberPorts; i++) {
 
 		if (def->slaveOnly && !ppg->pp_instances[i].slave_only)
 			def->slaveOnly = 0;
