@@ -17,7 +17,6 @@ static int wr_init(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	return 0;
 }
 
-/* This currently only works with one interface (i.e. WR Node) */
 static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 {
 	static struct wr_data_t wr_data; /* WR-specific global data */
