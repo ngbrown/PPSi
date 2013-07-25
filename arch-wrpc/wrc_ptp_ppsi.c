@@ -51,11 +51,11 @@ struct pp_instance ppi_static = {
 	.portDS			= &portDS,
 	.n_ops			= &wrpc_net_ops,
 	.t_ops			= &wrpc_time_ops,
+	.iface_name 	= "wr1",
 };
 
 /* We now have a structure with all globals, and multiple ppi inside */
 static struct pp_globals ppg_static = {
-	.nlinks			= 1,
 	.pp_instances		= &ppi_static,
 	.servo			= &servo,
 	.defaultDS		= &defaultDS,
