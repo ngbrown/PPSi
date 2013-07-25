@@ -100,6 +100,7 @@ void unix_main_loop(struct pp_globals *ppg)
 		delay_ms = -1;
 
 		for (j = 0; j < ppg->nlinks; j++) {
+			int tmp_d;
 			ppi = &ppg->pp_instances[j];
 
 			if ((NP(ppi)->ch[PP_NP_GEN].pkt_present) ||
@@ -121,8 +122,11 @@ void unix_main_loop(struct pp_globals *ppg)
 					continue;
 				}
 
-				pp_state_machine(ppi, ppi->rx_ptp,
+				tmp_d = pp_state_machine(ppi, ppi->rx_ptp,
 					i - NP(ppi)->ptp_offset);
+
+				if ((delay_ms == -1) || (tmp_d < delay_ms))
+					delay_ms = tmp_d;
 			}
 		}
 	}

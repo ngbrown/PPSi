@@ -401,8 +401,13 @@ int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 	int ret = 0;
 	int maxfd = 0;
 	struct unix_arch_data *arch_data = POSIX_ARCH(ppg);
+	int old_delay_ms;
 
-	if (delay_ms != -1) {
+	old_delay_ms = arch_data->tv.tv_sec * 1000 +
+		arch_data->tv.tv_usec / 1000;
+
+	if ((delay_ms != -1) &&
+		((old_delay_ms == 0) || (delay_ms < old_delay_ms))) {
 		/* Wait for a packet or for the timeout */
 		arch_data->tv.tv_sec = delay_ms / 1000;
 		arch_data->tv.tv_usec = (delay_ms % 1000) * 1000;
