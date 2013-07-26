@@ -168,7 +168,7 @@ static void dump_payload(char *prefix, void *pl, int len)
 	printf("%sVERSION: %i (type %i, len %i, domain %i)\n", prefix,
 	       version, messageType,
 	       ntohs(h->messageLength), h->domainNumber);
-	printf("%sFLAGS: 0x%04x (correction 0x%08lu)\n", prefix, h->flagField,
+	printf("%sFLAGS: 0x%04x (correction %08lu)\n", prefix, h->flagField,
 	       (unsigned long)h->correctionField);
 	dump_1port(prefix, "PORT: ", h->sourcePortIdentity);
 	printf("%sREST: seq %i, ctrl %i, log-interval %i\n", prefix,
