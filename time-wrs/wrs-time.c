@@ -61,9 +61,12 @@ int wrs_adjust_in_progress(void)
 	int ret, rval;
 
 	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_pps_cmd,
-		&rval, HEXP_PPSG_CMD_ADJUST_PHASE, &p);
+		&rval, HEXP_PPSG_CMD_POLL, &p);
 
-	return (ret == 0) && rval;
+	if ((ret < 0) || rval)
+		return 0;
+
+	return 1;
 }
 
 int wrs_enable_ptracker(struct pp_instance *ppi)
@@ -121,7 +124,7 @@ int wrs_locking_poll(struct pp_instance *ppi)
 	int ret, rval;
 
 	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_lock_cmd,
-			  &rval, ppi->iface_name, HEXP_LOCK_CMD_START, 0);
+			  &rval, ppi->iface_name, HEXP_LOCK_CMD_CHECK, 0);
 
 	if (ret != HEXP_LOCK_STATUS_LOCKED)
 		return WR_SPLL_ERROR; /* FIXME should be WR_SPLL_NOT_READY */
