@@ -2,6 +2,7 @@
  * Aurelio Colosimo for CERN, 2013 -- public domain
  */
 
+#include <errno.h>
 #include <ppsi/ppsi.h>
 #include <ppsi-wrs.h>
 
@@ -156,44 +157,57 @@ int wr_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
 int wr_adjust_phase(int32_t phase_ps)
 	__attribute__((alias("wrs_adjust_phase")));
 
-/*
- * WRS time operations fall back on unix time operations, for some things
- */
-
 static int wrs_time_get(struct pp_instance *ppi, TimeInternal *t)
 {
-	/* FIXME */
-	return unix_time_ops.get(ppi, t);
+
+	hexp_pps_params_t p;
+	int cmd;
+	int ret, rval;
+
+	cmd = HEXP_PPSG_CMD_GET;
+
+	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_pps_cmd, &rval,
+					  cmd, &p);
+
+	/* FIXME Don't know whether p.current_phase_shift is to be assigned
+	 * to t->phase or t->raw_phase. I ignore it, it's not useful here. */
+	t->seconds = p.current_sec;
+	t->nanoseconds = p.current_nsec;
+	t->correct = p.pps_valid;
+
+	if (ret < 0)
+		return ret;
+
+	return rval;
 }
 
 static int32_t wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
-	/* FIXME */
-	return unix_time_ops.set(ppi, t);
+	/* FIXME Don't know how to implement this. Actually it's almost unused
+	 * in ppsi, only proto-standard/servo.c calls it, at initialization
+	 * time */
+
+	return -ENOTSUP;
+}
+
+static int wrs_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
+{
+	return wr_adjust_counters(0, offset_ns);
 }
 
 static int wrs_time_adjust(struct pp_instance *ppi, long offset_ns,
 			   long freq_ppm)
 {
-	/* FIXME */
-	return unix_time_ops.adjust(ppi, offset_ns, freq_ppm);
-}
-
-static int wrs_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
-{
-	/* FIXME */
-	return unix_time_ops.adjust_offset(ppi, offset_ns);
-}
-
-static int wrs_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
-{
-	/* FIXME */
-	return unix_time_ops.adjust_freq(ppi, freq_ppm);
+	if (freq_ppm != 0)
+		pp_diag(ppi, time, 1, "Warning: %s: can not adjust freq_ppm %li\n",
+				__func__, freq_ppm);
+	return wrs_time_adjust_offset(ppi, offset_ns);
 }
 
 static unsigned long wrs_calc_timeout(struct pp_instance *ppi,
 				      int millisec)
 {
+	/* We can rely on unix's CLOCK_MONOTONIC timing for timeouts */
 	return unix_time_ops.calc_timeout(ppi, millisec);
 }
 
@@ -202,6 +216,6 @@ struct pp_time_operations wrs_time_ops = {
 	.set = wrs_time_set,
 	.adjust = wrs_time_adjust,
 	.adjust_offset = wrs_time_adjust_offset,
-	.adjust_freq = wrs_time_adjust_freq,
+	.adjust_freq = NULL,
 	.calc_timeout = wrs_calc_timeout,
 };
