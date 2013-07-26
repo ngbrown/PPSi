@@ -1,0 +1,98 @@
+# ppsi configuration file for Seven Solution 18-ports switch.
+# Just rename it to ppsi.conf and copy it to /etc/ppsi.conf on the
+# switch.
+
+# Global settings
+clock-class 187
+clock-accuracy 254
+
+link slave
+iface wr0
+role slave
+extension whiterabbit
+
+link master1
+iface wr1
+role auto
+extension whiterabbit
+
+link master2
+iface wr2
+role auto
+extension whiterabbit
+
+link master3
+iface wr3
+role auto
+extension whiterabbit
+
+link master4
+iface wr4
+role auto
+extension whiterabbit
+
+link master5
+iface wr5
+role auto
+extension whiterabbit
+
+link master6
+iface wr6
+role auto
+extension whiterabbit
+
+link master7
+iface wr7
+role auto
+extension whiterabbit
+
+link master8
+iface wr8
+role auto
+extension whiterabbit
+
+link master9
+iface wr9
+role auto
+extension whiterabbit
+
+link master10
+iface wr10
+role auto
+extension whiterabbit
+
+link master11
+iface wr11
+role auto
+extension whiterabbit
+
+link master12
+iface wr12
+role auto
+extension whiterabbit
+
+link master13
+iface wr13
+role auto
+extension whiterabbit
+
+link master14
+iface wr14
+role auto
+extension whiterabbit
+
+link master15
+iface wr15
+role auto
+extension whiterabbit
+
+link master16
+iface wr16
+role auto
+extension whiterabbit
+
+link master17
+iface wr17
+role auto
+extension whiterabbit
+
