@@ -314,6 +314,9 @@ int wr_servo_update(struct pp_instance *ppi)
 		 * DSPOR(ppi)->doRestart = TRUE; */
 	}
 
+	pp_diag(ppi, servo, 1, "wr_servo state: %s\n",
+		cur_servo_state.slave_servo_state);
+
 	switch (s->state) {
 	case WR_WAIT_SYNC_IDLE:
 		if (!wr_adjust_in_progress()) {
