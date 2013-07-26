@@ -32,7 +32,7 @@ static int wrpc_time_set(struct pp_instance *ppi, TimeInternal *t)
 	sec = t->seconds;
 	nsec = t->nanoseconds;
 
-	shw_pps_gen_set_time(sec, nsec);
+	shw_pps_gen_set_time(sec, nsec, PPSG_SET_ALL);
 	pp_diag(ppi, time, 1, "%s: %9lu.%09li\n", __func__,
 		(long)sec, (long)nsec);
 	return 0;
