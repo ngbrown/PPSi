@@ -20,7 +20,7 @@ static int wrs_read_calibration_data(struct pp_instance *ppi,
 
 	if(state.valid && state.tx_calibrated && state.rx_calibrated) {
 
-		pp_diag(ppi, servo, 1, "deltas: tx=%d, rx=%d)\n",
+		pp_diag(ppi, servo, 1, "deltas: tx=%d, rx=%d\n",
 			state.delta_tx ,state.delta_rx);
 
 		if(delta_tx)
