@@ -319,7 +319,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		if (!wr_adjust_in_progress()) {
 			s->state = s->next_state;
 		} else {
-			PP_PRINTF("servo:busy\n");
+			pp_diag(ppi, servo, 1, "servo:busy\n");
 		}
 		break;
 
