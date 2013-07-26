@@ -31,15 +31,17 @@ static void dump_time(char *prefix, struct TimeInternal *ti)
 	tv.tv_sec = ti->seconds;
 	tv.tv_usec = ti->nanoseconds / 1000;
 	localtime_r(&tv.tv_sec, &tm);
-	printf("%sTIME: (%li - 0x%lx) %02i:%02i:%02i.%06li\n", prefix,
+	printf("%sTIME: (%li - 0x%lx) %02i:%02i:%02i.%06li%s\n", prefix,
 	       tv.tv_sec, tv.tv_sec,
-	       tm.tm_hour, tm.tm_min, tm.tm_sec, (long)tv.tv_usec);
+	       tm.tm_hour, tm.tm_min, tm.tm_sec, (long)tv.tv_usec,
+	       !ti->correct ? " invalid" : "");
 }
 #else
 static void dump_time(char *prefix, struct TimeInternal *ti)
 {
-	printf("%sTIME: (%li - 0x%lx) %li.%06li\n", prefix, (long)ti->seconds,
-	       (long)ti->seconds, (long)ti->seconds, (long)ti->nanoseconds);
+	printf("%sTIME: (%li - 0x%lx) %li.%06li%s\n", prefix, (long)ti->seconds,
+	       (long)ti->seconds, (long)ti->seconds, (long)ti->nanoseconds,
+	       !ti->correct ? " invalid" : "");
 }
 #endif
 
