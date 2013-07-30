@@ -36,8 +36,6 @@ static struct minipc_pd __rpcdef_cmd = {
 /* Fill struct ptpdexp_sync_state_t with current servo state */
 static int wrsipc_get_sync_state(ptpdexp_sync_state_t *state)
 {
-	pp_printf(" GSS: valid %d\n", servo_state_valid);
-
 	if(servo_state_valid) {
 		memcpy(state, &cur_servo_state, sizeof(ptpdexp_sync_state_t));
 		state->valid = 1;
