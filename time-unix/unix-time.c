@@ -1,5 +1,8 @@
 /*
- * Alessandro Rubini for CERN, 2011 -- public domain
+ * Copyright (C) 2011 CERN (www.cern.ch)
+ * Author: Alessandro Rubini
+ *
+ * Released to the public domain
  */
 #include <stdio.h>
 #include <stdlib.h>

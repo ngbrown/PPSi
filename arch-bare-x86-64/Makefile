@@ -1,4 +1,3 @@
-# Alessandro Rubini for CERN, 2011 -- public domain
 
 CFLAGS += -ffreestanding -Os -fno-stack-protector -Itools
 ARCH_LDFLAGS = -nostdlib -static -T $(ARCH).lds

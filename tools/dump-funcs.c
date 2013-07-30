@@ -1,3 +1,9 @@
+/*
+ * Copyright (C) 2012 CERN (www.cern.ch)
+ * Author: Alessandro Rubini
+ *
+ * Released according to the GNU GPL, version 2 or any later version.
+ */
 #include <stdio.h>
 #include <string.h>
 #include <ppsi/ieee1588_types.h> /* from ../include */

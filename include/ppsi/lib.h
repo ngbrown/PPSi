@@ -1,5 +1,8 @@
 /*
- * Alessandro Rubini and Aurelio Colosimo for CERN, 2011 -- public domain
+ * Copyright (C) 2011 CERN (www.cern.ch)
+ * Authors: Alessandro Rubini and Aurelio Colosimo
+ *
+ * Released according to the GNU LGPL, version 2.1 or any later version.
  */
 #ifndef __PPSI_LIB_H__
 #define __PPSI_LIB_H__

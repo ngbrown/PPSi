@@ -1,6 +1,10 @@
 /*
- * Alessandro Rubini for CERN, 2013 -- LGPL 2.1 or later
+ * Copyright (C) 2013 CERN (www.cern.ch)
+ * Author: Alessandro Rubini
+ *
+ * Released to the public domain
  */
+
 #include <ppsi/ppsi.h>
 #include "bare-linux.h"
 

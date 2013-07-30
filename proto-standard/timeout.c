@@ -1,5 +1,8 @@
 /*
- * Alessandro Rubini for CERN, 2013 -- GNU LGPL v2.1 or later
+ * Copyright (C) 2013 CERN (www.cern.ch)
+ * Author: Alessandro Rubini
+ *
+ * Released according to the GNU LGPL, version 2.1 or any later version.
  */
 #include <ppsi/ppsi.h>
 

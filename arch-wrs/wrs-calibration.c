@@ -1,5 +1,8 @@
 /*
- * Aurelio Colosimo for CERN, 2012 -- public domain
+ * Copyright (C) 2012 CERN (www.cern.ch)
+ * Author: Aurelio Colosimo
+ *
+ * Released to the public domain
  */
 
 #include <ppsi/ppsi.h>

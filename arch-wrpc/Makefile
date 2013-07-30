@@ -1,4 +1,3 @@
-# Alessandro Rubini for CERN, 2011 -- public domain
 
 CFLAGS += -ffreestanding -Os \
 	-ffunction-sections -fdata-sections \

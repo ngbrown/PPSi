@@ -1,5 +1,8 @@
 /*
- * Aurelio Colosimo for CERN, 2011 -- GNU LGPL v2.1 or later
+ * Copyright (C) 2011 CERN (www.cern.ch)
+ * Author: Aurelio Colosimo
+ *
+ * Released according to the GNU LGPL, version 2.1 or any later version.
  */
 
 #ifndef __PPSI_PPSI_H__

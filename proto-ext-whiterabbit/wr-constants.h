@@ -1,6 +1,9 @@
 /*
- * Aurelio Colosimo for CERN, 2012 -- GNU LGPL v2.1 or later
+ * Copyright (C) 2012 CERN (www.cern.ch)
+ * Author: Aurelio Colosimo
  * Based on ptp-noposix project (see AUTHORS for details)
+ *
+ * Released according to the GNU LGPL, version 2.1 or any later version.
  */
 
 /* White Rabbit stuff

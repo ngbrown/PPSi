@@ -1,6 +1,10 @@
 /*
- * Alessandro Rubini for CERN, 2011 -- GNU LGPL v2.1 or later
- * Aurelio Colosimo for CERN, 2012 -- GNU LGPL v2.1 or later
+ * Copyright (C) 2011 CERN (www.cern.ch)
+ * Author: Alessandro Rubini
+ * Copyright (C) 2012 CERN (www.cern.ch)
+ * Author: Aurelio Colosimo
+ *
+ * Released according to the GNU LGPL, version 2.1 or any later version.
  */
 #ifndef __WRPC_H
 #define __WRPC_H

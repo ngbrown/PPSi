@@ -1,4 +1,8 @@
-/* Alessandro Rubini, 2012, GPL v2 or later */
+/*
+ * Copyright (C) 2012 Alessandro Rubini
+ *
+ * Released according to the GNU GPL, version 2 or any later version.
+ */
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>

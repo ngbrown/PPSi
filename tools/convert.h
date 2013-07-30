@@ -1,4 +1,9 @@
-/* CERN 2013 (author A. Rubini), part of the ppsi project, GPL v2 or later */
+/*
+ * Copyright (C) 2013 CERN (www.cern.ch)
+ * Author: Alessandro Rubini
+ *
+ * Released according to the GNU GPL, version 2 or any later version.
+ */
 
 /*
  * Conversions are boring stuff: we can't use floats or doubles (because

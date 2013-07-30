@@ -1,5 +1,8 @@
 /*
- * Aurelio Colosimo for CERN, 2011 -- public domain
+ * Copyright (C) 2011 CERN (www.cern.ch)
+ * Author: Aurelio Colosimo
+ *
+ * Released to the public domain
  */
 
 /* Structs defined in IEEE Std 1588-2008 */

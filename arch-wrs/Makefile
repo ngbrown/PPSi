@@ -1,5 +1,3 @@
-# Alessandro Rubini for CERN, 2011 -- public domain
-
 # All files are under A (short for ARCH): I'm lazy
 A := arch-$(ARCH)
 
