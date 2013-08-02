@@ -370,7 +370,11 @@ int unix_net_exit(struct pp_instance *ppi)
 	int i;
 
 	if (ppi->ethernet_mode) {
-		close(NP(ppi)->ch[PP_NP_GEN].fd);
+		fd = NP(ppi)->ch[PP_NP_GEN].fd;
+		if (fd > 0) {
+			close(fd);
+			NP(ppi)->ch[PP_NP_GEN].fd = -1;
+		}
 		return 0;
 	}
 
