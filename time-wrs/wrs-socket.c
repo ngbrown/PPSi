@@ -348,10 +348,15 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 }
 
+static int wrs_net_exit(struct pp_instance *ppi);
+
 static int wrs_net_init(struct pp_instance *ppi)
 {
 	int r, i;
 	hexp_port_state_t pstate;
+
+	if (NP(ppi)->ch[PP_NP_GEN].arch_data)
+		wrs_net_exit(ppi);
 
 	r = unix_net_ops.init(ppi);
 	if (r)
@@ -419,6 +424,7 @@ static int wrs_net_exit(struct pp_instance *ppi)
 {
 	unix_net_ops.exit(ppi);
 	free(NP(ppi)->ch[PP_NP_GEN].arch_data);
+	NP(ppi)->ch[PP_NP_GEN].arch_data = NULL;
 	return 0;
 }
 
