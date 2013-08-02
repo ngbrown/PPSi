@@ -70,12 +70,14 @@ int pp_open_globals(struct pp_globals *ppg)
 	def->domainNumber = rt_opts->domain_number;
 
 	for (i = 0; i < def->numberPorts; i++) {
+		struct pp_instance *ppi = &ppg->pp_instances[i];
 
-		if (def->slaveOnly && !ppg->pp_instances[i].slave_only)
+		if (def->slaveOnly && !ppi->slave_only)
 			def->slaveOnly = 0;
 
-		ppg->pp_instances[i].state = PPS_INITIALIZING;
-		ppg->pp_instances[i].port_idx = i;
+		ppi->state = PPS_INITIALIZING;
+		ppi->port_idx = i;
+		ppi->frgn_rec_best = -1;
 	}
 
 	if (def->slaveOnly) {
