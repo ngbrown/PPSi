@@ -406,7 +406,7 @@ int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 	fd_set set;
 	int i, j;
 	int ret = 0;
-	int maxfd = 0;
+	int maxfd = -1;
 	struct unix_arch_data *arch_data = POSIX_ARCH(ppg);
 	int old_delay_ms;
 
@@ -436,6 +436,10 @@ int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 		if (ppi->ethernet_mode) {
 
 			fd_to_set = NP(ppi)->ch[PP_NP_GEN].fd;
+
+			if (fd_to_set < 0)
+				continue;
+
 			FD_SET(fd_to_set, &set);
 			maxfd = fd_to_set > maxfd ? fd_to_set : maxfd;
 			continue;
@@ -451,6 +455,11 @@ int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 		maxfd = fd_to_set > maxfd ? fd_to_set : maxfd;
 	}
 
+	if (maxfd < 0) {
+		usleep(1000 * delay_ms);
+		return 0;
+	}
+
 	i = select(maxfd + 1, &set, NULL, NULL, &arch_data->tv);
 
 	if (i < 0 && errno != EINTR)
@@ -464,13 +473,16 @@ int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 
 	for (j = 0; j < ppg->nlinks; j++) {
 		struct pp_instance *ppi = &ppg->pp_instances[j];
+		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
-		if (FD_ISSET(NP(ppi)->ch[PP_NP_GEN].fd, &set)) {
+		if (fd >= 0 && FD_ISSET(fd, &set)) {
 			ret++;
 			NP(ppi)->ch[PP_NP_GEN].pkt_present = 1;
 		}
 
-		if (FD_ISSET(NP(ppi)->ch[PP_NP_EVT].fd, &set)) {
+		fd = NP(ppi)->ch[PP_NP_EVT].fd;
+
+		if (fd >= 0 && FD_ISSET(fd, &set)) {
 			ret++;
 			NP(ppi)->ch[PP_NP_EVT].pkt_present = 1;
 		}
