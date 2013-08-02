@@ -16,6 +16,9 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi-wrs.h>
+#include <wr-api.h>
+#include <hal_exports.h>
+extern struct minipc_pd __rpcdef_get_port_state;
 
 /* Call pp_state_machine for each instance. To be called periodically,
  * when no packets are incoming */
@@ -26,7 +29,40 @@ static int run_all_state_machines(struct pp_globals *ppg)
 
 	for (j = 0; j < ppg->nlinks; j++) {
 		struct pp_instance *ppi = &ppg->pp_instances[j];
-		delay_ms_j = pp_state_machine(ppi, NULL, 0);
+		int old_lu = WR_DSPOR(ppi)->linkUP;
+		hexp_port_state_t state;
+
+		minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_get_port_state,
+			&state, ppi->iface_name);
+
+		if ((state.valid) && (state.up))
+			WR_DSPOR(ppi)->linkUP = 1;
+		else
+			WR_DSPOR(ppi)->linkUP = 0;
+
+		if (old_lu != WR_DSPOR(ppi)->linkUP) {
+
+			pp_diag(ppi, fsm, 1, "iface %s went %s\n",
+				ppi->iface_name, WR_DSPOR(ppi)->linkUP ? "up":"down");
+
+			if (WR_DSPOR(ppi)->linkUP) {
+				ppi->state = PPS_INITIALIZING;
+			}
+			else {
+				ppi->n_ops->exit(ppi);
+				ppi->frgn_rec_num = 0;
+				ppi->frgn_rec_i = 0;
+				ppi->frgn_rec_best = -1;
+				if (ppg->ebest_idx == ppi->port_idx)
+					wr_servo_reset();
+			}
+		}
+
+		/* Do not call state machine if link is down */
+		if (WR_DSPOR(ppi)->linkUP)
+			delay_ms_j = pp_state_machine(ppi, NULL, 0);
+		else
+			delay_ms_j = PP_DEFAULT_NEXT_DELAY_MS;
 
 		/* delay_ms is the least delay_ms among all instances */
 		if (j == 0)
