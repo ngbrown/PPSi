@@ -338,7 +338,7 @@ int unix_net_init(struct pp_instance *ppi)
 {
 	int i;
 
-	if (NP(ppi)->ch[0].fd)
+	if (NP(ppi)->ch[0].fd > 0)
 		unix_net_exit(ppi);
 
 	/* The buffer is inside ppi, but we need to set pointers and align */
