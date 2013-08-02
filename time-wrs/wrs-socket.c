@@ -407,17 +407,24 @@ static int wrs_net_init(struct pp_instance *ppi)
 
 		if (ioctl(fd, SIOCSHWTSTAMP, &ifr) < 0) {
 			perror("SIOCSHWTSTAMP");
-			return -1;
+			goto error;
 		}
 
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPING,
 			&so_timestamping_flags, sizeof(int)) < 0) {
 			pp_error("setsockopt(SO_TIMESTAMPING)");
-			return -1;
+			goto error;
 		}
 	}
 
 	return 0;
+
+error:
+	free(s);
+	NP(ppi)->ch[PP_NP_GEN].arch_data = NULL;
+	NP(ppi)->ch[PP_NP_EVT].arch_data = NULL;
+
+	return -1;
 }
 
 static int wrs_net_exit(struct pp_instance *ppi)
