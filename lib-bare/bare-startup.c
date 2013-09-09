@@ -39,7 +39,8 @@ int ppsi_main(int argc, char **argv)
 	struct pp_globals *ppg = &ppg_static;
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
 
-	PP_PRINTF("bare: starting. Compiled on %s\n", __DATE__);
+	if (pp_diag_verbosity)
+		pp_printf("ppsi starting. Built on %s\n", __DATE__);
 
 	ppi->glbs        = ppg;
 	ppg->defaultDS   = &defaultDS;

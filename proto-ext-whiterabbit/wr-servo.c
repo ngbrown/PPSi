@@ -34,9 +34,9 @@ void wr_servo_enable_tracking(int enable)
 
 /* my own timestamp arithmetic functions */
 
-static void dump_timestamp(char *what, TimeInternal ts)
+static void dump_timestamp(struct pp_instance *ppi, char *what, TimeInternal ts)
 {
-	PP_PRINTF("%s = %d:%d:%d\n", what, (int32_t)ts.seconds,
+	pp_diag(ppi, servo, 2, "%s = %d:%d:%d\n", what, (int32_t)ts.seconds,
 		  ts.nanoseconds, ts.phase);
 }
 
@@ -269,13 +269,11 @@ int wr_servo_update(struct pp_instance *ppi)
 	got_sync = 0;
 
 	if (__PP_DIAG_ALLOW_FLAGS(pp_global_flags, pp_dt_servo, 1)) {
-		dump_timestamp("servo:t1", s->t1);
-		dump_timestamp("servo:t2", s->t2);
-		dump_timestamp("servo:t3", s->t3);
-		dump_timestamp("servo:t4", s->t4);
-
-		dump_timestamp("->mdelay", s->mu);
-
+		dump_timestamp(ppi, "servo:t1", s->t1);
+		dump_timestamp(ppi, "servo:t2", s->t2);
+		dump_timestamp(ppi, "servo:t3", s->t3);
+		dump_timestamp(ppi, "servo:t4", s->t4);
+		dump_timestamp(ppi, "->mdelay", s->mu);
 	}
 
 	s->mu = ts_sub(ts_sub(s->t4, s->t1), ts_sub(s->t3, s->t2));
