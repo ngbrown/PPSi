@@ -404,7 +404,7 @@ static int wrs_net_init(struct pp_instance *ppi)
 			break;
 
 		if (ioctl(fd, SIOCSHWTSTAMP, &ifr) < 0) {
-			perror("SIOCSHWTSTAMP");
+			pp_error("ioctl(SIOCSHWTSTAMP)");
 			goto error;
 		}
 
