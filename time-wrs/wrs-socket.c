@@ -233,7 +233,6 @@ int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int _len,
 int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
-	struct pp_channel *ch1, *ch2;
 	int ret;
 
 	if (ppi->ethernet_mode) {
@@ -316,7 +315,6 @@ static void poll_tx_timestamp(struct wrs_socket *s, int fd,
 int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
-	struct sockaddr_in addr;
 	struct ethhdr *hdr = pkt;
 	struct wrs_socket *s;
 	int ret;
