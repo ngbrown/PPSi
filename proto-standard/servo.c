@@ -235,20 +235,28 @@ static void __pp_update_clock(struct pp_instance *ppi)
 	}
 }
 
+static void format_TimeInternal(char *s, TimeInternal *t)
+{
+	pp_sprintf(s, "%s%d.%09d",
+		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0))
+		   ? "-" : " ",
+		   (int)abs(t->seconds), (int)abs(t->nanoseconds));
+}
+
+
 /* called only *exactly* after calling pp_update_offset above */
 void pp_update_clock(struct pp_instance *ppi)
 {
+	char s[24];
+
 	__pp_update_clock(ppi);
 
-	pp_diag(ppi, servo, 2, "Raw offset from master: %9i.%09i\n",
-		(int)SRV(ppi)->m_to_s_dly.seconds,
-		(int)SRV(ppi)->m_to_s_dly.nanoseconds);
-	pp_diag(ppi, servo, 2, "One-way delay averaged: %9i.%09i\n",
-		(int)DSCUR(ppi)->meanPathDelay.seconds,
-		(int)DSCUR(ppi)->meanPathDelay.nanoseconds);
-	pp_diag(ppi, servo, 2, "Offset from master:     %9i.%09i\n",
-		(int)DSCUR(ppi)->offsetFromMaster.seconds,
-		(int)DSCUR(ppi)->offsetFromMaster.nanoseconds);
+	format_TimeInternal(s, &SRV(ppi)->m_to_s_dly);
+	pp_diag(ppi, servo, 2, "Raw offset from master: %s\n", s);
+	format_TimeInternal(s, &DSCUR(ppi)->meanPathDelay);
+	pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n", s);
+	format_TimeInternal(s, &DSCUR(ppi)->offsetFromMaster);
+	pp_diag(ppi, servo, 2, "Offset from master:     %s\n", s);
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
 		(int)SRV(ppi)->obs_drift);
 }

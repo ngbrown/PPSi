@@ -73,6 +73,7 @@ int to_TimeInternal(TimeInternal *internal, Timestamp *external)
 	}
 }
 
+/* A negative TimeInternal has both secs and nsecs <= 0 */
 static void normalize_TimeInternal(TimeInternal *r)
 {
 	r->seconds += r->nanoseconds / PP_NSEC_PER_SEC;
@@ -110,12 +111,4 @@ void div2_TimeInternal(TimeInternal *r)
 	r->nanoseconds /= 2;
 
 	normalize_TimeInternal(r);
-}
-
-void display_TimeInternal(const char *label, TimeInternal *t)
-{
-	pp_Vprintf("%s: %s%d.%09d\n", label,
-		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0))
-		   ? "-" : " ",
-		   (int)abs(t->seconds), (int)abs(t->nanoseconds));
 }
