@@ -20,39 +20,14 @@
 
 #ifdef CONFIG_PPSI_RUNTIME_VERBOSITY
   #define CONST_VERBOSITY /* nothing: use "int pp_diag_verbosity" */
-
-  #define PP_PRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
-
 #else /* no runtime verbosity */
-
-  /*
-   * If verbosity cannot be changed at run time, we have CONFIG_PPSI_VERBOSITY
-   * set at build time (or at Kconfig time when we add it)
-   */
-
   #define CONST_VERBOSITY const /* use "const int pp_diag_verbosity */
-
-  #if CONFIG_PPSI_VERBOSITY > 0
-    #define PP_PRINTF(...) if (pp_diag_verbosity) pp_printf(__VA_ARGS__)
-  #else
-    #define PP_PRINTF(...)
-  #endif /* CONFIG_PPSI_VERBOSITY > 0 */
-
 #endif /* CONFIG_PPSI_RUNTIME_VERBOSITY */
 
 extern CONST_VERBOSITY int pp_diag_verbosity;
 
-/*
- * The following ones are expected to overcome the above uppercase macros.
- * We really need to remove code from the object files, but the finer-grained
- * selection (pp_verbose_dump etc) is a better long-term solution than
- * CONFIG_PPSI_RUNTIME_VERBOSITY
- */
 #define pp_error(...) \
 	if (pp_diag_verbosity) pp_printf("ERROR: " __VA_ARGS__)
-
-#define pp_Vprintf(...) \
-	if (pp_diag_verbosity > 1) pp_printf(__VA_ARGS__)
 
 /*
  * The "new" diagnostics is based on flags: there are per-instance flags
