@@ -532,6 +532,50 @@ This is, for example, the dump of two UDP frames:
 @end smallexample
 
 @c ==========================================================================
+@node pps-out
+@section pps-out
+
+The tools outputs a pulse-per-second signal to a parallel port or a
+serial port.  Most likely it only works on an x86 Linux system because
+of direct access to I/O ports -- no such portability problem is
+expected for serial ports.  For this reason it is not built by
+default in the distributed @t{tools/Makefile}
+
+The program receives a single argument on the command line, which is
+either an hex port number (with or without leading @t{0x}) or an
+absolute filename:
+
+@example
+   ./tools/pps-out 378
+   ./tools/pps-out /dev/ttyS0
+@end example
+
+When passed a port number, the program toggles all bits assuming it
+refers to a parallel port.  When passed a pathname, the program assumes
+it is a serial port and it toggles the DTR and RTS modem control signals
+(on pins 4 and 7 of the DB9 male connector).
+
+By setting the @t{VERBOSE} environment variable you ask the program
+to report how late it was before and after generating the rising
+edge:
+
+@example
+   morgana$ VERBOSE=1 ./tools/pps-out /dev/ttyS0
+  gettimeofday takes 0.2 usec
+  udelay takes 4.0 usec
+  delayed between   0 and   2 usecs
+  delayed between   0 and   4 usecs
+  [...]
+@end example
+
+@t{pps-out} can be used to verify on a scope the level of
+synchronization of two or more computers, but please note that the
+user-space software-only approach shows some jitter; on my systems the
+delay is usually a few microseconds, up to around a dozen (in general,
+use of the parallel port has less delay and less jitter). In any case
+this offers a second source to check what NTP or PTP daemons report.
+
+@c ==========================================================================
 @node jmptime
 @section jmptime
 
