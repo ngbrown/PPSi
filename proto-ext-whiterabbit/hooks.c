@@ -105,7 +105,7 @@ static int wr_new_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	return 0;
 }
 
-static int wr_update_delay(struct pp_instance *ppi)
+static int wr_handle_resp(struct pp_instance *ppi)
 {
 	MsgHeader *hdr = &ppi->received_ptp_header;
 	TimeInternal correction_field;
@@ -115,7 +115,7 @@ static int wr_update_delay(struct pp_instance *ppi)
 
 	/* If no WR mode is on, run normal code */
 	if (!WR_DSPOR(ppi)->wrModeOn) {
-		pp_update_delay(ppi, &correction_field);
+		pp_servo_got_resp(ppi);
 		return 0;
 	}
 	wr_servo_got_delay(ppi, hdr->correctionfield.lsb);
@@ -197,7 +197,7 @@ struct pp_ext_hooks pp_hooks = {
 	.listening = wr_listening,
 	.master_msg = wr_master_msg,
 	.new_slave = wr_new_slave,
-	.update_delay = wr_update_delay,
+	.handle_resp = wr_handle_resp,
 	.s1 = wr_s1,
 	.execute_slave = wr_execute_slave,
 	.handle_announce = wr_handle_announce,

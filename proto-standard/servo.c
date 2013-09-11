@@ -8,7 +8,7 @@
 
 #include <ppsi/ppsi.h>
 
-void pp_init_clock(struct pp_instance *ppi)
+void pp_servo_init(struct pp_instance *ppi)
 {
 	pp_diag(ppi, servo, 1, "Initializing\n");
 
@@ -24,90 +24,12 @@ void pp_init_clock(struct pp_instance *ppi)
 		ppi->t_ops->adjust(ppi, 0, 0);
 }
 
-/* called by slave states */
-void pp_update_delay(struct pp_instance *ppi, TimeInternal *correction_field)
-{
-	TimeInternal s_to_m_dly;
-	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
-	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
-	int s;
-
-	/* calc 'slave to master' delay */
-	sub_TimeInternal(&s_to_m_dly, &ppi->t4,	&ppi->t3);
-
-	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
-		pp_diag(ppi, servo, 1, "%s aborted, delay "
-				   "greater than 1 second\n", __func__);
-		if (s_to_m_dly.seconds)
-			return;
-
-		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
-			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
-				   "than administratively set maximum %d\n",
-				   __func__,
-				   (int)s_to_m_dly.nanoseconds,
-				   (int)OPTS(ppi)->max_dly);
-		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
-			return;
-	}
-
-	if (!OPTS(ppi)->ofst_first_updated)
-		return;
-
-	/* calc 'slave to_master' delay (master to slave delay is
-	 * already computed in pp_update_offset)
-	 */
-	sub_TimeInternal(&SRV(ppi)->delay_sm, &ppi->t4,	&ppi->t3);
-
-	/* update 'one_way_delay' */
-	add_TimeInternal(mpd, &SRV(ppi)->delay_sm, &SRV(ppi)->delay_ms);
-
-	/* Subtract correction_field */
-	sub_TimeInternal(mpd, mpd, correction_field);
-
-	/* Compute one-way delay */
-	div2_TimeInternal(mpd);
-
-
-	if (mpd->seconds) {
-		/* cannot filter with secs, clear filter */
-		owd_fltr->s_exp = 0;
-		owd_fltr->nsec_prev = 0;
-		return;
-	}
-
-	/* avoid overflowing filter */
-	s = OPTS(ppi)->s;
-	while (abs(owd_fltr->y) >> (31 - s))
-		--s;
-
-	/* crank down filter cutoff by increasing 's_exp' */
-	if (owd_fltr->s_exp < 1)
-		owd_fltr->s_exp = 1;
-	else if (owd_fltr->s_exp < 1 << s)
-		++owd_fltr->s_exp;
-	else if (owd_fltr->s_exp > 1 << s)
-		owd_fltr->s_exp = 1 << s;
-
-	/* Use the average between current value and previous one */
-	mpd->nanoseconds = (mpd->nanoseconds + owd_fltr->nsec_prev) / 2;
-	owd_fltr->nsec_prev = mpd->nanoseconds;
-
-	/* filter 'meanPathDelay' (running average) */
-	owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1) + mpd->nanoseconds)
-		/ owd_fltr->s_exp;
-
-	mpd->nanoseconds = owd_fltr->y;
-
-	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
-		(int)owd_fltr->y, (int)owd_fltr->s_exp);
-}
-
 /*
- * Called by slave and uncalib.
+ * Called by slave and uncalib. (pp_servo_got_sync, below in this file).
  * Please note that it only uses t1 and t2, so I think it needs review - ARub
  */
-void pp_update_offset(struct pp_instance *ppi, TimeInternal *correction_field)
+static void pp_update_offset(struct pp_instance *ppi,
+			     TimeInternal *correction_field)
 {
 	TimeInternal m_to_s_dly;
 	struct pp_ofm_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
@@ -195,7 +117,7 @@ static void __pp_update_clock(struct pp_instance *ppi)
 				sub_TimeInternal(&time_tmp, &time_tmp,
 					&DSCUR(ppi)->offsetFromMaster);
 				ppi->t_ops->set(ppi, &time_tmp);
-				pp_init_clock(ppi);
+				pp_servo_init(ppi);
 			} else {
 				adj = DSCUR(ppi)->offsetFromMaster.nanoseconds
 					> 0 ? PP_ADJ_FREQ_MAX:-PP_ADJ_FREQ_MAX;
@@ -245,7 +167,7 @@ static void format_TimeInternal(char *s, TimeInternal *t)
 
 
 /* called only *exactly* after calling pp_update_offset above */
-void pp_update_clock(struct pp_instance *ppi)
+static void pp_update_clock(struct pp_instance *ppi)
 {
 	char s[24];
 
@@ -259,4 +181,96 @@ void pp_update_clock(struct pp_instance *ppi)
 	pp_diag(ppi, servo, 2, "Offset from master:     %s\n", s);
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
 		(int)SRV(ppi)->obs_drift);
+}
+
+void pp_servo_got_sync(struct pp_instance *ppi)
+{
+	pp_update_offset(ppi, &ppi->cField);
+	pp_update_clock(ppi);
+}
+
+
+/* called by slave states when delay_resp is received (all t1..t4 are valid) */
+static void pp_update_delay(struct pp_instance *ppi,
+			    TimeInternal *correction_field)
+{
+	TimeInternal s_to_m_dly;
+	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
+	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
+	int s;
+
+	/* calc 'slave to master' delay */
+	sub_TimeInternal(&s_to_m_dly, &ppi->t4,	&ppi->t3);
+
+	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
+		pp_diag(ppi, servo, 1, "%s aborted, delay "
+				   "greater than 1 second\n", __func__);
+		if (s_to_m_dly.seconds)
+			return;
+
+		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
+			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
+				   "than administratively set maximum %d\n",
+				   __func__,
+				   (int)s_to_m_dly.nanoseconds,
+				   (int)OPTS(ppi)->max_dly);
+		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
+			return;
+	}
+
+	if (!OPTS(ppi)->ofst_first_updated)
+		return;
+
+	/* calc 'slave to_master' delay (master to slave delay is
+	 * already computed in pp_update_offset)
+	 */
+	sub_TimeInternal(&SRV(ppi)->delay_sm, &ppi->t4,	&ppi->t3);
+
+	/* update 'one_way_delay' */
+	add_TimeInternal(mpd, &SRV(ppi)->delay_sm, &SRV(ppi)->delay_ms);
+
+	/* Subtract correction_field */
+	sub_TimeInternal(mpd, mpd, correction_field);
+
+	/* Compute one-way delay */
+	div2_TimeInternal(mpd);
+
+
+	if (mpd->seconds) {
+		/* cannot filter with secs, clear filter */
+		owd_fltr->s_exp = 0;
+		owd_fltr->nsec_prev = 0;
+		return;
+	}
+
+	/* avoid overflowing filter */
+	s = OPTS(ppi)->s;
+	while (abs(owd_fltr->y) >> (31 - s))
+		--s;
+
+	/* crank down filter cutoff by increasing 's_exp' */
+	if (owd_fltr->s_exp < 1)
+		owd_fltr->s_exp = 1;
+	else if (owd_fltr->s_exp < 1 << s)
+		++owd_fltr->s_exp;
+	else if (owd_fltr->s_exp > 1 << s)
+		owd_fltr->s_exp = 1 << s;
+
+	/* Use the average between current value and previous one */
+	mpd->nanoseconds = (mpd->nanoseconds + owd_fltr->nsec_prev) / 2;
+	owd_fltr->nsec_prev = mpd->nanoseconds;
+
+	/* filter 'meanPathDelay' (running average) */
+	owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1) + mpd->nanoseconds)
+		/ owd_fltr->s_exp;
+
+	mpd->nanoseconds = owd_fltr->y;
+
+	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
+		(int)owd_fltr->y, (int)owd_fltr->s_exp);
+}
+
+void pp_servo_got_resp(struct pp_instance *ppi)
+{
+	pp_update_delay(ppi, &ppi->cField);
 }
