@@ -54,7 +54,7 @@ static int __pp_servo_got_sync(struct pp_instance *ppi)
 		if (m_to_s_dly.seconds) {
 			pp_diag(ppi, servo, 1, "%s aborted, delay greater "
 				"than 1 second\n", __func__);
-			return -1;
+			return 0; /* not good */
 		}
 		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly) {
 			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
@@ -62,7 +62,7 @@ static int __pp_servo_got_sync(struct pp_instance *ppi)
 			     __func__,
 			     (int)m_to_s_dly.nanoseconds,
 			     (int)OPTS(ppi)->max_dly);
-			return -1;
+			return 0; /* not good */
 		}
 	}
 
@@ -94,7 +94,7 @@ static int __pp_servo_got_sync(struct pp_instance *ppi)
 		if (DSCUR(ppi)->offsetFromMaster.seconds) {
 			pp_diag(ppi, servo, 1, "%s aborted, offset greater "
 				"than 1 second\n", __func__);
-			return -1;
+			return 0; /* not good */
 		}
 
 		if ((DSCUR(ppi)->offsetFromMaster.nanoseconds) >
@@ -104,7 +104,7 @@ static int __pp_servo_got_sync(struct pp_instance *ppi)
 			     __func__,
 			     (int)DSCUR(ppi)->offsetFromMaster.nanoseconds,
 			     (int)OPTS(ppi)->max_rst);
-			return -1;
+			return 0; /* not good */
 		}
 	}
 
@@ -129,7 +129,7 @@ adjust:
 					ppi->t_ops->adjust_offset(ppi, -adj);
 			}
 		}
-		return 0;
+		return 1; /* ok */
 	}
 
 	/* the PI controller */
@@ -156,7 +156,7 @@ adjust:
 		else
 			ppi->t_ops->adjust_offset(ppi, -adj);
 	}
-	return 0;
+	return 1; /* ok */
 }
 
 /* Called by slave and uncalib when we have t1 and t2 */
@@ -164,12 +164,11 @@ void pp_servo_got_sync(struct pp_instance *ppi)
 {
 	char s[24];
 
-	if (__pp_servo_got_sync(ppi)) { /* error: message already reported */
-		OPTS(ppi)->ofst_first_updated = 0;
+	SRV(ppi)->t1_t2_valid = __pp_servo_got_sync(ppi);
+	if (!SRV(ppi)->t1_t2_valid) {
+		/* error: message already reported */
 		return;
 	}
-
-	OPTS(ppi)->ofst_first_updated = 1;
 
 	/* Ok: print data */
 	format_TimeInternal(s, &SRV(ppi)->m_to_s_dly);
@@ -192,7 +191,7 @@ static void pp_update_delay(struct pp_instance *ppi,
 	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
 	int s;
 
-	if (!OPTS(ppi)->ofst_first_updated)
+	if (!SRV(ppi)->t1_t2_valid)
 		return;
 
 	/* calc 'slave to master' delay */

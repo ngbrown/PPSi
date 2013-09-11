@@ -26,7 +26,6 @@ struct pp_runtime_opts {
 			/* ethernet_mode:1, -- moved to ppsi, is no more global */
 			/* e2e_mode:1, -- no more: we only support e2e */
 			/* gptp_mode:1, -- no more: peer-to-peer unsupported */
-			ofst_first_updated:1,
 			no_rst_clk:1;
 	Integer16 ap, ai;
 	Integer16 s;
@@ -105,6 +104,7 @@ struct pp_servo {
 	Integer32 obs_drift;
 	struct pp_owd_fltr owd_fltr;
 	struct pp_ofm_fltr ofm_fltr;
+	int t1_t2_valid; /* set at sync/follow-up time */
 };
 
 /*
