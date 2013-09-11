@@ -203,10 +203,11 @@ static void pp_update_delay(struct pp_instance *ppi,
 	sub_TimeInternal(&s_to_m_dly, &ppi->t4,	&ppi->t3);
 
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
-		pp_diag(ppi, servo, 1, "%s aborted, delay "
-				   "greater than 1 second\n", __func__);
-		if (s_to_m_dly.seconds)
+		if (s_to_m_dly.seconds) {
+			pp_diag(ppi, servo, 1, "%s aborted, delay "
+				"greater than 1 second\n", __func__);
 			return;
+		}
 
 		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
 			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
