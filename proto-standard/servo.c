@@ -39,14 +39,17 @@ static void format_TimeInternal(char *s, TimeInternal *t)
  */
 static int __pp_servo_got_sync(struct pp_instance *ppi)
 {
-	TimeInternal *correction_field = &ppi->cField;
 	TimeInternal m_to_s_dly;
 	TimeInternal time_tmp;
 	struct pp_ofm_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
 	Integer32 adj;
 
-	/* calc 'master_to_slave_delay' */
+	/*
+	 * calc 'master_to_slave_delay', removing the correction field
+	 * added by transparent clocks in the path.
+	 */
 	sub_TimeInternal(&m_to_s_dly, &ppi->t2, &ppi->t1);
+	sub_TimeInternal(&m_to_s_dly, &m_to_s_dly, &ppi->cField);
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
 		if (m_to_s_dly.seconds) {
@@ -65,12 +68,6 @@ static int __pp_servo_got_sync(struct pp_instance *ppi)
 	}
 
 	SRV(ppi)->m_to_s_dly = m_to_s_dly;
-
-	sub_TimeInternal(&SRV(ppi)->delay_ms, &ppi->t2, &ppi->t1);
-
-	/* Take care about correctionField */
-	sub_TimeInternal(&SRV(ppi)->m_to_s_dly,
-		&SRV(ppi)->m_to_s_dly, correction_field);
 
 	/* update 'offsetFromMaster', (End to End mode) */
 	sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster,
@@ -179,10 +176,8 @@ void pp_servo_got_sync(struct pp_instance *ppi)
 		(int)SRV(ppi)->obs_drift);
 }
 
-
 /* called by slave states when delay_resp is received (all t1..t4 are valid) */
-static void pp_update_delay(struct pp_instance *ppi,
-			    TimeInternal *correction_field)
+void pp_servo_got_resp(struct pp_instance *ppi)
 {
 	TimeInternal s_to_m_dly;
 	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
@@ -192,8 +187,12 @@ static void pp_update_delay(struct pp_instance *ppi,
 	if (!SRV(ppi)->t1_t2_valid)
 		return;
 
-	/* calc 'slave to master' delay */
+	/*
+	 * calc 'slave_to_master_delay', removing the correction field
+	 * added by transparent clocks in the path.
+	 */
 	sub_TimeInternal(&s_to_m_dly, &ppi->t4,	&ppi->t3);
+	sub_TimeInternal(&s_to_m_dly, &s_to_m_dly, &ppi->cField);
 
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
 		if (s_to_m_dly.seconds) {
@@ -212,20 +211,13 @@ static void pp_update_delay(struct pp_instance *ppi,
 			return;
 	}
 
-	/* calc 'slave to_master' delay (master to slave delay is
-	 * already computed in pp_update_offset)
-	 */
-	sub_TimeInternal(&SRV(ppi)->delay_sm, &ppi->t4,	&ppi->t3);
+	SRV(ppi)->s_to_m_dly = s_to_m_dly;
 
 	/* update 'one_way_delay' */
-	add_TimeInternal(mpd, &SRV(ppi)->delay_sm, &SRV(ppi)->delay_ms);
-
-	/* Subtract correction_field */
-	sub_TimeInternal(mpd, mpd, correction_field);
+	add_TimeInternal(mpd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
 
 	/* Compute one-way delay */
 	div2_TimeInternal(mpd);
-
 
 	if (mpd->seconds) {
 		/* cannot filter with secs, clear filter */
@@ -259,9 +251,4 @@ static void pp_update_delay(struct pp_instance *ppi,
 
 	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
 		(int)owd_fltr->y, (int)owd_fltr->s_exp);
-}
-
-void pp_servo_got_resp(struct pp_instance *ppi)
-{
-	pp_update_delay(ppi, &ppi->cField);
 }

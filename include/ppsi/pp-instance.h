@@ -91,16 +91,8 @@ struct pp_owd_fltr {
 };
 
 struct pp_servo {
-	/* TODO check. Which is the difference between m_to_s_dly (which
-	 * comes from ptpd's master_to_slave_delay) and delay_ms (which comes
-	 * from ptpd's delay_MS? Seems like ptpd actually uses only delay_MS.
-	 * The same of course must be checked for their equivalents,
-	 * s_to_m_dly and delay_sm
-	 */
 	TimeInternal m_to_s_dly;
 	TimeInternal s_to_m_dly;
-	TimeInternal delay_ms;
-	TimeInternal delay_sm;
 	Integer32 obs_drift;
 	struct pp_owd_fltr owd_fltr;
 	struct pp_ofm_fltr ofm_fltr;
