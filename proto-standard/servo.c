@@ -97,6 +97,44 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 			return;
 	}
 
+	/* Calc mean path delay, used later to calc "offset from master" */
+	add_TimeInternal(mpd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
+	div2_TimeInternal(mpd);
+
+	if (mpd->seconds) {
+		/* cannot filter with secs, clear filter */
+		owd_fltr->s_exp = 0;
+		owd_fltr->nsec_prev = 0;
+		goto done_mpd;
+	}
+
+	/* avoid overflowing filter */
+	s = OPTS(ppi)->s;
+	while (abs(owd_fltr->y) >> (31 - s))
+		--s;
+
+	/* crank down filter cutoff by increasing 's_exp' */
+	if (owd_fltr->s_exp < 1)
+		owd_fltr->s_exp = 1;
+	else if (owd_fltr->s_exp < 1 << s)
+		++owd_fltr->s_exp;
+	else if (owd_fltr->s_exp > 1 << s)
+		owd_fltr->s_exp = 1 << s;
+
+	/* Use the average between current value and previous one */
+	mpd->nanoseconds = (mpd->nanoseconds + owd_fltr->nsec_prev) / 2;
+	owd_fltr->nsec_prev = mpd->nanoseconds;
+
+	/* filter 'meanPathDelay' (running average) */
+	owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1) + mpd->nanoseconds)
+		/ owd_fltr->s_exp;
+
+	mpd->nanoseconds = owd_fltr->y;
+
+	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
+		(int)owd_fltr->y, (int)owd_fltr->s_exp);
+done_mpd:
+
 	/* update 'offsetFromMaster', (End to End mode) */
 	sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster,
 			m_to_s_dly,
@@ -179,45 +217,6 @@ adjust:
 		else
 			ppi->t_ops->adjust_offset(ppi, -adj);
 	}
-
-	/* update 'one_way_delay' */
-	add_TimeInternal(mpd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
-
-	/* Compute one-way delay */
-	div2_TimeInternal(mpd);
-
-	if (mpd->seconds) {
-		/* cannot filter with secs, clear filter */
-		owd_fltr->s_exp = 0;
-		owd_fltr->nsec_prev = 0;
-		return;
-	}
-
-	/* avoid overflowing filter */
-	s = OPTS(ppi)->s;
-	while (abs(owd_fltr->y) >> (31 - s))
-		--s;
-
-	/* crank down filter cutoff by increasing 's_exp' */
-	if (owd_fltr->s_exp < 1)
-		owd_fltr->s_exp = 1;
-	else if (owd_fltr->s_exp < 1 << s)
-		++owd_fltr->s_exp;
-	else if (owd_fltr->s_exp > 1 << s)
-		owd_fltr->s_exp = 1 << s;
-
-	/* Use the average between current value and previous one */
-	mpd->nanoseconds = (mpd->nanoseconds + owd_fltr->nsec_prev) / 2;
-	owd_fltr->nsec_prev = mpd->nanoseconds;
-
-	/* filter 'meanPathDelay' (running average) */
-	owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1) + mpd->nanoseconds)
-		/ owd_fltr->s_exp;
-
-	mpd->nanoseconds = owd_fltr->y;
-
-	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
-		(int)owd_fltr->y, (int)owd_fltr->s_exp);
 
 	/* Ok: print data if asked to, or don't even format_TimeInternal */
 	if (pp_diag_allow(ppi, servo, 2)) {
