@@ -24,15 +24,28 @@ void pp_servo_init(struct pp_instance *ppi)
 		ppi->t_ops->adjust(ppi, 0, 0);
 }
 
-/*
- * Called by slave and uncalib. (pp_servo_got_sync, below in this file).
- * Please note that it only uses t1 and t2, so I think it needs review - ARub
- */
-static void pp_update_offset(struct pp_instance *ppi,
-			     TimeInternal *correction_field)
+/* internal helper */
+static void format_TimeInternal(char *s, TimeInternal *t)
 {
+	pp_sprintf(s, "%s%d.%09d",
+		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0))
+		   ? "-" : " ",
+		   (int)abs(t->seconds), (int)abs(t->nanoseconds));
+}
+
+
+/*
+ * Actual body of pp_servo_got_sync: the outer function prints logs
+ * so we can return in different places.
+ * Called by slave and uncalib when we have t1 and t2
+ */
+static int __pp_servo_got_sync(struct pp_instance *ppi)
+{
+	TimeInternal *correction_field = &ppi->cField;
 	TimeInternal m_to_s_dly;
+	TimeInternal time_tmp;
 	struct pp_ofm_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
+	Integer32 adj;
 
 	/* calc 'master_to_slave_delay' */
 	sub_TimeInternal(&m_to_s_dly, &ppi->t2, &ppi->t1);
@@ -41,7 +54,7 @@ static void pp_update_offset(struct pp_instance *ppi,
 		if (m_to_s_dly.seconds) {
 			pp_diag(ppi, servo, 1, "%s aborted, delay greater "
 				"than 1 second\n", __func__);
-			return;
+			return -1;
 		}
 		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly) {
 			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
@@ -49,14 +62,13 @@ static void pp_update_offset(struct pp_instance *ppi,
 			     __func__,
 			     (int)m_to_s_dly.nanoseconds,
 			     (int)OPTS(ppi)->max_dly);
-			return;
+			return -1;
 		}
 	}
 
 	SRV(ppi)->m_to_s_dly = m_to_s_dly;
 
 	sub_TimeInternal(&SRV(ppi)->delay_ms, &ppi->t2, &ppi->t1);
-	/* Used just for End to End mode. */
 
 	/* Take care about correctionField */
 	sub_TimeInternal(&SRV(ppi)->m_to_s_dly,
@@ -70,7 +82,7 @@ static void pp_update_offset(struct pp_instance *ppi,
 	if (DSCUR(ppi)->offsetFromMaster.seconds) {
 		/* cannot filter with secs, clear filter */
 		ofm_fltr->nsec_prev = 0;
-		return;
+		goto adjust;
 	}
 	/* filter 'offsetFromMaster' */
 	ofm_fltr->y = DSCUR(ppi)->offsetFromMaster.nanoseconds / 2 +
@@ -78,23 +90,11 @@ static void pp_update_offset(struct pp_instance *ppi,
 	ofm_fltr->nsec_prev = DSCUR(ppi)->offsetFromMaster.nanoseconds;
 	DSCUR(ppi)->offsetFromMaster.nanoseconds = ofm_fltr->y;
 
-	/* Offset must have been computed at least one time before
-	 * computing end to end delay */
-	if (!OPTS(ppi)->ofst_first_updated)
-		OPTS(ppi)->ofst_first_updated = 1;
-}
-
-/* This internal code is used to avoid "goto display" and always have diags */
-static void __pp_update_clock(struct pp_instance *ppi)
-{
-	Integer32 adj;
-	TimeInternal time_tmp;
-
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
 		if (DSCUR(ppi)->offsetFromMaster.seconds) {
 			pp_diag(ppi, servo, 1, "%s aborted, offset greater "
 				"than 1 second\n", __func__);
-			return;
+			return -1;
 		}
 
 		if ((DSCUR(ppi)->offsetFromMaster.nanoseconds) >
@@ -104,10 +104,11 @@ static void __pp_update_clock(struct pp_instance *ppi)
 			     __func__,
 			     (int)DSCUR(ppi)->offsetFromMaster.nanoseconds,
 			     (int)OPTS(ppi)->max_rst);
-			return;
+			return -1;
 		}
 	}
 
+adjust:
 	if (DSCUR(ppi)->offsetFromMaster.seconds) {
 		/* if secs, reset clock or set freq adjustment to max */
 		if (!OPTS(ppi)->no_adjust) {
@@ -128,7 +129,7 @@ static void __pp_update_clock(struct pp_instance *ppi)
 					ppi->t_ops->adjust_offset(ppi, -adj);
 			}
 		}
-		return;
+		return 0;
 	}
 
 	/* the PI controller */
@@ -155,24 +156,22 @@ static void __pp_update_clock(struct pp_instance *ppi)
 		else
 			ppi->t_ops->adjust_offset(ppi, -adj);
 	}
+	return 0;
 }
 
-static void format_TimeInternal(char *s, TimeInternal *t)
-{
-	pp_sprintf(s, "%s%d.%09d",
-		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0))
-		   ? "-" : " ",
-		   (int)abs(t->seconds), (int)abs(t->nanoseconds));
-}
-
-
-/* called only *exactly* after calling pp_update_offset above */
-static void pp_update_clock(struct pp_instance *ppi)
+/* Called by slave and uncalib when we have t1 and t2 */
+void pp_servo_got_sync(struct pp_instance *ppi)
 {
 	char s[24];
 
-	__pp_update_clock(ppi);
+	if (__pp_servo_got_sync(ppi)) { /* error: message already reported */
+		OPTS(ppi)->ofst_first_updated = 0;
+		return;
+	}
 
+	OPTS(ppi)->ofst_first_updated = 1;
+
+	/* Ok: print data */
 	format_TimeInternal(s, &SRV(ppi)->m_to_s_dly);
 	pp_diag(ppi, servo, 2, "Raw offset from master: %s\n", s);
 	format_TimeInternal(s, &DSCUR(ppi)->meanPathDelay);
@@ -181,12 +180,6 @@ static void pp_update_clock(struct pp_instance *ppi)
 	pp_diag(ppi, servo, 2, "Offset from master:     %s\n", s);
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
 		(int)SRV(ppi)->obs_drift);
-}
-
-void pp_servo_got_sync(struct pp_instance *ppi)
-{
-	pp_update_offset(ppi, &ppi->cField);
-	pp_update_clock(ppi);
 }
 
 
@@ -198,6 +191,9 @@ static void pp_update_delay(struct pp_instance *ppi,
 	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
 	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
 	int s;
+
+	if (!OPTS(ppi)->ofst_first_updated)
+		return;
 
 	/* calc 'slave to master' delay */
 	sub_TimeInternal(&s_to_m_dly, &ppi->t4,	&ppi->t3);
@@ -218,9 +214,6 @@ static void pp_update_delay(struct pp_instance *ppi,
 		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
 			return;
 	}
-
-	if (!OPTS(ppi)->ofst_first_updated)
-		return;
 
 	/* calc 'slave to_master' delay (master to slave delay is
 	 * already computed in pp_update_offset)
