@@ -13,8 +13,6 @@ void pp_servo_init(struct pp_instance *ppi)
 	pp_diag(ppi, servo, 1, "Initializing\n");
 
 	/* clear vars */
-	clear_TimeInternal(&SRV(ppi)->m_to_s_dly);
-	clear_TimeInternal(&SRV(ppi)->s_to_m_dly);
 	SRV(ppi)->obs_drift = 0;	/* clears clock servo accumulator (the
 					 * I term) */
 	SRV(ppi)->owd_fltr.s_exp = 0;	/* clears one-way delay filter */
