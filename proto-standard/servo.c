@@ -38,32 +38,31 @@ static void format_TimeInternal(char *s, TimeInternal *t)
  */
 static int __pp_servo_got_sync(struct pp_instance *ppi)
 {
-	TimeInternal m_to_s_dly;
+	TimeInternal *m_to_s_dly = &SRV(ppi)->m_to_s_dly;
 
 	/*
 	 * calc 'master_to_slave_delay', removing the correction field
 	 * added by transparent clocks in the path.
 	 */
-	sub_TimeInternal(&m_to_s_dly, &ppi->t2, &ppi->t1);
-	sub_TimeInternal(&m_to_s_dly, &m_to_s_dly, &ppi->cField);
+	sub_TimeInternal(m_to_s_dly, &ppi->t2, &ppi->t1);
+	sub_TimeInternal(m_to_s_dly, m_to_s_dly, &ppi->cField);
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
-		if (m_to_s_dly.seconds) {
+		if (m_to_s_dly->seconds) {
 			pp_diag(ppi, servo, 1, "%s aborted, delay greater "
 				"than 1 second\n", __func__);
 			return 0; /* not good */
 		}
-		if (m_to_s_dly.nanoseconds > OPTS(ppi)->max_dly) {
+		if (m_to_s_dly->nanoseconds > OPTS(ppi)->max_dly) {
 			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
 			     "than administratively set maximum %d\n",
 			     __func__,
-			     (int)m_to_s_dly.nanoseconds,
+			     (int)m_to_s_dly->nanoseconds,
 			     (int)OPTS(ppi)->max_dly);
 			return 0; /* not good */
 		}
 	}
 
-	SRV(ppi)->m_to_s_dly = m_to_s_dly;
 	return 1; /* ok */
 }
 
@@ -80,7 +79,8 @@ void pp_servo_got_sync(struct pp_instance *ppi)
 /* called by slave states when delay_resp is received (all t1..t4 are valid) */
 void pp_servo_got_resp(struct pp_instance *ppi)
 {
-	TimeInternal s_to_m_dly;
+	TimeInternal *m_to_s_dly = &SRV(ppi)->m_to_s_dly;
+	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
 	TimeInternal time_tmp;
 	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
 	struct pp_ofm_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
@@ -95,31 +95,29 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	 * calc 'slave_to_master_delay', removing the correction field
 	 * added by transparent clocks in the path.
 	 */
-	sub_TimeInternal(&s_to_m_dly, &ppi->t4,	&ppi->t3);
-	sub_TimeInternal(&s_to_m_dly, &s_to_m_dly, &ppi->cField);
+	sub_TimeInternal(s_to_m_dly, &ppi->t4,	&ppi->t3);
+	sub_TimeInternal(s_to_m_dly, s_to_m_dly, &ppi->cField);
 
 	if (OPTS(ppi)->max_dly) { /* If max_delay is 0 then it's OFF */
-		if (s_to_m_dly.seconds) {
+		if (s_to_m_dly->seconds) {
 			pp_diag(ppi, servo, 1, "%s aborted, delay "
 				"greater than 1 second\n", __func__);
 			return;
 		}
 
-		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
+		if (s_to_m_dly->nanoseconds > OPTS(ppi)->max_dly)
 			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
 				   "than administratively set maximum %d\n",
 				   __func__,
-				   (int)s_to_m_dly.nanoseconds,
+				   (int)s_to_m_dly->nanoseconds,
 				   (int)OPTS(ppi)->max_dly);
-		if (s_to_m_dly.nanoseconds > OPTS(ppi)->max_dly)
+		if (s_to_m_dly->nanoseconds > OPTS(ppi)->max_dly)
 			return;
 	}
 
-	SRV(ppi)->s_to_m_dly = s_to_m_dly;
-
 	/* update 'offsetFromMaster', (End to End mode) */
 	sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster,
-			&SRV(ppi)->m_to_s_dly,
+			m_to_s_dly,
 			&DSCUR(ppi)->meanPathDelay);
 
 	if (DSCUR(ppi)->offsetFromMaster.seconds) {
