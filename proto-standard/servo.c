@@ -22,13 +22,16 @@ void pp_servo_init(struct pp_instance *ppi)
 		ppi->t_ops->adjust(ppi, 0, 0);
 }
 
-/* internal helper */
-static void format_TimeInternal(char *s, TimeInternal *t)
+/* internal helper, retuerning static storage to be used immediately */
+static char *fmt_TI(TimeInternal *t)
 {
+	static char s[24];
+
 	pp_sprintf(s, "%s%d.%09d",
 		(t->seconds < 0 || (t->seconds == 0 && t->nanoseconds < 0))
 		   ? "-" : " ",
 		   (int)abs(t->seconds), (int)abs(t->nanoseconds));
+	return s;
 }
 
 
@@ -43,6 +46,8 @@ void pp_servo_got_sync(struct pp_instance *ppi)
 	 */
 	sub_TimeInternal(m_to_s_dly, &ppi->t2, &ppi->t1);
 	sub_TimeInternal(m_to_s_dly, m_to_s_dly, &ppi->cField);
+	pp_diag(ppi, servo, 3, "correction field 1: %s\n",
+		fmt_TI(&ppi->cField));
 }
 
 /* called by slave states when delay_resp is received (all t1..t4 are valid) */
@@ -63,6 +68,15 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	 */
 	sub_TimeInternal(s_to_m_dly, &ppi->t4,	&ppi->t3);
 	sub_TimeInternal(s_to_m_dly, s_to_m_dly, &ppi->cField);
+	pp_diag(ppi, servo, 3, "correction field 2: %s\n",
+		fmt_TI(&ppi->cField));
+
+	pp_diag(ppi, servo, 2, "T1: %s\n", fmt_TI(&ppi->t1));
+	pp_diag(ppi, servo, 2, "T2: %s\n", fmt_TI(&ppi->t2));
+	pp_diag(ppi, servo, 2, "T3: %s\n", fmt_TI(&ppi->t3));
+	pp_diag(ppi, servo, 2, "T4: %s\n", fmt_TI(&ppi->t4));
+	pp_diag(ppi, servo, 1, "Master to slave: %s\n", fmt_TI(m_to_s_dly));
+	pp_diag(ppi, servo, 1, "Slave to master: %s\n", fmt_TI(s_to_m_dly));
 
 	/* Check for too-big offsets, and then make the calculation */
 
@@ -100,45 +114,43 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	/* Calc mean path delay, used later to calc "offset from master" */
 	add_TimeInternal(mpd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
 	div2_TimeInternal(mpd);
+	pp_diag(ppi, servo, 1, "Path Delay: %s\n", fmt_TI(mpd));
 
 	if (mpd->seconds) {
 		/* cannot filter with secs, clear filter */
 		owd_fltr->s_exp = 0;
 		owd_fltr->nsec_prev = 0;
-		goto done_mpd;
+	} else {
+		/* avoid overflowing filter */
+		s = OPTS(ppi)->s;
+		while (abs(owd_fltr->y) >> (31 - s))
+			--s;
+
+		/* crank down filter cutoff by increasing 's_exp' */
+		if (owd_fltr->s_exp < 1)
+			owd_fltr->s_exp = 1;
+		else if (owd_fltr->s_exp < 1 << s)
+			++owd_fltr->s_exp;
+		else if (owd_fltr->s_exp > 1 << s)
+			owd_fltr->s_exp = 1 << s;
+
+		/* Use the average between current value and previous one */
+		mpd->nanoseconds = (mpd->nanoseconds + owd_fltr->nsec_prev) / 2;
+		owd_fltr->nsec_prev = mpd->nanoseconds;
+
+		/* filter 'meanPathDelay' (running average) */
+		owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1)
+			       + mpd->nanoseconds)
+			/ owd_fltr->s_exp;
+
+		mpd->nanoseconds = owd_fltr->y;
+
+		pp_diag(ppi, servo, 1, "After avg(%i), path delay: %i\n",
+			(int)owd_fltr->s_exp, mpd->nanoseconds);
 	}
 
-	/* avoid overflowing filter */
-	s = OPTS(ppi)->s;
-	while (abs(owd_fltr->y) >> (31 - s))
-		--s;
-
-	/* crank down filter cutoff by increasing 's_exp' */
-	if (owd_fltr->s_exp < 1)
-		owd_fltr->s_exp = 1;
-	else if (owd_fltr->s_exp < 1 << s)
-		++owd_fltr->s_exp;
-	else if (owd_fltr->s_exp > 1 << s)
-		owd_fltr->s_exp = 1 << s;
-
-	/* Use the average between current value and previous one */
-	mpd->nanoseconds = (mpd->nanoseconds + owd_fltr->nsec_prev) / 2;
-	owd_fltr->nsec_prev = mpd->nanoseconds;
-
-	/* filter 'meanPathDelay' (running average) */
-	owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1) + mpd->nanoseconds)
-		/ owd_fltr->s_exp;
-
-	mpd->nanoseconds = owd_fltr->y;
-
-	pp_diag(ppi, servo, 1, "delay filter %d, %d\n",
-		(int)owd_fltr->y, (int)owd_fltr->s_exp);
-done_mpd:
-
 	/* update 'offsetFromMaster', (End to End mode) */
-	sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster,
-			m_to_s_dly,
-			&DSCUR(ppi)->meanPathDelay);
+	sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster, m_to_s_dly, mpd);
 
 	if (DSCUR(ppi)->offsetFromMaster.seconds) {
 		/* cannot filter with secs, clear filter */
@@ -218,17 +230,10 @@ adjust:
 			ppi->t_ops->adjust_offset(ppi, -adj);
 	}
 
-	/* Ok: print data if asked to, or don't even format_TimeInternal */
-	if (pp_diag_allow(ppi, servo, 2)) {
-		char s[24];
-
-		format_TimeInternal(s, &SRV(ppi)->m_to_s_dly);
-		pp_diag(ppi, servo, 2, "Raw offset from master: %s\n", s);
-		format_TimeInternal(s, &DSCUR(ppi)->meanPathDelay);
-		pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n", s);
-		format_TimeInternal(s, &DSCUR(ppi)->offsetFromMaster);
-		pp_diag(ppi, servo, 2, "Offset from master:     %s\n", s);
-		pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
-			(int)SRV(ppi)->obs_drift);
-	}
+	pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n",
+		fmt_TI(&DSCUR(ppi)->meanPathDelay));
+	pp_diag(ppi, servo, 2, "Offset from master:     %s\n",
+		fmt_TI( &DSCUR(ppi)->offsetFromMaster));
+	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
+		(int)SRV(ppi)->obs_drift);
 }
