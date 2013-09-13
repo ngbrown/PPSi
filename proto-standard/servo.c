@@ -56,7 +56,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	TimeInternal *m_to_s_dly = &SRV(ppi)->m_to_s_dly;
 	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
 	TimeInternal time_tmp;
-	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
+	TimeInternal *owd = &DSCUR(ppi)->oneWayDelay;
 	struct pp_ofm_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
 	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
 	Integer32 adj;
@@ -112,11 +112,11 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	}
 
 	/* Calc mean path delay, used later to calc "offset from master" */
-	add_TimeInternal(mpd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
-	div2_TimeInternal(mpd);
-	pp_diag(ppi, servo, 1, "Path Delay: %s\n", fmt_TI(mpd));
+	add_TimeInternal(owd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
+	div2_TimeInternal(owd);
+	pp_diag(ppi, servo, 1, "One-way delay: %s\n", fmt_TI(owd));
 
-	if (mpd->seconds) {
+	if (owd->seconds) {
 		/* cannot filter with secs, clear filter */
 		owd_fltr->s_exp = 0;
 		owd_fltr->nsec_prev = 0;
@@ -135,22 +135,22 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 			owd_fltr->s_exp = 1 << s;
 
 		/* Use the average between current value and previous one */
-		mpd->nanoseconds = (mpd->nanoseconds + owd_fltr->nsec_prev) / 2;
-		owd_fltr->nsec_prev = mpd->nanoseconds;
+		owd->nanoseconds = (owd->nanoseconds + owd_fltr->nsec_prev) / 2;
+		owd_fltr->nsec_prev = owd->nanoseconds;
 
-		/* filter 'meanPathDelay' (running average) */
+		/* filter 'oneWayDelay' (running average) */
 		owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1)
-			       + mpd->nanoseconds)
+			       + owd->nanoseconds)
 			/ owd_fltr->s_exp;
 
-		mpd->nanoseconds = owd_fltr->y;
+		owd->nanoseconds = owd_fltr->y;
 
-		pp_diag(ppi, servo, 1, "After avg(%i), path delay: %i\n",
-			(int)owd_fltr->s_exp, mpd->nanoseconds);
+		pp_diag(ppi, servo, 1, "After avg(%i), one-way delay: %i\n",
+			(int)owd_fltr->s_exp, owd->nanoseconds);
 	}
 
 	/* update 'offsetFromMaster', (End to End mode) */
-	sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster, m_to_s_dly, mpd);
+	sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster, m_to_s_dly, owd);
 
 	if (DSCUR(ppi)->offsetFromMaster.seconds) {
 		/* cannot filter with secs, clear filter */
@@ -231,7 +231,7 @@ adjust:
 	}
 
 	pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n",
-		fmt_TI(&DSCUR(ppi)->meanPathDelay));
+		fmt_TI(&DSCUR(ppi)->oneWayDelay));
 	pp_diag(ppi, servo, 2, "Offset from master:     %s\n",
 		fmt_TI( &DSCUR(ppi)->offsetFromMaster));
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
