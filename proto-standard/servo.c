@@ -55,8 +55,8 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 {
 	TimeInternal *m_to_s_dly = &SRV(ppi)->m_to_s_dly;
 	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
-	TimeInternal time_tmp;
 	TimeInternal *owd = &DSCUR(ppi)->oneWayDelay;
+	TimeInternal *ofm = &DSCUR(ppi)->offsetFromMaster;
 	struct pp_ofm_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
 	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
 	Integer32 adj;
@@ -150,51 +150,49 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	}
 
 	/* update 'offsetFromMaster', (End to End mode) */
-	sub_TimeInternal(&DSCUR(ppi)->offsetFromMaster, m_to_s_dly, owd);
+	sub_TimeInternal(ofm, m_to_s_dly, owd);
 
-	if (DSCUR(ppi)->offsetFromMaster.seconds) {
+	if (ofm->seconds) {
 		/* cannot filter with secs, clear filter */
 		ofm_fltr->nsec_prev = 0;
 		goto adjust;
 	}
 	/* filter 'offsetFromMaster' */
-	ofm_fltr->y = DSCUR(ppi)->offsetFromMaster.nanoseconds / 2 +
-		ofm_fltr->nsec_prev / 2;
-	ofm_fltr->nsec_prev = DSCUR(ppi)->offsetFromMaster.nanoseconds;
-	DSCUR(ppi)->offsetFromMaster.nanoseconds = ofm_fltr->y;
+	ofm_fltr->y = (ofm->nanoseconds + ofm_fltr->nsec_prev) / 2;
+	ofm_fltr->nsec_prev = ofm->nanoseconds;
+	ofm->nanoseconds = ofm_fltr->y;
 
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
-		if (DSCUR(ppi)->offsetFromMaster.seconds) {
+		if (ofm->seconds) {
 			pp_diag(ppi, servo, 1, "%s aborted, offset greater "
 				"than 1 second\n", __func__);
 			return; /* not good */
 		}
 
-		if ((DSCUR(ppi)->offsetFromMaster.nanoseconds) >
-		    OPTS(ppi)->max_rst) {
+		if (ofm->nanoseconds > OPTS(ppi)->max_rst) {
 			pp_diag(ppi, servo, 1, "%s aborted, offset %d greater "
-			     "than administratively set maximum %d\n",
-			     __func__,
-			     (int)DSCUR(ppi)->offsetFromMaster.nanoseconds,
-			     (int)OPTS(ppi)->max_rst);
+				"than administratively set maximum %d\n",
+				__func__, ofm->nanoseconds,
+				OPTS(ppi)->max_rst);
 			return; /* not good */
 		}
 	}
 
 adjust:
-	if (DSCUR(ppi)->offsetFromMaster.seconds) {
+	if (ofm->seconds) {
+		TimeInternal time_tmp;
+
 		/* if secs, reset clock or set freq adjustment to max */
 		if (!OPTS(ppi)->no_adjust) {
 			if (!OPTS(ppi)->no_rst_clk) {
 				/* FIXME: use adjust instead of set? */
 				ppi->t_ops->get(ppi, &time_tmp);
-				sub_TimeInternal(&time_tmp, &time_tmp,
-					&DSCUR(ppi)->offsetFromMaster);
+				sub_TimeInternal(&time_tmp, &time_tmp, ofm);
 				ppi->t_ops->set(ppi, &time_tmp);
 				pp_servo_init(ppi);
 			} else {
-				adj = DSCUR(ppi)->offsetFromMaster.nanoseconds
-					> 0 ? PP_ADJ_FREQ_MAX:-PP_ADJ_FREQ_MAX;
+				adj = ofm->nanoseconds > 0
+					? PP_ADJ_FREQ_MAX : -PP_ADJ_FREQ_MAX;
 
 				if (ppi->t_ops->adjust_freq)
 					ppi->t_ops->adjust_freq(ppi, -adj);
@@ -208,9 +206,7 @@ adjust:
 	/* the PI controller */
 
 	/* the accumulator for the I component */
-	SRV(ppi)->obs_drift +=
-		DSCUR(ppi)->offsetFromMaster.nanoseconds /
-		OPTS(ppi)->ai;
+	SRV(ppi)->obs_drift += ofm->nanoseconds / OPTS(ppi)->ai;
 
 	/* clamp the accumulator to PP_ADJ_FREQ_MAX for sanity */
 	if (SRV(ppi)->obs_drift > PP_ADJ_FREQ_MAX)
@@ -218,7 +214,7 @@ adjust:
 	else if (SRV(ppi)->obs_drift < -PP_ADJ_FREQ_MAX)
 		SRV(ppi)->obs_drift = -PP_ADJ_FREQ_MAX;
 
-	adj = DSCUR(ppi)->offsetFromMaster.nanoseconds / OPTS(ppi)->ap +
+	adj = ofm->nanoseconds / OPTS(ppi)->ap +
 		SRV(ppi)->obs_drift;
 
 	/* apply controller output as a clock tick rate adjustment, if
@@ -230,10 +226,8 @@ adjust:
 			ppi->t_ops->adjust_offset(ppi, -adj);
 	}
 
-	pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n",
-		fmt_TI(&DSCUR(ppi)->oneWayDelay));
-	pp_diag(ppi, servo, 2, "Offset from master:     %s\n",
-		fmt_TI( &DSCUR(ppi)->offsetFromMaster));
+	pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n", fmt_TI(owd));
+	pp_diag(ppi, servo, 2, "Offset from master:     %s\n", fmt_TI(ofm));
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
 		(int)SRV(ppi)->obs_drift);
 }
