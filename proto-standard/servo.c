@@ -77,6 +77,11 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	pp_diag(ppi, servo, 1, "Master to slave: %s\n", fmt_TI(m_to_s_dly));
 	pp_diag(ppi, servo, 1, "Slave to master: %s\n", fmt_TI(s_to_m_dly));
 
+	/* Calc mean path delay, used later to calc "offset from master" */
+	add_TimeInternal(owd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
+	div2_TimeInternal(owd);
+	pp_diag(ppi, servo, 1, "One-way delay: %s\n", fmt_TI(owd));
+
 	/* Check for too-big offsets, and then make the calculation */
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
@@ -109,11 +114,6 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		if (s_to_m_dly->nanoseconds > OPTS(ppi)->max_dly)
 			return;
 	}
-
-	/* Calc mean path delay, used later to calc "offset from master" */
-	add_TimeInternal(owd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
-	div2_TimeInternal(owd);
-	pp_diag(ppi, servo, 1, "One-way delay: %s\n", fmt_TI(owd));
 
 	if (owd->seconds) {
 		/* cannot filter with secs, clear filter */
