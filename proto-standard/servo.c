@@ -133,10 +133,6 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		else if (owd_fltr->s_exp > 1 << s)
 			owd_fltr->s_exp = 1 << s;
 
-		/* Use the average between current value and previous one */
-		owd->nanoseconds = (owd->nanoseconds + owd_fltr->nsec_prev) / 2;
-		owd_fltr->nsec_prev = owd->nanoseconds;
-
 		/* filter 'oneWayDelay' (running average) */
 		owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1)
 			       + owd->nanoseconds)
