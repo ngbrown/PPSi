@@ -57,7 +57,6 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
 	TimeInternal *owd = &DSCUR(ppi)->oneWayDelay;
 	TimeInternal *ofm = &DSCUR(ppi)->offsetFromMaster;
-	struct pp_ofm_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
 	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
 	Integer32 adj;
 	int s;
@@ -152,16 +151,6 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	/* update 'offsetFromMaster', (End to End mode) */
 	sub_TimeInternal(ofm, m_to_s_dly, owd);
 
-	if (ofm->seconds) {
-		/* cannot filter with secs, clear filter */
-		ofm_fltr->nsec_prev = 0;
-		goto adjust;
-	}
-	/* filter 'offsetFromMaster' */
-	ofm_fltr->y = (ofm->nanoseconds + ofm_fltr->nsec_prev) / 2;
-	ofm_fltr->nsec_prev = ofm->nanoseconds;
-	ofm->nanoseconds = ofm_fltr->y;
-
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
 		if (ofm->seconds) {
 			pp_diag(ppi, servo, 1, "%s aborted, offset greater "
@@ -178,7 +167,6 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		}
 	}
 
-adjust:
 	if (ofm->seconds) {
 		TimeInternal time_tmp;
 

@@ -71,19 +71,11 @@ struct pp_frgn_master {
  * are used in servo.c src, where specific function for time setting of the
  * machine are implemented.
  *
- * pp_ofm_fltr: The FIR filtering of the offset from master input is a simple,
- * two-sample average
- *
  * pp_owd_fltr: It is a variable cutoff/delay low-pass, infinite impulse
  * response (IIR) filter. The one-way delay filter has the difference equation:
  * s*y[n] - (s-1)*y[n-1] = x[n]/2 + x[n-1]/2,
  * where increasing the stiffness (s) lowers the cutoff and increases the delay.
  */
-struct pp_ofm_fltr {
-	Integer32 nsec_prev;
-	Integer32 y;
-};
-
 struct pp_owd_fltr {
 	Integer32 nsec_prev;
 	Integer32 y;
@@ -95,7 +87,6 @@ struct pp_servo {
 	TimeInternal s_to_m_dly;
 	Integer32 obs_drift;
 	struct pp_owd_fltr owd_fltr;
-	struct pp_ofm_fltr ofm_fltr;
 };
 
 /*
