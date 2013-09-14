@@ -50,6 +50,35 @@ void pp_servo_got_sync(struct pp_instance *ppi)
 		fmt_TI(&ppi->cField));
 }
 
+/*
+ * This function makes the necessary checks to discard a set of t1..t4.
+ * It relies on owd to be already calculated.
+ */
+static int pp_servo_bad_event(struct pp_instance *ppi)
+{
+	TimeInternal *m_to_s_dly = &SRV(ppi)->m_to_s_dly;
+	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
+
+	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
+		if (m_to_s_dly->seconds || s_to_m_dly->seconds) {
+			pp_diag(ppi, servo, 1,"servo aborted, delay greater "
+				"than 1 second\n");
+			return 1;
+		}
+		if (m_to_s_dly->nanoseconds > OPTS(ppi)->max_dly ||
+			s_to_m_dly->nanoseconds > OPTS(ppi)->max_dly) {
+			pp_diag(ppi, servo, 1, "servo aborted, delay %d or %d "
+				"greater than configured maximum %d\n",
+			     (int)m_to_s_dly->nanoseconds,
+			     (int)s_to_m_dly->nanoseconds,
+			     (int)OPTS(ppi)->max_dly);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
 /* called by slave states when delay_resp is received (all t1..t4 are valid) */
 void pp_servo_got_resp(struct pp_instance *ppi)
 {
@@ -82,38 +111,8 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	div2_TimeInternal(owd);
 	pp_diag(ppi, servo, 1, "One-way delay: %s\n", fmt_TI(owd));
 
-	/* Check for too-big offsets, and then make the calculation */
-
-	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
-		if (m_to_s_dly->seconds) {
-			pp_diag(ppi, servo, 1, "%s aborted, delay greater "
-				"than 1 second\n", __func__);
-			return;
-		}
-		if (m_to_s_dly->nanoseconds > OPTS(ppi)->max_dly) {
-			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
-			     "than administratively set maximum %d\n",
-			     __func__,
-			     (int)m_to_s_dly->nanoseconds,
-			     (int)OPTS(ppi)->max_dly);
-			return;
-		}
-
-		if (s_to_m_dly->seconds) {
-			pp_diag(ppi, servo, 1, "%s aborted, delay "
-				"greater than 1 second\n", __func__);
-			return;
-		}
-
-		if (s_to_m_dly->nanoseconds > OPTS(ppi)->max_dly)
-			pp_diag(ppi, servo, 1, "%s aborted, delay %d greater "
-				   "than administratively set maximum %d\n",
-				   __func__,
-				   (int)s_to_m_dly->nanoseconds,
-				   (int)OPTS(ppi)->max_dly);
-		if (s_to_m_dly->nanoseconds > OPTS(ppi)->max_dly)
-			return;
-	}
+	if(pp_servo_bad_event(ppi))
+		return;
 
 	if (owd->seconds) {
 		/* cannot filter with secs, clear filter */
