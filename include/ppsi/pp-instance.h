@@ -71,13 +71,13 @@ struct pp_frgn_master {
  * are used in servo.c src, where specific function for time setting of the
  * machine are implemented.
  *
- * pp_owd_fltr: It is a variable cutoff/delay low-pass, infinite impulse
+ * pp_avg_fltr: It is a variable cutoff/delay low-pass, infinite impulse
  * response (IIR) filter. The one-way delay filter has the difference equation:
  * s*y[n] - (s-1)*y[n-1] = x[n]/2 + x[n-1]/2,
  * where increasing the stiffness (s) lowers the cutoff and increases the delay.
  */
-struct pp_owd_fltr {
-	Integer32 nsec_prev;
+struct pp_avg_fltr {
+	Integer32 m; /* magnitude */
 	Integer32 y;
 	Integer32 s_exp;
 };
@@ -86,7 +86,8 @@ struct pp_servo {
 	TimeInternal m_to_s_dly;
 	TimeInternal s_to_m_dly;
 	Integer32 obs_drift;
-	struct pp_owd_fltr owd_fltr;
+	struct pp_avg_fltr owd_fltr;
+	struct pp_avg_fltr ofm_fltr;
 };
 
 /*

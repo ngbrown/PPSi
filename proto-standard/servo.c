@@ -16,6 +16,7 @@ void pp_servo_init(struct pp_instance *ppi)
 	SRV(ppi)->obs_drift = 0;	/* clears clock servo accumulator (the
 					 * I term) */
 	SRV(ppi)->owd_fltr.s_exp = 0;	/* clears one-way delay filter */
+	SRV(ppi)->ofm_fltr.s_exp = 0;	/* clears offset-from-master filter */
 
 	/* level clock */
 	if (!OPTS(ppi)->no_adjust)
@@ -91,7 +92,8 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
 	TimeInternal *owd = &DSCUR(ppi)->oneWayDelay;
 	TimeInternal *ofm = &DSCUR(ppi)->offsetFromMaster;
-	struct pp_owd_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
+	struct pp_avg_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
+	struct pp_avg_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
 	Integer32 adj;
 	int s;
 
@@ -156,7 +158,8 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	if (owd->nanoseconds > 3 * owd_fltr->y) {
 		pp_diag(ppi, servo, 1, "Trim too-long owd: %i\n",
 			owd->nanoseconds);
-		owd->nanoseconds = owd_fltr->y * 2 + 1;
+		/* add fltr->s_exp to ensure we are not trapped into 0 */
+		owd->nanoseconds = owd_fltr->y * 2 + owd_fltr->s_exp + 1;
 	}
 	/* filter 'oneWayDelay' (running average) */
 	owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1) + owd->nanoseconds)
@@ -168,18 +171,18 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 
 	/* update 'offsetFromMaster', (End to End mode) */
 	sub_TimeInternal(ofm, m_to_s_dly, owd);
+	pp_diag(ppi, servo, 2, "Offset from master:     %s\n", fmt_TI(ofm));
 
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
 		if (ofm->seconds) {
-			pp_diag(ppi, servo, 1, "%s aborted, offset greater "
-				"than 1 second\n", __func__);
+			pp_diag(ppi, servo, 1, "servo aborted, offset greater "
+				"than 1 second\n");
 			return; /* not good */
 		}
 
 		if (ofm->nanoseconds > OPTS(ppi)->max_rst) {
-			pp_diag(ppi, servo, 1, "%s aborted, offset %d greater "
-				"than administratively set maximum %d\n",
-				__func__, ofm->nanoseconds,
+			pp_diag(ppi, servo, 1, "servo aborted, offset greater "
+				"than configured maximum %d\n",
 				OPTS(ppi)->max_rst);
 			return; /* not good */
 		}
@@ -209,7 +212,87 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		return; /* ok */
 	}
 
-	/* the PI controller */
+	/*
+	 * Filter the ofm using the same running averags as we used for owd
+	 */
+	if (ofm_fltr->s_exp < 1) {
+		/* First time, keep what we have */
+		ofm_fltr->y = ofm->nanoseconds;
+		ofm_fltr->m = abs(ofm->nanoseconds);
+	}
+
+	/* avoid overflowing filter */
+	s = OPTS(ppi)->s;
+	while (abs(ofm_fltr->y) >> (31 - s))
+		--s;
+	if (ofm_fltr->s_exp > 1 << s)
+		ofm_fltr->s_exp = 1 << s;
+	/* crank down filter cutoff by increasing 's_exp' */
+	if (ofm_fltr->s_exp < 1 << s)
+		++ofm_fltr->s_exp;
+
+	/*
+	 * Identify and discard outliers.
+	 *
+	 * Even though in a synced state it's good to average the OFM
+	 * value, we must be careful when we are not yet synced: in
+	 * that case we should not average at all and accept the
+	 * outliers. avoiding the risk to drop good events in a
+	 * changing-delay environment.
+	 */
+	if (abs(SRV(ppi)->obs_drift) >= PP_ADJ_FREQ_MAX) {
+		/* do not average at all */
+		ofm_fltr->s_exp = 1;
+		ofm_fltr->y = ofm->nanoseconds;
+		ofm_fltr->m = abs(ofm->nanoseconds);
+	} else {
+		/*
+		 * Outliers are usually a few milliseconds off when we
+		 * are synced at near microsecond magnitude. Knowing
+		 * that high precision implementations (hw stamps)
+		 * have no outliers, we can trim supposed-outliers to
+		 * values that change the final averaged OFM by one magnitude
+		 * of our past history. Thus, after we converged, we
+		 * accept smaller changes, but doubling is allowed
+		 */
+		int delta = ofm->nanoseconds - ofm_fltr->y;
+		int maxd = ofm_fltr->m * ofm_fltr->s_exp;
+
+		if (abs(delta) > maxd) {
+			if (delta > 0)
+				ofm->nanoseconds  = ofm_fltr->y + maxd;
+			else
+				ofm->nanoseconds  = ofm_fltr->y - maxd;
+			pp_diag(ppi, servo, 1, "Trimmed delta %i to %i\n",
+				delta, maxd);
+			pp_diag(ppi, servo, 1, "Use ofm = %9i\n",
+				ofm->nanoseconds);
+		}
+	}
+	/* filter 'offsetFromMaster' (running average) and its magnitude */
+	ofm_fltr->y = (ofm_fltr->y * (ofm_fltr->s_exp - 1) + ofm->nanoseconds)
+		/ ofm_fltr->s_exp;
+	ofm_fltr->m = (ofm_fltr->m * (ofm_fltr->s_exp - 1) + abs(ofm_fltr->y))
+		/ ofm_fltr->s_exp + 1 /* add 1 to avoid near-0 issues */;
+
+	/* but if we changed sign, start averaging anew to limit oscillation */
+	if (ofm->nanoseconds * ofm_fltr->y < 0)
+		ofm_fltr->s_exp = 1;
+
+	ofm->nanoseconds = ofm_fltr->y;
+
+	pp_diag(ppi, servo, 1, "After avg(%i), mag %9i and ofm: %9i \n",
+		(int)ofm_fltr->s_exp, ofm_fltr->m, ofm->nanoseconds);
+
+	/*
+	 * What follows is the PI controller: it has a problem, in that
+	 * the same controller is used for offset and frequency adjustments.
+	 * Since the controller is based on deltas, if the host uses
+	 * adjust_freq() it has a stable offsey by design: the offset
+	 * that keeps the controller asking for the proper frequency (if
+	 * the offset were zero the controller would ask for 0 frequency
+	 * adjustment, thus unsyncing the clocks in most cases. 
+	 */
 
 	/* the accumulator for the I component */
 	SRV(ppi)->obs_drift += ofm->nanoseconds / OPTS(ppi)->ai;
@@ -233,7 +316,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	}
 
 	pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n", fmt_TI(owd));
-	pp_diag(ppi, servo, 2, "Offset from master:     %s\n", fmt_TI(ofm));
+	pp_diag(ppi, servo, 2, "Offset from m averaged: %s\n", fmt_TI(ofm));
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
 		(int)SRV(ppi)->obs_drift);
 }
