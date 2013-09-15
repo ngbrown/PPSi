@@ -119,32 +119,48 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	if(pp_servo_bad_event(ppi))
 		return;
 
+	if (owd_fltr->s_exp < 1) {
+		/* First time, keep what we have */
+		owd_fltr->y = owd->nanoseconds;
+	}
+	/* avoid overflowing filter */
+	s = OPTS(ppi)->s;
+	while (abs(owd_fltr->y) >> (31 - s))
+		--s;
+	if (owd_fltr->s_exp > 1 << s)
+		owd_fltr->s_exp = 1 << s;
+	/* crank down filter cutoff by increasing 's_exp' */
+	if (owd_fltr->s_exp < 1 << s)
+		++owd_fltr->s_exp;
+
 	/*
 	 * It may happen that owd appears as negative. This happens when
 	 * the slave clock is running fast to recover a late time: the
 	 * (t3 - t2) measured in the slave appears longer than the (t4 - t1)
-	 * measured in the master.  Ignore such values, by skipping
-	 * the filter and keeping the current average instead.
+	 * measured in the master.  Ignore such values, by keeping the
+	 * current average instead.
 	 */
-	if (owd->nanoseconds > 0) {
-		/* avoid overflowing filter */
-		s = OPTS(ppi)->s;
-		while (abs(owd_fltr->y) >> (31 - s))
-			--s;
+	if (owd->nanoseconds < 0)
+		owd->nanoseconds = owd_fltr->y;
+	if (owd->nanoseconds < 0)
+		owd->nanoseconds = 0;
 
-		/* crank down filter cutoff by increasing 's_exp' */
-		if (owd_fltr->s_exp < 1)
-			owd_fltr->s_exp = 1;
-		else if (owd_fltr->s_exp < 1 << s)
-			++owd_fltr->s_exp;
-		else if (owd_fltr->s_exp > 1 << s)
-			owd_fltr->s_exp = 1 << s;
-
-		/* filter 'oneWayDelay' (running average) */
-		owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1)
-			       + owd->nanoseconds)
-			/ owd_fltr->s_exp;
+	/*
+	 * It may happen that owd appears to be very big. This happens
+	 * when we have software timestamps and there is overhead
+	 * involved -- or when the slave clock is running slow.  In
+	 * this case use a value just slightly bigger than the current
+	 * average (so if it really got longer, we will adapt).  This
+	 * kills most outliers on loaded networks.
+	 */
+	if (owd->nanoseconds > 3 * owd_fltr->y) {
+		pp_diag(ppi, servo, 1, "Trim too-long owd: %i\n",
+			owd->nanoseconds);
+		owd->nanoseconds = owd_fltr->y * 2 + 1;
 	}
+	/* filter 'oneWayDelay' (running average) */
+	owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1) + owd->nanoseconds)
+		/ owd_fltr->s_exp;
 	owd->nanoseconds = owd_fltr->y;
 
 	pp_diag(ppi, servo, 1, "After avg(%i), one-way delay: %i\n",
