@@ -58,6 +58,11 @@ static int pp_servo_bad_event(struct pp_instance *ppi)
 {
 	TimeInternal *m_to_s_dly = &SRV(ppi)->m_to_s_dly;
 	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
+	TimeInternal *owd = &DSCUR(ppi)->oneWayDelay;
+
+	/* Discard one-way delays that overflow a second (makes no sense) */
+	if (owd->seconds)
+		return 1;
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
 		if (m_to_s_dly->seconds || s_to_m_dly->seconds) {
@@ -114,11 +119,14 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	if(pp_servo_bad_event(ppi))
 		return;
 
-	if (owd->seconds) {
-		/* cannot filter with secs, clear filter */
-		owd_fltr->s_exp = 0;
-		owd_fltr->nsec_prev = 0;
-	} else {
+	/*
+	 * It may happen that owd appears as negative. This happens when
+	 * the slave clock is running fast to recover a late time: the
+	 * (t3 - t2) measured in the slave appears longer than the (t4 - t1)
+	 * measured in the master.  Ignore such values, by skipping
+	 * the filter and keeping the current average instead.
+	 */
+	if (owd->nanoseconds > 0) {
 		/* avoid overflowing filter */
 		s = OPTS(ppi)->s;
 		while (abs(owd_fltr->y) >> (31 - s))
@@ -136,12 +144,11 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1)
 			       + owd->nanoseconds)
 			/ owd_fltr->s_exp;
-
-		owd->nanoseconds = owd_fltr->y;
-
-		pp_diag(ppi, servo, 1, "After avg(%i), one-way delay: %i\n",
-			(int)owd_fltr->s_exp, owd->nanoseconds);
 	}
+	owd->nanoseconds = owd_fltr->y;
+
+	pp_diag(ppi, servo, 1, "After avg(%i), one-way delay: %i\n",
+		(int)owd_fltr->s_exp, owd->nanoseconds);
 
 	/* update 'offsetFromMaster', (End to End mode) */
 	sub_TimeInternal(ofm, m_to_s_dly, owd);
