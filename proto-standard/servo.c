@@ -10,17 +10,29 @@
 
 void pp_servo_init(struct pp_instance *ppi)
 {
-	pp_diag(ppi, servo, 1, "Initializing\n");
+	int d;
 
-	/* clear vars */
-	SRV(ppi)->obs_drift = 0;	/* clears clock servo accumulator (the
-					 * I term) */
 	SRV(ppi)->owd_fltr.s_exp = 0;	/* clears one-way delay filter */
 	SRV(ppi)->ofm_fltr.s_exp = 0;	/* clears offset-from-master filter */
 
-	/* level clock */
-	if (!OPTS(ppi)->no_adjust)
-		ppi->t_ops->adjust(ppi, 0, 0);
+
+	if (ppi->t_ops->init_servo) {
+		/* The system may pre-set us to keep current frequency */
+		d = ppi->t_ops->init_servo(ppi);
+		if (d == -1) {
+			pp_diag(ppi, servo, 1, "error in t_ops->servo_init");
+			d = 0;
+		}
+		SRV(ppi)->obs_drift = -d; /* note "-" */
+	} else {
+		/* level clock */
+		if (!OPTS(ppi)->no_adjust)
+			ppi->t_ops->adjust(ppi, 0, 0);
+		SRV(ppi)->obs_drift = 0;
+	}
+
+	pp_diag(ppi, servo, 1, "Initialized: obs_drift %i\n",
+		SRV(ppi)->obs_drift);
 }
 
 /* internal helper, retuerning static storage to be used immediately */

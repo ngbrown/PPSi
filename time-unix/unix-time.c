@@ -45,6 +45,18 @@ static int32_t unix_time_set(struct pp_instance *ppi, TimeInternal *t)
 	return 0;
 }
 
+static int unix_time_init_servo(struct pp_instance *ppi)
+{
+	struct timex t;
+
+	/* We must set MOD_PLL and recover the current frequency value */
+	t.modes = MOD_STATUS;
+	t.status = STA_PLL;
+	if (adjtimex(&t) < 0)
+		return -1;
+	return (t.freq >> 16) * 1000; /* positive or negative, not -1 */
+}
+
 static int unix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
 {
 	struct timex t;
@@ -103,5 +115,6 @@ struct pp_time_operations unix_time_ops = {
 	.adjust = unix_time_adjust,
 	.adjust_offset = unix_time_adjust_offset,
 	.adjust_freq = unix_time_adjust_freq,
+	.init_servo = unix_time_init_servo,
 	.calc_timeout = unix_calc_timeout,
 };
