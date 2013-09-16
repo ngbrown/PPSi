@@ -104,7 +104,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 			cmd_line_print_help();
 			return -1;
 		}
-		if (1) { /* ARub: I don't want to reintent it all now */
+		if (1) { /* ARub: I don't want to reindent it all */
 			switch (a[1]) {
 			case 'V':
 				pp_diag_verbosity++;
@@ -120,7 +120,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 			case 'O':
 				a = argv[++i];
 				GOPTS(ppg)->max_rst = atoi(a);
-				if (GOPTS(ppg)->max_rst < PP_NSEC_PER_SEC) {
+				if (GOPTS(ppg)->max_rst > PP_NSEC_PER_SEC) {
 					pp_printf("Use -x to prevent jumps of"
 					" more than one second\n");
 					return -1;
@@ -129,7 +129,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 			case 'M':
 				a = argv[++i];
 				GOPTS(ppg)->max_dly = atoi(a);
-				if (GOPTS(ppg)->max_dly < PP_NSEC_PER_SEC) {
+				if (GOPTS(ppg)->max_dly > PP_NSEC_PER_SEC) {
 					pp_printf("Use -x to prevent jumps of"
 						" more than one second\n");
 					return -1;

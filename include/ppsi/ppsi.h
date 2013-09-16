@@ -117,7 +117,7 @@ struct pp_ext_hooks {
 	int (*master_msg)(struct pp_instance *ppi, unsigned char *pkt,
 			  int plen, int msgtype);
 	int (*new_slave)(struct pp_instance *ppi, unsigned char *pkt, int plen);
-	int (*update_delay)(struct pp_instance *ppi);
+	int (*handle_resp)(struct pp_instance *ppi);
 	void (*s1)(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann);
 	int (*execute_slave)(struct pp_instance *ppi);
 	void (*handle_announce)(struct pp_instance *ppi);
@@ -164,6 +164,7 @@ struct pp_time_operations {
 	int (*adjust)(struct pp_instance *ppi, long offset_ns, long freq_ppm);
 	int (*adjust_offset)(struct pp_instance *ppi, long offset_ns);
 	int (*adjust_freq)(struct pp_instance *ppi, long freq_ppm);
+	int (*init_servo)(struct pp_instance *ppi);
 	/* calc_timeout cannot return zero */
 	unsigned long (*calc_timeout)(struct pp_instance *ppi, int millisec);
 };
@@ -257,12 +258,9 @@ extern int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv);
 extern int pp_parse_conf(struct pp_globals *ppg, char *conf, int len);
 
 /* Servo */
-extern void pp_init_clock(struct pp_instance *ppi);
-extern void pp_update_delay(struct pp_instance *ppi,
-			    TimeInternal *correction_field);
-extern void pp_update_offset(struct pp_instance *ppi,
-			     TimeInternal *correctionField);
-extern void pp_update_clock(struct pp_instance *ppi);
+extern void pp_servo_init(struct pp_instance *ppi);
+extern void pp_servo_got_sync(struct pp_instance *ppi); /* got t1 and t2 */
+extern void pp_servo_got_resp(struct pp_instance *ppi); /* got all t1..t4 */
 
 
 /* bmc.c */

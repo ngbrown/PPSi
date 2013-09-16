@@ -231,7 +231,7 @@ typedef struct DSCurrent {		/* page 67 */
 	/* Dynamic */
 	UInteger16	stepsRemoved;
 	TimeInternal	offsetFromMaster;
-	TimeInternal	meanPathDelay;
+	TimeInternal	oneWayDelay;
 	/* White Rabbit extension begin */
 	UInteger16	primarySlavePortNumber;
 	/* White Rabbit extension end */

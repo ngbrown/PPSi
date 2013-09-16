@@ -25,7 +25,7 @@ void m1(struct pp_instance *ppi)
 	/* Current data set update */
 	DSCUR(ppi)->stepsRemoved = 0;
 	clear_TimeInternal(&DSCUR(ppi)->offsetFromMaster);
-	clear_TimeInternal(&DSCUR(ppi)->meanPathDelay);
+	clear_TimeInternal(&DSCUR(ppi)->oneWayDelay);
 
 	/* Parent data set: we are the parent */
 	memset(parent, 0, sizeof(*parent));

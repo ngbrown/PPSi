@@ -17,7 +17,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int d1, d2;
 
 	if (ppi->is_new_state) {
-		pp_init_clock(ppi);
+		pp_servo_init(ppi);
 
 		if (pp_hooks.new_slave)
 			e = pp_hooks.new_slave(ppi, pkt, plen);
@@ -79,10 +79,10 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			 * generating t4, and report back a modified t4
 			 */
 
-			if (pp_hooks.update_delay)
-				e = pp_hooks.update_delay(ppi);
+			if (pp_hooks.handle_resp)
+				e = pp_hooks.handle_resp(ppi);
 			else
-				pp_update_delay(ppi, &ppi->cField);
+				pp_servo_got_resp(ppi);
 			if (e)
 				goto out;
 
@@ -138,7 +138,7 @@ out:
 		pp_timeout_clr(ppi, PP_TO_ANN_RECEIPT);
 		pp_timeout_clr(ppi, PP_TO_DELAYREQ);
 
-		pp_init_clock(ppi);
+		pp_servo_init(ppi);
 	}
 	d1 = d2 = pp_ms_to_timeout(ppi, PP_TO_ANN_RECEIPT);
 	if (ppi->timeouts[PP_TO_DELAYREQ])

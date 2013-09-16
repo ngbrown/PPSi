@@ -26,7 +26,6 @@ struct pp_runtime_opts {
 			/* ethernet_mode:1, -- moved to ppsi, is no more global */
 			/* e2e_mode:1, -- no more: we only support e2e */
 			/* gptp_mode:1, -- no more: peer-to-peer unsupported */
-			ofst_first_updated:1,
 			no_rst_clk:1;
 	Integer16 ap, ai;
 	Integer16 s;
@@ -72,39 +71,23 @@ struct pp_frgn_master {
  * are used in servo.c src, where specific function for time setting of the
  * machine are implemented.
  *
- * pp_ofm_fltr: The FIR filtering of the offset from master input is a simple,
- * two-sample average
- *
- * pp_owd_fltr: It is a variable cutoff/delay low-pass, infinite impulse
+ * pp_avg_fltr: It is a variable cutoff/delay low-pass, infinite impulse
  * response (IIR) filter. The one-way delay filter has the difference equation:
  * s*y[n] - (s-1)*y[n-1] = x[n]/2 + x[n-1]/2,
  * where increasing the stiffness (s) lowers the cutoff and increases the delay.
  */
-struct pp_ofm_fltr {
-	Integer32 nsec_prev;
-	Integer32 y;
-};
-
-struct pp_owd_fltr {
-	Integer32 nsec_prev;
+struct pp_avg_fltr {
+	Integer32 m; /* magnitude */
 	Integer32 y;
 	Integer32 s_exp;
 };
 
 struct pp_servo {
-	/* TODO check. Which is the difference between m_to_s_dly (which
-	 * comes from ptpd's master_to_slave_delay) and delay_ms (which comes
-	 * from ptpd's delay_MS? Seems like ptpd actually uses only delay_MS.
-	 * The same of course must be checked for their equivalents,
-	 * s_to_m_dly and delay_sm
-	 */
 	TimeInternal m_to_s_dly;
 	TimeInternal s_to_m_dly;
-	TimeInternal delay_ms;
-	TimeInternal delay_sm;
 	Integer32 obs_drift;
-	struct pp_owd_fltr owd_fltr;
-	struct pp_ofm_fltr ofm_fltr;
+	struct pp_avg_fltr owd_fltr;
+	struct pp_avg_fltr ofm_fltr;
 };
 
 /*
