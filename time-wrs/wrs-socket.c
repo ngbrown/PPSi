@@ -360,6 +360,13 @@ static int wrs_net_init(struct pp_instance *ppi)
 	if (r)
 		return r;
 
+	if (!ppi->ethernet_mode) {
+		pp_diag(ppi, frames, 1, "%s: Can't do White Rabbit over UDP,"
+			" falling back to normal PTP\n", __func__);
+		ppi->n_ops = &unix_net_ops;
+		return 0;
+	}
+
 	r = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_get_port_state,
 		 &pstate, ppi->iface_name);
 
