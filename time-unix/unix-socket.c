@@ -93,7 +93,7 @@ static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 }
 
 /* Receive and send is *not* so trivial */
-int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
+static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
 	struct pp_channel *ch1, *ch2;
@@ -124,7 +124,7 @@ int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	return ret;
 }
 
-int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
+static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
 	struct sockaddr_in addr;
@@ -327,14 +327,14 @@ err_out:
 	return -1;
 }
 
-int unix_net_exit(struct pp_instance *ppi);
+static int unix_net_exit(struct pp_instance *ppi);
 
 /*
  * Inits all the network stuff
  */
 
 /* This function must be able to be called twice, and clean-up internally */
-int unix_net_init(struct pp_instance *ppi)
+static int unix_net_init(struct pp_instance *ppi)
 {
 	int i;
 
@@ -363,7 +363,7 @@ int unix_net_init(struct pp_instance *ppi)
 /*
  * Shutdown all the network stuff
  */
-int unix_net_exit(struct pp_instance *ppi)
+static int unix_net_exit(struct pp_instance *ppi)
 {
 	struct ip_mreq imr;
 	int fd;
@@ -401,6 +401,15 @@ int unix_net_exit(struct pp_instance *ppi)
 	return 0;
 }
 
+struct pp_network_operations unix_net_ops = {
+	.init = unix_net_init,
+	.exit = unix_net_exit,
+	.recv = unix_net_recv,
+	.send = unix_net_send,
+};
+
+
+/* This function is called by main loops outside of the network operations */
 int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 {
 	fd_set set;
@@ -490,9 +499,3 @@ int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 	return ret;
 }
 
-struct pp_network_operations unix_net_ops = {
-	.init = unix_net_init,
-	.exit = unix_net_exit,
-	.recv = unix_net_recv,
-	.send = unix_net_send,
-};
