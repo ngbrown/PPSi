@@ -129,10 +129,11 @@ int wrs_locking_poll(struct pp_instance *ppi)
 
 	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_lock_cmd,
 			  &rval, ppi->iface_name, HEXP_LOCK_CMD_CHECK, 0);
-
-	if (ret != HEXP_LOCK_STATUS_LOCKED)
+	if (ret != HEXP_LOCK_STATUS_LOCKED) {
+		pp_diag(ppi, time, 2, "PLL is not ready\n");
 		return WR_SPLL_ERROR; /* FIXME should be WR_SPLL_NOT_READY */
-
+	}
+	pp_diag(ppi, time, 2, "PLL is locked\n");
 	return WR_SPLL_READY;
 }
 
@@ -181,6 +182,10 @@ static int wrs_time_get(struct pp_instance *ppi, TimeInternal *t)
 	if (ret < 0)
 		return ret;
 
+	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
+		pp_diag(ppi, time, 2, "%s: (valid %x) %9li.%09li\n", __func__,
+			p.pps_valid,
+			(long)p.current_sec, (long)p.current_nsec);
 	return rval;
 }
 
@@ -189,12 +194,14 @@ static int32_t wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 	/* FIXME Don't know how to implement this. Actually it's almost unused
 	 * in ppsi, only proto-standard/servo.c calls it, at initialization
 	 * time */
-
+	pp_diag(ppi, time, 1, "%s: (not supported) %9li.%09li\n", __func__,
+		(long)t->seconds, (long)t->nanoseconds);
 	return -ENOTSUP;
 }
 
 static int wrs_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
 {
+	pp_diag(ppi, time, 1, "adjust offset %09li\n", offset_ns);
 	return wr_adjust_counters(0, offset_ns);
 }
 

@@ -241,6 +241,9 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		ret = wrs_recv_msg(ppi, fd, pkt, len, t);
 		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("recv: ", pkt, ret, t);
+		pp_diag(ppi, time, 1, "recv stamp: (correct %i) %9li.%09li\n",
+			t->correct, (long)t->seconds,
+			(long)t->nanoseconds);
 		return ret;
 	}
 
@@ -333,11 +336,12 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 			ppi->t_ops->get(ppi, t);
 
 		ret = send(fd, hdr, len, 0);
-		if (pp_diag_allow(ppi, frames, 2))
-			dump_1588pkt("send: ", pkt, len, t);
-
 		poll_tx_timestamp(s, fd, t);
-
+		if (pp_diag_allow(ppi, frames, 2))
+			dump_1588pkt("send2: ", pkt, len, t);
+		pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
+			t->correct, (long)t->seconds,
+			(long)t->nanoseconds);
 		return ret;
 	}
 
