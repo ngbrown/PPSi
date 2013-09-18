@@ -168,19 +168,23 @@ static int wrs_time_get(struct pp_instance *ppi, TimeInternal *t)
 	int cmd;
 	int ret, rval;
 
-	cmd = HEXP_PPSG_CMD_GET;
-
+	cmd = HEXP_PPSG_CMD_GET; /* likely not implemented... */
 	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_pps_cmd, &rval,
 					  cmd, &p);
+	if (ret < 0 || rval < 0) {
+		/*
+		 * It failed, so fall back on unix time. Please note
+		 * that these times are mainly for logging, nothing
+		 * critical is there, as T1..T4 are frame stamps.
+		 */
+		return unix_time_ops.get(ppi, t);
+	}
 
 	/* FIXME Don't know whether p.current_phase_shift is to be assigned
 	 * to t->phase or t->raw_phase. I ignore it, it's not useful here. */
 	t->seconds = p.current_sec;
 	t->nanoseconds = p.current_nsec;
 	t->correct = p.pps_valid;
-
-	if (ret < 0)
-		return ret;
 
 	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
 		pp_diag(ppi, time, 2, "%s: (valid %x) %9li.%09li\n", __func__,
@@ -196,6 +200,8 @@ static int32_t wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 	 * time */
 	pp_diag(ppi, time, 1, "%s: (not supported) %9li.%09li\n", __func__,
 		(long)t->seconds, (long)t->nanoseconds);
+	/* Set unix time anyways */
+	unix_time_ops.set(ppi, t);
 	return -ENOTSUP;
 }
 
