@@ -113,9 +113,17 @@ static int wr_handle_resp(struct pp_instance *ppi)
 	/* FIXME: check sub-nano relevance of correction filed */
 	cField_to_TimeInternal(&correction_field, hdr->correctionfield);
 
-	/* If no WR mode is on, run normal code */
+	/*
+	 * If no WR mode is on, run normal code, it T3 is valid.
+	 * After we adjusted the pps counter, stamps are invalid, so
+	 * we'll have the Unix time instead, marked by "correct"
+	 */
 	if (!WR_DSPOR(ppi)->wrModeOn) {
-		pp_servo_got_resp(ppi);
+		if (ppi->t3.correct)
+			pp_servo_got_resp(ppi);
+		else
+			pp_diag(ppi, servo, 1,
+				"T3 incorrect, discarding tuple\n");
 		return 0;
 	}
 	wr_servo_got_delay(ppi, hdr->correctionfield.lsb);
