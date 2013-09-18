@@ -24,18 +24,11 @@
 
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
-/* FIXME: make conf_path definable at compile time */
-#define CONF_PATH "/etc/ppsi.conf"
-
 int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
-	int i, ret;
-	struct stat conf_fs;
-	char *conf_buf;
-	FILE *f;
-	int conf_len = 0;
+	int i;
 
 	setbuf(stdout, NULL);
 
@@ -46,44 +39,22 @@ int main(int argc, char **argv)
 
 	ppg->max_links = PP_MAX_LINKS;
 	ppg->links = calloc(ppg->max_links, sizeof(struct pp_link));
-
-	f = fopen(CONF_PATH, "r");
-
-	if (!f || stat(CONF_PATH, &conf_fs) < 0) {
-		fprintf(stderr, "%s: Warning: %s: %s -- default to eth0 only\n",
-			argv[0], CONF_PATH, strerror(errno));
-		conf_buf = "link 0\niface eth0\n";
-		conf_len = strlen(conf_buf);
-	} else {
-		/* The parser needs a trailing newline, add one to be sure */
-		conf_len = conf_fs.st_size + 1;
-		conf_buf = calloc(1, conf_len + 1); /* trailing \0 */
-		i = fread(conf_buf, 1, conf_len, f);
-		if (i > 0) conf_buf[i] = '\n';
-		fclose(f);
-	}
-
-	ppg->rt_opts = &default_rt_opts;
-
-	if ((ret = pp_parse_conf(ppg, conf_buf, conf_len)) < 0) {
-		fprintf(stderr, "%s: %s:%d: parse error\n", argv[0],
-			CONF_PATH, -ret);
-		exit(__LINE__);
-	}
-
 	ppg->defaultDS = calloc(1, sizeof(*ppg->defaultDS));
 	ppg->currentDS = calloc(1, sizeof(*ppg->currentDS));
 	ppg->parentDS = calloc(1, sizeof(*ppg->parentDS));
 	ppg->timePropertiesDS = calloc(1, sizeof(*ppg->timePropertiesDS));
 	ppg->arch_data = calloc(1, sizeof(struct unix_arch_data));
 	ppg->pp_instances = calloc(ppg->max_links, sizeof(struct pp_instance));
+	ppg->servo = calloc(1, sizeof(*ppg->servo));
+	ppg->rt_opts = &default_rt_opts;
 
 	if ((!ppg->defaultDS) || (!ppg->currentDS) || (!ppg->parentDS)
 		|| (!ppg->timePropertiesDS) || (!ppg->arch_data)
-		|| (!ppg->pp_instances))
+		|| (!ppg->pp_instances) || (!ppg->servo))
 		exit(__LINE__);
 
-	ppg->servo = calloc(1, sizeof(*ppg->servo));
+	pp_config_file(ppg, &argc, argv, NULL,
+		       "link 0\niface eth0\n" /* mandatory trailing \n */);
 
 	for (i = 0; i < ppg->nlinks; i++) {
 

@@ -255,7 +255,8 @@ extern int pp_close_globals(struct pp_globals *ppg);
 
 extern int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv);
 
-extern int pp_parse_conf(struct pp_globals *ppg, char *conf, int len);
+extern int pp_config_file(struct pp_globals *ppg, int *argcp, char **argv,
+			  char *default_name, char *default_conf);
 
 /* Servo */
 extern void pp_servo_init(struct pp_instance *ppi);

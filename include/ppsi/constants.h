@@ -14,6 +14,8 @@
 
 /* implementation specific constants */
 #define PP_MAX_LINKS				64
+#define PP_DEFAULT_CONFIGFILE			"/etc/ppsi.conf"
+
 #define PP_DEFAULT_INBOUND_LATENCY		0		/* in nsec */
 #define PP_DEFAULT_OUTBOUND_LATENCY		0		/* in nsec */
 #define PP_DEFAULT_NO_RESET_CLOCK		0

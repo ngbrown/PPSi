@@ -27,9 +27,6 @@
 
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
-/* FIXME: make conf_path definable at compile time */
-#define CONF_PATH "/etc/ppsi.conf"
-
 struct minipc_ch *hal_ch;
 struct minipc_ch *ppsi_ch;
 
@@ -37,11 +34,7 @@ int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
-	int i = 0, ret;
-	struct stat conf_fs;
-	char *conf_buf;
-	int conf_fd;
-	int conf_len = 0;
+	int i;
 
 	setbuf(stdout, NULL);
 
@@ -66,53 +59,24 @@ int main(int argc, char **argv)
 
 	ppg->max_links = PP_MAX_LINKS;
 	ppg->links = calloc(ppg->max_links, sizeof(struct pp_link));
-
-	conf_fd = open(CONF_PATH, O_RDONLY);
-
-	if ((stat(CONF_PATH, &conf_fs) < 0) || (conf_fd < 0)) {
-		pp_printf("Warning: could not open %s, using wr0 only "
-			  "built-in config\n", CONF_PATH);
-		conf_buf = "link 0\niface wr0\n";
-		conf_len = strlen(conf_buf) - 1;
-	} else {
-		int r = 0, next_r;
-		conf_buf = calloc(1, conf_fs.st_size + 2);
-
-		do {
-			next_r = conf_fs.st_size - conf_len;
-			r = read(conf_fd, &conf_buf[conf_len], next_r);
-			if (r <= 0)
-				break;
-			conf_len = strlen(conf_buf);
-		} while (conf_len < conf_fs.st_size);
-
-		close(conf_fd);
-	}
-
-	conf_buf[conf_len + 1] = '\n';
-
-	ppg->rt_opts = &default_rt_opts;
-
-	if ((ret = pp_parse_conf(ppg, conf_buf, conf_len)) < 0) {
-		pp_printf("Fatal: Error in %s file at line %d\n", CONF_PATH, -ret);
-		exit(__LINE__);
-	}
-
 	ppg->defaultDS = calloc(1, sizeof(*ppg->defaultDS));
 	ppg->currentDS = calloc(1, sizeof(*ppg->currentDS));
 	ppg->parentDS = calloc(1, sizeof(*ppg->parentDS));
 	ppg->timePropertiesDS = calloc(1, sizeof(*ppg->timePropertiesDS));
 	ppg->arch_data = calloc(1, sizeof(struct unix_arch_data));
 	ppg->pp_instances = calloc(ppg->max_links, sizeof(struct pp_instance));
+	ppg->servo = calloc(1, sizeof(*ppg->servo));
+	ppg->rt_opts = &default_rt_opts;
 
 	if ((!ppg->defaultDS) || (!ppg->currentDS) || (!ppg->parentDS)
 		|| (!ppg->timePropertiesDS) || (!ppg->arch_data)
-		|| (!ppg->pp_instances))
+		|| (!ppg->pp_instances) || (!ppg->servo))
 		exit(__LINE__);
 
-	ppg->servo = calloc(1, sizeof(*ppg->servo));
+	pp_config_file(ppg, &argc, argv, "/wr/etc/ppsi.conf",
+		       "link 0\niface wr0\n" /* mandatory trailing \n */);
 
-	for (; i < ppg->nlinks; i++) {
+	for (i = 0; i < ppg->nlinks; i++) {
 
 		struct pp_link *lnk = &ppg->links[i];
 

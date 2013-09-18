@@ -6,6 +6,12 @@
  */
 
 #include <ppsi/ppsi.h>
+/* This file is build in hosted environments, so following headers are Ok */
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* Each pre-defined keyword is handled in the keywords list, so that the
  * same code is used to parse every token in the conf file */
@@ -151,7 +157,7 @@ static int handle_key_val(struct pp_globals *ppg, char *key, char *val)
 }
 
 /* Parse configuration (e.g. coming from /etc/ppsi.conf file) */
-int pp_parse_conf(struct pp_globals *ppg, char *conf, int len)
+static int pp_parse_conf(struct pp_globals *ppg, char *conf, int len)
 {
 	int st = 0;
 	char c;
@@ -241,4 +247,89 @@ int pp_parse_conf(struct pp_globals *ppg, char *conf, int len)
 ret_invalid_line:
 	ln--;
 	return -ln;
+}
+
+
+/* Open about a file, warn if not found */
+static int pp_open_conf_file(char **argv, char *name)
+{
+	int fd;
+
+	if (!name)
+		return -1;
+	fd = open(name, O_RDONLY);
+	if (fd >= 0) {
+		pp_printf("%s: Using config file %s\n", argv[0], name);
+		return fd;
+	}
+	pp_printf("%s: Warning: %s: %s\n", argv[0], name,
+		  strerror(errno));
+	return -1;
+}
+
+/*
+ * This is the public entry point, that is passed both a default name
+ * and a default value for the configuration file. This only builds
+ * in hosted environment.
+ *
+ * The function allows "-f <config>" to appear on the command line,
+ * and modifies the command line accordingly (hackish, I admit)
+ */
+int pp_config_file(struct pp_globals *ppg, int *argcp, char **argv,
+		   char *default_name, char *default_conf)
+{
+	char *name = NULL;
+	int conf_fd, i, conf_len = 0;
+	struct stat conf_fs;
+	char *conf_buf;
+
+	/* First, look for fname on the command line (which is parsed later) */
+	for (i = 1; i < *argcp - 1; i++) {
+		if (strcmp(argv[i], "-f"))
+			continue;
+		/* found: remove it from argv */
+		name = argv[i + 1];
+		for (;i < *argcp - 2; i++)
+			argv[i] = argv[i + 2];
+		*argcp -= 2;
+	}
+	conf_fd = pp_open_conf_file(argv, name);
+
+	/* Then try the caller-provided name */
+	if (conf_fd < 0)
+		conf_fd = pp_open_conf_file(argv, default_name);
+	/* Finally, the project-wide name */
+	if (conf_fd < 0)
+		conf_fd = pp_open_conf_file(argv, PP_DEFAULT_CONFIGFILE);
+
+	/* If nothing, use provided string */
+	if (conf_fd < 0) {		/* Read it, if any */
+		conf_buf = strdup(default_conf);
+		conf_len = strlen(conf_buf) - 1;
+	} else {
+		int r = 0, next_r;
+
+		fstat(conf_fd, &conf_fs);
+		conf_buf = calloc(1, conf_fs.st_size + 2);
+
+		do {
+			next_r = conf_fs.st_size - conf_len;
+			r = read(conf_fd, &conf_buf[conf_len], next_r);
+			if (r <= 0)
+				break;
+			conf_len = strlen(conf_buf);
+		} while (conf_len < conf_fs.st_size);
+
+		close(conf_fd);
+	}
+
+	/* We need this trailing \n for the parser */
+	conf_buf[conf_len + 1] = '\n';
+
+	if ((i = pp_parse_conf(ppg, conf_buf, conf_len)) < 0) {
+		pp_printf("%s: configuration: error at line %d\n", argv[0], -1);
+		exit(1);
+	}
+	free(conf_buf);
+	return 0;
 }
