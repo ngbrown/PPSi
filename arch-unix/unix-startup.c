@@ -24,8 +24,7 @@
 
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
-/* FIXME: make MAX_LINKS and conf_path definable at compile time */
-#define MAX_LINKS 32
+/* FIXME: make conf_path definable at compile time */
 #define CONF_PATH "/etc/ppsi.conf"
 
 int main(int argc, char **argv)
@@ -45,7 +44,7 @@ int main(int argc, char **argv)
 	if (!ppg)
 		exit(__LINE__);
 
-	ppg->max_links = MAX_LINKS;
+	ppg->max_links = PP_MAX_LINKS;
 	ppg->links = calloc(ppg->max_links, sizeof(struct pp_link));
 
 	f = fopen(CONF_PATH, "r");
