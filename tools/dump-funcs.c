@@ -234,8 +234,11 @@ static void dump_payload(char *prefix, void *pl, int len)
 #endif
 	}
 
-	/* Dump any trailing TLV */
-	while (donelen < len) {
+	/*
+	 * Dump any trailing TLV, but ignore a trailing 2-long data hunk.
+	 * The trailing zeroes appear with less-than-minimum Eth messages.
+	 */
+	while (donelen < len && len - donelen > 2) {
 		int n = len - donelen;
 		if (n < sizeof(struct ptp_tlv)) {
 			printf("%sTLV: too short (%i - %i = %i)\n", prefix,
