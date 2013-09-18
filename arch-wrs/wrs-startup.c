@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 	ppg->parentDS = calloc(1, sizeof(*ppg->parentDS));
 	ppg->timePropertiesDS = calloc(1, sizeof(*ppg->timePropertiesDS));
 	ppg->arch_data = calloc(1, sizeof(struct unix_arch_data));
-	ppg->pp_instances = calloc(ppg->nlinks, sizeof(struct pp_instance));
+	ppg->pp_instances = calloc(ppg->max_links, sizeof(struct pp_instance));
 
 	if ((!ppg->defaultDS) || (!ppg->currentDS) || (!ppg->parentDS)
 		|| (!ppg->timePropertiesDS) || (!ppg->arch_data)
