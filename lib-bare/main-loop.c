@@ -69,7 +69,6 @@ void bare_main_loop(struct pp_instance *ppi)
 		i = ppi->n_ops->recv(ppi, ppi->rx_frame,
 				     PP_MAX_FRAME_LENGTH - 4,
 				     &ppi->last_rcv_time);
-		ppi->last_rcv_time.seconds += DSPRO(ppi)->currentUtcOffset;
 
 		/* we passed payload but it filled the ether header too */
 		if (((struct bare_ethhdr *)(ppi->rx_frame))->h_proto

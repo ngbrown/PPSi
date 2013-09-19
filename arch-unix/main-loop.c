@@ -113,9 +113,6 @@ void unix_main_loop(struct pp_globals *ppg)
 						PP_MAX_FRAME_LENGTH - 4,
 						&ppi->last_rcv_time);
 
-				ppi->last_rcv_time.seconds
-					+= DSPRO(ppi)->currentUtcOffset;
-
 				if (i < PP_MINIMUM_LENGTH) {
 					pp_diag(ppi, frames, 1,
 						"Error or short frame: "
