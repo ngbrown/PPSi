@@ -109,6 +109,7 @@ static int wr_handle_resp(struct pp_instance *ppi)
 {
 	MsgHeader *hdr = &ppi->received_ptp_header;
 	TimeInternal correction_field;
+	TimeInternal *ofm = &DSCUR(ppi)->offsetFromMaster;
 
 	/* FIXME: check sub-nano relevance of correction filed */
 	cField_to_TimeInternal(&correction_field, hdr->correctionfield);
@@ -119,12 +120,17 @@ static int wr_handle_resp(struct pp_instance *ppi)
 	 * we'll have the Unix time instead, marked by "correct"
 	 */
 	if (!WR_DSPOR(ppi)->wrModeOn) {
-		if (ppi->t3.correct)
-			pp_servo_got_resp(ppi);
-		else
+		if (!ppi->t3.correct) {
 			pp_diag(ppi, servo, 1,
 				"T3 incorrect, discarding tuple\n");
-		return 0;
+			return 0;
+		}
+		pp_servo_got_resp(ppi);
+		/* turn on pps output even if not WR, if < 1ms offset */
+		if (ofm->seconds || abs(ofm->nanoseconds) > 1000 * 1000)
+			wr_enable_timing_output(ppi, 0);
+		else
+			wr_enable_timing_output(ppi, 1);
 	}
 	wr_servo_got_delay(ppi, hdr->correctionfield.lsb);
 	wr_servo_update(ppi);
