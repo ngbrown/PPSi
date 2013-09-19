@@ -206,9 +206,10 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		/* if secs, reset clock or set freq adjustment to max */
 		if (!OPTS(ppi)->no_adjust) {
 			if (!OPTS(ppi)->no_rst_clk) {
-				/* FIXME: use adjust instead of set? */
-				ppi->t_ops->get(ppi, &time_tmp);
-				sub_TimeInternal(&time_tmp, &time_tmp, ofm);
+				/* Can't use "adjust, limited to +/- 2s */
+				time_tmp = ppi->t4;
+				add_TimeInternal(&time_tmp, &time_tmp,
+						 &DSCUR(ppi)->oneWayDelay);
 				ppi->t_ops->set(ppi, &time_tmp);
 				pp_servo_init(ppi);
 			} else {
