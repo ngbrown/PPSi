@@ -338,7 +338,7 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 		ret = send(fd, hdr, len, 0);
 		poll_tx_timestamp(s, fd, t);
 		if (pp_diag_allow(ppi, frames, 2))
-			dump_1588pkt("send2: ", pkt, len, t);
+			dump_1588pkt("send: ", pkt, len, t);
 		pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
 			t->correct, (long)t->seconds,
 			(long)t->nanoseconds);
