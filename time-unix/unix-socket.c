@@ -324,6 +324,7 @@ err_out:
 	pp_printf("%s: %s: %s\n", __func__, context, strerror(errno));
 	if (sock >= 0)
 		close(sock);
+	NP(ppi)->ch[chtype].fd = -1;
 	return -1;
 }
 
@@ -413,7 +414,7 @@ struct pp_network_operations unix_net_ops = {
 int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 {
 	fd_set set;
-	int i, j;
+	int i, j, k;
 	int ret = 0;
 	int maxfd = -1;
 	struct unix_arch_data *arch_data = POSIX_ARCH(ppg);
@@ -439,36 +440,17 @@ int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 		struct pp_instance *ppi = &ppg->pp_instances[j];
 		int fd_to_set;
 
-		NP(ppi)->ch[PP_NP_GEN].pkt_present = 0;
-		NP(ppi)->ch[PP_NP_EVT].pkt_present = 0;
-
-		if (ppi->ethernet_mode) {
-
-			fd_to_set = NP(ppi)->ch[PP_NP_GEN].fd;
-
+		/* Use either fd that is valid, irrespective of ether/udp */
+		for (k = 0; k < 2; k++) {
+			NP(ppi)->ch[k].pkt_present = 0;
+			fd_to_set = NP(ppi)->ch[k].fd;
 			if (fd_to_set < 0)
 				continue;
 
 			FD_SET(fd_to_set, &set);
 			maxfd = fd_to_set > maxfd ? fd_to_set : maxfd;
-			continue;
 		}
-
-		/* else: UDP */
-		fd_to_set = NP(ppi)->ch[PP_NP_GEN].fd;
-		FD_SET(fd_to_set, &set);
-		maxfd = fd_to_set > maxfd ? fd_to_set : maxfd;
-
-		fd_to_set = NP(ppi)->ch[PP_NP_EVT].fd;
-		FD_SET(fd_to_set, &set);
-		maxfd = fd_to_set > maxfd ? fd_to_set : maxfd;
 	}
-
-	if (maxfd < 0) {
-		usleep(1000 * delay_ms);
-		return 0;
-	}
-
 	i = select(maxfd + 1, &set, NULL, NULL, &arch_data->tv);
 
 	if (i < 0 && errno != EINTR)

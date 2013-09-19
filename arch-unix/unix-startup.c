@@ -61,6 +61,9 @@ int main(int argc, char **argv)
 		struct pp_link *lnk = &ppg->links[i];
 
 		ppi = &ppg->pp_instances[i];
+		NP(ppi)->ch[PP_NP_EVT].fd = -1;
+		NP(ppi)->ch[PP_NP_GEN].fd = -1;
+
 		ppi->glbs = ppg;
 		ppi->iface_name = lnk->iface_name;
 		ppi->ethernet_mode = (lnk->proto == 0) ? 1 : 0;
