@@ -38,10 +38,12 @@ int wrs_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
 
 	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_pps_cmd, &rval, cmd, &p);
 
-	if (ret < 0)
-		return ret;
-
-	return rval;
+	if (ret < 0 || rval < 0) {
+		pp_printf("%s: error (local %i remote %i)\n",
+			  __func__, ret, rval);
+		return -1;
+	}
+	return 0;
 }
 
 int wrs_adjust_phase(int32_t phase_ps)
