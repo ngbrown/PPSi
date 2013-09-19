@@ -197,11 +197,22 @@ static int wrs_time_get(struct pp_instance *ppi, TimeInternal *t)
 
 static int32_t wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
-	/* FIXME Don't know how to implement this. Actually it's almost unused
-	 * in ppsi, only proto-standard/servo.c calls it, at initialization
-	 * time */
-	pp_diag(ppi, time, 1, "%s: (not supported) %9li.%09li\n", __func__,
+	int64_t offset_sec;
+	/*
+	 * This is almost unused in ppsi, only proto-standard/servo.c
+	 * calls it, at initialization time, when the offset is bigger
+	 * than one second.  Run this transient by just adjusting the
+	 * WR seconds.  Later on it will fix the nanos by ->adjust
+	 */
+	pp_diag(ppi, time, 1, "%s: (weird) %9li.%09li\n", __func__,
 		(long)t->seconds, (long)t->nanoseconds);
+
+	/* We have no way to get the WR time, currently. So use our T3 */
+	offset_sec = (long long)t->seconds - (long long)ppi->t3.seconds;
+	pp_diag(ppi, time, 1, "%s: adjusting seconds: %li\n", __func__,
+		(long)offset_sec);
+	wrs_adjust_counters(offset_sec, 0);
+
 	/* Set unix time anyways */
 	unix_time_ops.set(ppi, t);
 	return -ENOTSUP;
