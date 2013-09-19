@@ -31,6 +31,8 @@
 
 #include <ppsi-wrs.h>
 #include <hal_exports.h>
+#include "../proto-ext-whiterabbit/wr-api.h"
+
 extern struct minipc_pd __rpcdef_get_port_state;
 
 #define ETHER_MTU 1518
@@ -219,6 +221,11 @@ int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int _len,
 		t->raw_ahead = cntr_ahead;
 
 		update_dmtd(s, ppi->iface_name);
+		if (!WR_DSPOR(ppi)->wrModeOn) {
+			/* for non-wr-mode any reported stamp is correct */
+			t->correct = 1;
+			return ret;
+		}
 		if (s->dmtd_phase_valid)
 		{
 			wrs_linearize_rx_timestamp(t, s->dmtd_phase,

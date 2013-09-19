@@ -115,14 +115,14 @@ static int wr_handle_resp(struct pp_instance *ppi)
 	cField_to_TimeInternal(&correction_field, hdr->correctionfield);
 
 	/*
-	 * If no WR mode is on, run normal code, it T3 is valid.
+	 * If no WR mode is on, run normal code, if T2/T3 are valid.
 	 * After we adjusted the pps counter, stamps are invalid, so
 	 * we'll have the Unix time instead, marked by "correct"
 	 */
 	if (!WR_DSPOR(ppi)->wrModeOn) {
-		if (!ppi->t3.correct) {
+		if (!ppi->t2.correct || !ppi->t3.correct) {
 			pp_diag(ppi, servo, 1,
-				"T3 incorrect, discarding tuple\n");
+				"T2 or T3 incorrect, discarding tuple\n");
 			return 0;
 		}
 		pp_servo_got_resp(ppi);
