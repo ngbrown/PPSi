@@ -53,8 +53,8 @@ int main(int argc, char **argv)
 		|| (!ppg->pp_instances) || (!ppg->servo))
 		exit(__LINE__);
 
-	pp_config_file(ppg, &argc, argv, NULL,
-		       "link 0\niface eth0\n" /* mandatory trailing \n */);
+	pp_config_file(ppg, &argc, argv, NULL, "link 0\niface eth0\n"
+		       "proto udp\n" /* mandatory  trailing \n */);
 
 	for (i = 0; i < ppg->nlinks; i++) {
 
