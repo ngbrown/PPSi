@@ -64,6 +64,10 @@ static int handle_link(struct pp_globals *ppg, char *val)
 	/* ppg->nlinks is initialized to -1 and used as index for current link,
 	 * so increase it before using it */
 	ppg->nlinks++;
+	if (ppg->nlinks >= ppg->max_links) {
+		pp_printf("ppsi: Too many links in config file\n");
+		exit(1);
+	}
 	strcpy(ppg->links[ppg->nlinks].link_name, val); /* FIXME check val len */
 	return 1;
 }
