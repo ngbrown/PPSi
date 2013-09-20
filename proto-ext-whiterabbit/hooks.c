@@ -120,6 +120,8 @@ static int wr_handle_resp(struct pp_instance *ppi)
 	 * we'll have the Unix time instead, marked by "correct"
 	 */
 	if (!WR_DSPOR(ppi)->wrModeOn) {
+		Boolean pps_out;
+
 		if (!ppi->t2.correct || !ppi->t3.correct) {
 			pp_diag(ppi, servo, 1,
 				"T2 or T3 incorrect, discarding tuple\n");
@@ -127,10 +129,12 @@ static int wr_handle_resp(struct pp_instance *ppi)
 		}
 		pp_servo_got_resp(ppi);
 		/* turn on pps output even if not WR, if < 1ms offset */
-		if (ofm->seconds || abs(ofm->nanoseconds) > 1000 * 1000)
-			wr_enable_timing_output(ppi, 0);
-		else
-			wr_enable_timing_output(ppi, 1);
+		pps_out = (ofm->seconds || abs(ofm->nanoseconds) > 1000*1000);
+
+		/* Only act on changes, so hackers can force it on manually */
+		if (pps_out != WR_DSPOR(ppi)->ppsOutputOn)
+			wr_enable_timing_output(ppi, pps_out);
+		WR_DSPOR(ppi)->ppsOutputOn = pps_out;
 	}
 	wr_servo_got_delay(ppi, hdr->correctionfield.lsb);
 	wr_servo_update(ppi);
