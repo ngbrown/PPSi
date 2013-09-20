@@ -158,7 +158,7 @@ static void wrs_linearize_rx_timestamp(TimeInternal *ts,
 }
 
 
-int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int _len,
+static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int _len,
 			  TimeInternal *t)
 {
 	struct wrs_socket *s;
@@ -357,6 +357,40 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 }
 
+/* Helper for setting up hardware timestamps */
+static int wrs_enable_timestamps(struct pp_instance *ppi, int fd)
+{
+	int so_timestamping_flags = SOF_TIMESTAMPING_TX_HARDWARE |
+		SOF_TIMESTAMPING_RX_HARDWARE |
+		SOF_TIMESTAMPING_RAW_HARDWARE;
+	struct ifreq ifr;
+	struct hwtstamp_config hwconfig;
+
+	if (fd < 0)
+		return 0; /* nothing to do */
+
+	strncpy(ifr.ifr_name, ppi->iface_name, sizeof(ifr.ifr_name));
+	hwconfig.tx_type = HWTSTAMP_TX_ON;
+	hwconfig.rx_filter = HWTSTAMP_FILTER_PTP_V2_L2_EVENT;
+	ifr.ifr_data = &hwconfig;
+
+	if (ioctl(fd, SIOCSHWTSTAMP, &ifr) < 0) {
+		pp_diag(ppi, frames, 1,
+			"%s: ioctl(SIOCSHWTSTAMP): %s\n",
+			ppi->iface_name, strerror(errno));
+		return -1;
+	}
+
+	if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPING,
+		       &so_timestamping_flags, sizeof(int)) < 0) {
+		pp_diag(ppi, frames, 1,
+			"socket: setsockopt(TIMESTAMPING): %s\n",
+			strerror(errno));
+		return -1;
+	}
+	return 0;
+}
+
 static int wrs_net_exit(struct pp_instance *ppi);
 
 static int wrs_net_init(struct pp_instance *ppi)
@@ -400,47 +434,14 @@ static int wrs_net_init(struct pp_instance *ppi)
 	NP(ppi)->ch[PP_NP_EVT].arch_data = s;
 	tmo_init(&s->dmtd_update_tmo, DMTD_UPDATE_INTERVAL);
 
-	/* Hw timestamping enable */
-	int so_timestamping_flags = SOF_TIMESTAMPING_TX_HARDWARE |
-		SOF_TIMESTAMPING_RX_HARDWARE |
-		SOF_TIMESTAMPING_RAW_HARDWARE;
-
-	struct ifreq ifr;
-	struct hwtstamp_config hwconfig;
-
-	strncpy(ifr.ifr_name, ppi->iface_name, sizeof(ifr.ifr_name));
-
-	hwconfig.tx_type = HWTSTAMP_TX_ON;
-	hwconfig.rx_filter = HWTSTAMP_FILTER_PTP_V2_L2_EVENT;
-
-	ifr.ifr_data = &hwconfig;
-
-	for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
-		int fd = NP(ppi)->ch[i].fd;
-
-		if (fd <= 0)
-			break;
-
-		if (ioctl(fd, SIOCSHWTSTAMP, &ifr) < 0) {
-			pp_error("ioctl(SIOCSHWTSTAMP)");
-			goto error;
-		}
-
-		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPING,
-			&so_timestamping_flags, sizeof(int)) < 0) {
-			pp_error("setsockopt(SO_TIMESTAMPING)");
-			goto error;
-		}
+	for (i = PP_NP_GEN, r = 0; i <= PP_NP_EVT && r == 0; i++)
+		r = wrs_enable_timestamps(ppi, NP(ppi)->ch[i].fd);
+	if (r) {
+		NP(ppi)->ch[PP_NP_GEN].arch_data = NULL;
+		NP(ppi)->ch[PP_NP_EVT].arch_data = NULL;
+		free(s);
 	}
-
-	return 0;
-
-error:
-	free(s);
-	NP(ppi)->ch[PP_NP_GEN].arch_data = NULL;
-	NP(ppi)->ch[PP_NP_EVT].arch_data = NULL;
-
-	return -1;
+	return r;
 }
 
 static int wrs_net_exit(struct pp_instance *ppi)
