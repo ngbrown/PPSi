@@ -272,7 +272,6 @@ static void poll_tx_timestamp(struct wrs_socket *s, int fd,
 	} control;
 	struct cmsghdr *cmsg;
 	int res;
-	uint32_t rtag;
 
 	struct sock_extended_err *serr = NULL;
 	struct scm_timestamping *sts = NULL;
@@ -294,8 +293,6 @@ static void poll_tx_timestamp(struct wrs_socket *s, int fd,
 
 	if (res <= 0)
 		return;
-
-	memcpy(&rtag, data + res - 4, 4);
 
 	for (cmsg = CMSG_FIRSTHDR(&msg);
 	     cmsg;
