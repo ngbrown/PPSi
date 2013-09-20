@@ -158,7 +158,7 @@ static void wrs_linearize_rx_timestamp(TimeInternal *ts,
 }
 
 
-static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int _len,
+static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 			  TimeInternal *t)
 {
 	struct wrs_socket *s;
@@ -173,7 +173,6 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int _len,
 	struct scm_timestamping *sts = NULL;
 
 	s = (struct wrs_socket*)NP(ppi)->ch[PP_NP_GEN].arch_data;
-	size_t len = _len + sizeof(struct ethhdr);
 
 	memset(&msg, 0, sizeof(msg));
 	msg.msg_iov = &entry;
@@ -449,6 +448,7 @@ static int wrs_net_exit(struct pp_instance *ppi)
 	unix_net_ops.exit(ppi);
 	free(NP(ppi)->ch[PP_NP_GEN].arch_data);
 	NP(ppi)->ch[PP_NP_GEN].arch_data = NULL;
+	NP(ppi)->ch[PP_NP_EVT].arch_data = NULL;
 	return 0;
 }
 
