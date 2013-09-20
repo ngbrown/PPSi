@@ -197,7 +197,7 @@ static int wrs_time_get(struct pp_instance *ppi, TimeInternal *t)
 
 static int32_t wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
-	int64_t offset_sec;
+	TimeInternal diff;
 	/*
 	 * This is almost unused in ppsi, only proto-standard/servo.c
 	 * calls it, at initialization time, when the offset is bigger
@@ -206,16 +206,28 @@ static int32_t wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 	 */
 	pp_diag(ppi, time, 1, "%s: (weird) %9li.%09li\n", __func__,
 		(long)t->seconds, (long)t->nanoseconds);
-
 	/* We have no way to get the WR time, currently. So use our T3 */
-	offset_sec = (long long)t->seconds - (long long)ppi->t3.seconds;
-	pp_diag(ppi, time, 1, "%s: adjusting seconds: %li\n", __func__,
-		(long)offset_sec);
-	wrs_adjust_counters(offset_sec, 0);
+	sub_TimeInternal(&diff, t, &ppi->t3);
 
-	/* Set unix time anyways */
+	/*
+	 * We can adjust nanoseconds or seconds, but not both at the
+	 * same time. When an adjustment is in progress we can't do
+	 * the other.  So make nanoseconds first if > 10ms, and the
+	 * servo will call us again later for the seconds part.
+	 */
+	if (abs(diff.nanoseconds) > 10 * 1000 * 1000) {
+		pp_diag(ppi, time, 1, "%s: adjusting nanoseconds: %li\n",
+			__func__, (long)diff.nanoseconds);
+		wrs_adjust_counters(0, diff.nanoseconds);
+		return 0;
+	}
+	pp_diag(ppi, time, 1, "%s: adjusting seconds: %li\n",
+		__func__, (long)diff.seconds);
+	wrs_adjust_counters(diff.seconds, 0);
+
+	/* Finally, set unix time too */
 	unix_time_ops.set(ppi, t);
-	return -ENOTSUP;
+	return 0;
 }
 
 static int wrs_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
