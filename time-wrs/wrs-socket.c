@@ -239,7 +239,8 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
-	int ret;
+	struct pp_channel *ch1, *ch2;
+	int ret = -1;
 
 	if (ppi->ethernet_mode) {
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
@@ -247,19 +248,30 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		ret = wrs_recv_msg(ppi, fd, pkt, len, t);
 		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("recv: ", pkt, ret, t);
-		pp_diag(ppi, time, 1, "recv stamp: (correct %i) %9li.%09li\n",
-			t->correct, (long)t->seconds,
-			(long)t->nanoseconds);
-		return ret;
-	}
+	} else {
+		/* UDP: always handle EVT msgs before GEN */
+		ch1 = &(NP(ppi)->ch[PP_NP_EVT]);
+		ch2 = &(NP(ppi)->ch[PP_NP_GEN]);
 
-	pp_error("udp is not supported in wrs arch yet\n");
-	return -ENOTSUP;
+		if (ch1->pkt_present)
+			ret = wrs_recv_msg(ppi, ch1->fd, pkt, len, t);
+		else if (ch2->pkt_present)
+			ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t);
+
+		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+			dump_payloadpkt("recv: ", pkt, ret, t);
+	}
+	if (ret < 0)
+		return ret;
+	pp_diag(ppi, time, 1, "recv stamp: (correct %i) %9li.%09li\n",
+		t->correct, (long)t->seconds,
+		(long)t->nanoseconds);
+	return ret;
 }
 
 /* Waits for the transmission timestamp and stores it in t (if not null). */
-static void poll_tx_timestamp(struct wrs_socket *s, int fd,
-							  TimeInternal *t)
+static void poll_tx_timestamp(struct pp_instance *ppi,
+			      struct wrs_socket *s, int fd, TimeInternal *t)
 {
 	char data[16384];
 
@@ -291,8 +303,16 @@ static void poll_tx_timestamp(struct wrs_socket *s, int fd,
 	if (t)
 		t->correct = 0;
 
-	if (res <= 0)
+	if (res <= 0 || !t)
 		return;
+
+	/*
+	 * Raw frames return "sock_extended_err" too, telling this is
+	 * a tx timestamp. Udp doesn't so don't check in udp mode
+	 * (the pointer is only checked for non-null)
+	 */
+	if (!ppi->ethernet_mode)
+		serr = (void *)1;
 
 	for (cmsg = CMSG_FIRSTHDR(&msg);
 	     cmsg;
@@ -308,7 +328,7 @@ static void poll_tx_timestamp(struct wrs_socket *s, int fd,
 			   && cmsg->cmsg_type == SO_TIMESTAMPING)
 				sts = (struct scm_timestamping *) dp;
 
-			if(serr && sts && t)
+			if(sts && serr)
 			{
 				t->correct = 1;
 				t->phase = 0;
@@ -321,14 +341,15 @@ static void poll_tx_timestamp(struct wrs_socket *s, int fd,
 int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
+	struct sockaddr_in addr;
 	struct ethhdr *hdr = pkt;
 	struct wrs_socket *s;
-	int ret;
+	int ret, fd;
 
 	s = (struct wrs_socket *)NP(ppi)->ch[PP_NP_GEN].arch_data;
 
 	if (ppi->ethernet_mode) {
-		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
+		fd = NP(ppi)->ch[PP_NP_GEN].fd;
 		hdr->h_proto = htons(ETH_P_1588);
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
@@ -339,7 +360,7 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 			ppi->t_ops->get(ppi, t);
 
 		ret = send(fd, hdr, len, 0);
-		poll_tx_timestamp(s, fd, t);
+		poll_tx_timestamp(ppi, s, fd, t);
 		if (pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("send: ", pkt, len, t);
 		pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
@@ -348,9 +369,21 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 		return ret;
 	}
 
-	pp_error("udp is not supported in wrs arch yet\n");
-	return -ENOTSUP;
+	/* else: UDP */
+	fd = NP(ppi)->ch[chtype].fd;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(chtype == PP_NP_GEN ? PP_GEN_PORT : PP_EVT_PORT);
+	addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
 
+	ret = sendto(fd, pkt, len, 0,
+		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+	poll_tx_timestamp(ppi, s, fd, t);
+	if (pp_diag_allow(ppi, frames, 2))
+		dump_payloadpkt("send: ", pkt, len, t);
+	pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
+		t->correct, (long)t->seconds,
+		(long)t->nanoseconds);
+	return ret;
 }
 
 /* Helper for setting up hardware timestamps */
@@ -397,16 +430,11 @@ static int wrs_net_init(struct pp_instance *ppi)
 	if (NP(ppi)->ch[PP_NP_GEN].arch_data)
 		wrs_net_exit(ppi);
 
+	/* Generic OS work is done by standard Unix stuff */
 	r = unix_net_ops.init(ppi);
+
 	if (r)
 		return r;
-
-	if (!ppi->ethernet_mode) {
-		pp_diag(ppi, frames, 1, "%s: Can't do White Rabbit over UDP,"
-			" falling back to normal PTP\n", __func__);
-		ppi->n_ops = &unix_net_ops;
-		return 0;
-	}
 
 	r = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_get_port_state,
 		 &pstate, ppi->iface_name);
