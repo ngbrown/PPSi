@@ -128,8 +128,9 @@ static int wr_handle_resp(struct pp_instance *ppi)
 			return 0;
 		}
 		pp_servo_got_resp(ppi);
-		/* turn on pps output even if not WR, if < 1ms offset */
-		pps_out = (ofm->seconds || abs(ofm->nanoseconds) > 1000*1000);
+		/* pps always on; until we have a configurable threshold */
+		if (ofm /* ->seconds || ... */)
+			pps_out = 1;
 
 		/* Only act on changes, so hackers can force it on manually */
 		if (pps_out != WR_DSPOR(ppi)->ppsOutputOn)
