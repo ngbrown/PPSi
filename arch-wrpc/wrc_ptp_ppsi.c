@@ -82,6 +82,10 @@ int wrc_ptp_set_mode(int mode)
 {
 	uint32_t start_tics, lock_timeout = 0;
 	struct pp_instance *ppi = &ppi_static;
+	typeof(default_rt_opts.clock_quality.clockClass) *class_ptr;
+
+	/* We need to change the class in the default options */
+	class_ptr = &default_rt_opts.clock_quality.clockClass;
 
 	ptp_mode = 0;
 
@@ -93,6 +97,7 @@ int wrc_ptp_set_mode(int mode)
 		WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
 		ppi->master_only = TRUE;
 		ppi->slave_only = FALSE;
+		*class_ptr = PP_WRMASTER_CLOCK_CLASS;
 		spll_init(SPLL_MODE_GRAND_MASTER, 0, 1);
 		lock_timeout = LOCK_TIMEOUT_GM;
 		break;
@@ -102,6 +107,7 @@ int wrc_ptp_set_mode(int mode)
 		WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
 		ppi->master_only = TRUE;
 		ppi->slave_only = FALSE;
+		*class_ptr = PP_WRMASTER_CLOCK_CLASS;
 		spll_init(SPLL_MODE_FREE_RUNNING_MASTER, 0, 1);
 		lock_timeout = LOCK_TIMEOUT_FM;
 		break;
@@ -111,6 +117,7 @@ int wrc_ptp_set_mode(int mode)
 		WR_DSPOR(ppi)->wrConfig = WR_S_ONLY;
 		ppi->master_only = FALSE;
 		ppi->slave_only = TRUE;
+		*class_ptr = PP_WRMASTER_CLOCK_CLASS;
 		spll_init(SPLL_MODE_SLAVE, 0, 1);
 		break;
 	}
