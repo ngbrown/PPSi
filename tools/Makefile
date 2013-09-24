@@ -11,7 +11,7 @@ OBJDUMP         = $(CROSS_COMPILE)objdump
 
 CFLAGS = -Wall -ggdb -I../include
 
-PROGS = ptpdump adjtime jmptime chktime
+PROGS = ptpdump adjtime jmptime chktime adjrate
 LDFLAGS += -lrt
 
 all: $(PROGS)

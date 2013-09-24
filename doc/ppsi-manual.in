@@ -642,6 +642,32 @@ The following example shows how on my host the kernel adjusts the time by
 @end example
 
 @c ==========================================================================
+@node adjrate
+@section adjrate
+
+The program reads and optionally changes the clock rate of the host
+system using the Linux-specific @i{adjtimex} system call (the same
+being used in the core PPSi program).  It is meant to check adjustment
+and get acquainted with the involved values.
+
+The numerical argument of the system call is parts-per-million scaled
+by 16 bits. So for example half @i{ppm} is passed as 32768.
+
+The following are example uses of the program on an ntp-driven host:
+
+@example
+   morgana% ./tools/adjrate --help
+   ./tools/adjrate: use "./tools/adjrate [<adj-value> [ppm]]"
+   morgana% ./tools/adjrate
+   rate: -407582 (-6.219208 ppm)
+   morgana% ./tools/adjrate -6
+   ./tools/adjrate: adjtimex(rate=-6): -1 (Operation not permitted)
+   morgana% sudo ./tools/adjrate -6 ppm
+   morgana% sudo ./tools/adjrate
+   rate: -393216 (-6.000000 ppm)
+@end example
+
+@c ==========================================================================
 @node mtp
 @section mtp
 
