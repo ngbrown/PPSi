@@ -62,10 +62,8 @@ int msg_unpack_header(struct pp_instance *ppi, void *buf, int plen)
 /* Pack header message into out buffer of ppi */
 void msg_pack_header(struct pp_instance *ppi, void *buf)
 {
-	Nibble transport = 0x80;
-
-	/* (spec annex D) */
-	*(UInteger8 *) (buf + 0) = transport;
+	/* (spec annex D and F) */
+	*(UInteger8 *) (buf + 0) = 0; /* message type changed later */
 	*(UInteger4 *) (buf + 1) = DSPOR(ppi)->versionNumber;
 	*(UInteger8 *) (buf + 4) = DSDEF(ppi)->domainNumber;
 
