@@ -35,7 +35,7 @@
 
 @setchapternewpage off
 
-@set update-month May 2013
+@set update-month September 2013
 
 @finalout
 
@@ -425,11 +425,8 @@ commented.
 @section Older Diagnostics
 
 We introduced the diagnostic macros described above at the beginning
-of March 2013.  Earlier code used a less-structured approach, which is
-still used in parts of the code and is being slowly phased away.
-As of May 2013 we still have a pair of uses of @t{PP_PRINTF},
-but we'll kill them soon.  To help our users not add such calls,
-we are not documenting it any more.
+of March 2013.  Earlier code used a less-structured approach, which 
+has later been removed. If you used @t{PP_PRINTF}, it's gone by now.
 
 @c ==========================================================================
 @node Printf
