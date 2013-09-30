@@ -58,7 +58,6 @@ int main(int argc, char **argv)
 		exit(__LINE__);
 
 	ppg->max_links = PP_MAX_LINKS;
-	ppg->links = calloc(ppg->max_links, sizeof(struct pp_link));
 	ppg->defaultDS = calloc(1, sizeof(*ppg->defaultDS));
 	ppg->currentDS = calloc(1, sizeof(*ppg->currentDS));
 	ppg->parentDS = calloc(1, sizeof(*ppg->parentDS));
@@ -78,20 +77,18 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < ppg->nlinks; i++) {
 
-		struct pp_link *lnk = &ppg->links[i];
-
 		ppi = &ppg->pp_instances[i];
 		NP(ppi)->ch[PP_NP_EVT].fd = -1;
 		NP(ppi)->ch[PP_NP_GEN].fd = -1;
 
 		ppi->glbs = ppg;
-		ppi->iface_name = lnk->iface_name;
-		ppi->ethernet_mode = (lnk->proto == 0) ? 1 : 0;
-		if (lnk->role == 1) {
+		ppi->iface_name = ppi->cfg.iface_name;
+		ppi->ethernet_mode = (ppi->cfg.proto == 0) ? 1 : 0;
+		if (ppi->cfg.role == 1) {
 			ppi->master_only = 1;
 			ppi->slave_only = 0;
 		}
-		else if (lnk->role == 2) {
+		else if (ppi->cfg.role == 2) {
 			ppi->master_only = 0;
 			ppi->slave_only = 1;
 		}

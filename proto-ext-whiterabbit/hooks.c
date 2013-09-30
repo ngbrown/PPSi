@@ -31,15 +31,14 @@ static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 	}
 
 	for (i = 0; i < ppg->nlinks; i++) {
-		struct pp_link *lnk = &ppg->links[i];
 		struct pp_instance *ppi = &ppg->pp_instances[i];
 
 		/* FIXME check if correct: assign to each instance the same
 		 * wr_data. May I move it to pp_globals? */
 		ppg->pp_instances[i].ext_data = &wr_data;
 
-		if (lnk->ext) {
-			switch (lnk->role) {
+		if (ppi->cfg.ext) {
+			switch (ppi->cfg.role) {
 				case 1:
 					WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
 					break;

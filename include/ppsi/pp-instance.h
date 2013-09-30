@@ -109,6 +109,18 @@ struct pp_net_path {
 };
 
 /*
+ * Struct containg the result of ppsi.conf parsing: one for each link
+ * (see lib/conf.c)
+ */
+struct pp_instance_cfg {
+	char link_name[16];
+	char iface_name[16];
+	int proto; /* 0: raw, 1: udp */
+	int role;  /* 0: auto, 1: master, 2: slave */
+	int ext;   /* 0: none, 1: whiterabbit */ /* FIXME extension enumeration */
+};
+
+/*
  * Structure for the individual ppsi link
  */
 struct pp_instance {
@@ -167,19 +179,10 @@ struct pp_instance {
 		ethernet_mode:1;
 	char *iface_name;
 	int port_idx;
+
+	struct pp_instance_cfg cfg;
 };
 
-/*
- * Struct containg the result of ppsi.conf parsing: one for each link
- * (see lib/conf.c)
- */
-struct pp_link {
-	char link_name[16];
-	char iface_name[16];
-	int proto; /* 0: raw, 1: udp */
-	int role;  /* 0: auto, 1: master, 2: slave */
-	int ext;   /* 0: none, 1: whiterabbit */ /* FIXME extension enumeration */
-};
 
 /*
  * Structure for the multi-port ppsi instance.
@@ -204,7 +207,6 @@ struct pp_globals {
 
 	int nlinks;
 	int max_links;
-	struct pp_link *links;
 
 	void *arch_data;		/* if arch needs it */
 	/* FIXME Here include all is common to many interfaces */

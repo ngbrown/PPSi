@@ -68,13 +68,15 @@ static int handle_link(struct pp_globals *ppg, char *val)
 		pp_printf("ppsi: Too many links in config file\n");
 		exit(1);
 	}
-	strcpy(ppg->links[ppg->nlinks].link_name, val); /* FIXME check val len */
+	 /* FIXME: strncpy (it is missing in bare archs by now) */
+	strcpy(ppg->pp_instances[ppg->nlinks].cfg.link_name, val);
 	return 1;
 }
 
 static int handle_iface(struct pp_globals *ppg, char *val)
 {
-	strcpy(ppg->links[ppg->nlinks].iface_name, val); /* FIXME check iface len */
+	 /* FIXME: strncpy (it is missing in bare archs by now) */
+	strcpy(ppg->pp_instances[ppg->nlinks].iface_name, val);
 	return 1;
 }
 
@@ -98,7 +100,8 @@ static int handle_proto(struct pp_globals *ppg, char *val)
 	switch(v_id) {
 		case KW_RAW:
 		case KW_UDP:
-			ppg->links[ppg->nlinks].proto = v_id - KW_RAW;
+			ppg->pp_instances[ppg->nlinks].cfg.proto
+				= v_id - KW_RAW;
 			break;
 		default:
 			return 0;
@@ -115,7 +118,8 @@ static int handle_role(struct pp_globals *ppg, char *val)
 		case KW_AUTO:
 		case KW_MASTER:
 		case KW_SLAVE:
-			ppg->links[ppg->nlinks].role = v_id - KW_AUTO;
+			ppg->pp_instances[ppg->nlinks].cfg.role
+				= v_id - KW_AUTO;
 			break;
 		default:
 			return 0;
@@ -131,7 +135,8 @@ static int handle_ext(struct pp_globals *ppg, char *val)
 	switch(v_id) {
 		case KW_NONE:
 		case KW_WHITERAB:
-			ppg->links[ppg->nlinks].ext = v_id - KW_NONE;
+			ppg->pp_instances[ppg->nlinks].cfg.ext
+				= v_id - KW_NONE;
 			break;
 		default:
 			return 0;
@@ -174,7 +179,6 @@ static int pp_parse_conf(struct pp_globals *ppg, char *conf, int len)
 	/* ppg->nlinks is initialized to -1 and increased at first link found,
 	 * so that we can use it as array index */
 	ppg->nlinks = -1;
-	memset(ppg->links, 0, ppg->max_links * sizeof(struct pp_link));
 
 	for (i = 0; i < len; i++) {
 		c = conf[i];
