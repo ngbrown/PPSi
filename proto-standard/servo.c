@@ -12,7 +12,7 @@ void pp_servo_init(struct pp_instance *ppi)
 {
 	int d;
 
-	SRV(ppi)->owd_fltr.s_exp = 0;	/* clears one-way delay filter */
+	SRV(ppi)->mpd_fltr.s_exp = 0;	/* clears one-way delay filter */
 	SRV(ppi)->ofm_fltr.s_exp = 0;	/* clears offset-from-master filter */
 
 
@@ -65,16 +65,16 @@ void pp_servo_got_sync(struct pp_instance *ppi)
 
 /*
  * This function makes the necessary checks to discard a set of t1..t4.
- * It relies on owd to be already calculated.
+ * It relies on mpd to be already calculated.
  */
 static int pp_servo_bad_event(struct pp_instance *ppi)
 {
 	TimeInternal *m_to_s_dly = &SRV(ppi)->m_to_s_dly;
 	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
-	TimeInternal *owd = &DSCUR(ppi)->oneWayDelay;
+	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
 
 	/* Discard one-way delays that overflow a second (makes no sense) */
-	if (owd->seconds)
+	if (mpd->seconds)
 		return 1;
 
 	if (OPTS(ppi)->max_dly) { /* If maxDelay is 0 then it's OFF */
@@ -102,9 +102,9 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 {
 	TimeInternal *m_to_s_dly = &SRV(ppi)->m_to_s_dly;
 	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
-	TimeInternal *owd = &DSCUR(ppi)->oneWayDelay;
+	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
 	TimeInternal *ofm = &DSCUR(ppi)->offsetFromMaster;
-	struct pp_avg_fltr *owd_fltr = &SRV(ppi)->owd_fltr;
+	struct pp_avg_fltr *mpd_fltr = &SRV(ppi)->mpd_fltr;
 	struct pp_avg_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
 	Integer32 adj;
 	int s;
@@ -126,63 +126,63 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	pp_diag(ppi, servo, 1, "Slave to master: %s\n", fmt_TI(s_to_m_dly));
 
 	/* Calc mean path delay, used later to calc "offset from master" */
-	add_TimeInternal(owd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
-	div2_TimeInternal(owd);
-	pp_diag(ppi, servo, 1, "One-way delay: %s\n", fmt_TI(owd));
+	add_TimeInternal(mpd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
+	div2_TimeInternal(mpd);
+	pp_diag(ppi, servo, 1, "One-way delay: %s\n", fmt_TI(mpd));
 
 	if(pp_servo_bad_event(ppi))
 		return;
 
-	if (owd_fltr->s_exp < 1) {
+	if (mpd_fltr->s_exp < 1) {
 		/* First time, keep what we have */
-		owd_fltr->y = owd->nanoseconds;
+		mpd_fltr->y = mpd->nanoseconds;
 	}
 	/* avoid overflowing filter */
 	s = OPTS(ppi)->s;
-	while (abs(owd_fltr->y) >> (31 - s))
+	while (abs(mpd_fltr->y) >> (31 - s))
 		--s;
-	if (owd_fltr->s_exp > 1 << s)
-		owd_fltr->s_exp = 1 << s;
+	if (mpd_fltr->s_exp > 1 << s)
+		mpd_fltr->s_exp = 1 << s;
 	/* crank down filter cutoff by increasing 's_exp' */
-	if (owd_fltr->s_exp < 1 << s)
-		++owd_fltr->s_exp;
+	if (mpd_fltr->s_exp < 1 << s)
+		++mpd_fltr->s_exp;
 
 	/*
-	 * It may happen that owd appears as negative. This happens when
+	 * It may happen that mpd appears as negative. This happens when
 	 * the slave clock is running fast to recover a late time: the
 	 * (t3 - t2) measured in the slave appears longer than the (t4 - t1)
 	 * measured in the master.  Ignore such values, by keeping the
 	 * current average instead.
 	 */
-	if (owd->nanoseconds < 0)
-		owd->nanoseconds = owd_fltr->y;
-	if (owd->nanoseconds < 0)
-		owd->nanoseconds = 0;
+	if (mpd->nanoseconds < 0)
+		mpd->nanoseconds = mpd_fltr->y;
+	if (mpd->nanoseconds < 0)
+		mpd->nanoseconds = 0;
 
 	/*
-	 * It may happen that owd appears to be very big. This happens
+	 * It may happen that mpd appears to be very big. This happens
 	 * when we have software timestamps and there is overhead
 	 * involved -- or when the slave clock is running slow.  In
 	 * this case use a value just slightly bigger than the current
 	 * average (so if it really got longer, we will adapt).  This
 	 * kills most outliers on loaded networks.
 	 */
-	if (owd->nanoseconds > 3 * owd_fltr->y) {
-		pp_diag(ppi, servo, 1, "Trim too-long owd: %i\n",
-			owd->nanoseconds);
+	if (mpd->nanoseconds > 3 * mpd_fltr->y) {
+		pp_diag(ppi, servo, 1, "Trim too-long mpd: %i\n",
+			mpd->nanoseconds);
 		/* add fltr->s_exp to ensure we are not trapped into 0 */
-		owd->nanoseconds = owd_fltr->y * 2 + owd_fltr->s_exp + 1;
+		mpd->nanoseconds = mpd_fltr->y * 2 + mpd_fltr->s_exp + 1;
 	}
-	/* filter 'oneWayDelay' (running average) */
-	owd_fltr->y = (owd_fltr->y * (owd_fltr->s_exp - 1) + owd->nanoseconds)
-		/ owd_fltr->s_exp;
-	owd->nanoseconds = owd_fltr->y;
+	/* filter 'meanPathDelay' (running average) */
+	mpd_fltr->y = (mpd_fltr->y * (mpd_fltr->s_exp - 1) + mpd->nanoseconds)
+		/ mpd_fltr->s_exp;
+	mpd->nanoseconds = mpd_fltr->y;
 
 	pp_diag(ppi, servo, 1, "After avg(%i), one-way delay: %i\n",
-		(int)owd_fltr->s_exp, owd->nanoseconds);
+		(int)mpd_fltr->s_exp, mpd->nanoseconds);
 
 	/* update 'offsetFromMaster', (End to End mode) */
-	sub_TimeInternal(ofm, m_to_s_dly, owd);
+	sub_TimeInternal(ofm, m_to_s_dly, mpd);
 	pp_diag(ppi, servo, 2, "Offset from master:     %s\n", fmt_TI(ofm));
 
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
@@ -209,7 +209,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 				/* Can't use "adjust, limited to +/- 2s */
 				time_tmp = ppi->t4;
 				add_TimeInternal(&time_tmp, &time_tmp,
-						 &DSCUR(ppi)->oneWayDelay);
+						 &DSCUR(ppi)->meanPathDelay);
 				ppi->t_ops->set(ppi, &time_tmp);
 				pp_servo_init(ppi);
 			} else {
@@ -226,7 +226,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	}
 
 	/*
-	 * Filter the ofm using the same running averags as we used for owd
+	 * Filter the ofm using the same running averags as we used for mpd
 	 */
 	if (ofm_fltr->s_exp < 1) {
 		/* First time, keep what we have */
@@ -328,7 +328,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 			ppi->t_ops->adjust_offset(ppi, -adj);
 	}
 
-	pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n", fmt_TI(owd));
+	pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n", fmt_TI(mpd));
 	pp_diag(ppi, servo, 2, "Offset from m averaged: %s\n", fmt_TI(ofm));
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
 		(int)SRV(ppi)->obs_drift);
