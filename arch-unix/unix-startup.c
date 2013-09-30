@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/timex.h>
 
 #include <ppsi/ppsi.h>
 #include "ppsi-unix.h"
@@ -35,6 +36,7 @@ int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
+	struct timex t;
 	int i;
 
 	setbuf(stdout, NULL);
@@ -54,6 +56,10 @@ int main(int argc, char **argv)
 
 	if ((!ppg->arch_data) || (!ppg->pp_instances))
 		exit(__LINE__);
+
+	/* Set offset here, so config parsing can override it */
+	if (adjtimex(&t) >= 0)
+		timePropertiesDS.currentUtcOffset = t.tai;
 
 	pp_config_file(ppg, &argc, argv, NULL, "link 0\niface eth0\n"
 		       "proto udp\n" /* mandatory  trailing \n */);

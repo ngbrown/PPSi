@@ -61,6 +61,9 @@ static void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 
 	/* Timeproperties DS */
 	prop->timeSource = ann->timeSource;
+	if (prop->currentUtcOffset != ann->currentUtcOffset)
+		pp_diag(ppi, bmc, 1, "New UTC offset: %i\n",
+			ann->currentUtcOffset);
 	prop->currentUtcOffset = ann->currentUtcOffset;
 
 	/* FIXME: can't we just copy the bit keeping values? */

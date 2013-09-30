@@ -38,6 +38,7 @@ int ppsi_main(int argc, char **argv)
 {
 	struct pp_globals *ppg = &ppg_static;
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
+	struct bare_timex t;
 
 	if (pp_diag_verbosity)
 		pp_printf("ppsi starting. Built on %s\n", __DATE__);
@@ -57,6 +58,9 @@ int ppsi_main(int argc, char **argv)
 	ppi->iface_name = "eth0";
 
 	ppg->rt_opts = &default_rt_opts;
+
+	if (sys_adjtimex(&t) >= 0)
+		timePropertiesDS.currentUtcOffset = t.tai;
 
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;

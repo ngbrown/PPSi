@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/timex.h>
 
 #include <minipc.h>
 #include <hal_exports.h>
@@ -42,6 +43,7 @@ int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
+	struct timex t;
 	int i;
 
 	setbuf(stdout, NULL);
@@ -75,6 +77,18 @@ int main(int argc, char **argv)
 
 	if ((!ppg->arch_data) || (!ppg->pp_instances))
 		exit(__LINE__);
+
+	/* Set offset here, so config parsing can override it */
+	if (adjtimex(&t) >= 0) {
+		int *p;
+		/*
+		 * Our WRS kernel has tai support, but our compiler does not.
+		 * We are 32-bit only, and we know for sure that tai is
+		 * exactly after stbcnt. It's a bad hack, but it works
+		 */
+		p = (int *)(&t.stbcnt) + 1;
+		timePropertiesDS.currentUtcOffset = *p;
+	}
 
 	pp_config_file(ppg, &argc, argv, "/wr/etc/ppsi.conf",
 		       "link 0\niface wr0\n" /* mandatory trailing \n */);

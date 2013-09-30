@@ -24,7 +24,8 @@ static int unix_time_get(struct pp_instance *ppi, TimeInternal *t)
 	struct timespec tp;
 	if (clock_gettime(CLOCK_REALTIME, &tp) < 0)
 		clock_fatal_error("clock_gettime");
-	t->seconds = tp.tv_sec;
+	/* TAI = UTC + 34 */
+	t->seconds = tp.tv_sec + DSPRO(ppi)->currentUtcOffset;
 	t->nanoseconds = tp.tv_nsec;
 	t->correct = 1;
 	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
@@ -37,7 +38,8 @@ static int32_t unix_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec tp;
 
-	tp.tv_sec = t->seconds;
+	/* UTC = TAI - 34 */
+	tp.tv_sec = t->seconds - DSPRO(ppi)->currentUtcOffset;
 	tp.tv_nsec = t->nanoseconds;
 	if (clock_settime(CLOCK_REALTIME, &tp) < 0)
 		clock_fatal_error("clock_settime");
