@@ -29,6 +29,9 @@ static int wrpc_time_set(struct pp_instance *ppi, TimeInternal *t)
 	uint64_t sec;
 	unsigned long nsec;
 
+	if (!t) /* tai offset changed. We don't have it in wrpc-sw */
+		return 0;
+
 	sec = t->seconds;
 	nsec = t->nanoseconds;
 

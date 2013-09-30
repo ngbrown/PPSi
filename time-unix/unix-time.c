@@ -12,6 +12,10 @@
 #include <sys/timex.h>
 #include <ppsi/ppsi.h>
 
+#ifndef MOD_TAI
+#define MOD_TAI 0x80
+#endif
+
 static void clock_fatal_error(char *context)
 {
 	pp_error("failure in \"%s\": %s\n.Exiting.\n", context,
@@ -34,9 +38,21 @@ static int unix_time_get(struct pp_instance *ppi, TimeInternal *t)
 	return 0;
 }
 
-static int32_t unix_time_set(struct pp_instance *ppi, TimeInternal *t)
+static int unix_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec tp;
+
+	if (!t) { /* Change the network notion of the utc/tai offset */
+		struct timex t;
+
+		t.modes = MOD_TAI;
+		t.constant = DSPRO(ppi)->currentUtcOffset;
+		if (adjtimex(&t) < 0)
+			clock_fatal_error("change TAI offset");
+		pp_diag(ppi, time, 1, "New TAI offset: %i\n",
+			DSPRO(ppi)->currentUtcOffset);
+		return 0;
+	}
 
 	/* UTC = TAI - 34 */
 	tp.tv_sec = t->seconds - DSPRO(ppi)->currentUtcOffset;

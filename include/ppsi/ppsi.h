@@ -155,7 +155,7 @@ extern struct pp_network_operations unix_net_ops;
  * Time operations, like network operations above, are encapsulated.
  * They may live in their own time-<name> subdirectory.
  *
- * Maybe this structure will need updating, to pass ppi as well
+ * If "set" receives a NULL time value, it should update the TAI offset.
  */
 struct pp_time_operations {
 	int (*get)(struct pp_instance *ppi, TimeInternal *t);

@@ -29,6 +29,19 @@ static int bare_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct bare_timeval tv;
 
+	if (!t) { /* Change the network notion of the utc/tai offset */
+		struct bare_timex t;
+
+		t.modes = MOD_TAI;
+		t.constant = DSPRO(ppi)->currentUtcOffset;
+		if (sys_adjtimex(&t) < 0)
+			pp_diag(ppi, time, 1, "Can't change TAI offset");
+		else
+			pp_diag(ppi, time, 1, "New TAI offset: %i\n", 
+				DSPRO(ppi)->currentUtcOffset);
+		return 0;
+	}
+
 	/* UTC = TAI - 34 */
 	tv.tv_sec = t->seconds - DSPRO(ppi)->currentUtcOffset;
 	tv.tv_usec = t->nanoseconds / 1000;
