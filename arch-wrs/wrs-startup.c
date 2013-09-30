@@ -27,6 +27,14 @@
 
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
+/* ppg and fields */
+static struct pp_globals ppg_static;
+static DSDefault defaultDS;
+static DSCurrent currentDS;
+static DSParent parentDS;
+static DSTimeProperties timePropertiesDS;
+static struct pp_servo servo;
+
 struct minipc_ch *hal_ch;
 struct minipc_ch *ppsi_ch;
 
@@ -52,24 +60,20 @@ int main(int argc, char **argv)
 	}
 	wrs_init_ipcserver(ppsi_ch);
 
-	/* We are hosted, so we can allocate */
-	ppg = calloc(1, sizeof(*ppg));
-	if (!ppg)
-		exit(__LINE__);
-
-	ppg->max_links = PP_MAX_LINKS;
-	ppg->defaultDS = calloc(1, sizeof(*ppg->defaultDS));
-	ppg->currentDS = calloc(1, sizeof(*ppg->currentDS));
-	ppg->parentDS = calloc(1, sizeof(*ppg->parentDS));
-	ppg->timePropertiesDS = calloc(1, sizeof(*ppg->timePropertiesDS));
-	ppg->arch_data = calloc(1, sizeof(struct unix_arch_data));
-	ppg->pp_instances = calloc(ppg->max_links, sizeof(struct pp_instance));
-	ppg->servo = calloc(1, sizeof(*ppg->servo));
+	ppg = &ppg_static;
+	ppg->defaultDS = &defaultDS;
+	ppg->currentDS = &currentDS;
+	ppg->parentDS = &parentDS;
+	ppg->timePropertiesDS = &timePropertiesDS;
+	ppg->servo = &servo;
 	ppg->rt_opts = &default_rt_opts;
 
-	if ((!ppg->defaultDS) || (!ppg->currentDS) || (!ppg->parentDS)
-		|| (!ppg->timePropertiesDS) || (!ppg->arch_data)
-		|| (!ppg->pp_instances) || (!ppg->servo))
+	/* We are hosted, so we can allocate */
+	ppg->max_links = PP_MAX_LINKS;
+	ppg->arch_data = calloc(1, sizeof(struct unix_arch_data));
+	ppg->pp_instances = calloc(ppg->max_links, sizeof(struct pp_instance));
+
+	if ((!ppg->arch_data) || (!ppg->pp_instances))
 		exit(__LINE__);
 
 	pp_config_file(ppg, &argc, argv, "/wr/etc/ppsi.conf",

@@ -26,7 +26,7 @@ static struct pp_globals ppg_static;
 static struct pp_instance ppi_static;
 CONST_VERBOSITY int pp_diag_verbosity = 0;
 
-/* ppi fields */
+/* ppg fields */
 static DSDefault defaultDS;
 static DSCurrent currentDS;
 static DSParent parentDS;
