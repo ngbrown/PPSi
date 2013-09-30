@@ -44,7 +44,7 @@ void m1(struct pp_instance *ppi)
 
 
 /* ppi->port_idx port is synchronized to Ebest Table 16 (9.3.5) of the spec. */
-void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
+static void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 {
 	struct DSParent *parent = DSPAR(ppi);
 	struct DSTimeProperties *prop = DSPRO(ppi);
@@ -75,7 +75,7 @@ void s1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 		pp_hooks.s1(ppi, hdr, ann);
 }
 
-void p1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
+static void p1(struct pp_instance *ppi, MsgHeader *hdr, MsgAnnounce *ann)
 {
 	/* In the default implementation, nothing should be done when a port goes
 	 * to passive state. This empty function is a placeholder for

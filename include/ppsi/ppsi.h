@@ -266,7 +266,6 @@ extern void pp_servo_got_resp(struct pp_instance *ppi); /* got all t1..t4 */
 
 /* bmc.c */
 extern void m1(struct pp_instance *ppi);
-extern void s1(struct pp_instance *ppi, MsgHeader *header, MsgAnnounce *ann);
 extern int bmc(struct pp_instance *ppi);
 
 /* msg.c */
