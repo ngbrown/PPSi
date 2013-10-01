@@ -10,6 +10,10 @@
 #include <pps_gen.h>
 #include <softpll_ng.h>
 #include "../proto-ext-whiterabbit/wr-constants.h"
+#include <rxts_calibrator.h>
+#include "wrpc.h"
+
+extern uint32_t cal_phase_transition;
 
 int wrpc_spll_locking_enable(struct pp_instance *ppi)
 {
@@ -20,7 +24,21 @@ int wrpc_spll_locking_enable(struct pp_instance *ppi)
 
 int wrpc_spll_locking_poll(struct pp_instance *ppi)
 {
-	return spll_check_lock(0) ? WR_SPLL_READY : WR_SPLL_ERROR;
+	int locked;
+	static int t24p_calibrated = 0;
+
+	locked = spll_check_lock(0);
+
+	if(!locked) {
+		t24p_calibrated = 0;
+	}
+	else if(locked && !t24p_calibrated) {
+		/*run t24p calibration if needed*/
+		calib_t24p(WRC_MODE_SLAVE, &cal_phase_transition);
+		t24p_calibrated = 1;
+	}
+
+	return locked ? WR_SPLL_READY : WR_SPLL_ERROR;
 }
 
 int wrpc_spll_locking_disable(struct pp_instance *ppi)
