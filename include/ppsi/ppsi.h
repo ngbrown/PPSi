@@ -258,6 +258,17 @@ extern int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv);
 extern int pp_config_file(struct pp_globals *ppg, int *argcp, char **argv,
 			  char *default_name, char *default_conf);
 
+#define PPSI_PROTO_RAW		0
+#define PPSI_PROTO_UDP		1
+
+#define PPSI_ROLE_AUTO		0
+#define PPSI_ROLE_MASTER	1
+#define PPSI_ROLE_SLAVE		2
+
+#define PPSI_EXT_NONE		0
+#define PPSI_EXT_WR		1
+
+
 /* Servo */
 extern void pp_servo_init(struct pp_instance *ppi);
 extern void pp_servo_got_sync(struct pp_instance *ppi); /* got t1 and t2 */

@@ -37,12 +37,12 @@ static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 		 * wr_data. May I move it to pp_globals? */
 		ppg->pp_instances[i].ext_data = &wr_data;
 
-		if (ppi->cfg.ext) {
+		if (ppi->cfg.ext == PPSI_EXT_WR) {
 			switch (ppi->cfg.role) {
-				case 1:
+				case PPSI_ROLE_MASTER:
 					WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
 					break;
-				case 2:
+				case PPSI_ROLE_SLAVE:
 					WR_DSPOR(ppi)->wrConfig = WR_S_ONLY;
 					break;
 				default:

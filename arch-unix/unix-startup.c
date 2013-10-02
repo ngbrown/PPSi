@@ -72,12 +72,13 @@ int main(int argc, char **argv)
 
 		ppi->glbs = ppg;
 		ppi->iface_name = ppi->cfg.iface_name;
-		ppi->ethernet_mode = (ppi->cfg.proto == 0) ? 1 : 0;
-		if (ppi->cfg.role == 1) {
+		/* this old-fashioned "ethernet_mode" is a single bit */
+		ppi->ethernet_mode = (ppi->cfg.proto == PPSI_PROTO_RAW);
+		if (ppi->cfg.role == PPSI_ROLE_MASTER) {
 			ppi->master_only = 1;
 			ppi->slave_only = 0;
 		}
-		else if (ppi->cfg.role == 2) {
+		else if (ppi->cfg.role == PPSI_ROLE_SLAVE) {
 			ppi->master_only = 0;
 			ppi->slave_only = 1;
 		}
