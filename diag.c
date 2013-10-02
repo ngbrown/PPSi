@@ -21,6 +21,7 @@ void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 		      int level, char *fmt, ...)
 {
 	va_list args;
+	char *name = ppi ? ppi->iface_name : "ppsi";
 
 	if (!__PP_DIAG_ALLOW(ppi, th, level))
 		return;
@@ -37,7 +38,7 @@ void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 		extern int DIAG_PUTS(const char *s);
 
 		pp_sprintf(buf, "%s-%i-%s: ",
-			   thing_name[th], level, ppi->iface_name);
+			   thing_name[th], level, name);
 		DIAG_PUTS(buf);
 		va_start(args, fmt);
 		pp_vsprintf(buf, fmt, args);
@@ -46,7 +47,7 @@ void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 	}
 #else
 	/* Use the normal output channel for diagnostics */
-	pp_printf("%s-%i-%s: ", thing_name[th], level, ppi->iface_name);
+	pp_printf("%s-%i-%s: ", thing_name[th], level, name);
 	va_start(args, fmt);
 	pp_vprintf(fmt, args);
 	va_end(args);

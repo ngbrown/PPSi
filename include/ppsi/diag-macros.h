@@ -56,6 +56,7 @@ enum pp_diag_things {
 	pp_dt_servo	= 4,
 	pp_dt_bmc	= 3,
 	pp_dt_ext	= 2,
+	pp_dt_config	= 1,
 };
 /*
  * Note: we may use less bits and have more things, without changing
@@ -70,7 +71,7 @@ extern unsigned long pp_global_flags; /* Supplement ppi-specific ones */
 
 
 /* So, extract the level */
-#define __PP_FLAGS(ppi) (ppi->flags | pp_global_flags)
+#define __PP_FLAGS(ppi) ((ppi ? ppi->flags : 0) | pp_global_flags)
 
 #define __PP_DIAG_ALLOW(ppi, th, level) \
 		((__PP_FLAGS(ppi) >> (4 * (th)) & 0xf) >= level)
