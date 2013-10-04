@@ -14,6 +14,7 @@ static char *thing_name[] = {
 	[pp_dt_servo]	= "diag-servo",
 	[pp_dt_bmc]	= "diag-bmc",
 	[pp_dt_ext]	= "diag-extension",
+	[pp_dt_config]	= "diag-config",
 };
 
 
