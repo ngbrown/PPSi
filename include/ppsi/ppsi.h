@@ -255,8 +255,35 @@ extern int pp_close_globals(struct pp_globals *ppg);
 
 extern int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv);
 
-extern int pp_config_file(struct pp_globals *ppg, int *argcp, char **argv,
-			  char *default_name, char *default_conf);
+/*
+ * Configuration: we are structure-based, and a typedef simplifies things
+ */
+typedef int (*cfg_handler)(int lineno, int iarg, char *sarg);
+
+struct pp_argname {
+	char *name;
+	int value;
+};
+enum pp_argtype {
+	ARG_NONE,
+	ARG_INT,
+	ARG_STR,
+	ARG_NAMES,
+};
+struct pp_argline {
+	cfg_handler f;
+	char *keyword;	/* Each line starts with a keyword */
+	enum pp_argtype t;
+	struct pp_argname *args;
+};
+
+/* Both the architecture and the extension can provide config arguments */
+extern struct pp_argline pp_arch_arglines[];
+extern struct pp_argline pp_ext_arglines[];
+
+/* Note: config_string modifies the string it receives */
+extern int pp_config_string(struct pp_globals *ppg, char *s);
+extern int pp_config_file(struct pp_globals *ppg, int force, char *fname);
 
 #define PPSI_PROTO_RAW		0
 #define PPSI_PROTO_UDP		1

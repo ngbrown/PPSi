@@ -72,3 +72,11 @@ int ppsi_main(int argc, char **argv)
 	bare_main_loop(ppi);
 	return 0;
 }
+
+/* We can't parse a config file (no system calls, /me is lazy) */
+int pp_config_file(struct pp_globals *ppg, int force, char *fname)
+{
+	pp_printf("No support for config file: can't read \"%s\"\n",
+		  fname);
+	return -1;
+}

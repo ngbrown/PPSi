@@ -172,13 +172,14 @@ static char *first_word(char *line, char **rest)
 	return ret;
 }
 
-static int pp_parse_line(char *line, int lineno)
+static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 {
 	struct argline *l;
 	struct argname *n;
 	char *word;
 	int i;
 
+	current_ppg = ppg;
 	pp_diag(NULL, config, 2, "parsing line %i: \"%s\"\n", lineno, line);
 	word = first_word(line, &line);
 	/* now line points to the next word, with no leading blanks */
@@ -237,31 +238,32 @@ static int pp_parse_line(char *line, int lineno)
 	return 0;
 }
 
-/* Parse a whole string by splitting line (shoud I fgets instead?) */
+/* Parse a whole string by splitting lines at '\n' or ';' */
 static int pp_parse_conf(struct pp_globals *ppg, char *conf, int len)
 {
-	current_ppg = ppg;
 	int errcount = 0;
 	char *line, *rest, term;
-	int lineno = 0;
+	int lineno = 1;
 
 	line = conf;
 	do {
-		lineno++;
-		for (rest = line; *rest && *rest != '\n'; rest++)
+		for (rest = line;
+		     *rest && *rest != '\n' && *rest != ';'; rest++)
 			;
 		term = *rest;
 		*rest = '\0';
 		if (*line)
-			errcount += pp_parse_line(line, lineno) < 0;
+			errcount += pp_config_line(ppg, line, lineno) < 0;
 		line = rest + 1;
+		if (term == '\n')
+			lineno++;
 	} while (term); /* if terminator was already 0, we are done */
-
+	pp_config_line(ppg, "", 0); /* done: clear current_ppi */
 	return errcount ? -1 : 0;
 }
 
-/* Open about a file, warn if not found */
-static int pp_open_conf_file(char **argv, char *name)
+/* Open a file, warn if not found */
+static int pp_open_conf_file(char *name)
 {
 	int fd;
 
@@ -269,76 +271,59 @@ static int pp_open_conf_file(char **argv, char *name)
 		return -1;
 	fd = open(name, O_RDONLY);
 	if (fd >= 0) {
-		pp_printf("%s: Using config file %s\n", argv[0], name);
+		pp_printf("Using config file %s\n", name);
 		return fd;
 	}
-	pp_printf("%s: Warning: %s: %s\n", argv[0], name,
-		  strerror(errno));
+	pp_printf("Warning: %s: %s\n", name, strerror(errno));
 	return -1;
 }
 
 /*
- * This is the public entry point, that is passed both a default name
- * and a default value for the configuration file. This only builds
- * in hosted environment.
+ * This is one of the public entry points, opening a file
  *
- * The function allows "-f <config>" to appear on the command line,
- * and modifies the command line accordingly (hackish, I admit)
+ * "force" means that the called wants to open *this file.
+ * In this case we count it even if it fails, so the default
+ * config file is not used
  */
-int pp_config_file(struct pp_globals *ppg, int *argcp, char **argv,
-		   char *default_name, char *default_conf)
+int pp_config_file(struct pp_globals *ppg, int force, char *fname)
 {
-	char *name = NULL;
 	int conf_fd, i, conf_len = 0;
+	int r = 0, next_r;
 	struct stat conf_fs;
 	char *conf_buf;
 
-	current_ppg = ppg;
-
-	/* First, look for fname on the command line (which is parsed later) */
-	for (i = 1; i < *argcp - 1; i++) {
-		if (strcmp(argv[i], "-f"))
-			continue;
-		/* found: remove it from argv */
-		name = argv[i + 1];
-		for (;i < *argcp - 2; i++)
-			argv[i] = argv[i + 2];
-		*argcp -= 2;
+	conf_fd = pp_open_conf_file(fname);
+	if (conf_fd < 0) {
+		if (force)
+			ppg->cfg_items++;
+		return -1;
 	}
-	conf_fd = pp_open_conf_file(argv, name);
+	ppg->cfg_items++;
 
-	/* Then try the caller-provided name */
-	if (conf_fd < 0)
-		conf_fd = pp_open_conf_file(argv, default_name);
-	/* Finally, the project-wide name */
-	if (conf_fd < 0)
-		conf_fd = pp_open_conf_file(argv, PP_DEFAULT_CONFIGFILE);
+	/* read the whole file, it is split up later on */
 
-	/* If nothing, use provided string */
-	if (conf_fd < 0) {		/* Read it, if any */
-		conf_buf = strdup(default_conf);
-		conf_len = strlen(conf_buf) - 1;
-	} else {
-		int r = 0, next_r;
+	fstat(conf_fd, &conf_fs);
+	conf_buf = calloc(1, conf_fs.st_size + 2);
 
-		fstat(conf_fd, &conf_fs);
-		conf_buf = calloc(1, conf_fs.st_size + 2);
-
-		do {
-			next_r = conf_fs.st_size - conf_len;
-			r = read(conf_fd, &conf_buf[conf_len], next_r);
-			if (r <= 0)
-				break;
-			conf_len = strlen(conf_buf);
-		} while (conf_len < conf_fs.st_size);
-
-		close(conf_fd);
-	}
-
-	/* We need this trailing \0 for the parser */
-	conf_buf[conf_len + 1] = '\0';
+	do {
+		next_r = conf_fs.st_size - conf_len;
+		r = read(conf_fd, &conf_buf[conf_len], next_r);
+		if (r <= 0)
+			break;
+		conf_len = strlen(conf_buf);
+	} while (conf_len < conf_fs.st_size);
+	close(conf_fd);
 
 	i = pp_parse_conf(ppg, conf_buf, conf_len);
 	free(conf_buf);
 	return i;
 }
+
+/*
+ * This is the other public entry points, opening a file
+ */
+int pp_config_string(struct pp_globals *ppg, char *s)
+{
+	return pp_parse_conf(ppg, s, strlen(s));
+}
+

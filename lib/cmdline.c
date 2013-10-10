@@ -23,6 +23,7 @@ static struct cmd_line_opt cmd_line_list[] = {
 	//{"-d", "display stats"},
 	//{"-D", "display stats in .csv format"},
 	//{"-R", "record data about sync packets in a file"},
+	{"-f FILE", "read configuration file"},
 	{"-V", "run in verbose mode"},
 	{"-d STRING", "diagnostic level (see diag-macros.h)"},
 	CMD_LINE_SEPARATOR,
@@ -113,6 +114,9 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 				/* Use the general flags, per-instance TBD */
 				a = argv[++i];
 				pp_global_flags = pp_diag_parse(a);
+				break;
+			case 'f':
+				pp_config_file(ppg, 1, argv[++i]);
 				break;
 			case 'x':
 				GOPTS(ppg)->no_rst_clk = 1;

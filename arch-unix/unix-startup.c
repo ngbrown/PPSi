@@ -61,8 +61,14 @@ int main(int argc, char **argv)
 	if (adjtimex(&t) >= 0)
 		timePropertiesDS.currentUtcOffset = t.tai;
 
-	pp_config_file(ppg, &argc, argv, NULL, "link 0\niface eth0\n"
-		       "proto udp\n" /* mandatory  trailing \n */);
+	if (pp_parse_cmdline(ppg, argc, argv) != 0)
+		return -1;
+
+	/* If no item has been parsed, provide a default file or string */
+	if (ppg->cfg_items == 0)
+		pp_config_file(ppg, 0, PP_DEFAULT_CONFIGFILE);
+	if (ppg->cfg_items == 0)
+		pp_config_string(ppg, strdup("link 0; iface eth0; proto udp"));
 
 	for (i = 0; i < ppg->nlinks; i++) {
 
@@ -94,9 +100,6 @@ int main(int argc, char **argv)
 		if (!ppi->portDS)
 			exit(__LINE__);
 	}
-
-	if (pp_parse_cmdline(ppg, argc, argv) != 0)
-		return -1;
 
 	pp_open_globals(ppg);
 

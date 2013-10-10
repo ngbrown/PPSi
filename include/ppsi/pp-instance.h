@@ -207,6 +207,7 @@ struct pp_globals {
 
 	int nlinks;
 	int max_links;
+	int cfg_items;			/* Remember how many we parsed */
 
 	void *arch_data;		/* if arch needs it */
 	/* FIXME Here include all is common to many interfaces */

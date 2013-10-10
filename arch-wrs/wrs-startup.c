@@ -90,9 +90,25 @@ int main(int argc, char **argv)
 		timePropertiesDS.currentUtcOffset = *p;
 	}
 
-	pp_config_file(ppg, &argc, argv, "/wr/etc/ppsi.conf",
-		       "link 0\niface wr0\n" /* mandatory trailing \n */);
+	if (pp_parse_cmdline(ppg, argc, argv) != 0)
+		return -1;
 
+	/* If no item has been parsed, provide a default file or string */
+	if (ppg->cfg_items == 0)
+		pp_config_file(ppg, 0, "/wr/etc/ppsi.conf");
+	if (ppg->cfg_items == 0)
+		pp_config_file(ppg, 0, PP_DEFAULT_CONFIGFILE);
+	if (ppg->cfg_items == 0) {
+		/* Default configuration for WR switch is all ports */
+		char s[128];
+		int i;
+
+		for (i = 0; i < 18; i++) {
+			sprintf(s, "port wr%i; iface wr%i; proto raw;"
+				"extension whiterabbit; role auto", i, i);
+			pp_config_string(ppg, s);
+		}
+	}
 	for (i = 0; i < ppg->nlinks; i++) {
 
 		ppi = &ppg->pp_instances[i];
@@ -125,9 +141,6 @@ int main(int argc, char **argv)
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 
 	}
-
-	if (pp_parse_cmdline(ppg, argc, argv) != 0)
-		return -1;
 
 	pp_open_globals(ppg);
 
