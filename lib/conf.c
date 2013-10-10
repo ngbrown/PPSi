@@ -34,12 +34,20 @@ static int f_port(int lineno, int iarg, char *sarg)
 	return 0;
 }
 
+#define CHECK_PPI(need) /* Quick hack to factorize errors later */ 	\
+	({if (need && !current_ppi) {					\
+		pp_printf("config line %i: no port for this config\n", lineno);\
+		return -1; \
+	} \
+	if (!need && current_ppi) { \
+		pp_printf("config line %i: global config under \"port\"\n", \
+			  lineno); \
+		return -1; \
+	}})
+
 static int f_if(int lineno, int iarg, char *sarg)
 {
-	if (!current_ppi) {
-		pp_printf("config line %i: no port for this config\n", lineno);
-		return -1;
-	}
+	CHECK_PPI(1);
 	strcpy(current_ppi->cfg.iface_name, sarg);
 	return 0;
 }
@@ -47,30 +55,21 @@ static int f_if(int lineno, int iarg, char *sarg)
 /* The following ones are so similar. Bah... set a pointer somewhere? */
 static int f_proto(int lineno, int iarg, char *sarg)
 {
-	if (!current_ppi) {
-		pp_printf("config line %i: no port for this config\n", lineno);
-		return -1;
-	}
+	CHECK_PPI(1);
 	current_ppi->cfg.proto = iarg;
 	return 0;
 }
 
 static int f_role(int lineno, int iarg, char *sarg)
 {
-	if (!current_ppi) {
-		pp_printf("config line %i: no port for this config\n", lineno);
-		return -1;
-	}
+	CHECK_PPI(1);
 	current_ppi->cfg.role = iarg;
 	return 0;
 }
 
 static int f_ext(int lineno, int iarg, char *sarg)
 {
-	if (!current_ppi) {
-		pp_printf("config line %i: no port for this config\n", lineno);
-		return -1;
-	}
+	CHECK_PPI(1);
 	current_ppi->cfg.ext = iarg;
 	return 0;
 }
@@ -78,22 +77,14 @@ static int f_ext(int lineno, int iarg, char *sarg)
 /* The following two are identical as well. I really need a pointer... */
 static int f_class(int lineno, int iarg, char *sarg)
 {
-	if (current_ppi) {
-		pp_printf("config line %i: global config under \"port\"\n",
-			  lineno);
-		return -1;
-	}
+	CHECK_PPI(0);
 	GOPTS(current_ppg)->clock_quality.clockClass = iarg;
 	return 0;
 }
 
 static int f_accuracy(int lineno, int iarg, char *sarg)
 {
-	if (current_ppi) {
-		pp_printf("config line %i: global config under \"port\"\n",
-			  lineno);
-		return -1;
-	}
+	CHECK_PPI(0);
 	GOPTS(current_ppg)->clock_quality.clockAccuracy = iarg;
 	return 0;
 }
