@@ -107,42 +107,42 @@ typedef int (*cfg_handler)(int lineno, int iarg, char *sarg); /* /me lazy... */
  * The parser is using a table, built up by the following structures
  */
 
-struct argname {
+struct pp_argname {
 	char *name;
 	int value;
 };
-enum argtype {
+enum pp_argtype {
 	ARG_NONE,
 	ARG_INT,
 	ARG_STR,
 	ARG_NAMES,
 };
-struct argline {
+struct pp_argline {
 	cfg_handler f;
 	char *keyword;	/* Each line starts with a keyword */
-	enum argtype t;
-	struct argname *args;
+	enum pp_argtype t;
+	struct pp_argname *args;
 };
 
 /* These are the tables for the parser */
-static struct argname arg_proto[] = {
+static struct pp_argname arg_proto[] = {
 	{"raw", PPSI_PROTO_RAW},
 	{"udp", PPSI_PROTO_UDP},
 	{},
 };
-static struct argname arg_role[] = {
+static struct pp_argname arg_role[] = {
 	{"auto", PPSI_ROLE_AUTO},
 	{"master",PPSI_ROLE_MASTER},
 	{"slave", PPSI_ROLE_SLAVE},
 	{},
 };
-static struct argname arg_ext[] = {
+static struct pp_argname arg_ext[] = {
 	{"none", PPSI_EXT_NONE},
 	{"whiterabbit", PPSI_EXT_WR},
 	{},
 };
 
-static struct argline arglines[] = {
+static struct pp_argline arglines[] = {
 	{ f_port,	"port",		ARG_STR},
 	{ f_port,	"link",		ARG_STR}, /* old name for "port" */
 	{ f_if,		"iface",	ARG_STR},
@@ -187,8 +187,8 @@ static char *first_word(char *line, char **rest)
 
 static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 {
-	struct argline *l;
-	struct argname *n;
+	struct pp_argline *l;
+	struct pp_argname *n;
 	char *word;
 	int i;
 
