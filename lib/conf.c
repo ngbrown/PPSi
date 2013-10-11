@@ -89,6 +89,18 @@ static int f_accuracy(int lineno, int iarg, char *sarg)
 	return 0;
 }
 
+/* Diagnostics can be per-port or global */
+static int f_diag(int lineno, int iarg, char *sarg)
+{
+	unsigned long level = pp_diag_parse(sarg);
+
+	if (current_ppi)
+		current_ppi->flags = level;
+	else
+		pp_global_flags = level;
+	return 0;
+}
+
 
 typedef int (*cfg_handler)(int lineno, int iarg, char *sarg); /* /me lazy... */
 /*
@@ -137,6 +149,7 @@ static struct argline arglines[] = {
 	{ f_proto,	"proto",	ARG_NAMES,	arg_proto},
 	{ f_role,	"role",		ARG_NAMES,	arg_role},
 	{ f_ext,	"extension",	ARG_NAMES,	arg_ext},
+	{ f_diag,	"diagnostics",	ARG_STR},
 	{ f_class,	"clock-class",	ARG_INT},
 	{ f_accuracy,	"clock-accuracy", ARG_INT},
 	{}
