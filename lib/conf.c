@@ -101,29 +101,6 @@ static int f_diag(int lineno, int iarg, char *sarg)
 	return 0;
 }
 
-
-typedef int (*cfg_handler)(int lineno, int iarg, char *sarg); /* /me lazy... */
-/*
- * The parser is using a table, built up by the following structures
- */
-
-struct pp_argname {
-	char *name;
-	int value;
-};
-enum pp_argtype {
-	ARG_NONE,
-	ARG_INT,
-	ARG_STR,
-	ARG_NAMES,
-};
-struct pp_argline {
-	cfg_handler f;
-	char *keyword;	/* Each line starts with a keyword */
-	enum pp_argtype t;
-	struct pp_argname *args;
-};
-
 /* These are the tables for the parser */
 static struct pp_argname arg_proto[] = {
 	{"raw", PPSI_PROTO_RAW},
