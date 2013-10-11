@@ -119,7 +119,7 @@ static struct pp_argname arg_ext[] = {
 	{},
 };
 
-static struct pp_argline arglines[] = {
+static struct pp_argline pp_global_arglines[] = {
 	{ f_port,	"port",		ARG_STR},
 	{ f_port,	"link",		ARG_STR}, /* old name for "port" */
 	{ f_if,		"iface",	ARG_STR},
@@ -129,6 +129,14 @@ static struct pp_argline arglines[] = {
 	{ f_diag,	"diagnostics",	ARG_STR},
 	{ f_class,	"clock-class",	ARG_INT},
 	{ f_accuracy,	"clock-accuracy", ARG_INT},
+	{}
+};
+
+/* Provide default empty argument lines for architecture and extension */
+struct pp_argline pp_arch_arglines[] __attribute__((weak)) = {
+	{}
+};
+struct pp_argline pp_ext_arglines[] __attribute__((weak)) = {
 	{}
 };
 
@@ -181,9 +189,20 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 		current_ppi = NULL;
 		return 0;
 	}
-	for (l = arglines; l->f; l++)
+
+	/* Look for the configuration keyword in global, arch, ext */
+	for (l = pp_global_arglines; l->f; l++)
 		if (!strcmp(word, l->keyword))
 			break;
+	if (!l->f)
+		for (l = pp_arch_arglines; l->f; l++)
+			if (!strcmp(word, l->keyword))
+				break;
+	if (!l->f)
+		for (l = pp_ext_arglines; l->f; l++)
+			if (!strcmp(word, l->keyword))
+				break;
+
 	if (!l->f) {
 		pp_diag(NULL, config, 1, "line %i: no such keyword \"%s\"\n",
 			lineno, word);
