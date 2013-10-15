@@ -73,10 +73,16 @@ int ppsi_main(int argc, char **argv)
 	return 0;
 }
 
-/* We can't parse a config file (no system calls, /me is lazy) */
+/* We can't parse a config file or string (no system calls, /me is lazy) */
 int pp_config_file(struct pp_globals *ppg, int force, char *fname)
 {
 	pp_printf("No support for config file: can't read \"%s\"\n",
 		  fname);
+	return -1;
+}
+
+int pp_config_string(struct pp_globals *ppg, char *s)
+{
+	pp_printf("No support for config options: can't parse \"%s\"\n", s);
 	return -1;
 }

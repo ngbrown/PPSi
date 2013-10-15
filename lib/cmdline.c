@@ -23,6 +23,8 @@ static struct cmd_line_opt cmd_line_list[] = {
 	//{"-d", "display stats"},
 	//{"-D", "display stats in .csv format"},
 	//{"-R", "record data about sync packets in a file"},
+	{"-C CONFIG_ITEM", "set configuration options as stated in CONFIG_ITEM\n\t"
+		"CONFIG_ITEM must be a valid config string, enclosed by \" \""},
 	{"-f FILE", "read configuration file"},
 	{"-V", "run in verbose mode"},
 	{"-d STRING", "diagnostic level (see diag-macros.h)"},
@@ -114,6 +116,9 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 			/* Use the general flags, per-instance TBD */
 			a = argv[++i];
 			pp_global_flags = pp_diag_parse(a);
+			break;
+		case 'C':
+			pp_config_string(ppg, argv[++i]);
 			break;
 		case 'f':
 			pp_config_file(ppg, 1, argv[++i]);
