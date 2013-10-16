@@ -5,7 +5,6 @@
  * Released according to the GNU LGPL, version 2.1 or any later version.
  */
 
-#define CONFIG_PPSI_RUNTIME_VERBOSITY 1
 #include <ppsi/ppsi.h>
 
 #define CMD_LINE_SEPARATOR {"", ""}
@@ -26,7 +25,6 @@ static struct cmd_line_opt cmd_line_list[] = {
 	{"-C CONFIG_ITEM", "set configuration options as stated in CONFIG_ITEM\n\t"
 		"CONFIG_ITEM must be a valid config string, enclosed by \" \""},
 	{"-f FILE", "read configuration file"},
-	{"-V", "run in verbose mode"},
 	{"-d STRING", "diagnostic level (see diag-macros.h)"},
 	CMD_LINE_SEPARATOR,
 	{"-x", "do not reset the clock if off by more than one second"},
@@ -109,9 +107,6 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 		}
 
 		switch (a[1]) {
-		case 'V':
-			pp_diag_verbosity++;
-			break;
 		case 'd':
 			/* Use the general flags, per-instance TBD */
 			a = argv[++i];

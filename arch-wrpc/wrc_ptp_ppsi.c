@@ -27,9 +27,6 @@ extern int32_t cal_phase_transition;
 int ptp_mode = WRC_MODE_UNKNOWN;
 static int ptp_enabled = 0, ptp_forced_stop = 0;
 
-
-CONST_VERBOSITY int pp_diag_verbosity = 0;
-
 /*ppi fields*/
 static DSDefault  defaultDS;
 static DSCurrent  currentDS;

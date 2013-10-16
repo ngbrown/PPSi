@@ -22,8 +22,6 @@
 #include <ppsi/ppsi.h>
 #include "ppsi-unix.h"
 
-CONST_VERBOSITY int pp_diag_verbosity = 0;
-
 /* ppg and fields */
 static struct pp_globals ppg_static;
 static DSDefault defaultDS;

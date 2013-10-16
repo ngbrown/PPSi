@@ -2,32 +2,8 @@
  * Macros for diagnostic prints.
  */
 
-/*
- * We still have support for compile-time settings, in order to remove
- * quite a few kilobytes of stuff from the compiled binary. This first
- * part of the file is the previous way, which is still used in
- * several files. I plan to phase it out slowly, but let's avoid
- * massive changes at this point.
- *
- * This verbosity argument, that can be changed at run time
- * or not. If it can be changed, stuff works like this, depending on
- * an integer value somewhere (it is incremented by each -V on a host run).
- *
- * BTW, Host build always have CONFIG_PPSI_RUNTIME_VERBOSITY set, because we
- * have no size problems there (bare build don't have it, in order to
- * easily test how stuff work on real freestanding environments.
- */
 
-#ifdef CONFIG_PPSI_RUNTIME_VERBOSITY
-  #define CONST_VERBOSITY /* nothing: use "int pp_diag_verbosity" */
-#else /* no runtime verbosity */
-  #define CONST_VERBOSITY const /* use "const int pp_diag_verbosity */
-#endif /* CONFIG_PPSI_RUNTIME_VERBOSITY */
-
-extern CONST_VERBOSITY int pp_diag_verbosity;
-
-#define pp_error(...) \
-	if (pp_diag_verbosity) pp_printf("ERROR: " __VA_ARGS__)
+#define pp_error(...) pp_printf("ERROR: " __VA_ARGS__)
 
 /*
  * The "new" diagnostics is based on flags: there are per-instance flags

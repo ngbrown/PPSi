@@ -897,11 +897,6 @@ a list of the other ones please see the help message.
 
 @table @t
 
-@item -V
-
-	Increase verbosity. This is used for the @i{old} diagnostics (see
-        @ref{Older Diagnostics}). You may want to use it once or twice.
-
 @item -d
 
 	Diagnostics. This options receives the string of diagnostic

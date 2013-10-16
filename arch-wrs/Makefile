@@ -1,7 +1,7 @@
 # All files are under A (short for ARCH): I'm lazy
 A := arch-$(ARCH)
 
-CFLAGS += -DCONFIG_PPSI_RUNTIME_VERBOSITY -Itools
+CFLAGS += -Itools
 
 
 LIBARCH := $A/libarch.a
