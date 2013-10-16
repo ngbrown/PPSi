@@ -50,11 +50,11 @@ enum pp_timeouts {
 	PP_TO_SYNC,
 	PP_TO_ANN_RECEIPT,
 	PP_TO_ANN_INTERVAL,
+	PP_TO_FAULTY,
 	/* A few timeouts for the protocol extension  */
 	PP_TO_EXT_0,
 	PP_TO_EXT_1,
 	PP_TO_EXT_2,
-	PP_TO_EXT_3,
 	__PP_TO_ARRAY_SIZE,
 };
 

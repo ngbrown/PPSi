@@ -10,12 +10,19 @@
 
 /*
  * Fault troubleshooting. Now only prints an error messages and comes back to
- * PTP_INITIALIZING state
+ * PTP_INITIALIZING state after a 4-seconds grace period
  */
 
 int pp_faulty(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	pp_diag(ppi, fsm, 1, "Faulty state detected\n");
-	ppi->next_state = PPS_INITIALIZING;
+	if (ppi->is_new_state) {
+		pp_timeout_set(ppi, PP_TO_FAULTY, 4000);
+	}
+
+	if (pp_timeout(ppi, PP_TO_FAULTY)) {
+		ppi->next_state = PPS_INITIALIZING;
+		return 0;
+	}
+	ppi->next_delay = pp_ms_to_timeout(ppi, PP_TO_FAULTY);
 	return 0;
 }

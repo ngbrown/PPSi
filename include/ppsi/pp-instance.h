@@ -113,7 +113,7 @@ struct pp_net_path {
  * (see lib/conf.c)
  */
 struct pp_instance_cfg {
-	char link_name[16];
+	char port_name[16];
 	char iface_name[16];
 	int proto; /* 0: raw, 1: udp */
 	int role;  /* 0: auto, 1: master, 2: slave */
@@ -207,6 +207,7 @@ struct pp_globals {
 
 	int nlinks;
 	int max_links;
+	int cfg_items;			/* Remember how many we parsed */
 
 	void *arch_data;		/* if arch needs it */
 	/* FIXME Here include all is common to many interfaces */

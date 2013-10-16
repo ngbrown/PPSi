@@ -24,7 +24,6 @@ void ppsi_clear_bss(void)
 
 static struct pp_globals ppg_static;
 static struct pp_instance ppi_static;
-CONST_VERBOSITY int pp_diag_verbosity = 0;
 
 /* ppg fields */
 static DSDefault defaultDS;
@@ -40,8 +39,7 @@ int ppsi_main(int argc, char **argv)
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
 	struct bare_timex t;
 
-	if (pp_diag_verbosity)
-		pp_printf("ppsi starting. Built on %s\n", __DATE__);
+	pp_printf("ppsi starting. Built on %s\n", __DATE__);
 
 	ppi->glbs        = ppg;
 	ppg->defaultDS   = &defaultDS;
@@ -71,4 +69,18 @@ int ppsi_main(int argc, char **argv)
 	/* The actual sockets are opened in state-initializing */
 	bare_main_loop(ppi);
 	return 0;
+}
+
+/* We can't parse a config file or string (no system calls, /me is lazy) */
+int pp_config_file(struct pp_globals *ppg, int force, char *fname)
+{
+	pp_printf("No support for config file: can't read \"%s\"\n",
+		  fname);
+	return -1;
+}
+
+int pp_config_string(struct pp_globals *ppg, char *s)
+{
+	pp_printf("No support for config options: can't parse \"%s\"\n", s);
+	return -1;
 }

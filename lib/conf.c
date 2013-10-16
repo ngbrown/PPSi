@@ -1,265 +1,287 @@
 /*
  * Copyright (C) 2013 CERN (www.cern.ch)
- * Author: Aurelio Colosimo
+ * Authors: Aurelio Colosimo, Alessandro Rubini
  *
  * Released according to the GNU LGPL, version 2.1 or any later version.
  */
 
 #include <ppsi/ppsi.h>
-/* This file is build in hosted environments, so following headers are Ok */
+/* This file is built in hosted environments, so following headers are Ok */
+#include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/* Each pre-defined keyword is handled in the keywords list, so that the
- * same code is used to parse every token in the conf file */
+/* config lines are global or ppi-specific. Keep track of globals and ppi */
+static struct pp_globals *current_ppg;
+static struct pp_instance *current_ppi;
 
-struct keyword_t {
-	int id;
-	char *key;
-	int (*handle_key)(struct pp_globals *ppg, char *val);
-};
-
-enum {KW_INV = -1, KW_LINK, KW_IFACE, KW_PROTO, KW_RAW, KW_UDP, KW_ROLE,
-			KW_AUTO, KW_MASTER, KW_SLAVE, KW_EXT, KW_NONE, KW_WHITERAB,
-			KW_CLOCK_CLASS, KW_CLOCK_ACCURACY,
-			KW_NUMBER};
-
-static int handle_link(struct pp_globals *ppg, char *val);
-static int handle_iface(struct pp_globals *ppg, char *val);
-static int handle_proto(struct pp_globals *ppg, char *val);
-static int handle_role(struct pp_globals *ppg, char *val);
-static int handle_ext(struct pp_globals *ppg, char *val);
-static int handle_clock_class(struct pp_globals *ppg, char *val);
-static int handle_clock_accuracy(struct pp_globals *ppg, char *val);
-
-static struct keyword_t keywords[KW_NUMBER] = {
-	{KW_LINK, "link", handle_link},
-	{KW_IFACE, "iface", handle_iface},
-	{KW_PROTO, "proto", handle_proto}, {KW_RAW, "raw"}, {KW_UDP, "udp"},
-	{KW_ROLE, "role", handle_role}, {KW_AUTO, "auto"}, {KW_MASTER, "master"},
-		{KW_SLAVE, "slave"},
-	{KW_EXT, "extension", handle_ext}, {KW_NONE, "none"},
-		{KW_WHITERAB, "whiterabbit"},
-	{KW_CLOCK_CLASS, "clock-class", handle_clock_class},
-	{KW_CLOCK_ACCURACY, "clock-accuracy", handle_clock_accuracy},
-};
-
-static int detect_keyword(char *kw)
+/* A "port" (or "link", for compatibility) line creates or uses a pp instance */
+static int f_port(int lineno, int iarg, char *sarg)
 {
 	int i;
-	for (i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++)
-		if (!strcmp(keywords[i].key, kw))
-			return i;
-	return KW_INV;
-}
 
-/* Handlers for "key" keywords: return a bool value, 1 in case of success,
- * 0 otherwise */
-
-static int handle_link(struct pp_globals *ppg, char *val)
-{
-	/* ppg->nlinks is initialized to -1 and used as index for current link,
-	 * so increase it before using it */
-	ppg->nlinks++;
-	if (ppg->nlinks >= ppg->max_links) {
-		pp_printf("ppsi: Too many links in config file\n");
-		exit(1);
+	/* First look for an existing port with the same name */
+	for (i = 0; i < current_ppg->nlinks; i++) {
+		current_ppi = current_ppg->pp_instances + i;
+		if (!strcmp(sarg, current_ppi->cfg.port_name))
+			return 0;
 	}
+	/* Allocate a new ppi */
+	if (current_ppg->nlinks >= current_ppg->max_links) {
+		pp_printf("config line %i: out of available ports\n",
+			  lineno);
+		return -1;
+	}
+	current_ppi = current_ppg->pp_instances + current_ppg->nlinks;
+
 	 /* FIXME: strncpy (it is missing in bare archs by now) */
-	strcpy(ppg->pp_instances[ppg->nlinks].cfg.link_name, val);
-	return 1;
+	strcpy(current_ppi->cfg.port_name, sarg);
+	current_ppg->nlinks++;
+	return 0;
 }
 
-static int handle_iface(struct pp_globals *ppg, char *val)
+#define CHECK_PPI(need) /* Quick hack to factorize errors later */ 	\
+	({if (need && !current_ppi) {					\
+		pp_printf("config line %i: no port for this config\n", lineno);\
+		return -1; \
+	} \
+	if (!need && current_ppi) { \
+		pp_printf("config line %i: global config under \"port\"\n", \
+			  lineno); \
+		return -1; \
+	}})
+
+static int f_if(int lineno, int iarg, char *sarg)
 {
-	 /* FIXME: strncpy (it is missing in bare archs by now) */
-	strcpy(ppg->pp_instances[ppg->nlinks].iface_name, val);
-	return 1;
+	CHECK_PPI(1);
+	strcpy(current_ppi->cfg.iface_name, sarg);
+	return 0;
 }
 
-static int handle_clock_class(struct pp_globals *ppg, char *val)
+/* The following ones are so similar. Bah... set a pointer somewhere? */
+static int f_proto(int lineno, int iarg, char *sarg)
 {
-	GOPTS(ppg)->clock_quality.clockClass = atoi(val);
-	return 1;
+	CHECK_PPI(1);
+	current_ppi->cfg.proto = iarg;
+	return 0;
 }
 
-static int handle_clock_accuracy(struct pp_globals *ppg, char *val)
+static int f_role(int lineno, int iarg, char *sarg)
 {
-	GOPTS(ppg)->clock_quality.clockAccuracy = atoi(val);
-	return 1;
+	CHECK_PPI(1);
+	current_ppi->cfg.role = iarg;
+	return 0;
 }
 
-static int handle_proto(struct pp_globals *ppg, char *val)
+static int f_ext(int lineno, int iarg, char *sarg)
 {
-	int v_id;
-	v_id = detect_keyword(val);
+	CHECK_PPI(1);
+	current_ppi->cfg.ext = iarg;
+	return 0;
+}
 
-	switch(v_id) {
-		case KW_RAW:
-		case KW_UDP:
-			ppg->pp_instances[ppg->nlinks].cfg.proto
-				= v_id - KW_RAW;
+/* The following two are identical as well. I really need a pointer... */
+static int f_class(int lineno, int iarg, char *sarg)
+{
+	CHECK_PPI(0);
+	GOPTS(current_ppg)->clock_quality.clockClass = iarg;
+	return 0;
+}
+
+static int f_accuracy(int lineno, int iarg, char *sarg)
+{
+	CHECK_PPI(0);
+	GOPTS(current_ppg)->clock_quality.clockAccuracy = iarg;
+	return 0;
+}
+
+/* Diagnostics can be per-port or global */
+static int f_diag(int lineno, int iarg, char *sarg)
+{
+	unsigned long level = pp_diag_parse(sarg);
+
+	if (current_ppi)
+		current_ppi->flags = level;
+	else
+		pp_global_flags = level;
+	return 0;
+}
+
+/* These are the tables for the parser */
+static struct pp_argname arg_proto[] = {
+	{"raw", PPSI_PROTO_RAW},
+	{"udp", PPSI_PROTO_UDP},
+	{},
+};
+static struct pp_argname arg_role[] = {
+	{"auto", PPSI_ROLE_AUTO},
+	{"master",PPSI_ROLE_MASTER},
+	{"slave", PPSI_ROLE_SLAVE},
+	{},
+};
+static struct pp_argname arg_ext[] = {
+	{"none", PPSI_EXT_NONE},
+	{"whiterabbit", PPSI_EXT_WR},
+	{},
+};
+
+static struct pp_argline pp_global_arglines[] = {
+	{ f_port,	"port",		ARG_STR},
+	{ f_port,	"link",		ARG_STR}, /* old name for "port" */
+	{ f_if,		"iface",	ARG_STR},
+	{ f_proto,	"proto",	ARG_NAMES,	arg_proto},
+	{ f_role,	"role",		ARG_NAMES,	arg_role},
+	{ f_ext,	"extension",	ARG_NAMES,	arg_ext},
+	{ f_diag,	"diagnostics",	ARG_STR},
+	{ f_class,	"clock-class",	ARG_INT},
+	{ f_accuracy,	"clock-accuracy", ARG_INT},
+	{}
+};
+
+/* Provide default empty argument lines for architecture and extension */
+struct pp_argline pp_arch_arglines[] __attribute__((weak)) = {
+	{}
+};
+struct pp_argline pp_ext_arglines[] __attribute__((weak)) = {
+	{}
+};
+
+/* local implementation of isblank() for bare-metal users */
+static int blank(int c)
+{
+	return c == ' '  || c == '\t' || c == '\n';
+}
+
+static char *first_word(char *line, char **rest)
+{
+	char *ret;
+	int l = strlen(line) -1;
+
+	/* remove trailing blanks */
+	while (l >= 0 && blank(line[l]))
+		line [l--] = '\0';
+
+	/* skip leading blanks to find first word */
+	while (*line &&  blank(*line))
+		line++;
+	ret = line;
+	/* find next blank and thim there*/
+	while (*line && !blank(*line))
+		line++;
+	if (*line) {
+		*line = '\0';
+		line++;
+	}
+	*rest = line;
+	return ret;
+}
+
+static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
+{
+	struct pp_argline *l;
+	struct pp_argname *n;
+	char *word;
+	int i;
+
+	current_ppg = ppg;
+	pp_diag(NULL, config, 2, "parsing line %i: \"%s\"\n", lineno, line);
+	word = first_word(line, &line);
+	/* now line points to the next word, with no leading blanks */
+
+	if (word[0] == '#')
+		return 0;
+	if (!*word) {
+		/* empty or blank-only */
+		current_ppi = NULL;
+		return 0;
+	}
+
+	/* Look for the configuration keyword in global, arch, ext */
+	for (l = pp_global_arglines; l->f; l++)
+		if (!strcmp(word, l->keyword))
 			break;
-		default:
-			return 0;
+	if (!l->f)
+		for (l = pp_arch_arglines; l->f; l++)
+			if (!strcmp(word, l->keyword))
+				break;
+	if (!l->f)
+		for (l = pp_ext_arglines; l->f; l++)
+			if (!strcmp(word, l->keyword))
+				break;
+
+	if (!l->f) {
+		pp_diag(NULL, config, 1, "line %i: no such keyword \"%s\"\n",
+			lineno, word);
+		return -1;
 	}
-	return 1;
+
+	switch(l->t) {
+
+	case ARG_NONE:
+		break;
+
+	case ARG_INT:
+		if (sscanf(line, "%i", &i) != 1) {
+			pp_diag(NULL, config, 1, "line %i: \"%s\": not int\n",
+				lineno, word);
+			return -1;
+		}
+		if (l->f(lineno, i, NULL))
+			return -1;
+		break;
+
+	case ARG_STR:
+		while (*line && *line == ' ' && *line == '\t')
+			line++;
+		if (l->f(lineno, 0, line))
+			return -1;
+		break;
+
+	case ARG_NAMES:
+		for (n = l->args; n->name; n++)
+			if (!strcmp(line, n->name))
+				break;
+		if (!n->name) {
+			pp_diag(NULL, config, 1, "line %i: wrong arg \"%s\""
+				" for \"%s\"\n", lineno, line, word);
+			return -1;
+		}
+		if (l->f(lineno, n->value, NULL))
+			return -1;
+		break;
+	}
+	return 0;
 }
 
-static int handle_role(struct pp_globals *ppg, char *val)
-{
-	int v_id;
-	v_id = detect_keyword(val);
-
-	switch(v_id) {
-		case KW_AUTO:
-		case KW_MASTER:
-		case KW_SLAVE:
-			ppg->pp_instances[ppg->nlinks].cfg.role
-				= v_id - KW_AUTO;
-			break;
-		default:
-			return 0;
-	}
-	return 1;
-}
-
-static int handle_ext(struct pp_globals *ppg, char *val)
-{
-	int v_id;
-	v_id = detect_keyword(val);
-
-	switch(v_id) {
-		case KW_NONE:
-		case KW_WHITERAB:
-			ppg->pp_instances[ppg->nlinks].cfg.ext
-				= v_id - KW_NONE;
-			break;
-		default:
-			return 0;
-	}
-	return 1;
-}
-
-/* Called with the pair key-val detected by pp_parse_conf state machine */
-static int handle_key_val(struct pp_globals *ppg, char *key, char *val)
-{
-	int k_id;
-	k_id = detect_keyword(key);
-
-	switch(k_id) {
-		case KW_LINK:
-		case KW_IFACE:
-		case KW_PROTO:
-		case KW_ROLE:
-		case KW_EXT:
-		case KW_CLOCK_CLASS:
-		case KW_CLOCK_ACCURACY:
-			return keywords[k_id].handle_key(ppg, val);
-
-		default:
-			return 0;
-	}
-}
-
-/* Parse configuration (e.g. coming from /etc/ppsi.conf file) */
+/* Parse a whole string by splitting lines at '\n' or ';' */
 static int pp_parse_conf(struct pp_globals *ppg, char *conf, int len)
 {
-	int st = 0;
-	char c;
-	char key[16], val[16];
-	int toklen = 0;
-	int ln = 1; /* Line counter */
-	int newln;
-	int i;
+	int errcount = 0;
+	char *line, *rest, term;
+	int lineno = 1;
 
-	/* ppg->nlinks is initialized to -1 and increased at first link found,
-	 * so that we can use it as array index */
-	ppg->nlinks = -1;
-
-	for (i = 0; i < len; i++) {
-		c = conf[i];
-
-		/* Increase line counter and check if latest line is invalid */
-		newln = 0;
-		if ((c == '\n') || (c == '\0')) {
-			ln++;
-			newln = 1;
-			if (st == 2)
-				goto ret_invalid_line;
-		}
-
-		switch (st) {
-		case 0: /* initial status */
-			if ((c == ' ') || (c == '\t') || (c == '\r') || (newln))
-				continue;
-
-			if (c == '#')
-				st = 1;
-			else {
-				key[0] = c;
-				toklen = 1;
-				st = 2;
-			}
-			break;
-
-		case 1: /* ignoring commented line, those starting with '#' */
-			if (newln)
-				st = 0;
-			else
-				continue;
-			break;
-
-		case 2: /* detecting key */
-
-			if (toklen == sizeof(key))
-				goto ret_invalid_line;
-
-			if ((c != ' ') && (c != '\t'))
-				key[toklen++] = c;
-			else {
-				st = 3;
-				key[toklen] = '\0';
-				toklen = 0;
-			}
-
-			break;
-
-		case 3: /* detecting val */
-
-			if (toklen == sizeof(val))
-				goto ret_invalid_line;
-
-			if ((c != ' ') && (c != '\t') && (c != '\r') && (!newln))
-				val[toklen++] = c;
-			else if (newln) {
-				val[toklen] = '\0';
-				if (!handle_key_val(ppg, key, val))
-					goto ret_invalid_line;
-				st = 0;
-				toklen = 0;
-			}
-		}
-
-	}
-
-	/* finally, increase nlinks so that it is equal to the configured links
-	 * count */
-	ppg->nlinks++;
-
-	return 0;
-
-ret_invalid_line:
-	ln--;
-	return -ln;
+	line = conf;
+	do {
+		for (rest = line;
+		     *rest && *rest != '\n' && *rest != ';'; rest++)
+			;
+		term = *rest;
+		*rest = '\0';
+		if (*line)
+			errcount += pp_config_line(ppg, line, lineno) < 0;
+		line = rest + 1;
+		if (term == '\n')
+			lineno++;
+	} while (term); /* if terminator was already 0, we are done */
+	pp_config_line(ppg, "", 0); /* done: clear current_ppi */
+	return errcount ? -1 : 0;
 }
 
-
-/* Open about a file, warn if not found */
-static int pp_open_conf_file(char **argv, char *name)
+/* Open a file, warn if not found */
+static int pp_open_conf_file(char *name)
 {
 	int fd;
 
@@ -267,77 +289,59 @@ static int pp_open_conf_file(char **argv, char *name)
 		return -1;
 	fd = open(name, O_RDONLY);
 	if (fd >= 0) {
-		pp_printf("%s: Using config file %s\n", argv[0], name);
+		pp_printf("Using config file %s\n", name);
 		return fd;
 	}
-	pp_printf("%s: Warning: %s: %s\n", argv[0], name,
-		  strerror(errno));
+	pp_printf("Warning: %s: %s\n", name, strerror(errno));
 	return -1;
 }
 
 /*
- * This is the public entry point, that is passed both a default name
- * and a default value for the configuration file. This only builds
- * in hosted environment.
+ * This is one of the public entry points, opening a file
  *
- * The function allows "-f <config>" to appear on the command line,
- * and modifies the command line accordingly (hackish, I admit)
+ * "force" means that the called wants to open *this file.
+ * In this case we count it even if it fails, so the default
+ * config file is not used
  */
-int pp_config_file(struct pp_globals *ppg, int *argcp, char **argv,
-		   char *default_name, char *default_conf)
+int pp_config_file(struct pp_globals *ppg, int force, char *fname)
 {
-	char *name = NULL;
 	int conf_fd, i, conf_len = 0;
+	int r = 0, next_r;
 	struct stat conf_fs;
 	char *conf_buf;
 
-	/* First, look for fname on the command line (which is parsed later) */
-	for (i = 1; i < *argcp - 1; i++) {
-		if (strcmp(argv[i], "-f"))
-			continue;
-		/* found: remove it from argv */
-		name = argv[i + 1];
-		for (;i < *argcp - 2; i++)
-			argv[i] = argv[i + 2];
-		*argcp -= 2;
+	conf_fd = pp_open_conf_file(fname);
+	if (conf_fd < 0) {
+		if (force)
+			ppg->cfg_items++;
+		return -1;
 	}
-	conf_fd = pp_open_conf_file(argv, name);
+	ppg->cfg_items++;
 
-	/* Then try the caller-provided name */
-	if (conf_fd < 0)
-		conf_fd = pp_open_conf_file(argv, default_name);
-	/* Finally, the project-wide name */
-	if (conf_fd < 0)
-		conf_fd = pp_open_conf_file(argv, PP_DEFAULT_CONFIGFILE);
+	/* read the whole file, it is split up later on */
 
-	/* If nothing, use provided string */
-	if (conf_fd < 0) {		/* Read it, if any */
-		conf_buf = strdup(default_conf);
-		conf_len = strlen(conf_buf) - 1;
-	} else {
-		int r = 0, next_r;
+	fstat(conf_fd, &conf_fs);
+	conf_buf = calloc(1, conf_fs.st_size + 2);
 
-		fstat(conf_fd, &conf_fs);
-		conf_buf = calloc(1, conf_fs.st_size + 2);
+	do {
+		next_r = conf_fs.st_size - conf_len;
+		r = read(conf_fd, &conf_buf[conf_len], next_r);
+		if (r <= 0)
+			break;
+		conf_len = strlen(conf_buf);
+	} while (conf_len < conf_fs.st_size);
+	close(conf_fd);
 
-		do {
-			next_r = conf_fs.st_size - conf_len;
-			r = read(conf_fd, &conf_buf[conf_len], next_r);
-			if (r <= 0)
-				break;
-			conf_len = strlen(conf_buf);
-		} while (conf_len < conf_fs.st_size);
-
-		close(conf_fd);
-	}
-
-	/* We need this trailing \n for the parser */
-	conf_buf[conf_len + 1] = '\n';
-
-	if ((i = pp_parse_conf(ppg, conf_buf, conf_len)) < 0) {
-		pp_printf("%s: configuration: error at line %d\n", argv[0], -1);
-		exit(1);
-	}
+	i = pp_parse_conf(ppg, conf_buf, conf_len);
 	free(conf_buf);
-	return 0;
+	return i;
 }
+
+/*
+ * This is the other public entry points, opening a file
+ */
+int pp_config_string(struct pp_globals *ppg, char *s)
+{
+	return pp_parse_conf(ppg, s, strlen(s));
+}
+

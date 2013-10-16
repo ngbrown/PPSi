@@ -9,7 +9,7 @@
 ARCH ?= unix
 
 # Also, you can set USER_CFLAGS, like this (or on the command line)
-# USER_CFLAGS = -DVERB_LOG_MSGS -DCONFIG_PPSI_RUNTIME_VERBOSITY
+# USER_CFLAGS = -DVERB_LOG_MSGS
 
 #### In theory, users should not change stuff below this line (but please read)
 
@@ -73,7 +73,8 @@ export CFLAGS
 # libraries: see proto-standard/Makefile as an example.
 
 $(TARGET).o: $(OBJ-y)
-	$(LD) -Map $(TARGET).map1 -r -o $@ $(OBJ-y) --start-group $(LIBS) --end-group
+	$(LD) -Map $(TARGET).map1 -r -o $@ $(OBJ-y) $(PPSI_O_LDFLAGS) \
+		--start-group $(LIBS) --end-group
 
 # Finally, "make clean" is expected to work
 clean:

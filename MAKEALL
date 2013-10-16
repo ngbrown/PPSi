@@ -19,7 +19,7 @@ build_diags () {
     unset USER_CFLAGS
     build_one "$msg, printf xint" CONFIG_PRINTF_XINT=y
     # then build with all diagnostics, and default printf
-    export USER_CFLAGS="-DVERB_LOG_MSGS -DCONFIG_PPSI_RUNTIME_VERBOSITY"
+    export USER_CFLAGS="-DVERB_LOG_MSGS"
     build_one "$msg, all messages"
 }
 

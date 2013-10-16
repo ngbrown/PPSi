@@ -351,15 +351,63 @@ As of 2013-05 the project suffers from these known bugs:
 @end itemize
 
 @c ##########################################################################
+@node Configuration
+@chapter Configuration
+
+PPSi support configuration files and individual configuration items
+passed on the command line.  Such support is currently not available
+for freestanding architectures (the @i{bare} ones and @i{wrpc-sw}).
+
+When PPSi starts it parses its own configuration. The command line can
+include a number of @t{-f <file>} and @t{-C <item>} options; they are
+processed in order, so later ones override earlier ones. A
+configuration ``item'' can include several directives, using the
+semicolon as a separator.
+
+If no configuration file is specified, the program reads the default
+one, which is architecture-specific (thus, the default configuration
+file is processed after all the command line configuration items.  The
+default file name is @t{/etc/ppsi.conf}, but @t{arch-wrs} tries to
+load @t{/wr/etc/ppsi.conf} first.   The source tree of PPSi includes
+two example configuration files in its own @t{etc/} subdirectory.
+
+Configuration is made of of global options and port-specific options.
+To configure a port, use @t{port <name>} followed by its options.
+The parser allocates a new PTP state machine for each new port, but
+allows changing configuration of an existing port.  For instance, to
+enable frame diagnostics for a specific port, you can use:
+
+@smallexample
+        ./ppsi -f /etc/ppsi.conf -C "port eth1; diagnostics 02"
+@end smallexample
+
+Each configuration item is made up of a keywork and an optional
+argument.  The argument can be either a number or a string.  The
+parser looks up keywords in three tables: a global table, an
+architecture-specific table and an extension-specific table.
+
+Currently not architectures or extensions provide configuration
+keywords, while the list of global items is on show in @t{lib/conf.c},
+as the @t{pp_global_arglines} array.   Future versions of this manual
+may document the keywords, if the time allows it.
+
+@b{Note:} most current command-line options are going to be turned into
+configuration options. This applies to the priorities, intervals and
+thresholds, as well as the @i{slave-only} flag.
+
+@c ##########################################################################
 @node Diagnostics
 @chapter Diagnostics
 
 During development of PPSi, diagnostic support used several
 techniques, but finally we converged on the one described here, that
 is here to stay.  The idea is that we need to add verbosity
-per-feature and per-link.  This fine-grained control is expected to be
+per-feature and per-port.  This fine-grained control is expected to be
 important while developing features or while diagnosing problems on
 new architectures.
+
+The @t{diagnostics} configuration keyword can be used both as a global
+item and as a port-specific configuration value.
 
 @c ==========================================================================
 @node Diagnostic Macros
@@ -376,18 +424,40 @@ each diagnostic thing the header defines a few bits; so we can have
 diagnostic levels for each of them, but we suggest only using level 1
 and 2 -- the rationale is in the header itself.
 
-The @i{things} currently defined are: finite state machine, time code,
-frame send/receive, servo, best master clock, extension-specific
-features.  The user is expected to pass diagnostic flags as a string,
+The @i{things} currently defined are:
+
+@itemize
+@item Finite State Machine: PPSi reports FSM state transitions.
+
+@item Time: at level 1 PPSi reports @i{time_set} operations
+and timeouts; at level 2 it also reports @i{time_get} operations.
+
+@item Frames: at level 1 PPSi reports any send and receive event; at level 2
+it also shows the frame itself (using @i{ptpdump} code).
+
+@item Servo: report servo operation. At level 2 it also shows the individual
+timestamps and internal averaging.
+
+@item BMC: at level 1 PPSi reports BMC choices, at level 2 it reports
+addition of new masters as well.
+
+@item Externsions: extension-specific information.
+
+@item Configuration: at level 1 PPSi reports errors, at level 2 all
+configuration items being parsed (from either files or command line).
+
+@end itemize
+
+The user is expected to pass diagnostic flags as a string,
 specifying diagnostic levels for each of the things, where trailing
 zeroes are optional.  So for example ``@t{01}'' specifies a
-diagnostic level 1 for time, and ``@t{102}'' specifies FSM at level1
+diagnostic level 1 for time, and ``@t{102}'' specifies FSM at level 1
 and frames at level 2.   The header itself is more detailed about
 the conventions.
 
 To parse the diagnostic string, PPSi offers @i{pp_diag_parse}.  The
-function is used, for example, by the code that reads the command
-line.
+function is used by both the code that reads the command line
+and code that parses configuration.
 
 Within PPSi, developers should insert diagnostic messages by means
 of the @i{pp_diag} function:
@@ -866,6 +936,10 @@ support since-char options; we don't want to rely on @i{getopt} which
 is not available for all architectures, nor we want to implement
 complex parsing.
 
+@b{Note:} most current command-line options are going to be turned into
+configuration options. This applies to the priorities, intervals and
+thresholds, as well as the @i{slave-only} flag.
+
 For standard operation, simply run @t{./ppsi} with no options. It will
 work like the PTPd executable, with the automatic choice of
 master/slave defined in @sc{ieee} specification (announce/timeout mechanism).
@@ -874,11 +948,6 @@ What follows is a list of the most important command line options. For
 a list of the other ones please see the help message.
 
 @table @t
-
-@item -V
-
-	Increase verbosity. This is used for the @i{old} diagnostics (see
-        @ref{Older Diagnostics}). You may want to use it once or twice.
 
 @item -d
 

@@ -7,8 +7,9 @@ CFLAGS += -ffreestanding -Os \
 # Root of wrpc-sw project
 WRPCSW_ROOT ?= ..
 
-CFLAGS += -I$(WRPCSW_ROOT)/include -I$(WRPCSW_ROOT)/softpll \
-	  -I$(WRPCSW_ROOT)/boards/spec \
+CFLAGS += -I$(WRPCSW_ROOT)/include -I$(WRPCSW_ROOT)/softpll
+
+PPSI_O_LDFLAGS = -u wrc_ptp_init
 
 # FIXME ptp-noposix root; used temporarily until we clean up
 PTPNOPOSIX_ROOT = $(WRPCSW_ROOT)/ptp-noposix

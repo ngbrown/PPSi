@@ -22,8 +22,6 @@
 #include <ppsi/ppsi.h>
 #include "ppsi-unix.h"
 
-CONST_VERBOSITY int pp_diag_verbosity = 0;
-
 /* ppg and fields */
 static struct pp_globals ppg_static;
 static DSDefault defaultDS;
@@ -61,8 +59,14 @@ int main(int argc, char **argv)
 	if (adjtimex(&t) >= 0)
 		timePropertiesDS.currentUtcOffset = t.tai;
 
-	pp_config_file(ppg, &argc, argv, NULL, "link 0\niface eth0\n"
-		       "proto udp\n" /* mandatory  trailing \n */);
+	if (pp_parse_cmdline(ppg, argc, argv) != 0)
+		return -1;
+
+	/* If no item has been parsed, provide a default file or string */
+	if (ppg->cfg_items == 0)
+		pp_config_file(ppg, 0, PP_DEFAULT_CONFIGFILE);
+	if (ppg->cfg_items == 0)
+		pp_config_string(ppg, strdup("link 0; iface eth0; proto udp"));
 
 	for (i = 0; i < ppg->nlinks; i++) {
 
@@ -72,12 +76,13 @@ int main(int argc, char **argv)
 
 		ppi->glbs = ppg;
 		ppi->iface_name = ppi->cfg.iface_name;
-		ppi->ethernet_mode = (ppi->cfg.proto == 0) ? 1 : 0;
-		if (ppi->cfg.role == 1) {
+		/* this old-fashioned "ethernet_mode" is a single bit */
+		ppi->ethernet_mode = (ppi->cfg.proto == PPSI_PROTO_RAW);
+		if (ppi->cfg.role == PPSI_ROLE_MASTER) {
 			ppi->master_only = 1;
 			ppi->slave_only = 0;
 		}
-		else if (ppi->cfg.role == 2) {
+		else if (ppi->cfg.role == PPSI_ROLE_SLAVE) {
 			ppi->master_only = 0;
 			ppi->slave_only = 1;
 		}
@@ -93,9 +98,6 @@ int main(int argc, char **argv)
 		if (!ppi->portDS)
 			exit(__LINE__);
 	}
-
-	if (pp_parse_cmdline(ppg, argc, argv) != 0)
-		return -1;
 
 	pp_open_globals(ppg);
 
