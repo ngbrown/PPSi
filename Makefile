@@ -73,7 +73,8 @@ export CFLAGS
 # libraries: see proto-standard/Makefile as an example.
 
 $(TARGET).o: $(OBJ-y)
-	$(LD) -Map $(TARGET).map1 -r -o $@ $(OBJ-y) --start-group $(LIBS) --end-group
+	$(LD) -Map $(TARGET).map1 -r -o $@ $(OBJ-y) $(PPSI_O_LDFLAGS) \
+		--start-group $(LIBS) --end-group
 
 # Finally, "make clean" is expected to work
 clean:
