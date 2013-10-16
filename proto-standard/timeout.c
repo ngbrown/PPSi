@@ -13,10 +13,10 @@ static char *timeout_names[__PP_TO_ARRAY_SIZE] __attribute__((used)) = {
 	N(PP_TO_SYNC),
 	N(PP_TO_ANN_RECEIPT),
 	N(PP_TO_ANN_INTERVAL),
+	N(PP_TO_FAULTY),
 	N(PP_TO_EXT_0),
 	N(PP_TO_EXT_1),
 	N(PP_TO_EXT_2),
-	N(PP_TO_EXT_3),
 };
 
 /*
