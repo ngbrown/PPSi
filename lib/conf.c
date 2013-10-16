@@ -18,9 +18,18 @@
 static struct pp_globals *current_ppg;
 static struct pp_instance *current_ppi;
 
-/* A "port" (or "link", for compatibility) line creates a ppi instance */
+/* A "port" (or "link", for compatibility) line creates or uses a pp instance */
 static int f_port(int lineno, int iarg, char *sarg)
 {
+	int i;
+
+	/* First look for an existing port with the same name */
+	for (i = 0; i < current_ppg->nlinks; i++) {
+		current_ppi = current_ppg->pp_instances + i;
+		if (!strcmp(sarg, current_ppi->cfg.port_name))
+			return 0;
+	}
+	/* Allocate a new ppi */
 	if (current_ppg->nlinks >= current_ppg->max_links) {
 		pp_printf("config line %i: out of available ports\n",
 			  lineno);
