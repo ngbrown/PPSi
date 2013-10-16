@@ -376,18 +376,40 @@ each diagnostic thing the header defines a few bits; so we can have
 diagnostic levels for each of them, but we suggest only using level 1
 and 2 -- the rationale is in the header itself.
 
-The @i{things} currently defined are: finite state machine, time code,
-frame send/receive, servo, best master clock, extension-specific
-features.  The user is expected to pass diagnostic flags as a string,
+The @i{things} currently defined are:
+
+@itemize
+@item Finite State Machine: PPSi reports FSM state transitions.
+
+@item Time: at level 1 PPSi reports @i{time_set} operations
+and timeouts; at level 2 it also reports @i{time_get} operations.
+
+@item Frames: at level 1 PPSi reports any send and receive event; at level 2
+it also shows the frame itself (using @i{ptpdump} code).
+
+@item Servo: report servo operation. At level 2 it also shows the individual
+timestamps and internal averaging.
+
+@item BMC: at level 1 PPSi reports BMC choices, at level 2 it reports
+addition of new masters as well.
+
+@item Externsions: extension-specific information.
+
+@item Configuration: at level 1 PPSi reports errors, at level 2 all
+configuration items being parsed (from either files or command line).
+
+@end itemize
+
+The user is expected to pass diagnostic flags as a string,
 specifying diagnostic levels for each of the things, where trailing
 zeroes are optional.  So for example ``@t{01}'' specifies a
-diagnostic level 1 for time, and ``@t{102}'' specifies FSM at level1
+diagnostic level 1 for time, and ``@t{102}'' specifies FSM at level 1
 and frames at level 2.   The header itself is more detailed about
 the conventions.
 
 To parse the diagnostic string, PPSi offers @i{pp_diag_parse}.  The
-function is used, for example, by the code that reads the command
-line.
+function is used by both the code that reads the command line
+and code that parses configuration.
 
 Within PPSi, developers should insert diagnostic messages by means
 of the @i{pp_diag} function:
