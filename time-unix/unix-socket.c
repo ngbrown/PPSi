@@ -243,7 +243,6 @@ static int unix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
 		goto err_out;
 
-	iindex = ifr.ifr_ifindex;
 	context = "ioctl(SIOCGIFHWADDR)";
 	if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
 		goto err_out;
