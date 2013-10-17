@@ -11,11 +11,6 @@ CFLAGS += -I$(WRPCSW_ROOT)/include -I$(WRPCSW_ROOT)/softpll
 
 PPSI_O_LDFLAGS = -u wrc_ptp_init
 
-# FIXME ptp-noposix root; used temporarily until we clean up
-PTPNOPOSIX_ROOT = $(WRPCSW_ROOT)/ptp-noposix
-
-CFLAGS += -I$(PTPNOPOSIX_ROOT)/PTPWRd/dep -I$(PTPNOPOSIX_ROOT)/PTPWRd
-
 # Let's use the pp_printf we already have in wrpc-sw
 CONFIG_NO_PRINTF = y
 
