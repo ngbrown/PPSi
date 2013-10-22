@@ -94,31 +94,28 @@ int wrc_ptp_set_mode(int mode)
 
 	switch (mode) {
 	case WRC_MODE_GM:
-		/* FIXME multiport rtOpts.primarySource = TRUE; */
 		WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
 		ppi->master_only = TRUE;
 		ppi->slave_only = FALSE;
-		*class_ptr = PP_WRMASTER_CLOCK_CLASS;
+		*class_ptr = PP_CLASS_WR_GM_LOCKED;
 		spll_init(SPLL_MODE_GRAND_MASTER, 0, 1);
 		lock_timeout = LOCK_TIMEOUT_GM;
 		break;
 
 	case WRC_MODE_MASTER:
-		/* FIXME multiport rtOpts.primarySource = FALSE; */
 		WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
 		ppi->master_only = TRUE;
 		ppi->slave_only = FALSE;
-		*class_ptr = PP_WRMASTER_CLOCK_CLASS;
+		*class_ptr = PP_CLASS_WR_GM_UNLOCKED;
 		spll_init(SPLL_MODE_FREE_RUNNING_MASTER, 0, 1);
 		lock_timeout = LOCK_TIMEOUT_FM;
 		break;
 
 	case WRC_MODE_SLAVE:
-		/* FIXME multiport rtOpts.primarySource = FALSE; */
 		WR_DSPOR(ppi)->wrConfig = WR_S_ONLY;
 		ppi->master_only = FALSE;
 		ppi->slave_only = TRUE;
-		*class_ptr = PP_WRMASTER_CLOCK_CLASS;
+		*class_ptr = PP_CLASS_SLAVE_ONLY;
 		spll_init(SPLL_MODE_SLAVE, 0, 1);
 		break;
 	}
