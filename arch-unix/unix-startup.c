@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	ppg->parentDS = &parentDS;
 	ppg->timePropertiesDS = &timePropertiesDS;
 	ppg->servo = &servo;
-	ppg->rt_opts = &default_rt_opts;
+	ppg->rt_opts = &__pp_default_rt_opts;
 
 	/* We are hosted, so we can allocate */
 	ppg->max_links = PP_MAX_LINKS;

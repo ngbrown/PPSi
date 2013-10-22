@@ -55,7 +55,7 @@ int ppsi_main(int argc, char **argv)
 	ppi->ethernet_mode = PP_DEFAULT_ETHERNET_MODE;
 	ppi->iface_name = "eth0";
 
-	ppg->rt_opts = &default_rt_opts;
+	ppg->rt_opts = &__pp_default_rt_opts;
 
 	if (sys_adjtimex(&t) >= 0)
 		timePropertiesDS.currentUtcOffset = t.tai;

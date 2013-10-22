@@ -79,10 +79,14 @@ int wrc_ptp_set_mode(int mode)
 {
 	uint32_t start_tics, lock_timeout = 0;
 	struct pp_instance *ppi = &ppi_static;
-	typeof(default_rt_opts.clock_quality.clockClass) *class_ptr;
+	struct pp_globals *ppg = ppi->glbs;
+	typeof(ppg->rt_opts->clock_quality.clockClass) *class_ptr;
 
-	/* We need to change the class in the default options */
-	class_ptr = &default_rt_opts.clock_quality.clockClass;
+	/*
+	 * We need to change the class in the default options.
+	 * Unfortunately, ppg->rt_opts may be yet unassigned when this runs
+	 */
+	class_ptr = &__pp_default_rt_opts.clock_quality.clockClass;
 
 	ptp_mode = 0;
 

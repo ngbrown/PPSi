@@ -36,7 +36,9 @@ struct pp_runtime_opts {
 	UInteger8 domain_number;
 	void *arch_opts;
 };
-extern struct pp_runtime_opts default_rt_opts; /* preinited with defaults */
+
+/* We need a globally-accessible structure with preset defaults */
+extern struct pp_runtime_opts __pp_default_rt_opts;
 
 /*
  * Communication channel. Is the abstraction of a unix socket, so that

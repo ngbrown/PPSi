@@ -8,14 +8,12 @@
 #include <ppsi/ppsi.h>
 
 /*
- * This file deals with opening and closing an instance. The channel
- * must already have been created. In practice, this initializes the
- * state machine to the first state.
+ * This is a global structure, because commandline and other config places
+ * need to change some values in there.
  */
-
-struct pp_runtime_opts default_rt_opts = {
+struct pp_runtime_opts __pp_default_rt_opts = {
 	.clock_quality = {
-			.clockClass = PP_DEFAULT_CLOCK_CLASS,
+			.clockClass = PP_CLASS_DEFAULT,
 			.clockAccuracy = PP_DEFAULT_CLOCK_ACCURACY,
 			.offsetScaledLogVariance = PP_DEFAULT_CLOCK_VARIANCE,
 	},
@@ -36,6 +34,12 @@ struct pp_runtime_opts default_rt_opts = {
 	.ttl =			PP_DEFAULT_TTL,
 };
 
+/*
+ * This file deals with opening and closing an instance. The channel
+ * must already have been created. In practice, this initializes the
+ * state machine to the first state.
+ */
+
 int pp_open_globals(struct pp_globals *ppg)
 {
 	/*
@@ -51,7 +55,7 @@ int pp_open_globals(struct pp_globals *ppg)
 	struct pp_runtime_opts *rt_opts;
 
 	if (!ppg->rt_opts)
-		ppg->rt_opts = &default_rt_opts;
+		ppg->rt_opts = &__pp_default_rt_opts;
 
 	rt_opts = ppg->rt_opts;
 
@@ -81,7 +85,7 @@ int pp_open_globals(struct pp_globals *ppg)
 
 	if (def->slaveOnly) {
 		pp_printf("Slave Only, clock class set to 255\n");
-		def->clockQuality.clockClass = 255;
+		def->clockQuality.clockClass = PP_CLASS_SLAVE_ONLY;
 	}
 
 	if (pp_hooks.open)

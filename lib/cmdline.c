@@ -191,6 +191,8 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 				GOPTS(ppg)->announce_intvl = 4;
 			break;
 		case 'g':
+			GOPTS(ppg)->clock_quality.clockClass
+				= PP_CLASS_SLAVE_ONLY;
 			/* Apply -g option globally, to each configured link */
 			for (j = 0; j < ppg->nlinks; j++)
 				ppg->pp_instances[j].slave_only = 1;
