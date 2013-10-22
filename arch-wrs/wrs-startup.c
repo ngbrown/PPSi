@@ -46,6 +46,9 @@ int main(int argc, char **argv)
 
 	setbuf(stdout, NULL);
 
+	pp_printf("PPSi. Commit %s, built on " __DATE__ "\n",
+		PPSI_VERSION);
+
 	hal_ch = minipc_client_create(WRSW_HAL_SERVER_ADDR,
 				      MINIPC_FLAG_VERBOSE);
 	if (!hal_ch) { /* FIXME should we retry with minipc_client_create? */

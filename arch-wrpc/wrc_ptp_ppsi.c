@@ -67,7 +67,8 @@ int wrc_ptp_init()
 	uart_init_hw();
 	uart_init_sw();
 
-	pp_printf("PPSi for WRPC. Compiled on " __DATE__ "\n");
+	pp_printf("PPSi for WRPC. Commit %s, built on " __DATE__ "\n",
+		PPSI_VERSION);
 
 	return 0;
 }

@@ -39,6 +39,8 @@ int main(int argc, char **argv)
 
 	setbuf(stdout, NULL);
 
+	pp_printf("PPSi. Commit %s, built on " __DATE__ "\n", PPSI_VERSION);
+
 	ppg = &ppg_static;
 	ppg->defaultDS = &defaultDS;
 	ppg->currentDS = &currentDS;

@@ -27,12 +27,16 @@ OBJDUMP         = $(CROSS_COMPILE)objdump
 # Instead of repeating "ppsi" over and over, bless it TARGET
 TARGET = ppsi
 
+# we should use linux/scripts/setlocalversion instead...
+VERSION = $(shell git describe --always --dirty)
+
 # The main target is the big object file.
 all: $(TARGET).o
 
 # CFLAGS to use. Both this Makefile (later) and app-makefile may grow CFLAGS
 CFLAGS = $(USER_CFLAGS)
 CFLAGS += -Wall -O2 -ggdb -Iinclude -fno-common
+CFLAGS += -DPPSI_VERSION=\"$(VERSION)\"
 
 # to avoid ifdef as much as possible, I use the kernel trick for OBJ variables
 OBJ-y := fsm.o diag.o

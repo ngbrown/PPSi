@@ -39,7 +39,8 @@ int ppsi_main(int argc, char **argv)
 	struct pp_instance *ppi = &ppi_static; /* no malloc, one instance */
 	struct bare_timex t;
 
-	pp_printf("ppsi starting. Built on %s\n", __DATE__);
+	pp_printf("PPSi, bare kernel. Commit %s, built on " __DATE__ "\n",
+		PPSI_VERSION);
 
 	ppi->glbs        = ppg;
 	ppg->defaultDS   = &defaultDS;
