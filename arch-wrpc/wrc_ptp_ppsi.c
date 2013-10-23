@@ -82,7 +82,7 @@ int wrc_ptp_set_mode(int mode)
 	struct pp_instance *ppi = &ppi_static;
 	struct pp_globals *ppg = ppi->glbs;
 	typeof(ppg->rt_opts->clock_quality.clockClass) *class_ptr;
-
+	int error = 0;
 	/*
 	 * We need to change the class in the default options.
 	 * Unfortunately, ppg->rt_opts may be yet unassigned when this runs
@@ -107,7 +107,7 @@ int wrc_ptp_set_mode(int mode)
 		WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
 		ppi->master_only = TRUE;
 		ppi->slave_only = FALSE;
-		*class_ptr = PP_CLASS_WR_GM_UNLOCKED;
+		*class_ptr = PP_CLASS_DEFAULT;
 		spll_init(SPLL_MODE_FREE_RUNNING_MASTER, 0, 1);
 		lock_timeout = LOCK_TIMEOUT_FM;
 		break;
@@ -128,22 +128,25 @@ int wrc_ptp_set_mode(int mode)
 
 	while (!spll_check_lock(0) && lock_timeout) {
 		timer_delay(TICS_PER_SECOND);
-		pp_printf(".");
 		if (timer_get_tics() - start_tics > lock_timeout) {
-			pp_printf("\nLock timeout.\n");
-			return -ETIMEDOUT;
-		} else if (uart_read_byte() == 27) {
-			pp_printf("\n");
-			return -EINTR;
+			pp_printf("\nLock timeout.");
+			error = -ETIMEDOUT;
+			break;
 		}
+		pp_printf(".");
 	}
 	pp_printf("\n");
 
+	/* If we can't lock to the atomic/gps, we say it in the class */
+	if (error && mode == WRC_MODE_GM)
+		*class_ptr = PP_CLASS_WR_GM_UNLOCKED;
+
+	/* Success or failure, we enable pps */
 	if (mode == WRC_MODE_MASTER || mode == WRC_MODE_GM)
 		shw_pps_gen_enable_output(1);
 
 	ptp_mode = mode;
-	return 0;
+	return error;
 }
 
 int wrc_ptp_get_mode()

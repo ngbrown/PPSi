@@ -30,11 +30,11 @@
 #define PP_DEFAULT_SYNC_RECEIPT_TIMEOUT		3
 #define PP_DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT	6	/* 3 by default */
 
-/* Clock classes (pag 55, PTP-2008) */
+/* Clock classes (pag 55, PTP-2008). See ppsi-manual for an explanation */
 #define PP_CLASS_SLAVE_ONLY			255
 #define PP_CLASS_DEFAULT			187
 #define PP_CLASS_WR_GM_LOCKED			6
-#define PP_CLASS_WR_GM_UNLOCKED			7
+#define PP_CLASS_WR_GM_UNLOCKED			52
 
 #define PP_DEFAULT_CLOCK_ACCURACY		0xFE
 #define PP_DEFAULT_PRIORITY1			128

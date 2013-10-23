@@ -35,7 +35,7 @@
 
 @setchapternewpage off
 
-@set update-month September 2013
+@set update-month October 2013
 
 @finalout
 
@@ -381,12 +381,12 @@ enable frame diagnostics for a specific port, you can use:
         ./ppsi -f /etc/ppsi.conf -C "port eth1; diagnostics 02"
 @end smallexample
 
-Each configuration item is made up of a keywork and an optional
+Each configuration item is made up of a keyword and an optional
 argument.  The argument can be either a number or a string.  The
 parser looks up keywords in three tables: a global table, an
 architecture-specific table and an extension-specific table.
 
-Currently not architectures or extensions provide configuration
+Currently no architectures or extensions provide configuration
 keywords, while the list of global items is on show in @t{lib/conf.c},
 as the @t{pp_global_arglines} array.   Future versions of this manual
 may document the keywords, if the time allows it.
@@ -394,6 +394,26 @@ may document the keywords, if the time allows it.
 @b{Note:} most current command-line options are going to be turned into
 configuration options. This applies to the priorities, intervals and
 thresholds, as well as the @i{slave-only} flag.
+
+@c ##########################################################################
+@node PTP Clock Class
+@chapter PTP Clock Class
+
+The clock class value (@t{clockClass}), a field of the ``clock quality''
+structure, can be specified in the configuration file for the architectures
+that support such a file.
+
+For the White Rabbit node (@t{arch-wrpc}) the class is defined
+according to build-time constants, set forth in @t{constants.h}.
+
+When the node is configured as grandmaster (WRPC shell command @t{mode
+gm}), the class is set to 6 (a clock synchronized to a primary
+reference time source).  However, if the internal PLL can not lock in
+a 60 seconds timeout, the class is set to 52: a clock that will never
+be a slave, but is not currently connected to a primary time source.
+
+When the node is configured as master, it uses class 187, i.e.
+a clock that may be a slave of another clock.
 
 @c ##########################################################################
 @node Diagnostics
