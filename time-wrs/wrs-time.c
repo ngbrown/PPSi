@@ -151,7 +151,7 @@ int wr_locking_disable(struct pp_instance *ppi)
 int wr_enable_ptracker(struct pp_instance *ppi)
 	__attribute__((alias("wrs_enable_ptracker")));
 
-int wr_enable_timing_output(struct pp_instance *ppi, int enable)
+int __wr_enable_timing_output(struct pp_instance *ppi, int enable)
 	__attribute__((alias("wrs_enable_timing_output")));
 
 int wr_adjust_in_progress()

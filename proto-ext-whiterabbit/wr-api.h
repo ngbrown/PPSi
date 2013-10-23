@@ -106,7 +106,9 @@ int wr_read_calibration_data(struct pp_instance *ppi,
 
 int wr_enable_ptracker(struct pp_instance *ppi);
 
+/* The former is called by ppsi, the latter is the internal hw detail */
 int wr_enable_timing_output(struct pp_instance *ppi, int enable);
+int __wr_enable_timing_output(struct pp_instance *ppi, int enable);
 
 int wr_adjust_in_progress(void);
 int wr_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec);

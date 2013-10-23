@@ -32,6 +32,15 @@ void wr_servo_enable_tracking(int enable)
 	tracking_enabled = enable;
 }
 
+int wr_enable_timing_output(struct pp_instance *ppi, int enable)
+{
+	/* Only act on changes, so hackers can force it on manually */
+	if (enable != WR_DSPOR(ppi)->ppsOutputOn)
+		__wr_enable_timing_output(ppi, enable);
+	WR_DSPOR(ppi)->ppsOutputOn = enable;
+	return 0;
+}
+
 /* my own timestamp arithmetic functions */
 
 static void dump_timestamp(struct pp_instance *ppi, char *what, TimeInternal ts)
@@ -141,11 +150,8 @@ static int got_sync = 0;
 
 void wr_servo_reset()
 {
-//    shw_pps_gen_enable_output(0); /* fixme: unportable */
 	cur_servo_state.valid = 0;
 	servo_state_valid = 0;
-//    ptpd_netif_enable_timing_output(0);
-
 }
 
 int wr_servo_init(struct pp_instance *ppi)
