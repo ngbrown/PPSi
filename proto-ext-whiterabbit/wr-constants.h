@@ -16,7 +16,7 @@
 #define WR_NODE				0x80
 #define WR_IS_CALIBRATED		0x04
 #define WR_IS_WR_MODE			0x08
-#define WR_NODE_MODE			0x03
+#define WR_NODE_MODE			0x03 /* a mask, see NON_WR etc below */
 
 # define WR_TLV_TYPE			0x2004
 
