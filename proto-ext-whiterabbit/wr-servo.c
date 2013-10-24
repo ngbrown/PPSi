@@ -256,6 +256,7 @@ int wr_servo_update(struct pp_instance *ppi)
 	uint64_t tics;
 	uint64_t big_delta_fix;
 	uint64_t delay_ms_fix;
+	static int errcount;
 
 	TimeInternal ts_offset, ts_offset_hw /*, ts_phase_adjust */;
 
@@ -264,11 +265,14 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	if(!s->t1.correct || !s->t2.correct ||
 	   !s->t3.correct || !s->t4.correct) {
-		pp_error("%s: TimestampsIncorrect: %d %d %d %d\n", __func__,
-			    s->t1.correct, s->t2.correct,
-			    s->t3.correct, s->t4.correct);
+		errcount++;
+		if (errcount > 5) /* a 2-3 in a row are expected */
+			pp_error("%s: TimestampsIncorrect: %d %d %d %d\n",
+				 __func__, s->t1.correct, s->t2.correct,
+				 s->t3.correct, s->t4.correct);
 		return 0;
 	}
+	errcount = 0;
 
 	cur_servo_state.update_count++;
 
