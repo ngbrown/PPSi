@@ -156,7 +156,7 @@ The package currently supports the following architectures:
         doesn't apply to the WR switch, and modelling it as a
         separate architecture is the simplest and cleanest approach,
         in our opinion (even if it leads to some code duplication).
-        The architectures relies on @i{time-wrs}.   
+        The architectures relies on @i{time-wrs}.
 
 @item wrpc
 
@@ -244,7 +244,7 @@ suggests Unix timing code (@t{TIME?=unix}).
 
 If you want to support a different timing engine within the Unix build
 system, you can use ``@t{make TIME=xyz}'' to request building
-the@u{time-xyz} subdirectory.  Please note that the Unix time
+the @i{time-xyz} subdirectory.  Please note that the Unix time
 structures are built anyways, so you can piggy-back on those
 functions, either within your own methods or by replacing the
 @t{ppi->t_ops} and @t{ppi->n_ops} for the communications links that do
@@ -461,7 +461,7 @@ timestamps and internal averaging.
 @item BMC: at level 1 PPSi reports BMC choices, at level 2 it reports
 addition of new masters as well.
 
-@item Externsions: extension-specific information.
+@item Extensions: extension-specific information.
 
 @item Configuration: at level 1 PPSi reports errors, at level 2 all
 configuration items being parsed (from either files or command line).
@@ -622,7 +622,7 @@ This is, for example, the dump of two UDP frames:
 @node pps-out
 @section pps-out
 
-The tools outputs a pulse-per-second signal to a parallel port or a
+The tool outputs a pulse-per-second signal to a parallel port or a
 serial port.  Most likely it only works on an x86 Linux system because
 of direct access to I/O ports -- no such portability problem is
 expected for serial ports.  For this reason it is not built by
