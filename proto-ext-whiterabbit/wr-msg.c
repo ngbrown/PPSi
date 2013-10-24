@@ -57,9 +57,26 @@ void msg_pack_announce_wr_tlv(struct pp_instance *ppi)
 {
 	void *buf;
 	UInteger16 wr_flags = 0;
+	int locked, class = DSDEF(ppi)->clockQuality.clockClass;
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
+
+	buf = ppi->tx_ptp;
+
+	/* GM: update clock Class, according to whether we are locked or not */
+	if (class < PP_CLASS_DEFAULT) {
+		locked = wrp->ops->locking_poll(ppi, 1);
+		if (locked)
+			class = PP_CLASS_WR_GM_LOCKED;
+		else
+			class = PP_CLASS_WR_GM_UNLOCKED;
+		if (class != DSDEF(ppi)->clockQuality.clockClass) {
+			pp_error("New class %i\n", class);
+			DSDEF(ppi)->clockQuality.clockClass = class;
+			*(UInteger8 *) (buf + 48) = class;
+		}
+	}
 
 	/* Change length */
-	buf = ppi->tx_ptp;
 	*(UInteger16 *)(buf + 2) = htons(WR_ANNOUNCE_LENGTH);
 
 	*(UInteger16 *)(buf + 64) = htons(TLV_TYPE_ORG_EXTENSION);
