@@ -13,7 +13,7 @@
  * the linker can avoid pulling this data space if another table is there.
  */
 
-struct pp_state_table_item pp_state_table[] = {
+struct pp_state_table_item pp_state_table[] __attribute__((weak)) = {
 	{ PPS_INITIALIZING,	"initializing",	pp_initializing,},
 	{ PPS_FAULTY,		"faulty",	pp_faulty,},
 	{ PPS_DISABLED,		"disabled",	pp_disabled,},

@@ -91,8 +91,8 @@ export CFLAGS
 # libraries: see proto-standard/Makefile as an example.
 
 $(TARGET).o: silentoldconfig $(OBJ-y)
-	$(LD) -Map $(TARGET).map1 -r -o $@ $(OBJ-y) $(PPSI_O_LDFLAGS) \
-		--start-group $(LIBS) --end-group
+	$(LD) -Map $(TARGET).map1 -r -o $@ $(PPSI_O_LDFLAGS) \
+		--start-group $(OBJ-y) --end-group
 
 # Finally, "make clean" is expected to work
 clean:

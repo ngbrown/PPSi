@@ -17,12 +17,7 @@ CONFIG_NO_PRINTF = y
 # All files are under A (short for ARCH): I'm lazy
 A := arch-$(ARCH)
 
-LIBARCH := $A/libarch.a
-
-LIBS += -L$A -larch
-
-
-OBJ-libarch := \
+OBJ-y += \
 	$A/wrpc-io.o \
 	$A/wrpc-spll.o \
 	$A/wrpc-calibration.o \
@@ -33,8 +28,5 @@ OBJ-libarch := \
 # We only support "wrpc" time operations
 TIME := wrpc
 include time-wrpc/Makefile
-
-$(LIBARCH): $(OBJ-libarch)
-	$(AR) r $@ $^
 
 $(TARGET).o: $(LIBARCH)

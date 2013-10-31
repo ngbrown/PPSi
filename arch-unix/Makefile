@@ -4,10 +4,7 @@ A := arch-$(ARCH)
 
 CFLAGS += -Itools
 
-
-LIBARCH := $A/libarch.a
-
-OBJ-libarch := $A/unix-startup.o \
+OBJ-y += $A/unix-startup.o \
 	$A/main-loop.o \
 	$A/unix-io.o \
 	lib/cmdline.o \
@@ -22,17 +19,15 @@ TIME ?= unix
 include time-$(TIME)/Makefile
 
 # Unix time operations are always included as a fallback
+ifneq ($(TIME),unix)
 include time-unix/Makefile
+endif
 CFLAGS += -Itime-unix
-
-$(LIBARCH): $(OBJ-libarch)
-	$(AR) r $@ $^
 
 all: $(TARGET)
 
 # to build the target, we need -lstd again, in case we call functions that
 # were not selected yet (e.g., pp_open_globals() ).
-$(TARGET): $(TARGET).o $(LIBARCH)
-	$(CC) -Wl,-Map,$(TARGET).map2 -o $@ $(TARGET).o \
-		-L$A -larch -L$D -lstd -lrt
+$(TARGET): $(TARGET).o
+	$(CC) -Wl,-Map,$(TARGET).map2 -o $@ $(TARGET).o -lrt
 

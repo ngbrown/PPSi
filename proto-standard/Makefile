@@ -3,11 +3,7 @@
 # All files are under D: I'm lazy
 D := proto-standard
 
-LIBSTD := $D/libstd.a
-
-LIBS += -L$D -lstd
-
-OBJ-libstd := $D/fsm-table.o \
+OBJ-y += $D/fsm-table.o \
 	$D/state-initializing.o \
 	$D/state-faulty.o \
 	$D/state-disabled.o \
@@ -25,8 +21,3 @@ OBJ-libstd := $D/fsm-table.o \
 	$D/hooks.o \
 	$D/timeout.o \
 	$D/open-close.o
-
-$(TARGET).o: $(LIBSTD)
-
-$(LIBSTD): $(OBJ-libstd)
-	$(AR) r $@ $^
