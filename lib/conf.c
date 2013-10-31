@@ -149,10 +149,15 @@ struct pp_argline pp_ext_arglines[] __attribute__((weak)) = {
 	{}
 };
 
-/* local implementation of isblank() for bare-metal users */
+/* local implementation of isblank() and isdigit() for bare-metal users */
 static int blank(int c)
 {
 	return c == ' '  || c == '\t' || c == '\n';
+}
+
+static int digit(char c)
+{
+	return (('0' <= c) && (c <= '9'));
 }
 
 static char *first_word(char *line, char **rest)
@@ -177,6 +182,59 @@ static char *first_word(char *line, char **rest)
 	}
 	*rest = line;
 	return ret;
+}
+
+static int parse_time(struct pp_cfg_time *ts, char *s)
+{
+	long sign = 1;
+	long num;
+	int i;
+
+	/* skip leading blanks */
+	while (*s && blank(*s))
+		s++;
+	/* detect sign */
+	if (*s == '-') {
+		sign = -1;
+		s++;
+	} else if (*s == '+') {
+		s++;
+	}
+
+	if (!*s)
+		return -1;
+
+	/* parse integer part */
+	num = 0;
+	while (*s && digit(*s)) {
+		num *= 10;
+		num += *s - '0';
+		s++;
+	}
+
+	ts->tv_sec = sign * num;
+	ts->tv_nsec = 0;
+
+	if (*s == '\0')
+		return 0; // no decimals
+	// else
+	if (*s != '.')
+		return -1;
+
+	/* parse decimals */
+	s++; // skip '.'
+	num = 0;
+	for (i = 0; (i < 9) && *s && digit(*s); i++) {
+		num *= 10;
+		num += *s - '0';;
+		s++;
+	}
+	if (*s) // more than 9 digits or *s is not a digit
+		return -1;
+	for (; i < 9; i++) // finish to scale nanoseconds
+		num *=10;
+	ts->tv_nsec = sign * num;
+	return 0;
 }
 
 static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
@@ -254,6 +312,18 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 		cfg_arg.i = n->value;
 		if (l->f(lineno, &cfg_arg))
 			return -1;
+		break;
+
+	case ARG_TIME:
+		if(parse_time(&cfg_arg.ts, line)) {
+			pp_diag(NULL, config, 1, "line %i: wrong arg \"%s\" for "
+				"\"%s\"\n", lineno, line, word);
+			return -1;
+		}
+
+		if (l->f(lineno, &cfg_arg))
+			return -1;
+
 		break;
 	}
 	return 0;

@@ -256,12 +256,19 @@ extern int pp_close_globals(struct pp_globals *ppg);
 
 extern int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv);
 
+/* platform independent timespec-like data structure */
+struct pp_cfg_time {
+	long tv_sec;
+	long tv_nsec;
+};
+
 /* Data structure used to pass just a single argument to configuration
  * functions. Any future new type for any new configuration function can be just
  * added inside here, without redefining cfg_handler prototype */
 union pp_cfg_arg {
 	int i;
 	char *s;
+	struct pp_cfg_time ts;
 };
 
 /*
@@ -278,6 +285,7 @@ enum pp_argtype {
 	ARG_INT,
 	ARG_STR,
 	ARG_NAMES,
+	ARG_TIME,
 };
 struct pp_argline {
 	cfg_handler f;
