@@ -256,10 +256,18 @@ extern int pp_close_globals(struct pp_globals *ppg);
 
 extern int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv);
 
+/* Data structure used to pass just a single argument to configuration
+ * functions. Any future new type for any new configuration function can be just
+ * added inside here, without redefining cfg_handler prototype */
+union pp_cfg_arg {
+	int i;
+	char *s;
+};
+
 /*
  * Configuration: we are structure-based, and a typedef simplifies things
  */
-typedef int (*cfg_handler)(int lineno, int iarg, char *sarg);
+typedef int (*cfg_handler)(int lineno, union pp_cfg_arg *arg);
 
 struct pp_argname {
 	char *name;

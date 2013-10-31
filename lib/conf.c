@@ -19,14 +19,14 @@ static struct pp_globals *current_ppg;
 static struct pp_instance *current_ppi;
 
 /* A "port" (or "link", for compatibility) line creates or uses a pp instance */
-static int f_port(int lineno, int iarg, char *sarg)
+static int f_port(int lineno, union pp_cfg_arg *arg)
 {
 	int i;
 
 	/* First look for an existing port with the same name */
 	for (i = 0; i < current_ppg->nlinks; i++) {
 		current_ppi = current_ppg->pp_instances + i;
-		if (!strcmp(sarg, current_ppi->cfg.port_name))
+		if (!strcmp(arg->s, current_ppi->cfg.port_name))
 			return 0;
 	}
 	/* Allocate a new ppi */
@@ -38,7 +38,7 @@ static int f_port(int lineno, int iarg, char *sarg)
 	current_ppi = current_ppg->pp_instances + current_ppg->nlinks;
 
 	 /* FIXME: strncpy (it is missing in bare archs by now) */
-	strcpy(current_ppi->cfg.port_name, sarg);
+	strcpy(current_ppi->cfg.port_name, arg->s);
 	current_ppg->nlinks++;
 	return 0;
 }
@@ -54,54 +54,54 @@ static int f_port(int lineno, int iarg, char *sarg)
 		return -1; \
 	}})
 
-static int f_if(int lineno, int iarg, char *sarg)
+static int f_if(int lineno, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	strcpy(current_ppi->cfg.iface_name, sarg);
+	strcpy(current_ppi->cfg.iface_name, arg->s);
 	return 0;
 }
 
 /* The following ones are so similar. Bah... set a pointer somewhere? */
-static int f_proto(int lineno, int iarg, char *sarg)
+static int f_proto(int lineno, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	current_ppi->cfg.proto = iarg;
+	current_ppi->cfg.proto = arg->i;
 	return 0;
 }
 
-static int f_role(int lineno, int iarg, char *sarg)
+static int f_role(int lineno, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	current_ppi->cfg.role = iarg;
+	current_ppi->cfg.role = arg->i;
 	return 0;
 }
 
-static int f_ext(int lineno, int iarg, char *sarg)
+static int f_ext(int lineno, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	current_ppi->cfg.ext = iarg;
+	current_ppi->cfg.ext = arg->i;
 	return 0;
 }
 
 /* The following two are identical as well. I really need a pointer... */
-static int f_class(int lineno, int iarg, char *sarg)
+static int f_class(int lineno, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(0);
-	GOPTS(current_ppg)->clock_quality.clockClass = iarg;
+	GOPTS(current_ppg)->clock_quality.clockClass = arg->i;
 	return 0;
 }
 
-static int f_accuracy(int lineno, int iarg, char *sarg)
+static int f_accuracy(int lineno, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(0);
-	GOPTS(current_ppg)->clock_quality.clockAccuracy = iarg;
+	GOPTS(current_ppg)->clock_quality.clockAccuracy = arg->i;
 	return 0;
 }
 
 /* Diagnostics can be per-port or global */
-static int f_diag(int lineno, int iarg, char *sarg)
+static int f_diag(int lineno, union pp_cfg_arg *arg)
 {
-	unsigned long level = pp_diag_parse(sarg);
+	unsigned long level = pp_diag_parse(arg->s);
 
 	if (current_ppi)
 		current_ppi->flags = level;
@@ -181,10 +181,10 @@ static char *first_word(char *line, char **rest)
 
 static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 {
+	union pp_cfg_arg cfg_arg;
 	struct pp_argline *l;
 	struct pp_argname *n;
 	char *word;
-	int i;
 
 	current_ppg = ppg;
 	pp_diag(NULL, config, 2, "parsing line %i: \"%s\"\n", lineno, line);
@@ -224,19 +224,21 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 		break;
 
 	case ARG_INT:
-		if (sscanf(line, "%i", &i) != 1) {
+		if (sscanf(line, "%i", &(cfg_arg.i)) != 1) {
 			pp_diag(NULL, config, 1, "line %i: \"%s\": not int\n",
 				lineno, word);
 			return -1;
 		}
-		if (l->f(lineno, i, NULL))
+		if (l->f(lineno, &cfg_arg))
 			return -1;
 		break;
 
 	case ARG_STR:
 		while (*line && *line == ' ' && *line == '\t')
 			line++;
-		if (l->f(lineno, 0, line))
+
+		cfg_arg.s = line;
+		if (l->f(lineno, &cfg_arg))
 			return -1;
 		break;
 
@@ -249,7 +251,8 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 				" for \"%s\"\n", lineno, line, word);
 			return -1;
 		}
-		if (l->f(lineno, n->value, NULL))
+		cfg_arg.i = n->value;
+		if (l->f(lineno, &cfg_arg))
 			return -1;
 		break;
 	}
