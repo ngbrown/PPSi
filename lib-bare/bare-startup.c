@@ -22,9 +22,6 @@ void ppsi_clear_bss(void)
 		*ptr = 0;
 }
 
-static struct pp_globals ppg_static;
-static struct pp_instance ppi_static;
-
 /* ppg fields */
 static DSDefault defaultDS;
 static DSCurrent currentDS;
@@ -32,6 +29,29 @@ static DSParent parentDS;
 static DSPort portDS;
 static DSTimeProperties timePropertiesDS;
 static struct pp_servo servo;
+
+static struct pp_globals ppg_static; /* forward declaration */
+
+static struct pp_instance ppi_static = {
+	.glbs			= &ppg_static,
+	.portDS			= &portDS,
+	.n_ops			= &bare_net_ops,
+	.t_ops			= &bare_time_ops,
+	.iface_name 		= "eth0",
+	.ethernet_mode		= PP_DEFAULT_ETHERNET_MODE,
+};
+
+/* We now have a structure with all globals, and multiple ppi inside */
+static struct pp_globals ppg_static = {
+	.pp_instances		= &ppi_static,
+	.nlinks			= 1,
+	.servo			= &servo,
+	.defaultDS		= &defaultDS,
+	.currentDS		= &currentDS,
+	.parentDS		= &parentDS,
+	.timePropertiesDS	= &timePropertiesDS,
+	.rt_opts		= &__pp_default_rt_opts,
+};
 
 int ppsi_main(int argc, char **argv)
 {
@@ -41,20 +61,6 @@ int ppsi_main(int argc, char **argv)
 
 	pp_printf("PPSi, bare kernel. Commit %s, built on " __DATE__ "\n",
 		PPSI_VERSION);
-
-	ppi->glbs        = ppg;
-	ppg->defaultDS   = &defaultDS;
-	ppg->currentDS   = &currentDS;
-	ppg->parentDS    = &parentDS;
-	ppi->portDS      = &portDS;
-	ppg->timePropertiesDS = &timePropertiesDS;
-	ppg->servo = &servo;
-	ppg->arch_data   = NULL;
-	ppi->n_ops       = &bare_net_ops;
-	ppi->t_ops       = &bare_time_ops;
-
-	ppi->ethernet_mode = PP_DEFAULT_ETHERNET_MODE;
-	ppi->iface_name = "eth0";
 
 	ppg->rt_opts = &__pp_default_rt_opts;
 
