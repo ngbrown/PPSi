@@ -200,15 +200,6 @@ int wr_servo_init(struct pp_instance *ppi)
 	return 0;
 }
 
-TimeInternal timeint_to_wr(TimeInternal t)
-{
-	TimeInternal ts;
-	ts.seconds = t.seconds;
-	ts.nanoseconds = t.nanoseconds;
-	ts.phase = t.phase;
-	return ts;
-}
-
 static int ph_adjust = 0;
 
 int wr_servo_man_adjust_phase(int phase)
@@ -223,10 +214,9 @@ int wr_servo_got_sync(struct pp_instance *ppi, TimeInternal *t1,
 	struct wr_servo_state_t *s =
 			&((struct wr_data_t *)ppi->ext_data)->servo_state;
 
-	s->t1 = timeint_to_wr(*t1);
+	s->t1 = *t1;
 	s->t1.correct = 1;
-	s->t2 = timeint_to_wr(*t2);
-	s->t2.correct = t2->correct;
+	s->t2 = *t2;
 
 	got_sync = 1;
 
@@ -240,7 +230,7 @@ int wr_servo_got_delay(struct pp_instance *ppi, Integer32 cf)
 
 	s->t3 = ppi->t3;
 	/*  s->t3.phase = 0; */
-	s->t4 = timeint_to_wr(ppi->t4);
+	s->t4 = ppi->t4;
 	s->t4.correct = 1; /* clock->delay_req_receive_time.correct; */
 	s->t4.phase = (int64_t) cf * 1000LL / 65536LL;
 
