@@ -27,14 +27,38 @@ extern int32_t cal_phase_transition;
 int ptp_mode = WRC_MODE_UNKNOWN;
 static int ptp_enabled = 0, ptp_forced_stop = 0;
 
+static struct wr_operations wrpc_wr_operations = {
+	.locking_enable = wrpc_spll_locking_enable,
+	.locking_poll = wrpc_spll_locking_poll,
+	.locking_disable = wrpc_spll_locking_disable,
+	.enable_ptracker = wrpc_spll_enable_ptracker,
+
+	.adjust_in_progress = wrpc_adjust_in_progress,
+	.adjust_counters = wrpc_adjust_counters,
+	.adjust_phase = wrpc_adjust_phase,
+
+	.read_calib_data = wrpc_read_calibration_data,
+	.calib_disable = wrpc_calibrating_disable,
+	.calib_enable = wrpc_calibrating_enable,
+	.calib_poll = wrpc_calibrating_poll,
+	.calib_pattern_enable = wrpc_calibration_pattern_enable,
+	.calib_pattern_disable = wrpc_calibration_pattern_disable,
+};
+
 /*ppi fields*/
 static DSDefault  defaultDS;
 static DSCurrent  currentDS;
 static DSParent   parentDS;
-static struct wr_dsport wr_dsport;
-static DSPort     portDS = {.ext_dsport = &wr_dsport};
 static DSTimeProperties timePropertiesDS;
 static struct pp_servo servo;
+
+static struct wr_dsport wr_dsport = {
+	.ops = &wrpc_wr_operations,
+};
+static DSPort     portDS = {
+	.ext_dsport = &wr_dsport
+};
+
 
 static int delay_ms = PP_DEFAULT_NEXT_DELAY_MS;
 static int start_tics = 0;

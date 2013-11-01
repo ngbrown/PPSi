@@ -38,4 +38,27 @@ struct wrpc_ethhdr {
 	uint16_t	h_proto;
 } __attribute__((packed));
 
+/* wrpc-spll.c (some should move to time-wrpc/) */
+int wrpc_spll_locking_enable(struct pp_instance *ppi);
+int wrpc_spll_locking_poll(struct pp_instance *ppi);
+int wrpc_spll_locking_disable(struct pp_instance *ppi);
+int wrpc_spll_enable_ptracker(struct pp_instance *ppi);
+int wrpc_adjust_in_progress(void);
+int wrpc_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec);
+int wrpc_adjust_phase(int32_t phase_ps);
+
+/* wrpc-calibration.c */
+int wrpc_read_calibration_data(struct pp_instance *ppi,
+			       uint32_t *deltaTx, uint32_t *deltaRx,
+			       int32_t *fix_alpha, int32_t *clock_period);
+int wrpc_calibrating_disable(struct pp_instance *ppi, int txrx);
+int wrpc_calibrating_enable(struct pp_instance *ppi, int txrx);
+int wrpc_calibrating_poll(struct pp_instance *ppi, int txrx, uint32_t *delta);
+int wrpc_calibration_pattern_enable(struct pp_instance *ppi,
+				    unsigned int calibrationPeriod,
+				    unsigned int calibrationPattern,
+				    unsigned int calibrationPatternLen);
+int wrpc_calibration_pattern_disable(struct pp_instance *ppi);
+
+
 #endif /* __WRPC_H */

@@ -88,7 +88,7 @@ int wrs_enable_ptracker(struct pp_instance *ppi)
 	return WR_SPLL_OK;
 }
 
-int wrs_enable_timing_output(struct pp_instance *ppi, int enable)
+int __wr_enable_timing_output(struct pp_instance *ppi, int enable)
 {
 	int ret, rval;
 
@@ -139,29 +139,6 @@ int wrs_locking_poll(struct pp_instance *ppi)
 	return WR_SPLL_READY;
 }
 
-int wr_locking_enable(struct pp_instance *ppi)
-	__attribute__((alias("wrs_locking_enable")));
-
-int wr_locking_poll(struct pp_instance *ppi)
-	__attribute__((alias("wrs_locking_poll")));
-
-int wr_locking_disable(struct pp_instance *ppi)
-	__attribute__((alias("wrs_locking_disable")));
-
-int wr_enable_ptracker(struct pp_instance *ppi)
-	__attribute__((alias("wrs_enable_ptracker")));
-
-int __wr_enable_timing_output(struct pp_instance *ppi, int enable)
-	__attribute__((alias("wrs_enable_timing_output")));
-
-int wr_adjust_in_progress()
-	__attribute__((alias("wrs_adjust_in_progress")));
-
-int wr_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
-	__attribute__((alias("wrs_adjust_counters")));
-
-int wr_adjust_phase(int32_t phase_ps)
-	__attribute__((alias("wrs_adjust_phase")));
 
 static int wrs_time_get(struct pp_instance *ppi, TimeInternal *t)
 {
@@ -235,7 +212,7 @@ static int wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 static int wrs_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
 {
 	pp_diag(ppi, time, 1, "adjust offset %09li\n", offset_ns);
-	return wr_adjust_counters(0, offset_ns);
+	return wrs_adjust_counters(0, offset_ns);
 }
 
 static int wrs_time_adjust(struct pp_instance *ppi, long offset_ns,

@@ -12,7 +12,7 @@
 #include "wrpc.h"
 #include "../proto-ext-whiterabbit/wr-constants.h"
 
-static int wrpc_read_calibration_data(struct pp_instance *ppi,
+int wrpc_read_calibration_data(struct pp_instance *ppi,
   uint32_t *deltaTx, uint32_t *deltaRx, int32_t *fix_alpha,
   int32_t *clock_period)
 {
@@ -95,25 +95,3 @@ int wrpc_calibration_pattern_disable(struct pp_instance *ppi)
 	ep_cal_pattern_disable();
 	return WR_HW_CALIB_OK;
 }
-
-int wr_calibrating_disable(struct pp_instance *ppi, int txrx)
-	__attribute__((alias("wrpc_calibrating_disable")));
-
-int wr_calibrating_enable(struct pp_instance *ppi, int txrx)
-	__attribute__((alias("wrpc_calibrating_enable")));
-
-int wr_calibrating_poll(struct pp_instance *ppi, int txrx, uint32_t *delta)
-	__attribute__((alias("wrpc_calibrating_poll")));
-
-int wr_calibration_pattern_enable(struct pp_instance *ppi,
-	unsigned int calibrationPeriod, unsigned int calibrationPattern,
-	unsigned int calibrationPatternLen)
-	__attribute__((alias("wrpc_calibration_pattern_enable")));
-
-int wr_calibration_pattern_disable(struct pp_instance *ppi)
-	__attribute__((alias("wrpc_calibration_pattern_disable")));
-
-int wr_read_calibration_data(struct pp_instance *ppi,
-	uint32_t *deltaTx, uint32_t *deltaRx, int32_t *fix_alpha,
-	int32_t *clock_period)
-	__attribute__((alias("wrpc_read_calibration_data")));

@@ -53,13 +53,13 @@ int wrpc_spll_enable_ptracker(struct pp_instance *ppi)
 	return WR_SPLL_OK;
 }
 
-int wrpc_enable_timing_output(struct pp_instance *ppi, int enable)
+int __wr_enable_timing_output(struct pp_instance *ppi, int enable)
 {
 	shw_pps_gen_enable_output(enable);
 	return WR_SPLL_OK;
 }
 
-int wrpc_adjust_in_progress()
+int wrpc_adjust_in_progress(void)
 {
 	return shw_pps_gen_busy() || spll_shifter_busy(0);
 }
@@ -79,26 +79,3 @@ int wrpc_adjust_phase(int32_t phase_ps)
 	return WR_SPLL_OK;
 }
 
-int wr_locking_enable(struct pp_instance *ppi)
-	__attribute__((alias("wrpc_spll_locking_enable")));
-
-int wr_locking_poll(struct pp_instance *ppi)
-	__attribute__((alias("wrpc_spll_locking_poll")));
-
-int wr_locking_disable(struct pp_instance *ppi)
-	__attribute__((alias("wrpc_spll_locking_disable")));
-
-int wr_enable_ptracker(struct pp_instance *ppi)
-	__attribute__((alias("wrpc_spll_enable_ptracker")));
-
-int __wr_enable_timing_output(struct pp_instance *ppi, int enable)
-	__attribute__((alias("wrpc_enable_timing_output")));
-
-int wr_adjust_in_progress()
-	__attribute__((alias("wrpc_adjust_in_progress")));
-
-int wr_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
-	__attribute__((alias("wrpc_adjust_counters")));
-
-int wr_adjust_phase(int32_t phase_ps)
-	__attribute__((alias("wrpc_adjust_phase")));

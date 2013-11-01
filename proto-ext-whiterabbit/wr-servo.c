@@ -155,11 +155,12 @@ void wr_servo_reset()
 
 int wr_servo_init(struct pp_instance *ppi)
 {
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 	struct wr_servo_state_t *s =
 			&((struct wr_data_t *)ppi->ext_data)->servo_state;
 
 	/* Determine the alpha coefficient */
-	if (wr_read_calibration_data(ppi, 0, 0,
+	if (wrp->ops->read_calib_data(ppi, 0, 0,
 		&s->fiber_fix_alpha, &s->clock_period_ps) != WR_HW_CALIB_OK)
 		return -1;
 
@@ -239,6 +240,7 @@ int wr_servo_got_delay(struct pp_instance *ppi, Integer32 cf)
 
 int wr_servo_update(struct pp_instance *ppi)
 {
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 	struct wr_servo_state_t *s =
 			&((struct wr_data_t *)ppi->ext_data)->servo_state;
 
@@ -304,7 +306,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	tics = ppi->t_ops->calc_timeout(ppi, 0);
 
-	if (wr_locking_poll(ppi) != WR_SPLL_READY) {
+	if (wrp->ops->locking_poll(ppi) != WR_SPLL_READY) {
 		pp_diag(ppi, servo, 1, "PLL OutOfLock, should restart sync\n");
 		wr_enable_timing_output(ppi, 0);
 		/* TODO check
@@ -316,7 +318,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	switch (s->state) {
 	case WR_WAIT_SYNC_IDLE:
-		if (!wr_adjust_in_progress()) {
+		if (!wrp->ops->adjust_in_progress()) {
 			s->state = s->next_state;
 		} else {
 			pp_diag(ppi, servo, 1, "servo:busy\n");
@@ -328,8 +330,8 @@ int wr_servo_update(struct pp_instance *ppi)
 
 		if (ts_offset_hw.seconds != 0) {
 			strcpy(cur_servo_state.slave_servo_state, "SYNC_SEC");
-			wr_adjust_counters(ts_offset_hw.seconds, 0);
-			wr_adjust_phase(0);
+			wrp->ops->adjust_counters(ts_offset_hw.seconds, 0);
+			wrp->ops->adjust_phase(0);
 
 			s->next_state = WR_SYNC_NSEC;
 			s->state = WR_WAIT_SYNC_IDLE;
@@ -344,7 +346,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		strcpy(cur_servo_state.slave_servo_state, "SYNC_NSEC");
 
 		if (ts_offset_hw.nanoseconds != 0) {
-			wr_adjust_counters(0, ts_offset_hw.nanoseconds);
+			wrp->ops->adjust_counters(0, ts_offset_hw.nanoseconds);
 
 			s->next_state = WR_SYNC_NSEC;
 			s->state = WR_WAIT_SYNC_IDLE;
@@ -360,7 +362,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		s->cur_setpoint = ts_offset_hw.phase
 			+ ts_offset_hw.nanoseconds * 1000;
 
-		wr_adjust_phase(s->cur_setpoint);
+		wrp->ops->adjust_phase(s->cur_setpoint);
 
 		s->next_state = WR_WAIT_OFFSET_STABLE;
 		s->state = WR_WAIT_SYNC_IDLE;
@@ -400,7 +402,7 @@ int wr_servo_update(struct pp_instance *ppi)
 			// just follow the changes of deltaMS
 			s->cur_setpoint += (s->delta_ms - s->delta_ms_prev);
 
-			wr_adjust_phase(s->cur_setpoint);
+			wrp->ops->adjust_phase(s->cur_setpoint);
 
 			s->delta_ms_prev = s->delta_ms;
 			s->next_state = WR_TRACK_PHASE;

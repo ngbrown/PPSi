@@ -17,6 +17,7 @@
  * (see wrspec.v2-06-07-2011, page 17)
  */
 struct wr_dsport {
+	struct wr_operations *ops; /* hardware-dependent, see below */
 	Enumeration8 wrConfig;
 	Enumeration8 wrMode;
 	Boolean wrModeOn;
@@ -87,32 +88,35 @@ int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen);
 int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen);
 int wr_link_on(struct pp_instance *ppi, unsigned char *pkt, int plen);
 
-/* White Rabbit hw-dependent functions (they are indeed implemented in
- * arch-wrpc or any other arch- */
-int wr_locking_enable(struct pp_instance *ppi);
-int wr_locking_poll(struct pp_instance *ppi);
-int wr_locking_disable(struct pp_instance *ppi);
+/* White Rabbit hw-dependent functions (code in arch-wrpc and arch-wrs) */
+struct wr_operations {
+	int (*locking_enable)(struct pp_instance *ppi);
+	int (*locking_poll)(struct pp_instance *ppi);
+	int (*locking_disable)(struct pp_instance *ppi);
+	int (*enable_ptracker)(struct pp_instance *ppi);
 
-int wr_calibrating_disable(struct pp_instance *ppi, int txrx);
-int wr_calibrating_enable(struct pp_instance *ppi, int txrx);
-int wr_calibrating_poll(struct pp_instance *ppi, int txrx, uint32_t *delta);
-int wr_calibration_pattern_enable(struct pp_instance *ppi,
-	unsigned int calibrationPeriod, unsigned int calibrationPattern,
-	unsigned int calibrationPatternLen);
-int wr_calibration_pattern_disable(struct pp_instance *ppi);
-int wr_read_calibration_data(struct pp_instance *ppi,
-	uint32_t *deltaTx, uint32_t *deltaRx, int32_t *fix_alpha,
-	int32_t *clock_period);
+	int (*adjust_in_progress)(void);
+	int (*adjust_counters)(int64_t adjust_sec, int32_t adjust_nsec);
+	int (*adjust_phase)(int32_t phase_ps);
 
-int wr_enable_ptracker(struct pp_instance *ppi);
+	int (*read_calib_data)(struct pp_instance *ppi,
+			      uint32_t *deltaTx, uint32_t *deltaRx,
+			      int32_t *fix_alpha, int32_t *clock_period);
+	int (*calib_disable)(struct pp_instance *ppi, int txrx);
+	int (*calib_enable)(struct pp_instance *ppi, int txrx);
+	int (*calib_poll)(struct pp_instance *ppi, int txrx, uint32_t *delta);
+	int (*calib_pattern_enable)(struct pp_instance *ppi,
+				    unsigned int calibrationPeriod,
+				    unsigned int calibrationPattern,
+				    unsigned int calibrationPatternLen);
+	int (*calib_pattern_disable)(struct pp_instance *ppi);
+};
 
 /* The former is called by ppsi, the latter is the internal hw detail */
 int wr_enable_timing_output(struct pp_instance *ppi, int enable);
 int __wr_enable_timing_output(struct pp_instance *ppi, int enable);
+/* FIXME: fold function above into wr_operations */
 
-int wr_adjust_in_progress(void);
-int wr_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec);
-int wr_adjust_phase(int32_t phase_ps);
 
 /* wr_servo interface */
 int wr_servo_init(struct pp_instance *ppi);

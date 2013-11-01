@@ -11,25 +11,26 @@
 
 int wr_link_on(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 	int e = 0;
 
 	if (ppi->is_new_state) {
-		WR_DSPOR(ppi)->wrModeOn = TRUE;
-		wr_enable_ptracker(ppi);
+		wrp->wrModeOn = TRUE;
+		wrp->ops->enable_ptracker(ppi);
 
-		if (WR_DSPOR(ppi)->wrMode == WR_MASTER)
+		if (wrp->wrMode == WR_MASTER)
 			e = msg_issue_wrsig(ppi, WR_MODE_ON);
 
-		WR_DSPOR(ppi)->parentWrModeOn = TRUE;
-		WR_DSPOR(ppi)->wrPortState = WRS_WR_LINK_ON;
+		wrp->parentWrModeOn = TRUE;
+		wrp->wrPortState = WRS_WR_LINK_ON;
 	}
 
 	if (e != 0)
 		return -1;
 
-	WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
+	wrp->wrPortState = WRS_IDLE;
 
-	if (WR_DSPOR(ppi)->wrMode == WR_SLAVE)
+	if (wrp->wrMode == WR_SLAVE)
 		ppi->next_state = PPS_SLAVE;
 	else
 		ppi->next_state = PPS_MASTER;

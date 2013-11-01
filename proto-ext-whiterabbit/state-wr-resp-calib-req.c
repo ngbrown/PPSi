@@ -11,26 +11,27 @@
 
 int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 	int e = 0;
 	MsgSignaling wrsig_msg;
 
 	if (ppi->is_new_state) {
-		WR_DSPOR(ppi)->wrPortState = WRS_RESP_CALIB_REQ;
-		if (WR_DSPOR(ppi)->otherNodeCalSendPattern) {
-			wr_calibration_pattern_enable(ppi, 0, 0, 0);
+		wrp->wrPortState = WRS_RESP_CALIB_REQ;
+		if (wrp->otherNodeCalSendPattern) {
+			wrp->ops->calib_pattern_enable(ppi, 0, 0, 0);
 			pp_timeout_set(ppi, PP_TO_EXT_0,
-			       WR_DSPOR(ppi)->otherNodeCalPeriod / 1000);
+			       wrp->otherNodeCalPeriod / 1000);
 		}
 
 	}
 
-	if ((WR_DSPOR(ppi)->otherNodeCalSendPattern) &&
+	if ((wrp->otherNodeCalSendPattern) &&
 	    (pp_timeout_z(ppi, PP_TO_EXT_0))) {
-		if (WR_DSPOR(ppi)->wrMode == WR_MASTER)
+		if (wrp->wrMode == WR_MASTER)
 			ppi->next_state = PPS_MASTER;
 		else
 			ppi->next_state = PPS_LISTENING;
-		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
+		wrp->wrPortState = WRS_IDLE;
 		goto out;
 	}
 
@@ -40,12 +41,12 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (ppi->received_ptp_header.messageType == PPM_SIGNALING) {
 
 		msg_unpack_wrsig(ppi, pkt, &wrsig_msg,
-			 &(WR_DSPOR(ppi)->msgTmpWrMessageID));
+			 &(wrp->msgTmpWrMessageID));
 
-		if (WR_DSPOR(ppi)->msgTmpWrMessageID == CALIBRATED) {
-			if (WR_DSPOR(ppi)->otherNodeCalSendPattern)
-				wr_calibration_pattern_disable(ppi);
-			if (WR_DSPOR(ppi)->wrMode == WR_MASTER)
+		if (wrp->msgTmpWrMessageID == CALIBRATED) {
+			if (wrp->otherNodeCalSendPattern)
+				wrp->ops->calib_pattern_disable(ppi);
+			if (wrp->wrMode == WR_MASTER)
 				ppi->next_state = WRS_WR_LINK_ON;
 			else
 				ppi->next_state = WRS_CALIBRATION;
@@ -54,6 +55,6 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 out:
-	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
+	ppi->next_delay = wrp->wrStateTimeout;
 	return e;
 }

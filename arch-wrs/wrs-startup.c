@@ -24,7 +24,24 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi-wrs.h>
-#include "../proto-ext-whiterabbit/wr-api.h"
+
+static struct wr_operations wrs_wr_operations = {
+	.locking_enable = wrs_locking_enable,
+	.locking_poll = wrs_locking_poll,
+	.locking_disable = wrs_locking_disable,
+	.enable_ptracker = wrs_enable_ptracker,
+
+	.adjust_in_progress = wrs_adjust_in_progress,
+	.adjust_counters = wrs_adjust_counters,
+	.adjust_phase = wrs_adjust_phase,
+
+	.read_calib_data = wrs_read_calibration_data,
+	.calib_disable = wrs_calibrating_disable,
+	.calib_enable = wrs_calibrating_enable,
+	.calib_poll = wrs_calibrating_poll,
+	.calib_pattern_enable = wrs_calibration_pattern_enable,
+	.calib_pattern_disable = wrs_calibration_pattern_disable,
+};
 
 /* ppg and fields */
 static struct pp_globals ppg_static;
@@ -41,6 +58,7 @@ int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
+	struct wr_dsport *wrp;
 	struct timex t;
 	int i;
 
@@ -136,6 +154,8 @@ int main(int argc, char **argv)
 		ppi->portDS->ext_dsport = calloc(1, sizeof(struct wr_dsport));
 		if (!ppi->portDS->ext_dsport)
 			exit(__LINE__);
+		wrp = WR_DSPOR(ppi); /* just allocated above */
+		wrp->ops = &wrs_wr_operations;
 
 		/* The following default names depend on TIME= at build time */
 		ppi->n_ops = &DEFAULT_NET_OPS;

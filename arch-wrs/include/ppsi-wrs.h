@@ -45,3 +45,25 @@ extern int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms);
 extern void wrs_main_loop(struct pp_globals *ppg);
 
 extern void wrs_init_ipcserver(struct minipc_ch *ppsi_ch);
+
+/* wrs-calibration.c */
+int wrs_read_calibration_data(struct pp_instance *ppi,
+			      uint32_t *delta_tx, uint32_t *delta_rx,
+			      int32_t *fix_alpha, int32_t *clock_period);
+int wrs_calibrating_disable(struct pp_instance *ppi, int txrx);
+int wrs_calibrating_enable(struct pp_instance *ppi, int txrx);
+int wrs_calibrating_poll(struct pp_instance *ppi, int txrx, uint32_t *delta);
+int wrs_calibration_pattern_enable(struct pp_instance *ppi,
+				   unsigned int calib_period,
+				   unsigned int calib_pattern,
+				   unsigned int calib_pattern_len);
+int wrs_calibration_pattern_disable(struct pp_instance *ppi);
+
+/* wrs-time.c (some should moce to wrs-spll.c) */
+int wrs_locking_enable(struct pp_instance *ppi);
+int wrs_locking_poll(struct pp_instance *ppi);
+int wrs_locking_disable(struct pp_instance *ppi);
+int wrs_enable_ptracker(struct pp_instance *ppi);
+int wrs_adjust_in_progress(void);
+int wrs_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec);
+int wrs_adjust_phase(int32_t phase_ps);
