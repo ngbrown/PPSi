@@ -88,11 +88,14 @@ int wrs_enable_ptracker(struct pp_instance *ppi)
 	return WR_SPLL_OK;
 }
 
-int __wr_enable_timing_output(struct pp_instance *ppi, int enable)
+int wrs_enable_timing_output(struct pp_instance *ppi, int enable)
 {
 	int ret, rval;
-
 	hexp_pps_params_t p;
+
+	if (enable == WR_DSPOR(ppi)->ppsOutputOn)
+		return WR_SPLL_OK;
+	WR_DSPOR(ppi)->ppsOutputOn = enable;
 
 	p.pps_valid = enable;
 

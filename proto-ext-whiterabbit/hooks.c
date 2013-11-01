@@ -15,7 +15,7 @@ static int wr_init(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	wp->parentWrConfig = NON_WR;
 	wp->parentWrModeOn = 0;
 	wp->calibrated = !WR_DEFAULT_PHY_CALIBRATION_REQUIRED;
-	wr_enable_timing_output(ppi, 0);
+	wp->ops->enable_timing_output(ppi, 0);
 	return 0;
 }
 
@@ -111,6 +111,7 @@ static int wr_handle_resp(struct pp_instance *ppi)
 	MsgHeader *hdr = &ppi->received_ptp_header;
 	TimeInternal correction_field;
 	TimeInternal *ofm = &DSCUR(ppi)->offsetFromMaster;
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 
 	/* FIXME: check sub-nano relevance of correction filed */
 	cField_to_TimeInternal(&correction_field, hdr->correctionfield);
@@ -120,7 +121,7 @@ static int wr_handle_resp(struct pp_instance *ppi)
 	 * After we adjusted the pps counter, stamps are invalid, so
 	 * we'll have the Unix time instead, marked by "correct"
 	 */
-	if (!WR_DSPOR(ppi)->wrModeOn) {
+	if (!wrp->wrModeOn) {
 		if (!ppi->t2.correct || !ppi->t3.correct) {
 			pp_diag(ppi, servo, 1,
 				"T2 or T3 incorrect, discarding tuple\n");
@@ -131,9 +132,9 @@ static int wr_handle_resp(struct pp_instance *ppi)
 		 * pps always on if offset less than 1 second,
 		 * until ve have a configurable threshold */
 		if (ofm->seconds)
-			wr_enable_timing_output(ppi, 0);
+			wrp->ops->enable_timing_output(ppi, 0);
 		else
-			wr_enable_timing_output(ppi, 1);
+			wrp->ops->enable_timing_output(ppi, 1);
 
 	}
 	wr_servo_got_delay(ppi, hdr->correctionfield.lsb);

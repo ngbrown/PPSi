@@ -43,6 +43,8 @@ static struct wr_operations wrpc_wr_operations = {
 	.calib_poll = wrpc_calibrating_poll,
 	.calib_pattern_enable = wrpc_calibration_pattern_enable,
 	.calib_pattern_disable = wrpc_calibration_pattern_disable,
+
+	.enable_timing_output = wrpc_enable_timing_output,
 };
 
 /*ppi fields*/

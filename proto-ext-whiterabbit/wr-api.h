@@ -110,12 +110,8 @@ struct wr_operations {
 				    unsigned int calibrationPattern,
 				    unsigned int calibrationPatternLen);
 	int (*calib_pattern_disable)(struct pp_instance *ppi);
+	int (*enable_timing_output)(struct pp_instance *ppi, int enable);
 };
-
-/* The former is called by ppsi, the latter is the internal hw detail */
-int wr_enable_timing_output(struct pp_instance *ppi, int enable);
-int __wr_enable_timing_output(struct pp_instance *ppi, int enable);
-/* FIXME: fold function above into wr_operations */
 
 
 /* wr_servo interface */

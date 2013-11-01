@@ -31,15 +31,6 @@ void wr_servo_enable_tracking(int enable)
 	tracking_enabled = enable;
 }
 
-int wr_enable_timing_output(struct pp_instance *ppi, int enable)
-{
-	/* Only act on changes, so hackers can force it on manually */
-	if (enable != WR_DSPOR(ppi)->ppsOutputOn)
-		__wr_enable_timing_output(ppi, enable);
-	WR_DSPOR(ppi)->ppsOutputOn = enable;
-	return 0;
-}
-
 /* my own timestamp arithmetic functions */
 
 static void dump_timestamp(struct pp_instance *ppi, char *what, TimeInternal ts)
@@ -164,7 +155,7 @@ int wr_servo_init(struct pp_instance *ppi)
 		&s->fiber_fix_alpha, &s->clock_period_ps) != WR_HW_CALIB_OK)
 		return -1;
 
-	wr_enable_timing_output(ppi, 0);
+	wrp->ops->enable_timing_output(ppi, 0);
 
 	/* FIXME useful?
 	strncpy(s->if_name, clock->netPath.ifaceName, 16);
@@ -308,7 +299,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	if (wrp->ops->locking_poll(ppi) != WR_SPLL_READY) {
 		pp_diag(ppi, servo, 1, "PLL OutOfLock, should restart sync\n");
-		wr_enable_timing_output(ppi, 0);
+		wrp->ops->enable_timing_output(ppi, 0);
 		/* TODO check
 		 * DSPOR(ppi)->doRestart = TRUE; */
 	}
@@ -326,7 +317,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	case WR_SYNC_TAI:
-		wr_enable_timing_output(ppi, 0);
+		wrp->ops->enable_timing_output(ppi, 0);
 
 		if (ts_offset_hw.seconds != 0) {
 			strcpy(cur_servo_state.slave_servo_state, "SYNC_SEC");
@@ -378,7 +369,7 @@ int wr_servo_update(struct pp_instance *ppi)
 			s->state = WR_SYNC_TAI;
 		else
 			if(remaining_offset < WR_SERVO_OFFSET_STABILITY_THRESHOLD) {
-				wr_enable_timing_output(ppi, 1);
+				wrp->ops->enable_timing_output(ppi, 1);
 				s->state = WR_TRACK_PHASE;
 			} else {
 				s->missed_iters++;
