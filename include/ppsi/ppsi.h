@@ -10,7 +10,6 @@
 
 #include <stdint.h>
 #include <stdarg.h>
-#include <arch/arch.h> /* ntohs and so on */
 #include <ppsi/lib.h>
 #include <ppsi/ieee1588_types.h>
 #include <ppsi/constants.h>
@@ -18,6 +17,8 @@
 
 #include <ppsi/pp-instance.h>
 #include <ppsi/diag-macros.h>
+
+#include <arch/arch.h> /* ntohs and so on -- and wr-api.h for wr archs */
 
 /* We can't include pp-printf.h when building freestading, so have it here */
 extern int pp_printf(const char *fmt, ...)

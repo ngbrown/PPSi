@@ -1,6 +1,9 @@
 #ifndef __ARCH_H__
 #define __ARCH_H__
 
+/* This arch exports wr functions, so include this for consistency checking */
+#include "../proto-ext-whiterabbit/wr-api.h"
+
 /* Architecture-specific defines, included by top-level stuff */
 
 #define htons(x)      (x)

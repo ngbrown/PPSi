@@ -1,4 +1,3 @@
-#include <arch/arch.h>
 #include <ppsi/ppsi.h>
 #include "wr-api.h"
 
