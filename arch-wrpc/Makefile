@@ -7,7 +7,7 @@ CFLAGS += -ffreestanding -Os \
 # Root of wrpc-sw project
 WRPCSW_ROOT ?= ..
 
-CFLAGS += -I$(WRPCSW_ROOT)/include -I$(WRPCSW_ROOT)/softpll
+CFLAGS += -I$(WRPCSW_ROOT)/include -I$(WRPCSW_ROOT)/include/std -I$(WRPCSW_ROOT)/softpll
 
 PPSI_O_LDFLAGS = -u wrc_ptp_init
 
