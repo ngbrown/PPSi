@@ -202,6 +202,7 @@ int wrc_ptp_stop()
 {
 	struct pp_instance *ppi = &ppi_static;
 
+	shw_pps_gen_enable_output(0);
 	/* Moving fiber: forget about this parent (FIXME: shouldn't be here) */
 	WR_DSPOR(ppi)->parentWrConfig = WR_DSPOR(ppi)->parentWrModeOn = 0;
 	memset(ppi->frgn_master, 0, sizeof(ppi->frgn_master));
