@@ -27,7 +27,7 @@ int wr_s_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto out;
 	}
 
-	if (wrp->ops->locking_poll(ppi) == WR_SPLL_READY) {
+	if (wrp->ops->locking_poll(ppi, 0) == WR_SPLL_READY) {
 		ppi->next_state = WRS_LOCKED;
 		wrp->ops->locking_disable(ppi);
 	}

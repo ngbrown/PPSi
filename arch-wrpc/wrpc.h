@@ -40,7 +40,7 @@ struct wrpc_ethhdr {
 
 /* wrpc-spll.c (some should move to time-wrpc/) */
 int wrpc_spll_locking_enable(struct pp_instance *ppi);
-int wrpc_spll_locking_poll(struct pp_instance *ppi);
+int wrpc_spll_locking_poll(struct pp_instance *ppi, int grandmaster);
 int wrpc_spll_locking_disable(struct pp_instance *ppi);
 int wrpc_spll_enable_ptracker(struct pp_instance *ppi);
 int wrpc_adjust_in_progress(void);

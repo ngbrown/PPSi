@@ -128,9 +128,12 @@ int wrs_locking_enable(struct pp_instance *ppi)
 	return WR_SPLL_OK;
 }
 
-int wrs_locking_poll(struct pp_instance *ppi)
+int wrs_locking_poll(struct pp_instance *ppi, int grandmaster)
 {
 	int ret, rval;
+
+	if (grandmaster) /* FIXME: check wrs grandmaster PLL */
+		return WR_SPLL_READY;
 
 	ret = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_lock_cmd,
 			  &rval, ppi->iface_name, HEXP_LOCK_CMD_CHECK, 0);

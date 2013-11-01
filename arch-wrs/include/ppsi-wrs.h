@@ -61,7 +61,7 @@ int wrs_calibration_pattern_disable(struct pp_instance *ppi);
 
 /* wrs-time.c (some should moce to wrs-spll.c) */
 int wrs_locking_enable(struct pp_instance *ppi);
-int wrs_locking_poll(struct pp_instance *ppi);
+int wrs_locking_poll(struct pp_instance *ppi, int grandmaster);
 int wrs_locking_disable(struct pp_instance *ppi);
 int wrs_enable_ptracker(struct pp_instance *ppi);
 int wrs_adjust_in_progress(void);

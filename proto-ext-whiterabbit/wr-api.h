@@ -91,7 +91,7 @@ int wr_link_on(struct pp_instance *ppi, unsigned char *pkt, int plen);
 /* White Rabbit hw-dependent functions (code in arch-wrpc and arch-wrs) */
 struct wr_operations {
 	int (*locking_enable)(struct pp_instance *ppi);
-	int (*locking_poll)(struct pp_instance *ppi);
+	int (*locking_poll)(struct pp_instance *ppi, int grandmaster);
 	int (*locking_disable)(struct pp_instance *ppi);
 	int (*enable_ptracker)(struct pp_instance *ppi);
 

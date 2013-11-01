@@ -297,7 +297,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	tics = ppi->t_ops->calc_timeout(ppi, 0);
 
-	if (wrp->ops->locking_poll(ppi) != WR_SPLL_READY) {
+	if (wrp->ops->locking_poll(ppi, 0) != WR_SPLL_READY) {
 		pp_diag(ppi, servo, 1, "PLL OutOfLock, should restart sync\n");
 		wrp->ops->enable_timing_output(ppi, 0);
 		/* TODO check
