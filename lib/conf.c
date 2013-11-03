@@ -287,8 +287,6 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 				lineno, word);
 			return -1;
 		}
-		if (l->f(lineno, &cfg_arg))
-			return -1;
 		break;
 
 	case ARG_STR:
@@ -296,8 +294,6 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 			line++;
 
 		cfg_arg.s = line;
-		if (l->f(lineno, &cfg_arg))
-			return -1;
 		break;
 
 	case ARG_NAMES:
@@ -310,8 +306,6 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 			return -1;
 		}
 		cfg_arg.i = n->value;
-		if (l->f(lineno, &cfg_arg))
-			return -1;
 		break;
 
 	case ARG_TIME:
@@ -320,12 +314,12 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 				"\"%s\"\n", lineno, line, word);
 			return -1;
 		}
-
-		if (l->f(lineno, &cfg_arg))
-			return -1;
-
 		break;
 	}
+
+	if (l->f(lineno, &cfg_arg))
+		return -1;
+
 	return 0;
 }
 
