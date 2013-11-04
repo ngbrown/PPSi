@@ -48,11 +48,16 @@ int msg_unpack_header(struct pp_instance *ppi, void *buf, int plen)
 		    PP_CLOCK_IDENTITY_LENGTH))
 		return -1;
 
-	if (!memcmp(&DSPAR(ppi)->parentPortIdentity.clockIdentity,
+	/*
+	 * This "is_from_cur_par" must be killed. Meanwhile, say it's
+	 * from current parent if we have no current parent, so the rest works
+	 */
+	if (!DSPAR(ppi)->parentPortIdentity.portNumber ||
+	    (!memcmp(&DSPAR(ppi)->parentPortIdentity.clockIdentity,
 			&hdr->sourcePortIdentity.clockIdentity,
 			PP_CLOCK_IDENTITY_LENGTH) &&
 			(DSPAR(ppi)->parentPortIdentity.portNumber ==
-			hdr->sourcePortIdentity.portNumber))
+			 hdr->sourcePortIdentity.portNumber)))
 		ppi->is_from_cur_par = 1;
 	else
 		ppi->is_from_cur_par = 0;

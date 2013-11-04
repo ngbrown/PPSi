@@ -14,7 +14,8 @@ void pp_servo_init(struct pp_instance *ppi)
 
 	SRV(ppi)->mpd_fltr.s_exp = 0;	/* clears one-way delay filter */
 	SRV(ppi)->ofm_fltr.s_exp = 0;	/* clears offset-from-master filter */
-
+	ppi->frgn_rec_num = 0;		/* no known master */
+	DSPAR(ppi)->parentPortIdentity.portNumber = 0; /* invalid */
 
 	if (ppi->t_ops->init_servo) {
 		/* The system may pre-set us to keep current frequency */
