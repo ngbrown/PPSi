@@ -107,6 +107,7 @@ int wrc_ptp_set_mode(int mode)
 	uint32_t start_tics, lock_timeout = 0;
 	struct pp_instance *ppi = &ppi_static;
 	struct pp_globals *ppg = ppi->glbs;
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 	typeof(ppg->rt_opts->clock_quality.clockClass) *class_ptr;
 	int error = 0;
 	/*
@@ -121,7 +122,7 @@ int wrc_ptp_set_mode(int mode)
 
 	switch (mode) {
 	case WRC_MODE_GM:
-		WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
+		wrp->wrConfig = WR_M_ONLY;
 		ppi->master_only = TRUE;
 		ppi->slave_only = FALSE;
 		*class_ptr = PP_CLASS_WR_GM_LOCKED;
@@ -130,7 +131,7 @@ int wrc_ptp_set_mode(int mode)
 		break;
 
 	case WRC_MODE_MASTER:
-		WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
+		wrp->wrConfig = WR_M_ONLY;
 		ppi->master_only = TRUE;
 		ppi->slave_only = FALSE;
 		*class_ptr = PP_CLASS_DEFAULT;
@@ -139,7 +140,7 @@ int wrc_ptp_set_mode(int mode)
 		break;
 
 	case WRC_MODE_SLAVE:
-		WR_DSPOR(ppi)->wrConfig = WR_S_ONLY;
+		wrp->wrConfig = WR_S_ONLY;
 		ppi->master_only = FALSE;
 		ppi->slave_only = TRUE;
 		*class_ptr = PP_CLASS_SLAVE_ONLY;
@@ -150,7 +151,7 @@ int wrc_ptp_set_mode(int mode)
 	start_tics = timer_get_tics();
 
 	pp_printf("Locking PLL");
-	shw_pps_gen_enable_output(0);
+	wrp->ops->enable_timing_output(ppi, 0);
 
 	while (!spll_check_lock(0) && lock_timeout) {
 		timer_delay(TICS_PER_SECOND);
@@ -169,7 +170,7 @@ int wrc_ptp_set_mode(int mode)
 
 	/* Success or failure, we enable pps */
 	if (mode == WRC_MODE_MASTER || mode == WRC_MODE_GM)
-		shw_pps_gen_enable_output(1);
+		wrp->ops->enable_timing_output(ppi, 1);
 
 	ptp_mode = mode;
 	return error;
@@ -201,10 +202,11 @@ int wrc_ptp_start()
 int wrc_ptp_stop()
 {
 	struct pp_instance *ppi = &ppi_static;
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 
-	shw_pps_gen_enable_output(0);
+	wrp->ops->enable_timing_output(ppi, 0);
 	/* Moving fiber: forget about this parent (FIXME: shouldn't be here) */
-	WR_DSPOR(ppi)->parentWrConfig = WR_DSPOR(ppi)->parentWrModeOn = 0;
+	wrp->parentWrConfig = wrp->parentWrModeOn = 0;
 	memset(ppi->frgn_master, 0, sizeof(ppi->frgn_master));
 	ptp_enabled = 0;
 	wr_servo_reset();
