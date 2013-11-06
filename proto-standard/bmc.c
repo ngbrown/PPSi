@@ -299,7 +299,8 @@ int bmc(struct pp_instance *ppi)
 		    < 0)
 			best = i;
 
-	pp_diag(ppi, bmc, 1,"Best foreign master is %i\n", best);
+	pp_diag(ppi, bmc, 1,"Best foreign master is %i/%i\n", best,
+		ppi->frgn_rec_num);
 	if (ppi->frgn_rec_best != best) {
 		ppi->frgn_rec_best = best;
 		bmc_update_ebest(GLBS(ppi));
