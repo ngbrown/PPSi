@@ -25,7 +25,7 @@
 extern int32_t cal_phase_transition;
 
 int ptp_mode = WRC_MODE_UNKNOWN;
-static int ptp_enabled = 0, ptp_forced_stop = 0;
+static int ptp_enabled = 0;
 
 static struct wr_operations wrpc_wr_operations = {
 	.locking_enable = wrpc_spll_locking_enable,
@@ -228,15 +228,11 @@ int wrc_ptp_update()
 		last_link_up = now_link_up;
 		if (ptp_enabled && (!now_link_up)) {
 			wrc_ptp_stop();
-			ptp_forced_stop = 1;
 			pp_printf("Link down: PTP stop\n");
 		}
-		else {
-			if (ptp_forced_stop) {
-				pp_printf("Link up: PTP start\n");
-				ptp_forced_stop = 0;
-				wrc_ptp_start();
-			}
+		if (!ptp_enabled && now_link_up) {
+			pp_printf("Link up: PTP start\n");
+			wrc_ptp_start();
 		}
 	}
 
