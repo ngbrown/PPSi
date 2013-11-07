@@ -159,7 +159,6 @@ struct pp_instance {
 	 * foreignMasterDS data set for the purposes of qualifying Announce
 	 * messages */
 	UInteger16 frgn_rec_num;
-	Integer16  frgn_rec_i;
 	Integer16  frgn_rec_best;
 	struct pp_frgn_master frgn_master[PP_NR_FOREIGN_RECORDS];
 

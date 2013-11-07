@@ -49,7 +49,6 @@ int st_com_execute_slave(struct pp_instance *ppi)
 
 	if (pp_timeout_z(ppi, PP_TO_ANN_RECEIPT)) {
 		ppi->frgn_rec_num = 0;
-		ppi->frgn_rec_i = 0;
 		if (DSDEF(ppi)->clockQuality.clockClass != PP_CLASS_SLAVE_ONLY
 		    && !ppi->slave_only) {
 			m1(ppi);
@@ -85,7 +84,7 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 		ppi->frgn_rec_num++;
 
 	/* FIXME: replace the worst */
-	i = ppi->frgn_rec_i;
+	i = ppi->frgn_rec_num - 1;
 
 	/* Copy new foreign master data set from announce message */
 	memcpy(&ppi->frgn_master[i].port_id,
@@ -98,10 +97,7 @@ static void st_com_add_foreign(struct pp_instance *ppi, unsigned char *buf)
 	msg_copy_header(&ppi->frgn_master[i].hdr, hdr);
 	msg_unpack_announce(buf, &ppi->frgn_master[i].ann);
 
-	pp_diag(ppi, bmc, 2, "New foreign Master added\n");
-
-	ppi->frgn_rec_i = (ppi->frgn_rec_i+1) %
-		PP_NR_FOREIGN_RECORDS;
+	pp_diag(ppi, bmc, 1, "New foreign Master %i added\n", i);
 }
 
 
