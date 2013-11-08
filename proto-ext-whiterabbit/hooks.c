@@ -15,7 +15,11 @@ static int wr_init(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	wp->parentWrConfig = NON_WR;
 	wp->parentWrModeOn = 0;
 	wp->calibrated = !WR_DEFAULT_PHY_CALIBRATION_REQUIRED;
-	wp->ops->enable_timing_output(ppi, 0);
+
+	if ((wp->wrConfig & WR_M_AND_S) == WR_M_ONLY)
+		wp->ops->enable_timing_output(ppi, 1);
+	else
+		wp->ops->enable_timing_output(ppi, 0);
 	return 0;
 }
 

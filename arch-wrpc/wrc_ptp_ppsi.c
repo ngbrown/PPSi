@@ -151,7 +151,7 @@ int wrc_ptp_set_mode(int mode)
 	start_tics = timer_get_tics();
 
 	pp_printf("Locking PLL");
-	wrp->ops->enable_timing_output(ppi, 0);
+	wrp->ops->enable_timing_output(ppi, 0); /* later, wr_init chooses */
 
 	while (!spll_check_lock(0) && lock_timeout) {
 		timer_delay(TICS_PER_SECOND);
@@ -167,10 +167,6 @@ int wrc_ptp_set_mode(int mode)
 	/* If we can't lock to the atomic/gps, we say it in the class */
 	if (error && mode == WRC_MODE_GM)
 		*class_ptr = PP_CLASS_WR_GM_UNLOCKED;
-
-	/* Success or failure, we enable pps */
-	if (mode == WRC_MODE_MASTER || mode == WRC_MODE_GM)
-		wrp->ops->enable_timing_output(ppi, 1);
 
 	ptp_mode = mode;
 	return error;
