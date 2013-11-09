@@ -56,12 +56,12 @@
 @node Top
 @top Introduction
 
-PPSi (PTP Ported to Silicon) is an application which, in
+PPSi (@sc{ptp} Ported to Silicon) is an application which, in
 its basic operation, implements @sc{ieee} 1588 specification in a way
 that is portable to several architectures, including OS-less ones.
 
 This manual is mainly aimed at developers: people who are working with
-PTP and/or White Rabbit and need to use the protocol in their own
+@sc{ptp} and/or White Rabbit and need to use the protocol in their own
 hardware or software environments.  Users who simply run PPSi on the host
 may want to read @ref{Command Line} and little else.
 
@@ -75,14 +75,14 @@ shortened to @i{WR} in this manual.
 
 WR is a multi-lab research project that aims at synchronizing
 thousands of I/O devices distributed in a network several kilometers
-wide; its software protocol is an extension of PTP.  A WR network is
+wide; its software protocol is an extension of @sc{ptp}.  A WR network is
 made up of two devices: the @i{WR Switch} and the @i{WR Node}.  White
 Rabbit is developed at ohwr.org:
 @t{http://www.ohwr.org/projects/white-rabbit}.
 
 The WR switch is an 18-ports Gigabit Ethernet switch that runs
 @sc{wr-ptp} as a Linux process, synchronizing each Ethernet link as
-either a PTP master or a PTP slave (it is a @i{boundary clock}). The
+either a @sc{ptp} master or a @sc{ptp} slave (it is a @i{boundary clock}). The
 WR node is an I/O device that includes a soft core that runs @sc{wr-ptp}
 in @i{freestanding} mode (i.e., without an operating system).
 
@@ -193,9 +193,9 @@ The package currently supports the following architectures:
 
 @end table
 
-We plan, over time, to support microcontrollers (Danilo Sabato is
-working on ARM7 and Cortex-M) and @i{bare-arm} (to be tested on the WR
-switch).
+We plan, over time, to support microcontrollers (a beta version for
+ARM7 is working, and we are considering Cortex-M) and @i{bare-arm} (to
+be tested on the WR switch).
 
 @c ==========================================================================
 @node Protocols
@@ -212,7 +212,7 @@ Source files in that directory may override the implementation for the
 standard protocol (which lives in @t{proto-standard}) to provide their
 own functionalities.  To simplify writing extensions, the @i{proto-standard}
 functions already provide @i{hooks} so the extension itself can provide
-callbacks while still using the basic PTP engine.
+callbacks while still using the basic @sc{ptp} engine.
 The set of callbacks is currently based on the needs of
 WR, but we are willing to accept patches to provide more hooks as
 needed.
@@ -266,9 +266,9 @@ unfair to hide them.
 
 @table @r
 
-@item Support standard PTP and extensions.
+@item Support standard @sc{ptp} and extensions.
 
-	Each protocol extension should fall back to standard PTP when
+	Each protocol extension should fall back to standard @sc{ptp} when
         it detects that its peers are not able to speak the extended
         protocol.  We don't plan to support more than one extensions in
         a single build: it would be just an academic exercise until
@@ -344,10 +344,13 @@ As of 2013-05 the project suffers from these known bugs:
 @itemize
 @item All frames must be sent according to a pseudo-random distribution;
       this is mostly in place but mut be audited project-wide.
-@item We removed @i{peer-delay} support. Maybe this is a feature, we
-      are still shaping our mind about that, but for the time being we
-      don't plan to support peer-delay because it would be academic and
-      untested in our environments.
+@item We removed @i{peer-delay} support. We plan to add it back, and
+      actually move White Rabbit to use @i{peer-delay} @sc{ptp} instead of
+      @i{end-to-end} @sc{ptp}. 
+@item The servo for standard-@sc{ptp} must be audited. Pietro Fezzardi
+      is working on @i{arch-sim} to simulate network transactions and
+      make serious work on the servo algorithm and parameters.
+@item @sc{udp} over @sc{IPV6} is not yet supported.
 @end itemize
 
 @c ##########################################################################
@@ -373,7 +376,7 @@ two example configuration files in its own @t{etc/} subdirectory.
 
 Configuration is made of of global options and port-specific options.
 To configure a port, use @t{port <name>} followed by its options.
-The parser allocates a new PTP state machine for each new port, but
+The parser allocates a new @sc{ptp} state machine for each new port, but
 allows changing configuration of an existing port.  For instance, to
 enable frame diagnostics for a specific port, you can use:
 
@@ -572,8 +575,8 @@ separately with ``@t{make -C tools}''.
 @node ptpdump
 @section ptpdump
 
-This is a sniffer for PTP frames. It reports all Ethernet frames and
-UDP datagrams that talk PTP, from a specific network interface. The
+This is a sniffer for @sc{ptp} frames. It reports all Ethernet frames and
+UDP datagrams that talk @sc{ptp}, from a specific network interface. The
 output format is line-oriented to help running @i{grep} over log
 files.  The number of blank lines between frames depends on how much
 time elapsed between them; this should help identifying sync/follow-up
@@ -660,7 +663,7 @@ synchronization of two or more computers, but please note that the
 user-space software-only approach shows some jitter; on my systems the
 delay is usually a few microseconds, up to around a dozen (in general,
 use of the parallel port has less delay and less jitter). In any case
-this offers a second source to check what NTP or PTP daemons report.
+this offers a second source to check what NTP or @sc{ptp} daemons report.
 
 @c ==========================================================================
 @node jmptime
@@ -914,7 +917,7 @@ the suggested "CamelCase" form. Similarly, the typedefs are left, even
 if they are really a pain to deal with.  Most of this stuff is in
 include/ppsi/ieee1588_types.h file.
 
-The mostly used prefix is @t{pp_}, the short prefix for 'Portable PTP',
+The mostly used prefix is @t{pp_}, the short prefix for 'Portable @sc{ptp}',
 which is used for every function related to the algorithm itself (but
 not in the architecture-specific code).
 
@@ -969,16 +972,29 @@ a list of the other ones please see the help message.
 
 @table @t
 
+@item -f <file>
+
+	Read configuration file. The program can read several
+        configuration files. If no @t{-f} is passed, it tries to
+        read a configuration file from the standard places:
+        @t{/wr/etc/ppsi.conf} if White Rabbit, and @t{/etc/ppsi.conf}.
+
+@item -C <config-item>
+
+	Pass a single configuration item, or several of them using
+        the semicolon as separator. See @ref{Configuration} for details.
+
 @item -d
 
 	Diagnostics. This options receives the string of diagnostic
         levels for  fsm, time, frames, servo, bmc, extension (in that order).
-        See @ref{Diagnostic Macros} for detail.
+        See @ref{Diagnostic Macros} for details.
 
 @item -b <ifname>
 
 	Specify which interface to use, for Ethernet mode (default:
-        architecture-dependent, but @t{eth0} for Linux builds).
+        architecture-dependent, but @t{eth0} for Linux builds). This
+        option can only be used in single-port operation.
 
 @item -e
 
