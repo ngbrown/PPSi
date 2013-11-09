@@ -35,13 +35,14 @@
 
 @setchapternewpage off
 
-@set update-month October 2013
+@set update-month November 2013
+@set release __RELEASE_GIT_ID__
 
 @finalout
 
 @titlepage
 @title PPSi Manual
-@subtitle @value{update-month}
+@subtitle @value{update-month} (@value{release})
 @subtitle Documentation about ``PTP Ported to Silicon''
 @author Alessandro Rubini and Aurelio Colosimo for CERN (be-co-ht)
 @end titlepage
