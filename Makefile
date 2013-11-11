@@ -76,10 +76,24 @@ export CFLAGS
 # The object only depends on OBJ-y because each subdirs added needed
 # libraries: see proto-standard/Makefile as an example.
 
-$(TARGET).o: $(OBJ-y)
+$(TARGET).o: silentoldconfig $(OBJ-y)
 	$(LD) -Map $(TARGET).map1 -r -o $@ $(OBJ-y) $(PPSI_O_LDFLAGS) \
 		--start-group $(LIBS) --end-group
 
 # Finally, "make clean" is expected to work
 clean:
 	rm -f $$(find . -name '*.[oa]') *.bin $(TARGET) *~ $(TARGET).map*
+
+# following targets from Makefile.kconfig
+silentoldconfig:
+	@mkdir -p include/config
+	$(MAKE) -f Makefile.kconfig $@
+
+scripts_basic config %config:
+	$(MAKE) -f Makefile.kconfig $@
+
+defconfig:
+	@echo "Using unix_defconfig"
+	@$(MAKE) -f Makefile.kconfig unix_defconfig
+
+.config: silentoldconfig
