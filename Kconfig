@@ -1,0 +1,107 @@
+
+mainmenu "PPSi configuration"
+
+choice
+	prompt "Architecture to build for"
+
+config ARCH_UNIX
+	bool "Unix (Linux and likely other systems)"
+	help
+	  ARCH=unix supports standard Unix system calls, although
+	  the code most likely includes some Linux dependencies.
+	  Choose this architecture if you build for a Linux PC
+	  or embedded system
+
+config ARCH_BARE_I386
+	bool "Bare i386"
+	help
+	  This architecture builds a Linux-i386 executable that
+	  does not rely on the standard C library, but makes
+	  system calls directly.  This architecture is a test case
+	  to ensure the code can run in freestanding environments
+	  (microcontrollers or other contexts with no operating system)
+
+config ARCH_BARE_X86_64
+	bool "Bare x86-64"
+	help
+	  This architecture builds a Linux-x86-64 executable that
+	  does not rely on the standard C library, but makes
+	  system calls directly.  This architecture is a test case
+	  to ensure the code can run in freestanding environments
+	  (microcontrollers or other contexts with no operating system)
+
+config ARCH_WRPC
+	bool "White Rabbit PTP Core (WR Node)"
+	select CONFIG_EXT_WR
+	help
+	  Build PPSi for use in the WRPC environment (SPEC card or similar
+	  one).  This is a freestanding build, without operating system.
+	  The configuration selects the "White Rabbit" protocol extension.
+
+config ARCH_WRS
+	bool "White Rabbit Switch"
+	select CONFIG_EXT_WR
+	help
+	  Build PPSi for use in the WR switch. The computer is a standard
+	  ARM-Linux host with hardware timestamping and internal PLLs
+	  needed to achieve sub-ns synchnonization. 
+	  The configuration selects the "White Rabbit" protocol extension.
+
+endchoice
+
+config ARCH
+       string
+       default "unix" if ARCH_UNIX
+       default "bare-i386" if ARCH_BARE_I386
+       default "bare-x86-64" if ARCH_BARE_X86_64
+       default "wrpc" if ARCH_WRPC
+       default "wrs" if ARCH_WRS
+
+
+
+choice EXTENSION
+	prompt "Protocol Extension"
+
+config EXT_WR
+	bool "White Rabbit" if ARCH_WRS || ARCH_WRPC
+	help
+	  Build WR-PTP (which is able to works as a standard PTP agent,
+	  when the peer is not WR-aware).
+
+config EXT_NONE
+	bool "None"
+	default y
+	help
+	  Select not protocol extension (build standard PTP-V2 daemon).
+
+endchoice
+
+config EXTENSION
+       string
+       default "whiterabbit" if EXT_WR
+       default "" if EXT_NONE
+
+
+
+config CROSS_COMPILE
+       string "Cross compiler prefix"
+       default "/opt/gcc-lm32/bin/lm32-elf-" if ARCH_WRPC
+       default "/opt/arm-wrswitch/bin/arm-linux-" if ARCH_WRS
+       default ""
+
+config ARCH_CFLAGS
+       string
+       default "-m32" if ARCH_BARE_I386
+       default "-m64" if ARCH_BARE_X86_64
+       default ""
+
+config ARCH_LDFLAGS
+       string
+       default "-m elf_i386" if ARCH_BARE_I386
+       default "-m elf_x86_64" if ARCH_BARE_X86_64
+       default ""
+
+config WRPCSW_ROOT
+       string "Source location of wrpc-sw"
+       depends on ARCH_WRPC
+       default "../wrpc-sw"

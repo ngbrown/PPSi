@@ -5,7 +5,7 @@ CFLAGS += -ffreestanding -Os \
 	-Itools
 
 # Root of wrpc-sw project
-WRPCSW_ROOT ?= ..
+WRPCSW_ROOT ?= $(CONFIG_WRPCSW_ROOT)
 
 CFLAGS += -I$(WRPCSW_ROOT)/include -I$(WRPCSW_ROOT)/include/std -I$(WRPCSW_ROOT)/softpll
 
