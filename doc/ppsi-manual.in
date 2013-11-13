@@ -120,14 +120,29 @@ protocols and timing engine
  can be replaced by providing a proper subdirectory.
 
 @c ==========================================================================
+@node Build-time Configuration
+@section Build-time Configuration
+
+After release 2013.11 we added to PPSi the Kconfig configuration
+engine.  Configuration is now performed by running ``@t{make
+menuconfig}'' or equivalent command.
+
+A number of ready-to use configuration files are distributed in the
+@t{configs/} directory: to use any of them name it as target of @i{make}
+(for example: ``@t{make wrs_defconfig}'').
+
+The default configuration is @i{unix_defconfig}, that builds a Unix daemon
+running the standard @sc{ptp} version 2 protocol.
+
+@c ==========================================================================
 @node Architectures
 @section Architectures
 
 When building PPSi, the user can specify which architecture to build
-for, by passing the @t{ARCH} variable to @i{make}, either on the
-command line or as an environment variable.  When cross-compiling,
-you can use the @t{CROSS_COMPILE} variable to pass your tool-chain
-prefix, as customary in the free software world.
+for, by selecting it in @t{make menuconfig} or equivalent configuration
+command.  When cross-compiling, you need to tell your cross-compiler
+prefix in the configuration step, or override it at build time
+by passing @t{CROSS_COMPILE=} on the commabnd line.
 
 The package currently supports the following architectures:
 
@@ -203,8 +218,10 @@ be tested on the WR switch).
 @section Protocols
 
 At build time, the user can select the standard protocol (selected by
-default) or an extension.  The code base only includes one extension,
-selected by setting @t{PROTO_EXT=whiterabbit}, but there's nothing that
+default by most architectures) or an extension.
+The code base only includes one extension, White Rabbit, which is the
+default choice when building for one of the WR architectures.
+Nothing in PPSi
 prevents our fellow developers to support their own @i{ptp} extension
 using PPSi.
 
@@ -241,12 +258,15 @@ Each architecture defines its own @t{TIME=} choice in the specific
 variable on the command line of PPSi, or by setting an environment
 variable if the architecture supports it.  For example, the @i{bare}
 architectures force @t{TIME=bare}, while the @i{unix} architecture
-suggests Unix timing code (@t{TIME?=unix}).
+suggests Unix timing code (@t{TIME?=unix}). The choice for @t{TIME=}
+is not currently selected using Kconfig, because nobody is expected
+to diverge from the default choice for the architecture being built.
 
 If you want to support a different timing engine within the Unix build
 system, you can use ``@t{make TIME=xyz}'' to request building
 the @i{time-xyz} subdirectory.  Please note that the Unix time
-structures are built anyways, so you can piggy-back on those
+structures are built anyways for @t{CONFIG_ARCH=unix},
+so you can piggy-back on those
 functions, either within your own methods or by replacing the
 @t{ppi->t_ops} and @t{ppi->n_ops} for the communications links that do
 not include your own hardware support.
@@ -327,11 +347,12 @@ unfair to hide them.
 @item Support run-time enable/disable of diagnostics.
 
 	We want to allow run-time modification of diagnostics flags
-        with a per-link granularity.  We think this feature is useful
+        with a per-link granularity.  Currently we have configuration-based
+        per-link diagnostic flags and global flags that can be changed
+        at run time (for example, arch-wrpc offers that through a shell
+        command). We think this feature is useful
         when you run more than a pair of interfaces and have problems
-	on some of the links but not all of them.  The diagnostic code
-        is designed to support this and we only miss the last bits when
-        multi-link is implemented.
+	on some of the links but not all of them. 
 
 @end table
 
@@ -802,17 +823,20 @@ and superuser privileges.
 @section MAKEALL
 
 The @i{MAKEALL} script, in the top-level directory of PPSi builds the
-program for all known configurations.  Developers are urged to run it
+program for all known configurations, picking them from @t{configs/}.
+Developers are urged to run it
 before committing each patch, to ensure they are not breaking the
-program for configurations they are not using.
+program for configurations they are not using -- but sometimes I
+forgot to do that myself and committed trivially-incomplete changes.
 
 It may happen, however, that some developers experience errors or
 warnings that others didn't notice, because of differences in compiler
-version or library versions.  The command line can be
-used to limit the amount of builds. Please check the script itself
-for further details.
+version or library versions.
 
-This is an example run, limited to hosted compilation:
+What follows is an older example run, limited to hosted compilation;
+currently, with the new Kconfig engine introduced after release
+2013.11, @t{MAKEALL} ignores command-line arguments and always builds
+all configurations; but I plan to add the command line back.
 
 @example
    % ./MAKEALL unix
