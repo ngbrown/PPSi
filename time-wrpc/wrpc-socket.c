@@ -57,9 +57,12 @@ static int wrpc_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		t->raw_ahead = wr_ts.raw_ahead;
 	}
 
+/* wrpc-sw may pass this in USER_CFLAGS, to remove footprint */
+#ifndef CONFIG_NO_PTPDUMP
 	/* The header is separate, so dump payload only */
 	if (got > 0 && pp_diag_allow(ppi, frames, 2))
 		dump_payloadpkt("recv: ", pkt, got, t);
+#endif
 
 	return got;
 }
@@ -87,9 +90,12 @@ static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
 		pp_diag(ppi, frames, 2, "%s: snt=%d, sec=%d, nsec=%d\n",
 				__func__, snt, t->seconds, t->nanoseconds);
 	}
+/* wrpc-sw may pass this in USER_CFLAGS, to remove footprint */
+#ifndef CONFIG_NO_PTPDUMP
 	/* The header is separate, so dump payload only */
 	if (snt >0 && pp_diag_allow(ppi, frames, 2))
 		dump_payloadpkt("send: ", pkt, len, t);
+#endif
 
 	return snt;
 }
