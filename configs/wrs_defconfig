@@ -1,0 +1,15 @@
+#
+# Automatically generated make config: don't edit
+#
+# CONFIG_ARCH_UNIX is not set
+# CONFIG_ARCH_BARE_I386 is not set
+# CONFIG_ARCH_BARE_X86_64 is not set
+# CONFIG_ARCH_WRPC is not set
+CONFIG_ARCH_WRS=y
+CONFIG_ARCH="wrs"
+CONFIG_EXT_WR=y
+# CONFIG_EXT_NONE is not set
+CONFIG_EXTENSION="whiterabbit"
+CONFIG_CROSS_COMPILE="/opt/arm-wrswitch/bin/arm-linux-"
+CONFIG_ARCH_CFLAGS=""
+CONFIG_ARCH_LDFLAGS=""

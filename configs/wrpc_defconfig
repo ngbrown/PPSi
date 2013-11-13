@@ -1,0 +1,15 @@
+#
+# Automatically generated make config: don't edit
+#
+# CONFIG_ARCH_UNIX is not set
+# CONFIG_ARCH_BARE_I386 is not set
+# CONFIG_ARCH_BARE_X86_64 is not set
+CONFIG_ARCH_WRPC=y
+# CONFIG_ARCH_WRS is not set
+CONFIG_ARCH="wrpc"
+CONFIG_EXT_WR=y
+# CONFIG_EXT_NONE is not set
+CONFIG_EXTENSION="whiterabbit"
+CONFIG_CROSS_COMPILE="/opt/gcc-lm32/bin/lm32-elf-"
+CONFIG_ARCH_CFLAGS=""
+CONFIG_ARCH_LDFLAGS=""
