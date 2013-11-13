@@ -477,9 +477,15 @@ static int wrs_net_exit(struct pp_instance *ppi)
 	return 0;
 }
 
+static int wrs_net_check_packet(struct pp_globals *ppg, int delay_ms)
+{
+	return unix_net_ops.check_packet(ppg, delay_ms);
+}
+
 struct pp_network_operations wrs_net_ops = {
 	.init = wrs_net_init,
 	.exit = wrs_net_exit,
 	.recv = wrs_net_recv,
 	.send = wrs_net_send,
+	.check_packet = wrs_net_check_packet,
 };

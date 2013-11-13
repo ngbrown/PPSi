@@ -86,7 +86,7 @@ void unix_main_loop(struct pp_globals *ppg)
 			ppg->ebest_updated = 0;
 		}
 
-		i = unix_net_check_pkt(ppg, delay_ms);
+		i = unix_net_ops.check_packet(ppg, delay_ms);
 
 		if (i < 0)
 			continue;
@@ -96,7 +96,7 @@ void unix_main_loop(struct pp_globals *ppg)
 			continue;
 		}
 
-		/* If delay_ms is -1, the above unix_net_check_pkt will continue
+		/* If delay_ms is -1, the above ops.check_packet will continue
 		 * consuming the previous timeout (see its implementation).
 		 * This ensures that every state machine is called at least once
 		 * every delay_ms */

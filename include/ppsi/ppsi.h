@@ -133,7 +133,7 @@ extern struct pp_ext_hooks pp_hooks; /* The one for the extension we build */
 
 /*
  * Network methods are encapsulated in a structure, so each arch only needs
- * to provide that structure. This should simplify management overall.
+ * to provide that structure. This simplifies management overall.
  */
 struct pp_network_operations {
 	int (*init)(struct pp_instance *ppi);
@@ -143,6 +143,7 @@ struct pp_network_operations {
 	/* chtype here is PP_NP_GEN or PP_NP_EVT -- use_pdelay must be 0 */
 	int (*send)(struct pp_instance *ppi, void *pkt, int len,
 		    TimeInternal *t, int chtype, int use_pdelay_addr);
+	int (*check_packet)(struct pp_globals *ppg, int delay_ms);
 };
 
 /* This is the struct pp_network_operations to be provided by time- dir */

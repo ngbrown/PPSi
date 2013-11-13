@@ -402,16 +402,7 @@ static int unix_net_exit(struct pp_instance *ppi)
 	return 0;
 }
 
-struct pp_network_operations unix_net_ops = {
-	.init = unix_net_init,
-	.exit = unix_net_exit,
-	.recv = unix_net_recv,
-	.send = unix_net_send,
-};
-
-
-/* This function is called by main loops outside of the network operations */
-int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
+static int unix_net_check_packet(struct pp_globals *ppg, int delay_ms)
 {
 	fd_set set;
 	int i, j, k;
@@ -480,4 +471,13 @@ int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms)
 	}
 	return ret;
 }
+
+struct pp_network_operations unix_net_ops = {
+	.init = unix_net_init,
+	.exit = unix_net_exit,
+	.recv = unix_net_recv,
+	.send = unix_net_send,
+	.check_packet = unix_net_check_packet,
+};
+
 

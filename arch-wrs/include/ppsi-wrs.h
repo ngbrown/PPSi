@@ -40,8 +40,6 @@ struct unix_arch_data {
 	struct timeval tv;
 };
 
-extern int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms);
-
 extern void wrs_main_loop(struct pp_globals *ppg);
 
 extern void wrs_init_ipcserver(struct minipc_ch *ppsi_ch);

@@ -14,6 +14,4 @@ struct unix_arch_data {
 	struct timeval tv;
 };
 
-extern int unix_net_check_pkt(struct pp_globals *ppg, int delay_ms);
-
 extern void unix_main_loop(struct pp_globals *ppg);
