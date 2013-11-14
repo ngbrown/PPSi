@@ -65,7 +65,7 @@ void msg_pack_announce_wr_tlv(struct pp_instance *ppi)
 	/* GM: update clock Class, according to whether we are locked or not */
 	if (class < PP_CLASS_DEFAULT) {
 		locked = wrp->ops->locking_poll(ppi, 1);
-		if (locked)
+		if (locked > 0)
 			class = PP_CLASS_WR_GM_LOCKED;
 		else
 			class = PP_CLASS_WR_GM_UNLOCKED;
