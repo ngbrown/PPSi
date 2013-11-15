@@ -234,7 +234,7 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 		break;
 
 	case ARG_STR:
-		while (*line && *line == ' ' && *line == '\t')
+		while (*line && (*line == ' ' || *line == '\t'))
 			line++;
 
 		cfg_arg.s = line;
