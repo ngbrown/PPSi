@@ -1,0 +1,15 @@
+#
+# Automatically generated make config: don't edit
+#
+# CONFIG_ARCH_UNIX is not set
+CONFIG_ARCH_BARE_I386=y
+# CONFIG_ARCH_BARE_X86_64 is not set
+# CONFIG_ARCH_WRPC is not set
+# CONFIG_ARCH_WRS is not set
+CONFIG_ARCH="bare-i386"
+# CONFIG_EXT_WR is not set
+CONFIG_EXT_NONE=y
+CONFIG_EXTENSION=""
+CONFIG_CROSS_COMPILE=""
+CONFIG_ARCH_CFLAGS="-m32"
+CONFIG_ARCH_LDFLAGS="-m elf_i386"

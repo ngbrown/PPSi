@@ -6,3 +6,10 @@ ppsi.bin
 *~
 /ppsi
 
+*.cmd
+*.o
+.tmp_*
+.config
+.config.old
+include/config
+include/generated

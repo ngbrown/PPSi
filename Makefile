@@ -1,12 +1,21 @@
 #
-# Alessandro Rubini for CERN, 2011 -- public domain
+# Alessandro Rubini for CERN, 2011,2013 -- public domain
 #
 
-# The default is not extension. Uncomment here or set on the command line
-# PROTO_EXT ?= whiterabbit
+# We are now Kconfig-based
+-include $(CURDIR)/.config
 
-# The default architecture is hosted GNU/Linux stuff
-ARCH ?= unix
+# We still accept command-line choices like we used to do.
+# Also, we must remove the quotes from these Kconfig values
+PROTO_EXT ?= $(patsubst "%",%,$(CONFIG_EXTENSION))
+ARCH ?= $(patsubst "%",%,$(CONFIG_ARCH))
+CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
+WRPCSW_ROOT ?= $(patsubst "%",%,$(CONFIG_WRPCSW_ROOT))
+
+# For "make config" to work, we need a valid ARCH
+ifeq ($(ARCH),)
+   ARCH = unix
+endif
 
 # Also, you can set USER_CFLAGS, like this (or on the command line)
 # USER_CFLAGS = -DVERB_LOG_MSGS
@@ -23,6 +32,11 @@ NM              = $(CROSS_COMPILE)nm
 STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
+
+# To cross-build bare stuff (x86-64 under i386 and vice versa). We need this:
+LD := $(LD) $(shell echo $(CONFIG_ARCH_LDFLAGS))
+CC := $(CC) $(shell echo $(CONFIG_ARCH_CFLAGS))
+# (I apologize, but I couldn't find another way to remove quotes)
 
 # Instead of repeating "ppsi" over and over, bless it TARGET
 TARGET = ppsi
@@ -50,7 +64,7 @@ ifndef CONFIG_NO_PRINTF
 OBJ-y += pp_printf/pp-printf.o
 
 pp_printf/pp-printf.o: $(wildcard pp_printf/*.[ch])
-	$(MAKE) -C pp_printf pp-printf.o
+	$(MAKE) -C pp_printf pp-printf.o CC="$(CC)" LD="$(LD)"
 endif
 
 # We need this -I so <arch/arch.h> can be found
@@ -58,7 +72,7 @@ CFLAGS += -Iarch-$(ARCH)/include
 
 # proto-standard is always included, as it provides default function
 # so the extension can avoid duplication of code.
-ifdef PROTO_EXT
+ifneq ($(PROTO_EXT),)
   include proto-ext-$(PROTO_EXT)/Makefile
 endif
 include proto-standard/Makefile
@@ -76,10 +90,24 @@ export CFLAGS
 # The object only depends on OBJ-y because each subdirs added needed
 # libraries: see proto-standard/Makefile as an example.
 
-$(TARGET).o: $(OBJ-y)
+$(TARGET).o: silentoldconfig $(OBJ-y)
 	$(LD) -Map $(TARGET).map1 -r -o $@ $(OBJ-y) $(PPSI_O_LDFLAGS) \
 		--start-group $(LIBS) --end-group
 
 # Finally, "make clean" is expected to work
 clean:
 	rm -f $$(find . -name '*.[oa]') *.bin $(TARGET) *~ $(TARGET).map*
+
+# following targets from Makefile.kconfig
+silentoldconfig:
+	@mkdir -p include/config
+	$(MAKE) -f Makefile.kconfig $@
+
+scripts_basic config %config:
+	$(MAKE) -f Makefile.kconfig $@
+
+defconfig:
+	@echo "Using unix_defconfig"
+	@$(MAKE) -f Makefile.kconfig unix_defconfig
+
+.config: silentoldconfig

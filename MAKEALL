@@ -1,106 +1,27 @@
 #!/bin/sh
+# A trivial script to build with all known configurations
+# (please add a configs/ file to test your special case)
 
-# This trivially compiles all known-good configurations
+C=$(mktemp /tmp/wrpc-config.XXXXXX); remove_tmp_c=true
+B=$(mktemp /tmp/wrpc-build.XXXXXX); remove_tmp_b=true
 
-build_one () {
+configs=$(ls configs)
+for c in $configs; do
+    echo "##### Building with '$c'"
+    echo "##### Building with '$c'" >> $B
+    echo "##### Configuiring for '$c'" >> $C
+    if ! make -s $c 2>&1 >> $C; then
+	echo "Error in configuration (see $C)"
+	remove_tmp_c=false
+    fi
     make -s clean
-    echo "###### Build for " "$1"
-    make -s -j3 CC="$CC" LD="$LD" -k $2 2>&1 | grep -v ar:.creating
+    if ! make  -j5  2>&1 >> $B; then
+	echo "Build error (see $B)"
+	remove_tmp_b=false
+    fi
     test -f ppsi.o && size ppsi.o
-    if $SHOW_UNDEF; then
-	nm -u ppsi.o
-    fi
     test -f ppsi && size ppsi | tail -n 1
-}
 
-build_diags () {
-    msg="arch \"$ARCH\", ext \"$PROTO_EXT\""
-    # only build xint, we know pp_printf works
-    unset USER_CFLAGS
-    build_one "$msg, printf xint" CONFIG_PRINTF_XINT=y
-    # then build with all diagnostics, and default printf
-    export USER_CFLAGS="-DVERB_LOG_MSGS"
-    build_one "$msg, all messages"
-}
-
-build_ext () {
-    unset PROTO_EXT
-    build_diags
-    if [ "$ARCH" = "wrpc" ]; then
-	export PROTO_EXT=whiterabbit
-	build_diags
-    fi
-}
-
-for var in HAS_DIAG HAS_FULL_DIAG CROSS_COMPILE ARCH CC LD; do
-    unset $var
 done
-
-# Build tools first, we must be sure they work
-echo "###### Build ./tools"
-make -s -C tools clean; make -s -C tools
-make -s -C tools/mtp clean; make -s -C tools/mtp
-
-# Variables to set up proper stuff for the various architectures
-PREFIX_unix=""
-PREFIX_bare_i386=""
-PREFIX_bare_x86_64=""
-PREFIX_wrpc="/opt/gcc-lm32/bin/lm32-elf-"
-PREFIX_wrs="/opt/arm-wrswitch/bin/arm-linux-"
-
-CC_unix="gcc"
-CC_bare_i386="gcc -m32"
-CC_bare_x86_64="gcc -m64"
-CC_wrpc="${PREFIX_wrpc}gcc"
-CC_wrs="${PREFIX_wrs}gcc"
-
-LD_unix="ld"
-LD_bare_i386="ld -m elf_i386"
-LD_bare_x86_64="ld -m elf_x86_64"
-LD_wrpc="${PREFIX_wrpc}ld"
-LD_wrs="${PREFIX_wrs}ld"
-
-# Defaults, overridden by command line, later
-SHOW_UNDEF=false
-
-ARCHS="unix bare-i386 bare-x86-64 wrs"
-if [ "x${WRPCSW_ROOT}" != "x" ]; then
-    ARCHS="$ARCHS wrpc"
-fi
-
-# Parse command line, so we can limit the archs we build for
-while [ $# -gt 0 ]; do
-    case $1 in
-	gnu-linux) # The previous name we used
-	    ARCHS="unix";;
-	unix)
-	    ARCHS="$1";;
-	bare-i386)
-	    ARCHS="$1";;
-	bare-x86-64)
-	    ARCHS="$1";;
-	wrpc)
-	    ARCHS="$1";;
-	bare)
-	    ARCHS="bare-i386 bare-x86-64";;
-	wrs)
-		ARCHS="$1";;
-	*=*)
-	    eval export $1;;
-	-u)
-	    SHOW_UNDEF=true;;
-	*)
-	    echo "$0: Unknown argument \"$1\"" >&2
-	    exit 1;;
-	esac
-    shift
-done
-
-# And finally build
-for a in $ARCHS; do
-    export ARCH=$a
-    eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
-    eval export CC=\""\${CC_$(echo $ARCH | sed 's/-/_/g')}"\"
-    eval export LD=\""\${LD_$(echo $ARCH | sed 's/-/_/g')}"\"
-    build_ext
-done
+if $remove_tmp_c; then rm $C; fi
+if $remove_tmp_b; then rm $B; fi

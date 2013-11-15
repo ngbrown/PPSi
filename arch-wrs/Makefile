@@ -28,6 +28,7 @@ include time-unix/Makefile
 CFLAGS += -Iproto-ext-whiterabbit
 
 # mini-rpc directory contains minipc library
+export CROSS_COMPILE
 MINIPC_DIR := $A/mini-rpc
 MINIPC_LIB := $(MINIPC_DIR)/libminipc.a
 CFLAGS += -I$(MINIPC_DIR)
