@@ -2,26 +2,46 @@
 # A trivial script to build with all known configurations
 # (please add a configs/ file to test your special case)
 
-C=$(mktemp /tmp/wrpc-config.XXXXXX); remove_tmp_c=true
-B=$(mktemp /tmp/wrpc-build.XXXXXX); remove_tmp_b=true
+# Backup previous .config file, if present
+rm -f .config.backup 2> /dev/null
+mv -f .config .config.backup 2> /dev/null
 
+# make some temporary files for logs
+C=$(mktemp /tmp/ppsi-config.XXXXXX)
+remove_tmp_c=true
+
+B=$(mktemp /tmp/ppsi-build.XXXXXX)
+remove_tmp_b=true
+
+# loop on default .config files, building for all architectures
 configs=$(ls configs)
 for c in $configs; do
     echo "##### Building with '$c'"
     echo "##### Building with '$c'" >> $B
-    echo "##### Configuiring for '$c'" >> $C
+    echo "##### Configuring for '$c'" >> $C
+    # make config and log
     if ! make -s $c 2>&1 >> $C; then
 	echo "Error in configuration (see $C)"
 	remove_tmp_c=false
     fi
     make -s clean
+    # build binaries and log
     if ! make  -j5  2>&1 >> $B; then
 	echo "Build error (see $B)"
 	remove_tmp_b=false
     fi
+    # print sizes
     test -f ppsi.o && size ppsi.o
     test -f ppsi && size ppsi | tail -n 1
 
 done
+
+make -s clean
+
+# clean logs if succesful
 if $remove_tmp_c; then rm $C; fi
 if $remove_tmp_b; then rm $B; fi
+
+# restore previous .config file if needed, otherwise just clean.
+rm -f .config 2> /dev/null
+mv -f .config.backup .config 2> /dev/null
