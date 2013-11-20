@@ -71,7 +71,7 @@ int ppsi_main(int argc, char **argv)
 		return -1;
 
 	/* This just allocates the stuff */
-	pp_open_globals(ppg);
+	pp_open_globals(ppg, &__pp_default_rt_opts);
 
 	/* The actual sockets are opened in state-initializing */
 	bare_main_loop(ppi);

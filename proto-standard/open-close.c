@@ -40,7 +40,7 @@ struct pp_runtime_opts __pp_default_rt_opts = {
  * state machine to the first state.
  */
 
-int pp_open_globals(struct pp_globals *ppg)
+int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *pp_rt_opts)
 {
 	/*
 	 * Initialize default data set
@@ -55,7 +55,7 @@ int pp_open_globals(struct pp_globals *ppg)
 	struct pp_runtime_opts *rt_opts;
 
 	if (!ppg->rt_opts)
-		ppg->rt_opts = &__pp_default_rt_opts;
+		ppg->rt_opts = pp_rt_opts;
 
 	rt_opts = ppg->rt_opts;
 

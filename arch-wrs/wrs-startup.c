@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 
 	}
 
-	pp_open_globals(ppg);
+	pp_open_globals(ppg, &__pp_default_rt_opts);
 
 	wrs_main_loop(ppg);
 	return 0; /* never reached */

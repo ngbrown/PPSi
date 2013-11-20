@@ -251,7 +251,7 @@ static inline void pp_timeout_restart_annrec(struct pp_instance *ppi)
 
 
 /* The channel for an instance must be created and possibly destroyed. */
-extern int pp_open_globals(struct pp_globals *ppg);
+extern int pp_open_globals(struct pp_globals *ppg, struct pp_runtime_opts *opts);
 extern int pp_close_globals(struct pp_globals *ppg);
 
 extern int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv);

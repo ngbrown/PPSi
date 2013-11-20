@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 			exit(__LINE__);
 	}
 
-	pp_open_globals(ppg);
+	pp_open_globals(ppg, &__pp_default_rt_opts);
 
 	unix_main_loop(ppg);
 	return 0; /* never reached */
