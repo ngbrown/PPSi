@@ -96,7 +96,7 @@ $(TARGET).o: silentoldconfig $(OBJ-y)
 
 # Finally, "make clean" is expected to work
 clean:
-	rm -f $$(find . -name '*.[oa]') *.bin $(TARGET) *~ $(TARGET).map*
+	rm -f $$(find . -name '*.[oa]' ! -path './scripts/kconfig/*') *.bin $(TARGET) *~ $(TARGET).map*
 
 # following targets from Makefile.kconfig
 silentoldconfig:
