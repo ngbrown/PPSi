@@ -170,7 +170,7 @@ static char *first_word(char *line, char **rest)
 		line [l--] = '\0';
 
 	/* skip leading blanks to find first word */
-	while (*line &&  blank(*line))
+	while (*line && blank(*line))
 		line++;
 	ret = line;
 	/* find next blank and thim there*/
@@ -290,7 +290,7 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 		break;
 
 	case ARG_STR:
-		while (*line && (*line == ' ' || *line == '\t'))
+		while (*line && blank(*line))
 			line++;
 
 		cfg_arg.s = line;
