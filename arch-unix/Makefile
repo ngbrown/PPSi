@@ -27,7 +27,7 @@ CFLAGS += -Itime-unix
 all: $(TARGET)
 
 # to build the target, we need -lstd again, in case we call functions that
-# were not selected yet (e.g., pp_open_globals() ).
+# were not selected yet (e.g., pp_init_globals() ).
 $(TARGET): $(TARGET).o
 	$(CC) -Wl,-Map,$(TARGET).map2 -o $@ $(TARGET).o -lrt
 
