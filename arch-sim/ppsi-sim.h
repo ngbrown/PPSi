@@ -5,6 +5,22 @@
  */
 
 /*
+ * This structure represents a clock abstraction. You can use it to
+ * have different pp_instances with different notions of time.
+ * When you try to get the time the sim_get_time function is performing the
+ * calculations needed to convert the raw data from the "real" clock to the
+ * timescale of the simulated one.
+ * When you set the time you're not actually setting it in the hardware but
+ * only in the parameters in this structure.
+ */
+struct pp_sim_time_instance {
+	int64_t current_ns; // with nsecs it's enough for ~300 years
+	int64_t freq_ppm_real; // drift of the simulated hw clock
+	int64_t freq_ppm_servo; // drift applied from servo to correct the hw
+	// Future parameters can be added
+};
+
+/*
  * This structure holds the lowest timeout of all the state machines in the
  * ppg, namely the master and slave state machines in the simulator. All the
  * future configuration parameters needed from both master and slave ppi
@@ -17,6 +33,22 @@ struct sim_ppg_arch_data {
 static inline struct sim_ppg_arch_data *SIM_PPG_ARCH(struct pp_globals *ppg)
 {
 	return (struct sim_ppg_arch_data *)(ppg->arch_data);
+}
+
+/*
+ * Structure holding parameters and informations restricted to just a single
+ * instance, like timing informations. Infact in the simulator, even if both
+ * master and slave are ppi inside the same ppg, they act like every one of
+ * them had its own clock.
+ * More stuff can be added here in the future if necessary
+ */
+struct sim_ppi_arch_data {
+	struct pp_sim_time_instance time;
+};
+
+static inline struct sim_ppi_arch_data *SIM_PPI_ARCH(struct pp_instance *ppi)
+{
+	return (struct sim_ppi_arch_data *)(ppi->arch_data);
 }
 
 extern void sim_main_loop(struct pp_globals *ppg);
