@@ -40,10 +40,25 @@ static inline struct sim_ppg_arch_data *SIM_PPG_ARCH(struct pp_globals *ppg)
  * instance, like timing informations. Infact in the simulator, even if both
  * master and slave are ppi inside the same ppg, they act like every one of
  * them had its own clock.
- * More stuff can be added here in the future if necessary
+ * Some more data we need in every instance are Data Sets, runtime options,
+ * servo and TimeProperties. We need them because, since we have two ppi
+ * acting like two different machines, we have to use different copies of
+ * these data for every one of them. So we just put the per-instance data
+ * here and we will the pointers in ppg according to our needs every time
+ * we will need to use them.
+ * Even more stuff can be added if needed
  */
 struct sim_ppi_arch_data {
 	struct pp_sim_time_instance time;
+	/* servo */
+	struct pp_servo *servo;
+	/* Runtime options */
+	struct pp_runtime_opts *rt_opts;
+	/* Data sets */
+	DSDefault *defaultDS;
+	DSCurrent *currentDS;
+	DSParent *parentDS;
+	DSTimeProperties *timePropertiesDS;
 };
 
 static inline struct sim_ppi_arch_data *SIM_PPI_ARCH(struct pp_instance *ppi)
