@@ -5,13 +5,18 @@
  */
 
 /*
- * These are the functions provided by the various sim files
+ * This structure holds the lowest timeout of all the state machines in the
+ * ppg, namely the master and slave state machines in the simulator. All the
+ * future configuration parameters needed from both master and slave ppi
+ * can be added here.
  */
-
-/* the arch_data is the same as unix */
-#define POSIX_ARCH(ppg) ((struct unix_arch_data *)(ppg->arch_data))
-struct unix_arch_data {
+struct sim_ppg_arch_data {
 	struct timeval tv;
 };
+
+static inline struct sim_ppg_arch_data *SIM_PPG_ARCH(struct pp_globals *ppg)
+{
+	return (struct sim_ppg_arch_data *)(ppg->arch_data);
+}
 
 extern void sim_main_loop(struct pp_globals *ppg);
