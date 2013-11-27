@@ -7,11 +7,11 @@ CFLAGS += -Itools
 OBJ-y += $A/sim-startup.o \
 	$A/main-loop.o \
 	$A/sim-io.o \
+	lib/cmdline.o \
+	lib/conf.o \
 	lib/div64.o
 #	lib/dump-funcs.o \
-#	lib/conf.o \
 #	lib/libc-functions.o \
-#	lib/cmdline.o \
 
 # Support only "sim" time operations
 TIME := sim

@@ -59,11 +59,17 @@ struct sim_ppi_arch_data {
 	DSCurrent *currentDS;
 	DSParent *parentDS;
 	DSTimeProperties *timePropertiesDS;
+	/* other pp_instance, used in net ops */
+	struct pp_instance *other_ppi;
 };
+/* symbolic names to address master and slave in ppg->pp_instances */
+#define SIM_SLAVE	1
+#define SIM_MASTER	0
 
 static inline struct sim_ppi_arch_data *SIM_PPI_ARCH(struct pp_instance *ppi)
 {
 	return (struct sim_ppi_arch_data *)(ppi->arch_data);
 }
 
+extern int sim_set_global_DS(struct pp_instance *ppi);
 extern void sim_main_loop(struct pp_globals *ppg);
