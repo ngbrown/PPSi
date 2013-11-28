@@ -21,6 +21,16 @@ struct pp_sim_time_instance {
 };
 
 /*
+ * This structure holds the parameter representing the delays on the outgoing
+ * link of every pp_instance. All the values are expressed in the *absolute*
+ * timescale, which is represented by the master time.
+ */
+struct pp_sim_net_delay {
+	unsigned int t_prop_ns; // propagation delay on outgoing link
+	unsigned int jit_ns; // jitter in nsec on outgoing link
+};
+
+/*
  * This structure holds the lowest timeout of all the state machines in the
  * ppg, namely the master and slave state machines in the simulator. All the
  * future configuration parameters needed from both master and slave ppi
@@ -50,6 +60,7 @@ static inline struct sim_ppg_arch_data *SIM_PPG_ARCH(struct pp_globals *ppg)
  */
 struct sim_ppi_arch_data {
 	struct pp_sim_time_instance time;
+	struct pp_sim_net_delay n_delay;
 	/* servo */
 	struct pp_servo *servo;
 	/* Runtime options */
