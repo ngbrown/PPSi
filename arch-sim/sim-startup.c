@@ -111,6 +111,22 @@ int main(int argc, char **argv)
 	ppi_slave = &ppg->pp_instances[SIM_SLAVE];
 	ppi_master = &ppg->pp_instances[SIM_MASTER];
 
+	/*
+	 * Configure the master with standard configuration, only from default
+	 * string. The master is not configurable, but there's no need to do
+	 * it cause we are ok with a standard one. We just want to see the
+	 * behaviour of the slave.
+	 * NOTE: the master instance is initialized before parsing the command
+	 * line, so the diagnostics cannot be enabled here. We cannot put the
+	 * master config later because the initial time for the master is needed
+	 * to set the initial offset for the slave
+	 */
+	sim_set_global_DS(ppi_master);
+	pp_config_string(ppg, strdup("port SIM_MASTER; iface MASTER;"
+					"proto udp; role master;"
+					"sim_init_master_time 10.0;"));
+
+	/* parse commandline for configuration options */
 	sim_set_global_DS(ppi_slave);
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;
@@ -120,15 +136,6 @@ int main(int argc, char **argv)
 	if (ppg->cfg.cfg_items == 0)
 		pp_config_string(ppg, strdup("port SIM_SLAVE; iface SLAVE;"
 						"proto udp; role slave;"));
-	/*
-	 * Configure the master with standard configuration, only from default
-	 * string. The master is not configurable, but there's no need to do
-	 * it cause we are ok with a standard one. We just want to see the
-	 * behaviour of the slave
-	 */
-	sim_set_global_DS(ppi_master);
-	pp_config_string(ppg, strdup("port SIM_MASTER; iface MASTER;"
-					"proto udp; role master;"));
 
 	for (i = 0; i < ppg->nlinks; i++) {
 		ppi = &ppg->pp_instances[i];

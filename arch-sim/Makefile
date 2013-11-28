@@ -7,6 +7,7 @@ CFLAGS += -Itools
 OBJ-y += $A/sim-startup.o \
 	$A/main-loop.o \
 	$A/sim-io.o \
+	$A/sim-conf.o \
 	lib/cmdline.o \
 	lib/conf.o \
 	lib/div64.o
