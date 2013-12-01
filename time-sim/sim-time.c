@@ -15,6 +15,20 @@
 #include <ppsi/ppsi.h>
 #include "../arch-sim/ppsi-sim.h"
 
+int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
+{
+	struct pp_sim_time_instance *t_inst;
+	int i;
+	for (i = 0; i < ppg->nlinks; i++) {
+		t_inst = &SIM_PPI_ARCH(ppg->pp_instances + i)->time;
+		t_inst->current_ns += ff_ns +
+			(t_inst->freq_ppm_servo + t_inst->freq_ppm_real) *
+				ff_ns / 1000 / 1000 / 1000;
+	}
+	pp_diag(0, time, 1, "%s: %li ns\n", __func__, (long)ff_ns);
+	return 0;
+}
+
 static int sim_time_get(struct pp_instance *ppi, TimeInternal *t)
 {
 	struct timespec ts;

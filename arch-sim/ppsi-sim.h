@@ -102,5 +102,6 @@ static inline int pp_sim_is_slave(struct pp_instance *ppi)
 	return ((ppi - ppi->glbs->pp_instances) == SIM_SLAVE);
 }
 
+extern int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns);
 extern int sim_set_global_DS(struct pp_instance *ppi);
 extern void sim_main_loop(struct pp_globals *ppg);
