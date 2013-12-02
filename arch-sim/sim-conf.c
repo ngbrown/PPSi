@@ -57,11 +57,70 @@ static int f_init_time(int lineno, struct pp_globals *ppg,
 	return 0;
 }
 
+static int f_fwd_t_prop(int lineno, struct pp_globals *ppg,
+			union pp_cfg_arg *arg)
+{
+	struct sim_ppi_arch_data *data;
+	data = SIM_PPI_ARCH(pp_sim_get_master(ppg));
+	data->n_delay.t_prop_ns = arg->i;
+	return 0;
+}
+
+static int f_bckwd_t_prop(int lineno, struct pp_globals *ppg,
+			union pp_cfg_arg *arg)
+{
+	struct sim_ppi_arch_data *data;
+	data = SIM_PPI_ARCH(pp_sim_get_slave(ppg));
+	data->n_delay.t_prop_ns = arg->i;
+	return 0;
+}
+
+static int f_t_prop(int lineno, struct pp_globals *ppg,
+			union pp_cfg_arg *arg)
+{
+	f_fwd_t_prop(lineno, ppg, arg);
+	f_bckwd_t_prop(lineno, ppg, arg);
+	return 0;
+}
+
+static int f_fwd_jit(int lineno, struct pp_globals *ppg,
+			union pp_cfg_arg *arg)
+{
+	struct sim_ppi_arch_data *data;
+	data = SIM_PPI_ARCH(pp_sim_get_master(ppg));
+	data->n_delay.jit_ns = arg->i;
+	return 0;
+}
+
+
+static int f_bckwd_jit(int lineno, struct pp_globals *ppg,
+			union pp_cfg_arg *arg)
+{
+	struct sim_ppi_arch_data *data;
+	data = SIM_PPI_ARCH(pp_sim_get_slave(ppg));
+	data->n_delay.jit_ns = arg->i;
+	return 0;
+}
+
+static int f_jit(int lineno, struct pp_globals *ppg,
+			union pp_cfg_arg *arg)
+{
+	f_fwd_jit(lineno, ppg, arg);
+	f_bckwd_jit(lineno, ppg, arg);
+	return 0;
+}
+
 struct pp_argline pp_arch_arglines[] = {
 	{f_ppm_real,	"sim_ppm_real",		ARG_INT},
 	{f_ppm_servo,	"sim_init_ppm_servo",	ARG_INT},
 	{f_ofm,		"sim_init_ofm",		ARG_TIME},
 	{f_init_time,	"sim_init_master_time",	ARG_TIME},
+	{f_t_prop,	"sim_t_prop_ns",	ARG_INT},
+	{f_fwd_t_prop,	"sim_fwd_t_prop_ns",	ARG_INT},
+	{f_bckwd_t_prop,"sim_bckwd_t_prop_ns",	ARG_INT},
+	{f_jit,		"sim_jit_ns",		ARG_INT},
+	{f_fwd_jit,	"sim_fwd_jit_ns",	ARG_INT},
+	{f_bckwd_jit,	"sim_bckwd_jit_ns",	ARG_INT},
 	{}
 };
 
