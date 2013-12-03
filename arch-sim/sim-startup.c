@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 	 * to set the initial offset for the slave
 	 */
 	sim_set_global_DS(ppi_master);
-	pp_config_string(ppg, strdup("port SIM_MASTER; iface MASTER;"
+	pp_config_string(ppg, strdup("port SIM_MASTER; iface lo;"
 					"proto udp; role master;"
 					"sim_init_master_time 10.0;"));
 
@@ -144,6 +144,8 @@ int main(int argc, char **argv)
 			pp_printf("Warning: simulator doesn't support raw "
 					"ethernet. Using UDP\n");
 		ppi->ethernet_mode = 0;
+		NP(ppi)->ch[PP_NP_GEN].fd = -1;
+		NP(ppi)->ch[PP_NP_EVT].fd = -1;
 		if (ppi->cfg.role == PPSI_ROLE_MASTER) {
 			ppi->master_only = 1;
 			ppi->slave_only = 0;
@@ -152,12 +154,13 @@ int main(int argc, char **argv)
 			ppi->slave_only = 1;
 		}
 		ppi->t_ops = &DEFAULT_TIME_OPS;
-		//ppi->n_ops = &DEFAULT_NET_OPS;
 	}
 	sim_set_global_DS(ppi_master);
 	pp_init_globals(ppg, &sim_master_rt_opts);
+	ppi_master->n_ops = &sim_master_net_ops;
 	sim_set_global_DS(ppi_slave);
 	pp_init_globals(ppg, &__pp_default_rt_opts);
+	ppi_slave->n_ops = &sim_slave_net_ops;
 
 	sim_main_loop(ppg);
 	return 0;

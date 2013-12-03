@@ -10,8 +10,8 @@ OBJ-y += $A/sim-startup.o \
 	$A/sim-conf.o \
 	lib/cmdline.o \
 	lib/conf.o \
+	lib/dump-funcs.o \
 	lib/div64.o
-#	lib/dump-funcs.o \
 #	lib/libc-functions.o \
 
 # Support only "sim" time operations

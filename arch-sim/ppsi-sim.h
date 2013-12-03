@@ -31,13 +31,32 @@ struct pp_sim_net_delay {
 };
 
 /*
- * This structure holds the lowest timeout of all the state machines in the
- * ppg, namely the master and slave state machines in the simulator. All the
- * future configuration parameters needed from both master and slave ppi
- * can be added here.
+ * This structure represets a pending packet. which_ppi is the destination ppi,
+ * chtype is the channel and delay_ns is the time that should pass from when the
+ * packet is sent until it will be received from the destination.
+ * Every time a packet is sent a structure like this is filled and stored in the
+ * ppg->arch_data so that we always know which is the first packet that has to
+ * be received and when.
+ */
+struct sim_pending_pkt {
+	int64_t delay_ns;
+	int which_ppi;
+	int chtype;
+};
+/*
+ * Structure holding an array of pending packets. 64 does not have a special
+ * meaning. They could be less if you look inside the ptp specification, but
+ * I put 64 just to be sure.
+ * The aim of this structure is to store information on flying packets and when
+ * the'll be received, because the standard state machine timeouts are not
+ * enough for this. Infact the main loop need to know if there are some packets
+ * arriving and when, otherwise it will not know how much fast forwarding is
+ * needed. If you fast forward based on timeouts they will expire before any
+ * packet has arrived and the state machine will do nothing.
  */
 struct sim_ppg_arch_data {
-	struct timeval tv;
+	int n_pending;
+	struct sim_pending_pkt pending[64];
 };
 
 static inline struct sim_ppg_arch_data *SIM_PPG_ARCH(struct pp_globals *ppg)
@@ -105,3 +124,6 @@ static inline int pp_sim_is_slave(struct pp_instance *ppi)
 extern int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns);
 extern int sim_set_global_DS(struct pp_instance *ppi);
 extern void sim_main_loop(struct pp_globals *ppg);
+
+extern struct pp_network_operations sim_master_net_ops;
+extern struct pp_network_operations sim_slave_net_ops;
