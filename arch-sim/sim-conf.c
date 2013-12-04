@@ -110,6 +110,14 @@ static int f_jit(int lineno, struct pp_globals *ppg,
 	return 0;
 }
 
+static int f_duration(int lineno, struct pp_globals *ppg,
+			union pp_cfg_arg *arg)
+{
+	SIM_PPG_ARCH(ppg)->duration_ns = arg->ts.tv_nsec +
+				arg->ts.tv_sec * (long long)PP_NSEC_PER_SEC;
+	return 0;
+}
+
 struct pp_argline pp_arch_arglines[] = {
 	{f_ppm_real,	"sim_ppm_real",		ARG_INT},
 	{f_ppm_servo,	"sim_init_ppm_servo",	ARG_INT},
@@ -121,6 +129,7 @@ struct pp_argline pp_arch_arglines[] = {
 	{f_jit,		"sim_jit_ns",		ARG_INT},
 	{f_fwd_jit,	"sim_fwd_jit_ns",	ARG_INT},
 	{f_bckwd_jit,	"sim_bckwd_jit_ns",	ARG_INT},
+	{f_duration,	"sim_duration_sec",	ARG_TIME},
 	{}
 };
 

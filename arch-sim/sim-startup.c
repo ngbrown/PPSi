@@ -121,6 +121,7 @@ int main(int argc, char **argv)
 	sim_set_global_DS(&ppg->pp_instances[SIM_MASTER]);
 	pp_config_string(ppg, strdup("port SIM_MASTER; iface MASTER;"
 					"proto udp; role master;"
+					"sim_duration_sec 3600;" // one hour
 					"sim_init_master_time 10.0;"));
 
 	/* parse commandline for configuration options */

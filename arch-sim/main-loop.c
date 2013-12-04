@@ -54,7 +54,7 @@ void sim_main_loop(struct pp_globals *ppg)
 
 	delay_ns = run_all_state_machines(ppg) * 1000LL * 1000LL;
 
-	while (1) {
+	while (data->duration_ns >= 0) {
 		/*
 		 * If Ebest was changed in previous loop, run best
 		 * master clock before checking for new packets, which
@@ -103,4 +103,5 @@ void sim_main_loop(struct pp_globals *ppg)
 		sim_fast_forward_ns(ppg, delay_ns);
 		delay_ns = run_all_state_machines(ppg) * 1000LL * 1000LL;
 	}
+	return;
 }

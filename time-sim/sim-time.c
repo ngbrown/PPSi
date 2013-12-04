@@ -39,6 +39,7 @@ int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
 		}
 	}
 
+	data->duration_ns -= ff_ns;
 	return 0;
 }
 

@@ -57,6 +57,7 @@ struct sim_pending_pkt {
 struct sim_ppg_arch_data {
 	int n_pending;
 	struct sim_pending_pkt pending[64];
+	int64_t duration_ns;
 };
 
 static inline struct sim_ppg_arch_data *SIM_PPG_ARCH(struct pp_globals *ppg)
