@@ -86,7 +86,6 @@ static int sim_ppi_init(struct pp_instance *ppi, int which_ppi)
 int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
-	struct pp_instance *ppi_master, *ppi_slave;
 	struct pp_instance *ppi;
 	int i;
 
@@ -108,8 +107,6 @@ int main(int argc, char **argv)
 		if (sim_ppi_init(ppi, i))
 			return -1;
 	}
-	ppi_slave = &ppg->pp_instances[SIM_SLAVE];
-	ppi_master = &ppg->pp_instances[SIM_MASTER];
 
 	/*
 	 * Configure the master with standard configuration, only from default
@@ -121,13 +118,13 @@ int main(int argc, char **argv)
 	 * master config later because the initial time for the master is needed
 	 * to set the initial offset for the slave
 	 */
-	sim_set_global_DS(ppi_master);
+	sim_set_global_DS(&ppg->pp_instances[SIM_MASTER]);
 	pp_config_string(ppg, strdup("port SIM_MASTER; iface MASTER;"
 					"proto udp; role master;"
 					"sim_init_master_time 10.0;"));
 
 	/* parse commandline for configuration options */
-	sim_set_global_DS(ppi_slave);
+	sim_set_global_DS(&ppg->pp_instances[SIM_SLAVE]);
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;
 	/* If no item has been parsed, provide default file or string */
@@ -139,6 +136,7 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < ppg->nlinks; i++) {
 		ppi = &ppg->pp_instances[i];
+		sim_set_global_DS(ppi);
 		ppi->iface_name = ppi->cfg.iface_name;
 		if (ppi->cfg.proto == PPSI_PROTO_RAW)
 			pp_printf("Warning: simulator doesn't support raw "
@@ -155,11 +153,11 @@ int main(int argc, char **argv)
 		}
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 		ppi->n_ops = &DEFAULT_NET_OPS;
+		if (ppi - ppi->glbs->pp_instances == SIM_MASTER)
+			pp_init_globals(ppg, &sim_master_rt_opts);
+		else
+			pp_init_globals(ppg, &__pp_default_rt_opts);
 	}
-	sim_set_global_DS(ppi_master);
-	pp_init_globals(ppg, &sim_master_rt_opts);
-	sim_set_global_DS(ppi_slave);
-	pp_init_globals(ppg, &__pp_default_rt_opts);
 
 	sim_main_loop(ppg);
 	return 0;
