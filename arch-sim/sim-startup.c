@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 	 * to set the initial offset for the slave
 	 */
 	sim_set_global_DS(ppi_master);
-	pp_config_string(ppg, strdup("port SIM_MASTER; iface lo;"
+	pp_config_string(ppg, strdup("port SIM_MASTER; iface MASTER;"
 					"proto udp; role master;"
 					"sim_init_master_time 10.0;"));
 
