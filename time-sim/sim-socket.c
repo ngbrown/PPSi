@@ -10,8 +10,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
 
 #include <ppsi/ppsi.h>
 #include "ptpdump.h"
@@ -214,8 +212,6 @@ static int sim_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 
 	int sock = -1;
 	int temp;
-	struct in_addr iface_addr;
-	struct ifreq ifr;
 	struct sockaddr_in addr;
 	char *context;
 
@@ -227,31 +223,8 @@ static int sim_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 
 	NP(ppi)->ch[chtype].fd = sock;
 
-	/* hw interface information */
-	memset(&ifr, 0, sizeof(ifr));
-	strcpy(ifr.ifr_name, ifname);
-	context = "ioctl(SIOCGIFINDEX)";
-	if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
-		goto err_out;
-
-	context = "ioctl(SIOCGIFHWADDR)";
-	if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
-		goto err_out;
-
-	memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
-	context = "ioctl(SIOCGIFADDR)";
-	if (ioctl(sock, SIOCGIFADDR, &ifr) < 0)
-		goto err_out;
-
-	iface_addr.s_addr =
-		((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
-
-	pp_diag(ppi, frames, 2, "Local IP address used : %s\n",
-			inet_ntoa(iface_addr));
-
 	temp = 1; /* allow address reuse */
-	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-		       &temp, sizeof(int)) < 0)
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &temp, sizeof(int)) < 0)
 		pp_printf("%s: ioctl(SO_REUSEADDR): %s\n", __func__,
 			  strerror(errno));
 
