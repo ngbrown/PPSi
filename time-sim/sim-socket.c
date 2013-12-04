@@ -17,8 +17,10 @@
 #include "ptpdump.h"
 #include "../arch-sim/ppsi-sim.h"
 
-#define PP_SIM_GEN_PORT	(10000 + PP_GEN_PORT)
-#define PP_SIM_EVT_PORT	(10000 + PP_EVT_PORT)
+#define PP_MASTER_GEN_PORT	(10000 + PP_GEN_PORT)
+#define PP_MASTER_EVT_PORT	(10000 + PP_EVT_PORT)
+#define PP_SLAVE_GEN_PORT	(20000 + PP_GEN_PORT)
+#define PP_SLAVE_EVT_PORT	(20000 + PP_EVT_PORT)
 
 /* Returns 1 if p1 has higher priority  than p2 */
 static int compare_pending(struct sim_pending_pkt *p1,
@@ -161,12 +163,12 @@ static int sim_net_send(struct pp_instance *ppi, void *pkt, int len,
 	addr.sin_family = AF_INET;
 	if (ppi - ppi->glbs->pp_instances == SIM_SLAVE)
 		addr.sin_port = htons(chtype == PP_NP_GEN ?
-					PP_SIM_GEN_PORT :
-					PP_SIM_EVT_PORT);
+					PP_MASTER_GEN_PORT :
+					PP_MASTER_EVT_PORT);
 	else
 		addr.sin_port = htons(chtype == PP_NP_GEN ?
-					PP_GEN_PORT :
-					PP_EVT_PORT);
+					PP_SLAVE_GEN_PORT :
+					PP_SLAVE_EVT_PORT);
 
 	addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
 
@@ -260,12 +262,12 @@ static int sim_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	if ((ppi - ppi->glbs->pp_instances) == SIM_MASTER)
 		addr.sin_port = htons(chtype == PP_NP_GEN ?
-					PP_SIM_GEN_PORT :
-					PP_SIM_EVT_PORT);
+					PP_MASTER_GEN_PORT :
+					PP_MASTER_EVT_PORT);
 	else
 		addr.sin_port = htons(chtype == PP_NP_GEN ?
-					PP_GEN_PORT :
-					PP_EVT_PORT);
+					PP_SLAVE_GEN_PORT :
+					PP_SLAVE_EVT_PORT);
 	context = "bind()";
 	if (bind(sock, (struct sockaddr *)&addr,
 		 sizeof(struct sockaddr_in)) < 0)
