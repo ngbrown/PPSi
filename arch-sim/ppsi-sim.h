@@ -124,6 +124,3 @@ static inline int pp_sim_is_slave(struct pp_instance *ppi)
 extern int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns);
 extern int sim_set_global_DS(struct pp_instance *ppi);
 extern void sim_main_loop(struct pp_globals *ppg);
-
-extern struct pp_network_operations sim_master_net_ops;
-extern struct pp_network_operations sim_slave_net_ops;

@@ -283,15 +283,7 @@ static int sim_net_init(struct pp_instance *ppi)
 	return 0;
 }
 
-struct pp_network_operations sim_master_net_ops = {
-	.init = sim_net_init,
-	.exit = sim_net_exit,
-	.recv = sim_net_recv,
-	.send = sim_net_send,
-	.check_packet = NULL,
-};
-
-struct pp_network_operations sim_slave_net_ops = {
+struct pp_network_operations sim_net_ops = {
 	.init = sim_net_init,
 	.exit = sim_net_exit,
 	.recv = sim_net_recv,

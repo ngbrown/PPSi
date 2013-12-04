@@ -154,13 +154,12 @@ int main(int argc, char **argv)
 			ppi->slave_only = 1;
 		}
 		ppi->t_ops = &DEFAULT_TIME_OPS;
+		ppi->n_ops = &DEFAULT_NET_OPS;
 	}
 	sim_set_global_DS(ppi_master);
 	pp_init_globals(ppg, &sim_master_rt_opts);
-	ppi_master->n_ops = &sim_master_net_ops;
 	sim_set_global_DS(ppi_slave);
 	pp_init_globals(ppg, &__pp_default_rt_opts);
-	ppi_slave->n_ops = &sim_slave_net_ops;
 
 	sim_main_loop(ppg);
 	return 0;
