@@ -44,15 +44,10 @@ int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
 
 static int sim_time_get(struct pp_instance *ppi, TimeInternal *t)
 {
-	struct timespec ts;
-
-	ts.tv_nsec = SIM_PPI_ARCH(ppi)->time.current_ns %
+	t->nanoseconds = SIM_PPI_ARCH(ppi)->time.current_ns %
 				(long long)PP_NSEC_PER_SEC;
-	ts.tv_sec = (SIM_PPI_ARCH(ppi)->time.current_ns - ts.tv_nsec) /
+	t->seconds = (SIM_PPI_ARCH(ppi)->time.current_ns - t->nanoseconds) /
 				(long long)PP_NSEC_PER_SEC;
-
-	t->nanoseconds = ts.tv_nsec;
-	t->seconds = ts.tv_sec;
 	t->correct = 1;
 
 	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
