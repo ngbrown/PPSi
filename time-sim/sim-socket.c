@@ -153,8 +153,10 @@ static int sim_net_recv(struct pp_instance *ppi, void *pkt, int len,
 static int sim_net_send(struct pp_instance *ppi, void *pkt, int len,
 			  TimeInternal *t, int chtype, int use_pdelay_addr)
 {
+	struct sim_ppi_arch_data *data = SIM_PPI_ARCH(ppi);
 	struct sockaddr_in addr;
 	struct sim_pending_pkt pending;
+	int64_t jit_ns = 0;
 	int ret;
 
 	/* only UDP */
@@ -184,10 +186,29 @@ static int sim_net_send(struct pp_instance *ppi, void *pkt, int len,
 		pending.which_ppi = SIM_SLAVE;
 	else
 		pending.which_ppi = SIM_MASTER;
-	pending.delay_ns = SIM_PPI_ARCH(ppi)->n_delay.t_prop_ns +
-				SIM_PPI_ARCH(ppi)->n_delay.jit_ns;
+
+	/* check if we are sending a FollowUp. In this case we have to add the
+	 * previous jitter, that was added to the previous Sync.
+	 * Sync and FollowUp are sent out during the same cycle of the state
+	 * machine. The simulator is not designed to fast-forward the time from
+	 * within a cycle of state machine, so Sync and FollowUp are sent out
+	 * without any time interval in the middle. The simulator acts like if
+	 * they were sent exactly at the same time. So we need a way to be sure
+	 * that the FollowUp is received after the Sync. This can be done
+	 * adding the jitter of the Sync to the one of the FollowUp. In this way
+	 * the first will always arrive first to the destination and will not
+	 * cause the FollowUp to be discarded by the slave state machine when it
+	 * comes earlier then the Sync */
+	if (((*(Enumeration4 *) (pkt + 0)) & 0x0F) == PPM_FOLLOW_UP) {
+		jit_ns += data->last_outgoing_jit_ns;
+	}
+	jit_ns += (rand() * data->n_delay.jit_ns) / RAND_MAX;
+	/* store the jitter, used from the next send if it is a FollowUp */
+	data->last_outgoing_jit_ns = jit_ns;
+
+	pending.delay_ns = data->n_delay.t_prop_ns + jit_ns;
 	insert_pending(SIM_PPG_ARCH(ppi->glbs), &pending);
-	NP(SIM_PPI_ARCH(ppi)->other_ppi)->ch[chtype].pkt_present++;
+	NP(data->other_ppi)->ch[chtype].pkt_present++;
 	return ret;
 }
 
