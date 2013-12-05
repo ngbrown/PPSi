@@ -7,6 +7,7 @@
 
 /* Socket interface for GNU/Linux (and most likely other posix systems) */
 
+#include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
 #include <sys/socket.h>
@@ -28,7 +29,7 @@ static int compare_pending(struct sim_pending_pkt *p1,
 	if (p1->delay_ns < p2->delay_ns)
 		return 1;
 
-	/* same expire time ---> higher priority to the slave beacuse it has to
+	/* same expire time ---> higher priority to the slave because it has to
 	 * handle Sync and Follow_Up in a row. If both are for the slave handle
 	 * PP_NP_EVT first */
 	if (p1->delay_ns == p2->delay_ns) {
@@ -46,15 +47,14 @@ static int insert_pending(struct sim_ppg_arch_data *data,
 	struct sim_pending_pkt *pkt, tmp;
 	int i = data->n_pending;
 
-	pkt = &data->pending[i];
-	*pkt = *new;
-	pkt--;
+	data->pending[i] = *new;
+	pkt = &data->pending[i - 1];
 	while (compare_pending(new, pkt) && (i > 0)) {
 		tmp = *pkt;
 		*pkt = *new;
-		*new = tmp;
+		*(pkt + 1) = tmp;
 		pkt--;
-		new--;
+		i--;
 	}
 	data->n_pending++;
 	return 0;
