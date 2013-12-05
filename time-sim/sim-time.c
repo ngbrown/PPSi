@@ -34,8 +34,11 @@ int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
 		for (i = 0; i < data->n_pending; i++) {
 			pkt = &data->pending[i];
 			pkt->delay_ns -= ff_ns;
-			if (pkt->delay_ns < 0)
+			if (pkt->delay_ns < 0) {
+				pp_error("pkt->delay_ns = %lli\n",
+						(long long)pkt->delay_ns);
 				exit(-1);
+			}
 		}
 	}
 
