@@ -106,7 +106,7 @@ void sub_TimeInternal(TimeInternal *r, TimeInternal *x, TimeInternal *y)
 
 void div2_TimeInternal(TimeInternal *r)
 {
-	r->nanoseconds += r->seconds % 2 * 1000000000;
+	r->nanoseconds += r->seconds % 2 * PP_NSEC_PER_SEC;
 	r->seconds /= 2;
 	r->nanoseconds /= 2;
 
