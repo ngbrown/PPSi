@@ -36,7 +36,7 @@ void pp_servo_init(struct pp_instance *ppi)
 		SRV(ppi)->obs_drift);
 }
 
-/* internal helper, retuerning static storage to be used immediately */
+/* internal helper, returning static storage to be used immediately */
 static char *fmt_TI(TimeInternal *t)
 {
 	static char s[24];
@@ -305,7 +305,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	 * adjust_freq() it has a stable offsey by design: the offset
 	 * that keeps the controller asking for the proper frequency (if
 	 * the offset were zero the controller would ask for 0 frequency
-	 * adjustment, thus unsyncing the clocks in most cases. 
+	 * adjustment, thus unsyncing the clocks in most cases.
 	 */
 
 	/* the accumulator for the I component */
