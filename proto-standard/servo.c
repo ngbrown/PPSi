@@ -12,7 +12,7 @@ void pp_servo_init(struct pp_instance *ppi)
 {
 	int d;
 
-	SRV(ppi)->mpd_fltr.s_exp = 0;	/* clears one-way delay filter */
+	SRV(ppi)->mpd_fltr.s_exp = 0;	/* clears meanPathDelay filter */
 	SRV(ppi)->ofm_fltr.s_exp = 0;	/* clears offset-from-master filter */
 	ppi->frgn_rec_num = 0;		/* no known master */
 	DSPAR(ppi)->parentPortIdentity.portNumber = 0; /* invalid */
@@ -74,7 +74,7 @@ static int pp_servo_bad_event(struct pp_instance *ppi)
 	TimeInternal *s_to_m_dly = &SRV(ppi)->s_to_m_dly;
 	TimeInternal *mpd = &DSCUR(ppi)->meanPathDelay;
 
-	/* Discard one-way delays that overflow a second (makes no sense) */
+	/* Discard meanPathDelays that overflow a second (makes no sense) */
 	if (mpd->seconds)
 		return 1;
 
@@ -129,7 +129,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	/* Calc mean path delay, used later to calc "offset from master" */
 	add_TimeInternal(mpd, &SRV(ppi)->m_to_s_dly, &SRV(ppi)->s_to_m_dly);
 	div2_TimeInternal(mpd);
-	pp_diag(ppi, servo, 1, "One-way delay: %s\n", fmt_TI(mpd));
+	pp_diag(ppi, servo, 1, "meanPathDelay: %s\n", fmt_TI(mpd));
 
 	if(pp_servo_bad_event(ppi))
 		return;
@@ -179,7 +179,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		/ mpd_fltr->s_exp;
 	mpd->nanoseconds = mpd_fltr->y;
 
-	pp_diag(ppi, servo, 1, "After avg(%i), one-way delay: %i\n",
+	pp_diag(ppi, servo, 1, "After avg(%i), meanPathDelay: %i\n",
 		(int)mpd_fltr->s_exp, mpd->nanoseconds);
 
 	/* update 'offsetFromMaster', (End to End mode) */
@@ -329,7 +329,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 			ppi->t_ops->adjust_offset(ppi, -adj);
 	}
 
-	pp_diag(ppi, servo, 2, "One-way delay averaged: %s\n", fmt_TI(mpd));
+	pp_diag(ppi, servo, 2, "meanPathDelay averaged: %s\n", fmt_TI(mpd));
 	pp_diag(ppi, servo, 2, "Offset from m averaged: %s\n", fmt_TI(ofm));
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
 		(int)SRV(ppi)->obs_drift);

@@ -32,7 +32,7 @@ static struct cmd_line_opt cmd_line_list[] = {
 	{"-M NUMBER", "do not accept delay values of more than NUMBER nanoseconds"},
 	{"-t", "do not adjust the system clock"},
 	{"-a NUMBER,NUMBER", "specify clock servo P and I values (min == 1)"},
-	{"-w NUMBER", "specify one way delay filter stiffness"},
+	{"-w NUMBER", "specify meanPathDelay filter stiffness"},
 	CMD_LINE_SEPARATOR,
 	{"-b NAME", "bind PTP to network interface NAME"},
 	//{"-u ADDRESS", "also send uni-cast to ADDRESS\n"}, -- FIXME: useful?

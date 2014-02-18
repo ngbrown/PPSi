@@ -74,7 +74,7 @@ struct pp_frgn_master {
  * machine are implemented.
  *
  * pp_avg_fltr: It is a variable cutoff/delay low-pass, infinite impulse
- * response (IIR) filter. The one-way delay filter has the difference equation:
+ * response (IIR) filter. The meanPathDelay filter has the difference equation:
  * s*y[n] - (s-1)*y[n-1] = x[n]/2 + x[n-1]/2,
  * where increasing the stiffness (s) lowers the cutoff and increases the delay.
  */
