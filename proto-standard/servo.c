@@ -131,7 +131,8 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	div2_TimeInternal(mpd);
 	pp_diag(ppi, servo, 1, "meanPathDelay: %s\n", fmt_TI(mpd));
 
-	if(pp_servo_bad_event(ppi))
+	/* if this succeeds mpd->seconds == 0 is true */
+	if (pp_servo_bad_event(ppi))
 		return;
 
 	if (mpd_fltr->s_exp < 1) {
@@ -167,6 +168,8 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	 * this case use a value just slightly bigger than the current
 	 * average (so if it really got longer, we will adapt).  This
 	 * kills most outliers on loaded networks.
+	 * The constant multipliers have been chosed arbitrarily, but
+	 * they work well in testing environment.
 	 */
 	if (mpd->nanoseconds > 3 * mpd_fltr->y) {
 		pp_diag(ppi, servo, 1, "Trim too-long mpd: %i\n",
@@ -207,7 +210,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		/* if secs, reset clock or set freq adjustment to max */
 		if (!OPTS(ppi)->no_adjust) {
 			if (!OPTS(ppi)->no_rst_clk) {
-				/* Can't use "adjust, limited to +/- 2s */
+				/* Can't use adjust, limited to +/- 2s */
 				time_tmp = ppi->t4;
 				add_TimeInternal(&time_tmp, &time_tmp,
 						 &DSCUR(ppi)->meanPathDelay);
