@@ -29,7 +29,7 @@ int wrs_adjust_counters(int64_t adjust_sec, int32_t adjust_nsec)
 	if (adjust_sec && adjust_nsec) {
 		pp_printf("FATAL: trying to adjust both the SEC and the NS"
 			" counters simultaneously. \n");
-		exit(-1);
+		exit(1);
 	}
 
 	p.adjust_sec = adjust_sec;
