@@ -271,8 +271,13 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 				break;
 
 	if (!l->f) {
-		pp_diag(NULL, config, 1, "line %i: no such keyword \"%s\"\n",
-			lineno, word);
+		pp_error("line %i: no such keyword \"%s\"\n", lineno, word);
+		return -1;
+	}
+
+	if ((l->t != ARG_NONE) && (!*line)) {
+		pp_error("line %i: no argument for option \"%s\"\n", lineno,
+									word);
 		return -1;
 	}
 

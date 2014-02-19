@@ -113,10 +113,12 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 			pp_global_flags = pp_diag_parse(a);
 			break;
 		case 'C':
-			pp_config_string(ppg, argv[++i]);
+			if (pp_config_string(ppg, argv[++i]) != 0)
+				return -1;
 			break;
 		case 'f':
-			pp_config_file(ppg, 1, argv[++i]);
+			if (pp_config_file(ppg, 1, argv[++i]) != 0)
+				return -1;
 			break;
 		case 'x':
 			GOPTS(ppg)->no_rst_clk = 1;
