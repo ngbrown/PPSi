@@ -37,7 +37,7 @@ int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
 			if (pkt->delay_ns < 0) {
 				pp_error("pkt->delay_ns = %lli\n",
 						(long long)pkt->delay_ns);
-				exit(-1);
+				exit(1);
 			}
 		}
 	}
