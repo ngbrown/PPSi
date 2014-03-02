@@ -184,6 +184,10 @@ struct pp_instance {
 	struct pp_instance_cfg cfg;
 };
 
+struct pp_globals_cfg {
+	int cfg_items;			/* Remember how many we parsed */
+	int cur_ppi_n;	/* Remember which instance we are configuring */
+};
 
 /*
  * Structure for the multi-port ppsi instance.
@@ -208,7 +212,7 @@ struct pp_globals {
 
 	int nlinks;
 	int max_links;
-	int cfg_items;			/* Remember how many we parsed */
+	struct pp_globals_cfg cfg;
 
 	void *arch_data;		/* if arch needs it */
 	/* FIXME Here include all is common to many interfaces */

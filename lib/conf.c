@@ -14,97 +14,105 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/* config lines are global or ppi-specific. Keep track of globals and ppi */
-static struct pp_globals *current_ppg;
-static struct pp_instance *current_ppi;
+static inline struct pp_instance *CUR_PPI(struct pp_globals *ppg)
+{
+	if (ppg->cfg.cur_ppi_n < 0)
+		return NULL;
+	return INST(ppg, ppg->cfg.cur_ppi_n);
+}
 
 /* A "port" (or "link", for compatibility) line creates or uses a pp instance */
-static int f_port(int lineno, union pp_cfg_arg *arg)
+static int f_port(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	int i;
 
 	/* First look for an existing port with the same name */
-	for (i = 0; i < current_ppg->nlinks; i++) {
-		current_ppi = INST(current_ppg, i);
-		if (!strcmp(arg->s, current_ppi->cfg.port_name))
+	for ( i = 0; i < ppg->nlinks; i++) {
+		ppg->cfg.cur_ppi_n = i;
+		if (!strcmp(arg->s, CUR_PPI(ppg)->cfg.port_name))
 			return 0;
 	}
-	/* Allocate a new ppi */
-	if (current_ppg->nlinks >= current_ppg->max_links) {
+	/* check if there are still some free pp_instances to be used */
+	if (ppg->nlinks >= ppg->max_links) {
 		pp_printf("config line %i: out of available ports\n",
 			  lineno);
+		/* we are out of available ports. set cur_ppi_n to -1 so if
+		 * someone tries to set some parameter to this pp_instance it
+		 * will cause an error, instead of overwrite the parameters of
+		 * antother pp_instance */
+		ppg->cfg.cur_ppi_n = -1;
 		return -1;
 	}
-	current_ppi = INST(current_ppg, current_ppg->nlinks);
+	ppg->cfg.cur_ppi_n = ppg->nlinks;
 
 	 /* FIXME: strncpy (it is missing in bare archs by now) */
-	strcpy(current_ppi->cfg.port_name, arg->s);
-	current_ppg->nlinks++;
+	strcpy(CUR_PPI(ppg)->cfg.port_name, arg->s);
+	ppg->nlinks++;
 	return 0;
 }
 
 #define CHECK_PPI(need) /* Quick hack to factorize errors later */ 	\
-	({if (need && !current_ppi) {					\
+	({if (need && !CUR_PPI(ppg)) {		\
 		pp_printf("config line %i: no port for this config\n", lineno);\
 		return -1; \
 	} \
-	if (!need && current_ppi) { \
+	if (!need && CUR_PPI(ppg)) { \
 		pp_printf("config line %i: global config under \"port\"\n", \
 			  lineno); \
 		return -1; \
 	}})
 
-static int f_if(int lineno, union pp_cfg_arg *arg)
+static int f_if(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	strcpy(current_ppi->cfg.iface_name, arg->s);
+	strcpy(CUR_PPI(ppg)->cfg.iface_name, arg->s);
 	return 0;
 }
 
 /* The following ones are so similar. Bah... set a pointer somewhere? */
-static int f_proto(int lineno, union pp_cfg_arg *arg)
+static int f_proto(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	current_ppi->cfg.proto = arg->i;
+	CUR_PPI(ppg)->cfg.proto = arg->i;
 	return 0;
 }
 
-static int f_role(int lineno, union pp_cfg_arg *arg)
+static int f_role(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	current_ppi->cfg.role = arg->i;
+	CUR_PPI(ppg)->cfg.role = arg->i;
 	return 0;
 }
 
-static int f_ext(int lineno, union pp_cfg_arg *arg)
+static int f_ext(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	current_ppi->cfg.ext = arg->i;
+	CUR_PPI(ppg)->cfg.ext = arg->i;
 	return 0;
 }
 
 /* The following two are identical as well. I really need a pointer... */
-static int f_class(int lineno, union pp_cfg_arg *arg)
+static int f_class(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(0);
-	GOPTS(current_ppg)->clock_quality.clockClass = arg->i;
+	GOPTS(ppg)->clock_quality.clockClass = arg->i;
 	return 0;
 }
 
-static int f_accuracy(int lineno, union pp_cfg_arg *arg)
+static int f_accuracy(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(0);
-	GOPTS(current_ppg)->clock_quality.clockAccuracy = arg->i;
+	GOPTS(ppg)->clock_quality.clockAccuracy = arg->i;
 	return 0;
 }
 
 /* Diagnostics can be per-port or global */
-static int f_diag(int lineno, union pp_cfg_arg *arg)
+static int f_diag(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	unsigned long level = pp_diag_parse(arg->s);
 
-	if (current_ppi)
-		current_ppi->flags = level;
+	if (ppg->cfg.cur_ppi_n >= 0)
+		CUR_PPI(ppg)->flags = level;
 	else
 		pp_global_flags = level;
 	return 0;
@@ -244,7 +252,6 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 	struct pp_argname *n;
 	char *word;
 
-	current_ppg = ppg;
 	pp_diag(NULL, config, 2, "parsing line %i: \"%s\"\n", lineno, line);
 	word = first_word(line, &line);
 	/* now line points to the next word, with no leading blanks */
@@ -252,8 +259,20 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 	if (word[0] == '#')
 		return 0;
 	if (!*word) {
-		/* empty or blank-only */
-		current_ppi = NULL;
+		/* empty or blank-only
+		 * FIXME: this sets cur_ppi_n to an unvalid value. this means
+		 * that every blank line in config file unsets the current
+		 * pp_instance being configured. For this reason after a blank
+		 * line in config file the pp_instance to be configured needs to
+		 * be stated anew. Probably this is a desired feature because
+		 * this behavior was already present here with the previous
+		 * implementation, based on pointers. Is this sane? This means
+		 * configuration file is somehow indentation-dependent (because
+		 * presence or absence of blank lines matters). This feature is
+		 * not documented anywhere AFAIK. If it's a feature it should
+		 * be. If its a bug it should be fixed.
+		 */
+		ppg->cfg.cur_ppi_n = -1;
 		return 0;
 	}
 
@@ -322,7 +341,7 @@ static int pp_config_line(struct pp_globals *ppg, char *line, int lineno)
 		break;
 	}
 
-	if (l->f(lineno, &cfg_arg))
+	if (l->f(lineno, ppg, &cfg_arg))
 		return -1;
 
 	return 0;
@@ -348,7 +367,9 @@ static int pp_parse_conf(struct pp_globals *ppg, char *conf, int len)
 		if (term == '\n')
 			lineno++;
 	} while (term); /* if terminator was already 0, we are done */
-	pp_config_line(ppg, "", 0); /* done: clear current_ppi */
+	/* clear current ppi, don't store current ppi across different
+	 * configuration files or strings */
+	ppg->cfg.cur_ppi_n = -1;
 	return errcount ? -1 : 0;
 }
 
@@ -385,10 +406,10 @@ int pp_config_file(struct pp_globals *ppg, int force, char *fname)
 	conf_fd = pp_open_conf_file(fname);
 	if (conf_fd < 0) {
 		if (force)
-			ppg->cfg_items++;
+			ppg->cfg.cfg_items++;
 		return -1;
 	}
-	ppg->cfg_items++;
+	ppg->cfg.cfg_items++;
 
 	/* read the whole file, it is split up later on */
 
