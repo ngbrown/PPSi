@@ -71,5 +71,25 @@ static inline struct sim_ppi_arch_data *SIM_PPI_ARCH(struct pp_instance *ppi)
 	return (struct sim_ppi_arch_data *)(ppi->arch_data);
 }
 
+static inline struct pp_instance *pp_sim_get_master(struct pp_globals *ppg)
+{
+	return INST(ppg, SIM_MASTER);
+}
+
+static inline struct pp_instance *pp_sim_get_slave(struct pp_globals *ppg)
+{
+	return INST(ppg, SIM_SLAVE);
+}
+
+static inline int pp_sim_is_master(struct pp_instance *ppi)
+{
+	return ((ppi - ppi->glbs->pp_instances) == SIM_MASTER);
+}
+
+static inline int pp_sim_is_slave(struct pp_instance *ppi)
+{
+	return ((ppi - ppi->glbs->pp_instances) == SIM_SLAVE);
+}
+
 extern int sim_set_global_DS(struct pp_instance *ppi);
 extern void sim_main_loop(struct pp_globals *ppg);
