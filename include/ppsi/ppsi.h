@@ -37,6 +37,12 @@ static inline struct pp_globals *GLBS(struct pp_instance *ppi)
 	return ppi->glbs;
 }
 
+static inline struct pp_instance *INST(struct pp_globals *ppg,
+							int n_instance)
+{
+	return ppg->pp_instances + n_instance;
+}
+
 static inline struct pp_runtime_opts *GOPTS(struct pp_globals *ppg)
 {
 	return ppg->rt_opts;
