@@ -28,7 +28,7 @@ static int run_all_state_machines(struct pp_globals *ppg)
 	int delay_ms = 0, delay_ms_j;
 
 	for (j = 0; j < ppg->nlinks; j++) {
-		struct pp_instance *ppi = &ppg->pp_instances[j];
+		struct pp_instance *ppi = INST(ppg, j);
 		int old_lu = WR_DSPOR(ppi)->linkUP;
 		hexp_port_state_t state;
 
@@ -82,7 +82,7 @@ void wrs_main_loop(struct pp_globals *ppg)
 	/* Initialize each link's state machine */
 	for (j = 0; j < ppg->nlinks; j++) {
 
-		ppi = &ppg->pp_instances[j];
+		ppi = INST(ppg, j);
 
 		/*
 		* If we are sending or receiving raw ethernet frames,
@@ -114,7 +114,7 @@ void wrs_main_loop(struct pp_globals *ppg)
 		if (ppg->ebest_updated) {
 			for (j = 0; j < ppg->nlinks; j++) {
 				int new_state;
-				struct pp_instance *ppi = &ppg->pp_instances[j];
+				struct pp_instance *ppi = INST(ppg, j);
 				new_state = bmc(ppi);
 				if (new_state != ppi->state) {
 					ppi->state = new_state;
@@ -142,7 +142,7 @@ void wrs_main_loop(struct pp_globals *ppg)
 
 		for (j = 0; j < ppg->nlinks; j++) {
 			int tmp_d;
-			ppi = &ppg->pp_instances[j];
+			ppi = INST(ppg, j);
 
 			if ((NP(ppi)->ch[PP_NP_GEN].pkt_present) ||
 			    (NP(ppi)->ch[PP_NP_EVT].pkt_present)) {

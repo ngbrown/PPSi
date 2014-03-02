@@ -160,7 +160,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 		case 'b':
 			a = argv[++i];
 			if (ppg->nlinks == 1)
-				ppg->pp_instances[0].iface_name = a;
+				INST(ppg, 0)->iface_name = a;
 			else {
 				/* If ppsi.conf exists and more than one link is
 				 * configured, it makes no sense trying to set an iface
@@ -197,7 +197,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 				= PP_CLASS_SLAVE_ONLY;
 			/* Apply -g option globally, to each configured link */
 			for (j = 0; j < ppg->nlinks; j++)
-				ppg->pp_instances[j].slave_only = 1;
+				INST(ppg, j)->slave_only = 1;
 			break;
 		case 'v':
 			a = argv[++i];
@@ -228,7 +228,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 		case 'e':
 			/* Apply -e option globally, to each configured link */
 			for (j = 0; j < ppg->nlinks; j++)
-				ppg->pp_instances[j].ethernet_mode = 1;
+				INST(ppg, j)->ethernet_mode = 1;
 			break;
 		case 'G':
 			/* gptp_mode not supported: fall through */

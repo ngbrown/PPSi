@@ -428,7 +428,7 @@ static int unix_net_check_packet(struct pp_globals *ppg, int delay_ms)
 	FD_ZERO(&set);
 
 	for (j = 0; j < ppg->nlinks; j++) {
-		struct pp_instance *ppi = &ppg->pp_instances[j];
+		struct pp_instance *ppi = INST(ppg, j);
 		int fd_to_set;
 
 		/* Use either fd that is valid, irrespective of ether/udp */
@@ -454,7 +454,7 @@ static int unix_net_check_packet(struct pp_globals *ppg, int delay_ms)
 		return 0;
 
 	for (j = 0; j < ppg->nlinks; j++) {
-		struct pp_instance *ppi = &ppg->pp_instances[j];
+		struct pp_instance *ppi = INST(ppg, j);
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
 		if (fd >= 0 && FD_ISSET(fd, &set)) {

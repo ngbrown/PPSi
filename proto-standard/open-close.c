@@ -63,7 +63,7 @@ int pp_init_globals(struct pp_globals *ppg, struct pp_runtime_opts *pp_rt_opts)
 		   sizeof(ClockQuality));
 
 	if (def->numberPorts == 1)
-		def->slaveOnly = ppg->pp_instances[0].slave_only;
+		def->slaveOnly = INST(ppg, 0)->slave_only;
 	else
 		def->slaveOnly = 1; /* the for cycle below will set it to 0 if not
 							 * ports are not all slave_only */
@@ -73,7 +73,7 @@ int pp_init_globals(struct pp_globals *ppg, struct pp_runtime_opts *pp_rt_opts)
 	def->domainNumber = rt_opts->domain_number;
 
 	for (i = 0; i < def->numberPorts; i++) {
-		struct pp_instance *ppi = &ppg->pp_instances[i];
+		struct pp_instance *ppi = INST(ppg, i);
 
 		if (def->slaveOnly && !ppi->slave_only)
 			def->slaveOnly = 0;

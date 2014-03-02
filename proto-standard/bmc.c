@@ -265,8 +265,8 @@ void bmc_update_ebest(struct pp_globals *ppg)
 
 	for (i = 1, best = 0; i < ppg->defaultDS->numberPorts; i++) {
 
-		ppi_best = &ppg->pp_instances[best];
-		ppi = &ppg->pp_instances[i];
+		ppi_best = INST(ppg, best);
+		ppi = INST(ppg, i);
 
 		if ((ppi->frgn_rec_num > 0) &&
 			 (bmc_dataset_cmp(ppi,

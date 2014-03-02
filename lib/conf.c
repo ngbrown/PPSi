@@ -25,7 +25,7 @@ static int f_port(int lineno, union pp_cfg_arg *arg)
 
 	/* First look for an existing port with the same name */
 	for (i = 0; i < current_ppg->nlinks; i++) {
-		current_ppi = current_ppg->pp_instances + i;
+		current_ppi = INST(current_ppg, i);
 		if (!strcmp(arg->s, current_ppi->cfg.port_name))
 			return 0;
 	}
@@ -35,7 +35,7 @@ static int f_port(int lineno, union pp_cfg_arg *arg)
 			  lineno);
 		return -1;
 	}
-	current_ppi = current_ppg->pp_instances + current_ppg->nlinks;
+	current_ppi = INST(current_ppg, current_ppg->nlinks);
 
 	 /* FIXME: strncpy (it is missing in bare archs by now) */
 	strcpy(current_ppi->cfg.port_name, arg->s);

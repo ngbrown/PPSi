@@ -32,16 +32,16 @@ static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 	 * configuration, just assume there is one ppi instance,
 	 * already configured properly by the arch's main loop */
 	if (ppg->nlinks == 0) {
-		ppg->pp_instances[0].ext_data = &wr_data;
+		INST(ppg, 0)->ext_data = &wr_data;
 		return 0;
 	}
 
 	for (i = 0; i < ppg->nlinks; i++) {
-		struct pp_instance *ppi = &ppg->pp_instances[i];
+		struct pp_instance *ppi = INST(ppg, i);
 
 		/* FIXME check if correct: assign to each instance the same
 		 * wr_data. May I move it to pp_globals? */
-		ppg->pp_instances[i].ext_data = &wr_data;
+		INST(ppg, i)->ext_data = &wr_data;
 
 		if (ppi->cfg.ext == PPSI_EXT_WR) {
 			switch (ppi->cfg.role) {

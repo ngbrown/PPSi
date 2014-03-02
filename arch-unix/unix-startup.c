@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < ppg->nlinks; i++) {
 
-		ppi = &ppg->pp_instances[i];
+		ppi = INST(ppg, i);
 		NP(ppi)->ch[PP_NP_EVT].fd = -1;
 		NP(ppi)->ch[PP_NP_GEN].fd = -1;
 
