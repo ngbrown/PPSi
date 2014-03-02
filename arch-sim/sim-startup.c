@@ -79,7 +79,7 @@ static int sim_ppi_init(struct pp_instance *ppi, int which_ppi)
 		data->rt_opts = &sim_master_rt_opts;
 	else
 		data->rt_opts = &__pp_default_rt_opts;
-	data->other_ppi = &ppi->glbs->pp_instances[- (which_ppi - 1)];
+	data->other_ppi = INST(ppi->glbs, -(which_ppi - 1));
 	return 0;
 }
 
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 
 	/* Alloc data stuctures inside the pp_instances */
 	for (i = 0; i < ppg->max_links; i++) {
-		ppi = &ppg->pp_instances[i];
+		ppi = INST(ppg, i);
 		ppi->glbs = ppg; // must be done before using sim_set_global_DS
 		if (sim_ppi_init(ppi, i))
 			return -1;
@@ -118,14 +118,14 @@ int main(int argc, char **argv)
 	 * master config later because the initial time for the master is needed
 	 * to set the initial offset for the slave
 	 */
-	sim_set_global_DS(&ppg->pp_instances[SIM_MASTER]);
+	sim_set_global_DS(pp_sim_get_master(ppg));
 	pp_config_string(ppg, strdup("port SIM_MASTER; iface MASTER;"
 					"proto udp; role master;"
 					"sim_duration_sec 3600;" // one hour
 					"sim_init_master_time 10.0;"));
 
 	/* parse commandline for configuration options */
-	sim_set_global_DS(&ppg->pp_instances[SIM_SLAVE]);
+	sim_set_global_DS(pp_sim_get_slave(ppg));
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;
 	/* If no item has been parsed, provide default file or string */
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 						"proto udp; role slave;"));
 
 	for (i = 0; i < ppg->nlinks; i++) {
-		ppi = &ppg->pp_instances[i];
+		ppi = INST(ppg, i);
 		sim_set_global_DS(ppi);
 		ppi->iface_name = ppi->cfg.iface_name;
 		if (ppi->cfg.proto == PPSI_PROTO_RAW)
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 		}
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 		ppi->n_ops = &DEFAULT_NET_OPS;
-		if (ppi - ppi->glbs->pp_instances == SIM_MASTER)
+		if (pp_sim_is_master(ppi))
 			pp_init_globals(ppg, &sim_master_rt_opts);
 		else
 			pp_init_globals(ppg, &__pp_default_rt_opts);

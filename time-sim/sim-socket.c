@@ -161,7 +161,7 @@ static int sim_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 	/* only UDP */
 	addr.sin_family = AF_INET;
-	if (ppi - ppi->glbs->pp_instances == SIM_SLAVE)
+	if (pp_sim_is_slave(ppi))
 		addr.sin_port = htons(chtype == PP_NP_GEN ?
 					PP_MASTER_GEN_PORT :
 					PP_MASTER_EVT_PORT);
@@ -182,7 +182,7 @@ static int sim_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 	/* store pending packets in global structure */
 	pending.chtype = chtype;
-	if (ppi - ppi->glbs->pp_instances == SIM_MASTER)
+	if (pp_sim_is_master(ppi))
 		pending.which_ppi = SIM_SLAVE;
 	else
 		pending.which_ppi = SIM_MASTER;
@@ -254,7 +254,7 @@ static int sim_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	 * messages */
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	if ((ppi - ppi->glbs->pp_instances) == SIM_MASTER)
+	if (pp_sim_is_master(ppi))
 		addr.sin_port = htons(chtype == PP_NP_GEN ?
 					PP_MASTER_GEN_PORT :
 					PP_MASTER_EVT_PORT);
@@ -273,7 +273,7 @@ static int sim_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	 * itself, based on the clockIdentity. This hack avoids this behaviour,
 	 * changing the clockIdentity of the master.
 	 */
-	if (ppi - ppi->glbs->pp_instances == SIM_MASTER)
+	if (pp_sim_is_master(ppi))
 		memset(NP(ppi)->ch[chtype].addr, 111, 1);
 	return 0;
 

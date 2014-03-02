@@ -21,7 +21,7 @@ int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
 	int i;
 
 	for (i = 0; i < ppg->nlinks; i++) {
-		t_inst = &SIM_PPI_ARCH(ppg->pp_instances + i)->time;
+		t_inst = &SIM_PPI_ARCH(INST(ppg, i))->time;
 		t_inst->current_ns += ff_ns +
 			(t_inst->freq_ppm_servo + t_inst->freq_ppm_real) *
 				ff_ns / 1000 / 1000 / 1000;

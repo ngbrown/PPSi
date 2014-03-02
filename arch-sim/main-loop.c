@@ -24,7 +24,7 @@ static int run_all_state_machines(struct pp_globals *ppg)
 	int delay_ms = 0, delay_ms_j;
 
 	for (j = 0; j < ppg->nlinks; j++) {
-		struct pp_instance *ppi = &ppg->pp_instances[j];
+		struct pp_instance *ppi = INST(ppg, j);
 		sim_set_global_DS(ppi);
 		delay_ms_j = pp_state_machine(ppi, NULL, 0);
 
@@ -48,7 +48,7 @@ void sim_main_loop(struct pp_globals *ppg)
 
 	/* Initialize each link's state machine */
 	for (j = 0; j < ppg->nlinks; j++) {
-		ppi = &ppg->pp_instances[j];
+		ppi = INST(ppg, j);
 		ppi->is_new_state = 1;
 	}
 
@@ -63,7 +63,7 @@ void sim_main_loop(struct pp_globals *ppg)
 		if (ppg->ebest_updated) {
 			for (j = 0; j < ppg->nlinks; j++) {
 				int new_state;
-				struct pp_instance *ppi = &ppg->pp_instances[j];
+				struct pp_instance *ppi = INST(ppg ,j);
 				new_state = bmc(ppi);
 				if (new_state != ppi->state) {
 					ppi->state = new_state;
@@ -74,7 +74,7 @@ void sim_main_loop(struct pp_globals *ppg)
 		}
 
 		while (data->n_pending && data->pending->delay_ns <= delay_ns) {
-			ppi = &ppg->pp_instances[data->pending->which_ppi];
+			ppi = INST(ppg, data->pending->which_ppi);
 
 			sim_fast_forward_ns(ppg, data->pending->delay_ns);
 			delay_ns -= data->pending->delay_ns;
