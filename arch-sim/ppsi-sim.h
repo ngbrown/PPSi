@@ -28,6 +28,7 @@ struct pp_sim_time_instance {
 struct pp_sim_net_delay {
 	unsigned int t_prop_ns; // propagation delay on outgoing link
 	uint64_t jit_ns; // jitter in nsec on outgoing link
+	uint64_t last_outgoing_jit_ns;
 };
 
 /*
@@ -81,7 +82,6 @@ static inline struct sim_ppg_arch_data *SIM_PPG_ARCH(struct pp_globals *ppg)
 struct sim_ppi_arch_data {
 	struct pp_sim_time_instance time;
 	struct pp_sim_net_delay n_delay;
-	uint64_t last_outgoing_jit_ns;
 	/* servo */
 	struct pp_servo *servo;
 	/* Runtime options */

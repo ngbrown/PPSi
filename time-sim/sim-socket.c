@@ -200,11 +200,11 @@ static int sim_net_send(struct pp_instance *ppi, void *pkt, int len,
 	 * cause the FollowUp to be discarded by the slave state machine when it
 	 * comes earlier then the Sync */
 	if (((*(Enumeration4 *) (pkt + 0)) & 0x0F) == PPM_FOLLOW_UP) {
-		jit_ns += data->last_outgoing_jit_ns;
+		jit_ns += data->n_delay.last_outgoing_jit_ns;
 	}
 	jit_ns += (rand() * data->n_delay.jit_ns) / RAND_MAX;
 	/* store the jitter, used from the next send if it is a FollowUp */
-	data->last_outgoing_jit_ns = jit_ns;
+	data->n_delay.last_outgoing_jit_ns = jit_ns;
 
 	pending.delay_ns = data->n_delay.t_prop_ns + jit_ns;
 	insert_pending(SIM_PPG_ARCH(ppi->glbs), &pending);
