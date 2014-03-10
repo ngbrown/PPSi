@@ -25,6 +25,9 @@
 #include <ppsi/ppsi.h>
 #include <ppsi-wrs.h>
 
+#define WRSW_HAL_RETRIES 1000
+#define WRSW_HAL_TIMEOUT 2000000 /* us */
+
 static struct wr_operations wrs_wr_operations = {
 	.locking_enable = wrs_locking_enable,
 	.locking_poll = wrs_locking_poll,
@@ -62,16 +65,28 @@ int main(int argc, char **argv)
 	struct pp_instance *ppi;
 	struct wr_dsport *wrp;
 	struct timex t;
-	int i;
+	int i, hal_retries;
 
 	setbuf(stdout, NULL);
 
 	pp_printf("PPSi. Commit %s, built on " __DATE__ "\n",
 		PPSI_VERSION);
 
-	hal_ch = minipc_client_create(WRSW_HAL_SERVER_ADDR,
-				      MINIPC_FLAG_VERBOSE);
-	if (!hal_ch) { /* FIXME should we retry with minipc_client_create? */
+	/* try connecting to HAL multiple times in case it's still not ready */
+	hal_retries = WRSW_HAL_RETRIES;
+	for(;;) {
+		hal_ch = minipc_client_create(WRSW_HAL_SERVER_ADDR,
+					      MINIPC_FLAG_VERBOSE);
+		if (!hal_ch)
+			hal_retries--;
+
+		if(hal_ch || !hal_retries)
+			break;
+
+		usleep(WRSW_HAL_TIMEOUT);
+	}
+
+	if (!hal_ch) {
 		pp_printf("Fatal: could not connect to HAL");
 		exit(__LINE__);
 	}
