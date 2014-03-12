@@ -105,7 +105,7 @@ static int sim_adjust_offset(struct pp_instance *ppi, long offset_ns)
 
 static inline int sim_init_servo(struct pp_instance *ppi)
 {
-	return SIM_PPI_ARCH(ppi)->time.freq_ppm_servo;
+	return SIM_PPI_ARCH(ppi)->time.freq_ppm_real;
 }
 
 static unsigned long sim_calc_timeout(struct pp_instance *ppi, int millisec)
