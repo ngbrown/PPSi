@@ -19,12 +19,13 @@ int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
 {
 	struct pp_sim_time_instance *t_inst;
 	int i;
+	int64_t tmp;
 
 	for (i = 0; i < ppg->nlinks; i++) {
 		t_inst = &SIM_PPI_ARCH(INST(ppg, i))->time;
-		t_inst->current_ns += ff_ns +
-			(t_inst->freq_ppm_servo + t_inst->freq_ppm_real) *
-				ff_ns / 1000 / 1000 / 1000;
+		tmp = ff_ns + t_inst->freq_ppm_real * ff_ns / 1000 / 1000 / 1000;
+		t_inst->current_ns += tmp + (t_inst->freq_ppm_servo) *
+						tmp / 1000 / 1000 / 1000;
 	}
 	pp_diag(0, time, 1, "%s: %li ns\n", __func__, (long)ff_ns);
 
