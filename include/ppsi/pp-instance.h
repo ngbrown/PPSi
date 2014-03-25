@@ -89,7 +89,6 @@ struct pp_servo {
 	TimeInternal s_to_m_dly;
 	long long obs_drift;
 	struct pp_avg_fltr mpd_fltr;
-	struct pp_avg_fltr ofm_fltr;
 };
 
 /*
