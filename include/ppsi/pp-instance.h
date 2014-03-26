@@ -87,7 +87,7 @@ struct pp_avg_fltr {
 struct pp_servo {
 	TimeInternal m_to_s_dly;
 	TimeInternal s_to_m_dly;
-	Integer32 obs_drift;
+	long long obs_drift;
 	struct pp_avg_fltr mpd_fltr;
 	struct pp_avg_fltr ofm_fltr;
 };

@@ -24,7 +24,7 @@ void pp_servo_init(struct pp_instance *ppi)
 			pp_diag(ppi, servo, 1, "error in t_ops->servo_init");
 			d = 0;
 		}
-		SRV(ppi)->obs_drift = -d; /* note "-" */
+		SRV(ppi)->obs_drift = -d << 10; /* note "-" */
 	} else {
 		/* level clock */
 		if (!OPTS(ppi)->no_adjust)
@@ -32,7 +32,7 @@ void pp_servo_init(struct pp_instance *ppi)
 		SRV(ppi)->obs_drift = 0;
 	}
 
-	pp_diag(ppi, servo, 1, "Initialized: obs_drift %i\n",
+	pp_diag(ppi, servo, 1, "Initialized: obs_drift %lli\n",
 		SRV(ppi)->obs_drift);
 }
 
@@ -96,7 +96,6 @@ static int pp_servo_bad_event(struct pp_instance *ppi)
 	return 0;
 }
 
-
 /* called by slave states when delay_resp is received (all t1..t4 are valid) */
 void pp_servo_got_resp(struct pp_instance *ppi)
 {
@@ -106,6 +105,11 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	TimeInternal *ofm = &DSCUR(ppi)->offsetFromMaster;
 	struct pp_avg_fltr *mpd_fltr = &SRV(ppi)->mpd_fltr;
 	struct pp_avg_fltr *ofm_fltr = &SRV(ppi)->ofm_fltr;
+	long long I_term;
+	long long P_term;
+	long long tmp;
+	int I_sign;
+	int P_sign;
 	Integer32 adj;
 	int s;
 
@@ -310,17 +314,47 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	 * adjustment, thus unsyncing the clocks in most cases.
 	 */
 
-	/* the accumulator for the I component */
-	SRV(ppi)->obs_drift += ofm->nanoseconds / OPTS(ppi)->ai;
+	/* the accumulator for the I component, shift by 10 to avoid losing bits
+	 * later in the division */
+	SRV(ppi)->obs_drift += ((long long)ofm->nanoseconds) << 10;
 
-	/* clamp the accumulator to PP_ADJ_FREQ_MAX for sanity */
-	if (SRV(ppi)->obs_drift > PP_ADJ_FREQ_MAX)
-		SRV(ppi)->obs_drift = PP_ADJ_FREQ_MAX;
-	else if (SRV(ppi)->obs_drift < -PP_ADJ_FREQ_MAX)
-		SRV(ppi)->obs_drift = -PP_ADJ_FREQ_MAX;
+	/* Anti-windup. The PP_ADJ_FREQ_MAX value is multiplied by OPTS(ppi)->ai
+	 * (which is the reciprocal of the integral gain of the controller).
+	 * Then it's scaled by 10 bits to match the bit shift used earlier to
+	 * avoid bit losses */
+	tmp = (((long long)PP_ADJ_FREQ_MAX) * OPTS(ppi)->ai) << 10;
+	if (SRV(ppi)->obs_drift > tmp)
+		SRV(ppi)->obs_drift = tmp;
+	else if (SRV(ppi)->obs_drift < -tmp)
+		SRV(ppi)->obs_drift = -tmp;
 
-	adj = ofm->nanoseconds / OPTS(ppi)->ap +
-		SRV(ppi)->obs_drift;
+	/* calculation of the I component, based on obs_drift */
+	I_sign = (SRV(ppi)->obs_drift > 0) ? 0 : -1;
+	I_term = SRV(ppi)->obs_drift;
+	if (I_sign)
+		I_term = -I_term;
+	__div64_32((uint64_t *)&I_term, OPTS(ppi)->ai);
+	if (I_sign)
+		I_term = -I_term;
+
+	/* calculation of the P component */
+	P_sign = (ofm->nanoseconds > 0) ? 0 : -1;
+	/* shift 10 bits again to avoid losses */
+	P_term = ((long long)ofm->nanoseconds) << 10;
+	if (P_sign)
+		P_term = -P_term;
+	__div64_32((uint64_t *)&P_term, OPTS(ppi)->ap);
+	if (P_sign)
+		P_term = -P_term;
+
+	/* calculate the correction of applied by the controller */
+	tmp = P_term + I_term;
+	/* Now scale it before passing the argument to adjtimex
+	 * Be careful with the signs */
+	if (tmp > 0)
+		adj = (tmp >> 10);
+	else
+		adj = -((-tmp) >> 10);
 
 	/* apply controller output as a clock tick rate adjustment, if
 	 * provided by arch, or as a raw offset otherwise */
@@ -334,5 +368,5 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 	pp_diag(ppi, servo, 2, "meanPathDelay averaged: %s\n", fmt_TI(mpd));
 	pp_diag(ppi, servo, 2, "Offset from m averaged: %s\n", fmt_TI(ofm));
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
-		(int)SRV(ppi)->obs_drift);
+		(int)SRV(ppi)->obs_drift >> 10);
 }
