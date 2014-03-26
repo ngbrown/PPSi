@@ -65,9 +65,9 @@ int main(int argc, char **argv)
 		return -1;
 
 	/* If no item has been parsed, provide a default file or string */
-	if (ppg->cfg_items == 0)
+	if (ppg->cfg.cfg_items == 0)
 		pp_config_file(ppg, 0, PP_DEFAULT_CONFIGFILE);
-	if (ppg->cfg_items == 0)
+	if (ppg->cfg.cfg_items == 0)
 		pp_config_string(ppg, strdup("link 0; iface eth0; proto udp"));
 
 	for (i = 0; i < ppg->nlinks; i++) {

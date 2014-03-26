@@ -35,7 +35,7 @@
 
 @setchapternewpage off
 
-@set update-month November 2013
+@set update-month March 2014
 @set release __RELEASE_GIT_ID__
 
 @finalout
@@ -187,6 +187,14 @@ The package currently supports the following architectures:
         be able to be linked from @i{wrpc-sw} as its own @i{wr-ptp}
         engine. PPSi in this environment currently supports only raw
         Ethernet, not @sc{udp}.  The architecture uses @i{time-wrpc}.
+
+@item sim
+
+	This is a simulator. It uses special time and network operations
+        to simulate a master and a slave exchanging ptp frames.
+        Arch-specific configuration options are implemented in
+        @i{arch-sim/sim-conf.c}. Use of the simulator is briefly
+        descibed in @ref{Configuring the Simulator}.
 
 @item bare-i386
 
@@ -369,9 +377,8 @@ As of 2013-05 the project suffers from these known bugs:
 @item We removed @i{peer-delay} support. We plan to add it back, and
       actually move White Rabbit to use @i{peer-delay} @sc{ptp} instead of
       @i{end-to-end} @sc{ptp}. 
-@item The servo for standard-@sc{ptp} must be audited. Pietro Fezzardi
-      is working on @i{arch-sim} to simulate network transactions and
-      make serious work on the servo algorithm and parameters.
+@item The servo for standard-@sc{ptp} must be audited. We are doing
+      it now using  @i{arch-sim} support,
 @item @sc{udp} over @sc{IPV6} is not yet supported.
 @end itemize
 
@@ -410,15 +417,50 @@ Each configuration item is made up of a keyword and an optional
 argument.  The argument can be either a number or a string.  The
 parser looks up keywords in three tables: a global table, an
 architecture-specific table and an extension-specific table.
+Currently, only @i{arch-sim} has specific configuration items.
 
-Currently no architectures or extensions provide configuration
-keywords, while the list of global items is on show in @t{lib/conf.c},
+The list of global configuration items is on show in @t{lib/conf.c},
 as the @t{pp_global_arglines} array.   Future versions of this manual
 may document the keywords, if the time allows it.
 
 @b{Note:} most current command-line options are going to be turned into
 configuration options. This applies to the priorities, intervals and
 thresholds, as well as the @i{slave-only} flag.
+
+@c ==========================================================================
+@node Configuring the Simulator
+@section Configuring the Simulator
+
+To tun the PPSi simulator you need to rely on diagnostics and specific
+configuration items.  The configuration items are defined in
+@i{arch-sim/sim-conf.c} and are not individually documented here at
+this point.
+
+After building with ``@t{make sim_defconfig}'', you can look at how
+PPSi behaves in different situation. For example, to see how the servo
+works with default parameters you can activate servo messages at level
+2, and only look at the offset from master:
+
+@smallexample
+   ./ppsi -d 0002 | grep 'Offset from master'
+@end smallexample
+
+The diagnostic values are specified in the range 0 to 2 and represent,
+in this order: state machine, time, frames, servo, bmc, extensions.
+See @ref{Diagnostic Macros} for details.
+
+The simulator runs by default for one hour of simulated time (in a
+fraction of a second of running time), and the initial offset from
+master to slave is 0.9 seconds.
+
+To pass configuration options, you can use the @t{-C} command line option.
+so, for example, to start with 0.1 seconds of offset and 1000 ns of
+transmission jitter, you can run like this:
+
+@smallexample
+   ./ppsi -d 0002 -C "sim_init_master_time .1; sim_jit_ns 1000"
+@end smallexample
+
 
 @c ##########################################################################
 @node PTP Clock Class

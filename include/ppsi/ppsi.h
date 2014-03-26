@@ -280,7 +280,8 @@ union pp_cfg_arg {
 /*
  * Configuration: we are structure-based, and a typedef simplifies things
  */
-typedef int (*cfg_handler)(int lineno, union pp_cfg_arg *arg);
+typedef int (*cfg_handler)(int lineno, struct pp_globals *ppg,
+				union pp_cfg_arg *arg);
 
 struct pp_argname {
 	char *name;

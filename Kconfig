@@ -44,8 +44,17 @@ config ARCH_WRS
 	help
 	  Build PPSi for use in the WR switch. The computer is a standard
 	  ARM-Linux host with hardware timestamping and internal PLLs
-	  needed to achieve sub-ns synchnonization. 
+	  needed to achieve sub-ns synchronization.
 	  The configuration selects the "White Rabbit" protocol extension.
+
+config ARCH_SIMULATOR
+	bool "PPSi Simulator (hosted on Linux)"
+	help
+	  Build a PPSi simulator. It's almost a unix full running slave,
+	  with a simulated master stimulating it for test purposes. This
+	  avoids to wait a long time to see how PPSi behaves.
+	  This architecture uses standard Unix system calls, but the
+	  code includes some Linux dependencies.
 
 endchoice
 
@@ -56,6 +65,7 @@ config ARCH
        default "bare-x86-64" if ARCH_BARE_X86_64
        default "wrpc" if ARCH_WRPC
        default "wrs" if ARCH_WRS
+       default "sim" if ARCH_SIMULATOR
 
 
 
