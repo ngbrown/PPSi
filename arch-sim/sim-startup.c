@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 	pp_config_string(ppg, strdup("port SIM_MASTER; iface MASTER;"
 					"proto udp; role master;"
 					"sim_duration_sec 3600;" // one hour
-					"sim_init_master_time 10.0;"));
+					"sim_init_master_time .9;"));
 
 	/* parse commandline for configuration options */
 	sim_set_global_DS(pp_sim_get_slave(ppg));
