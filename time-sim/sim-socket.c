@@ -78,6 +78,9 @@ static int sim_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	ssize_t ret;
 	struct msghdr msg;
 	struct iovec vec[1];
+	int64_t master_ns, slave_ns;
+	struct pp_globals *ppg = GLBS(ppi);
+	struct sim_ppg_arch_data *data = SIM_PPG_ARCH(ppg);
 
 	union {
 		struct cmsghdr cm;
@@ -117,6 +120,14 @@ static int sim_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	/* This is not really hw... */
 	pp_diag(ppi, time, 2, "recv stamp: %i.%09i (%s)\n",
 		(int)t->seconds, (int)t->nanoseconds, "user");
+	/* If we got a DelayResponse print out the offset from master */
+	if (((*(Enumeration4 *) (pkt + 0)) & 0x0F) == PPM_DELAY_RESP) {
+		master_ns = SIM_PPI_ARCH(INST(ppg, SIM_MASTER))->time.current_ns;
+		slave_ns = SIM_PPI_ARCH(INST(ppg, SIM_SLAVE))->time.current_ns;
+		pp_diag(ppi, ext, 1, "Real ofm %lli\n",
+					(long long)slave_ns - master_ns);
+		data->sim_iter_n++;
+	}
 	return ret;
 }
 

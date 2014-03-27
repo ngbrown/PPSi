@@ -27,7 +27,7 @@ int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
 		t_inst->current_ns += tmp + (t_inst->freq_ppm_servo) *
 						tmp / 1000 / 1000 / 1000;
 	}
-	pp_diag(0, time, 1, "%s: %li ns\n", __func__, (long)ff_ns);
+	pp_diag(0, ext, 2, "%s: %lli ns\n", __func__, (long long)ff_ns);
 
 	struct sim_pending_pkt *pkt;
 	struct sim_ppg_arch_data *data = SIM_PPG_ARCH(ppg);
@@ -43,7 +43,6 @@ int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
 		}
 	}
 
-	data->duration_ns -= ff_ns;
 	return 0;
 }
 

@@ -48,7 +48,6 @@ static char *fmt_TI(TimeInternal *t)
 	return s;
 }
 
-
 /* Called by slave and uncalib when we have t1 and t2 */
 void pp_servo_got_sync(struct pp_instance *ppi)
 {
