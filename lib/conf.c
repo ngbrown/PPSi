@@ -355,6 +355,10 @@ static int pp_parse_conf(struct pp_globals *ppg, char *conf, int len)
 	int lineno = 1;
 
 	line = conf;
+	/* clear current ppi, don't store current ppi across different
+	 * configuration files or strings */
+	ppg->cfg.cur_ppi_n = -1;
+	/* parse config */
 	do {
 		for (rest = line;
 		     *rest && *rest != '\n' && *rest != ';'; rest++)
@@ -367,9 +371,6 @@ static int pp_parse_conf(struct pp_globals *ppg, char *conf, int len)
 		if (term == '\n')
 			lineno++;
 	} while (term); /* if terminator was already 0, we are done */
-	/* clear current ppi, don't store current ppi across different
-	 * configuration files or strings */
-	ppg->cfg.cur_ppi_n = -1;
 	return errcount ? -1 : 0;
 }
 
