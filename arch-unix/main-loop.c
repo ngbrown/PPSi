@@ -113,12 +113,19 @@ void unix_main_loop(struct pp_globals *ppg)
 						PP_MAX_FRAME_LENGTH - 4,
 						&ppi->last_rcv_time);
 
+				if (i == -2) {
+					continue; /* dropped */
+				}
+				if (i == -1) {
+					pp_diag(ppi, frames, 1,
+						"Receive Error %i: %s\n",
+						errno, strerror(errno));
+					continue;
+				}
 				if (i < PP_MINIMUM_LENGTH) {
 					pp_diag(ppi, frames, 1,
-						"Error or short frame: "
-						"%d < %d\n", i,
-						PP_MINIMUM_LENGTH
-					);
+						"Short frame: %d < %d\n", i,
+						PP_MINIMUM_LENGTH);
 					continue;
 				}
 
