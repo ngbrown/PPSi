@@ -35,7 +35,7 @@
 
 @setchapternewpage off
 
-@set update-month March 2014
+@set update-month July 2014
 @set release __RELEASE_GIT_ID__
 
 @finalout
@@ -428,10 +428,55 @@ configuration options. This applies to the priorities, intervals and
 thresholds, as well as the @i{slave-only} flag.
 
 @c ==========================================================================
+@node Configuring Faults
+@section Configuring Faults
+
+Configuration, for @t{arch-unix} and @t{arch-wrs}, allows to provide
+some fault injection.
+
+In particular, the program allows dropping frames, in both the TX and RX
+paths.  The configuration values state how many frames are dropped every
+1000.  Dropping is randomized, but the user can set the seed to ensure
+a repeatable dropping sequence.
+
+Dropping transmitted frames is performed by reporting success (and the
+timestamp), while no frame is actually sent.  A diagnostic message
+is generated at @t{frames} level 1, but other than than that nothing
+happens.   Actually, @t{arch-wrs} needs to actually send a frame in
+order to get a timestamp back; in this case the program modifies the
+frame, to use a wrong Ethernet type or a wrong UDP port. 
+
+Dropping received frames is performed by actually receiving (and
+timestamping), but returning a special error code to the caller.
+Again, PPSi creates a diagnostic message at @t{frames} level 1.
+
+The following configuration lines are supported:
+
+@table @code
+
+@item rx-drop <value>
+@itemx tx-drop <value>
+
+	Drop @i{value} frames every 1000 frames received or sent.
+        The randomized sequence is global.
+
+@end table
+
+The randomization see can be passed by pre-setting the environment
+variable @t{PPSI_DROP_SEED} to a decimal numeric value. For example:
+
+@smallexample
+   export PPSI_DROP_SEED=33
+@end smallexample
+
+@noindent
+before starting the daemon.
+
+@c ==========================================================================
 @node Configuring the Simulator
 @section Configuring the Simulator
 
-To tun the PPSi simulator you need to rely on diagnostics and specific
+To run the PPSi simulator you need to rely on diagnostics and specific
 configuration items.  The configuration items are defined in
 @i{arch-sim/sim-conf.c} and are not individually documented here at
 this point.
