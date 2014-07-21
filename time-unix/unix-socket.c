@@ -77,7 +77,7 @@ static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	}
 
 	if (tv) {
-		t->seconds = tv->tv_sec;
+		t->seconds = tv->tv_sec + DSPRO(ppi)->currentUtcOffset;
 		t->nanoseconds = tv->tv_usec * 1000;
 		t->correct = 1;
 	} else {
