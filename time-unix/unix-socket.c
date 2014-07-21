@@ -87,6 +87,12 @@ static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 		 */
 		ppi->t_ops->get(ppi, t);
 	}
+
+	if (ppsi_drop_rx()) {
+		pp_diag(ppi, frames, 1, "Drop received frame\n");
+		return -2;
+	}
+
 	/* This is not really hw... */
 	pp_diag(ppi, time, 2, "recv stamp: %i.%09i (%s)\n",
 		(int)t->seconds, (int)t->nanoseconds, tv ? "kernel" : "user");
@@ -131,6 +137,14 @@ static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 	struct sockaddr_in addr;
 	struct ethhdr *hdr = pkt;
 	int ret;
+
+	/* To fake a network frame loss, set the timestamp and do not send */
+	if (ppsi_drop_tx()) {
+		if (t)
+			ppi->t_ops->get(ppi, t);
+		pp_diag(ppi, frames, 1, "Drop sent frame\n");
+		return len;
+	}
 
 	if (ppi->ethernet_mode) {
 		hdr->h_proto = htons(ETH_P_1588);
@@ -358,6 +372,7 @@ static int unix_net_init(struct pp_instance *ppi)
 		if (unix_open_ch(ppi, ppi->iface_name, i))
 			return -1;
 	}
+
 	return 0;
 }
 

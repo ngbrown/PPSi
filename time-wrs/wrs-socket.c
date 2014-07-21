@@ -223,7 +223,7 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 		if (!WR_DSPOR(ppi)->wrModeOn) {
 			/* for non-wr-mode any reported stamp is correct */
 			t->correct = 1;
-			return ret;
+			goto drop;
 		}
 		if (s->dmtd_phase_valid)
 		{
@@ -231,6 +231,12 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 				cntr_ahead, s->phase_transition, s->clock_period);
 			t->correct = 1;
 		}
+	}
+
+drop:
+	if (ppsi_drop_rx()) {
+		pp_diag(ppi, frames, 1, "Drop received frame\n");
+		return -2;
 	}
 
 	return ret;
@@ -344,13 +350,22 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 	struct sockaddr_in addr;
 	struct ethhdr *hdr = pkt;
 	struct wrs_socket *s;
-	int ret, fd;
+	int ret, fd, drop;
 
 	s = (struct wrs_socket *)NP(ppi)->ch[PP_NP_GEN].arch_data;
+
+	/*
+	 * To fake a packet loss, we must corrupt the frame; we need
+	 * to transmit it for real, if we want to get back our
+	 * hardware stamp. Thus, remember if we drop, and use this info.
+	 */
+	drop = ppsi_drop_tx();
 
 	if (ppi->ethernet_mode) {
 		fd = NP(ppi)->ch[PP_NP_GEN].fd;
 		hdr->h_proto = htons(ETH_P_1588);
+		if (drop)
+			hdr->h_proto++;
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
 		/* raw socket implementation always uses gen socket */
@@ -361,6 +376,10 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 		ret = send(fd, hdr, len, 0);
 		poll_tx_timestamp(ppi, s, fd, t);
+
+		if (drop) /* avoid messaging about stamps that are not used */
+			goto drop_msg;
+
 		if (pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("send: ", pkt, len, t);
 		pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
@@ -374,15 +393,24 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(chtype == PP_NP_GEN ? PP_GEN_PORT : PP_EVT_PORT);
 	addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
-
+	if (drop)
+		addr.sin_port = 3200;
 	ret = sendto(fd, pkt, len, 0,
 		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 	poll_tx_timestamp(ppi, s, fd, t);
+
+	if (drop) /* like above: skil messages about timestamps */
+		goto drop_msg;
+
 	if (pp_diag_allow(ppi, frames, 2))
 		dump_payloadpkt("send: ", pkt, len, t);
 	pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
 		t->correct, (long)t->seconds,
 		(long)t->nanoseconds);
+drop_msg:
+	if (drop)
+		pp_diag(ppi, frames, 1, "Drop sent frame\n");
+
 	return ret;
 }
 

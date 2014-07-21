@@ -389,4 +389,9 @@ extern pp_action pp_initializing, pp_faulty, pp_disabled, pp_listening,
 /* The engine */
 extern int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen);
 
+/* Frame-drop support -- rx before tx, alphabetically */
+extern void ppsi_drop_init(struct pp_globals *ppg, unsigned long seed);
+extern int ppsi_drop_rx(void);
+extern int ppsi_drop_tx(void);
+
 #endif /* __PPSI_PPSI_H__ */

@@ -7,10 +7,12 @@ CFLAGS += -Itools
 OBJ-y += $A/unix-startup.o \
 	$A/main-loop.o \
 	$A/unix-io.o \
+	$A/unix-conf.o \
 	lib/cmdline.o \
 	lib/conf.o \
 	lib/libc-functions.o \
 	lib/dump-funcs.o \
+	lib/drop.o \
 	lib/div64.o
 
 # The user can set TIME=, but we pick unix time by default

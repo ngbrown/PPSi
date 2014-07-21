@@ -213,6 +213,8 @@ struct pp_globals {
 	int max_links;
 	struct pp_globals_cfg cfg;
 
+	int rxdrop, txdrop;		/* fault injection, per thousand */
+
 	void *arch_data;		/* if arch needs it */
 	/* FIXME Here include all is common to many interfaces */
 };
