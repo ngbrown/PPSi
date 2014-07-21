@@ -16,7 +16,7 @@ static int bare_time_get(struct pp_instance *ppi, TimeInternal *t)
 		pp_error("%s:", __func__);
 		sys_exit(1);
 	}
-	/* TAI = UTC + 34 */
+	/* TAI = UTC + 35 */
 	t->seconds = tv.tv_sec + DSPRO(ppi)->currentUtcOffset;
 	t->nanoseconds = tv.tv_usec * 1000;
 	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
@@ -42,7 +42,7 @@ static int bare_time_set(struct pp_instance *ppi, TimeInternal *t)
 		return 0;
 	}
 
-	/* UTC = TAI - 34 */
+	/* UTC = TAI - 35 */
 	tv.tv_sec = t->seconds - DSPRO(ppi)->currentUtcOffset;
 	tv.tv_usec = t->nanoseconds / 1000;
 
