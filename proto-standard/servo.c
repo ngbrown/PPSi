@@ -188,7 +188,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 
 	/* update 'offsetFromMaster', (End to End mode) */
 	sub_TimeInternal(ofm, m_to_s_dly, mpd);
-	pp_diag(ppi, servo, 2, "Offset from master:     %s\n", fmt_TI(ofm));
+	pp_diag(ppi, servo, 1, "Offset from master:     %s\n", fmt_TI(ofm));
 
 	if (OPTS(ppi)->max_rst) { /* If max_rst is 0 then it's OFF */
 		if (ofm->seconds) {
@@ -229,8 +229,6 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		}
 		return; /* ok */
 	}
-
-	pp_diag(ppi, servo, 1, "Measured ofm: %9i \n", ofm->nanoseconds);
 
 	/*
 	 * What follows is the PI controller
@@ -287,8 +285,6 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 			ppi->t_ops->adjust_offset(ppi, -adj);
 	}
 
-	pp_diag(ppi, servo, 2, "meanPathDelay averaged: %s\n", fmt_TI(mpd));
-	pp_diag(ppi, servo, 2, "Offset from m averaged: %s\n", fmt_TI(ofm));
 	pp_diag(ppi, servo, 2, "Observed drift: %9i\n",
 		(int)SRV(ppi)->obs_drift >> 10);
 }
