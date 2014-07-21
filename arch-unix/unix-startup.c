@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <time.h>
 #include <sys/timex.h>
 
 #include <ppsi/ppsi.h>
@@ -34,6 +35,7 @@ int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
+	unsigned long seed;
 	struct timex t;
 	int i;
 
@@ -102,6 +104,11 @@ int main(int argc, char **argv)
 	}
 
 	pp_init_globals(ppg, &__pp_default_rt_opts);
+
+	seed = time(NULL);
+	if (getenv("PPSI_DROP_SEED"))
+		seed = atoi(getenv("PPSI_DROP_SEED"));
+	ppsi_drop_init(ppg, seed);
 
 	unix_main_loop(ppg);
 	return 0; /* never reached */
