@@ -18,38 +18,38 @@
 /* put 16 bit word in big endianess (from little endianess) */
 static inline void put_be16(void *ptr, UInteger16 x)
 {
-  *(unsigned char *)(ptr++) = (x >> 8) & 0xff;
-  *(unsigned char *)(ptr++) = (x) & 0xff;
+	*(unsigned char *)(ptr++) = (x >> 8) & 0xff;
+	*(unsigned char *)(ptr++) = (x) & 0xff;
 }
 /* put 32 bit word in big endianess (from little endianess) */
 static inline void put_be32(void *ptr, UInteger32 x)
 {
-  *(unsigned char *)(ptr++) = (x >> 24) & 0xff;
-  *(unsigned char *)(ptr++) = (x >> 16) & 0xff;
-  *(unsigned char *)(ptr++) = (x >> 8) & 0xff;
-  *(unsigned char *)(ptr++) = (x) & 0xff;
+	*(unsigned char *)(ptr++) = (x >> 24) & 0xff;
+	*(unsigned char *)(ptr++) = (x >> 16) & 0xff;
+	*(unsigned char *)(ptr++) = (x >> 8) & 0xff;
+	*(unsigned char *)(ptr++) = (x) & 0xff;
 }
 
 /* gets 32 bit word from big endianness (to little endianness) */
 static inline UInteger32 get_be32(void *ptr)
 {
-  UInteger32 res = 0x0;
+	UInteger32 res = 0x0;
 
-  res = res | ((*(unsigned char *)(ptr++) << 24) & 0xFF000000);
-  res = res | ((*(unsigned char *)(ptr++) << 16) & 0x00FF0000);
-  res = res | ((*(unsigned char *)(ptr++) << 8 ) & 0x0000FF00);
-  res = res | ((*(unsigned char *)(ptr++) << 0 ) & 0x000000FF);
-  return res;
+	res = res | ((*(unsigned char *)(ptr++) << 24) & 0xFF000000);
+	res = res | ((*(unsigned char *)(ptr++) << 16) & 0x00FF0000);
+	res = res | ((*(unsigned char *)(ptr++) << 8 ) & 0x0000FF00);
+	res = res | ((*(unsigned char *)(ptr++) << 0 ) & 0x000000FF);
+	return res;
 }
 
 /* gets 16 bit word from big endianess (to little endianess) */
 static inline UInteger16 get_be16(void *ptr)
 {
-  UInteger16 res = 0x0;
+	UInteger16 res = 0x0;
 
-  res = res | ((*(unsigned char *)(ptr++) << 8 ) & 0xFF00);
-  res = res | ((*(unsigned char *)(ptr++) << 0 ) & 0x000FF);
-  return res;
+	res = res | ((*(unsigned char *)(ptr++) << 8 ) & 0xFF00);
+	res = res | ((*(unsigned char *)(ptr++) << 0 ) & 0x000FF);
+	return res;
 }
 
 /* Pack White rabbit message in the suffix of PTP announce message */
