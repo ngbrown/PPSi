@@ -128,8 +128,7 @@ enum {
 	WRS_CALIBRATED,
 	WRS_RESP_CALIB_REQ,
 	WRS_WR_LINK_ON,
-	/* here are substates and informative wrPortState values */
-	WR_PORT_IDLE,
+	/* substates: used within WRS_CALIBRATED as wrPortState field */
 	WR_PORT_CALIBRATION_0,
 	WR_PORT_CALIBRATION_1,
 	WR_PORT_CALIBRATION_2,

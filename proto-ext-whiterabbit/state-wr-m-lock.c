@@ -15,7 +15,6 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	MsgSignaling wrsig_msg;
 
 	if (ppi->is_new_state) {
-		WR_DSPOR(ppi)->wrPortState = WRS_M_LOCK;
 		WR_DSPOR(ppi)->wrMode = WR_MASTER;
 		e = msg_issue_wrsig(ppi, LOCK);
 		pp_timeout_set(ppi, PP_TO_EXT_0, WR_M_LOCK_TIMEOUT_MS);
@@ -23,7 +22,6 @@ int wr_m_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
 		ppi->next_state = PPS_MASTER;
-		WR_DSPOR(ppi)->wrPortState = WR_PORT_IDLE;
 		goto out;
 	}
 

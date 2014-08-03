@@ -22,7 +22,7 @@ struct wr_dsport {
 	Enumeration8 wrMode;
 	Boolean wrModeOn;
 	Boolean ppsOutputOn;
-	Enumeration8  wrPortState;
+	Enumeration8  wrPortState; /* used for sub-states during calibration */
 	/* FIXME check doc: knownDeltaTx, knownDeltaRx, deltasKnown?) */
 	Boolean calibrated;
 	FixedDelta deltaTx;

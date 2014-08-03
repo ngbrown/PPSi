@@ -14,7 +14,6 @@ int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	MsgSignaling wrsig_msg;
 
 	if (ppi->is_new_state) {
-		WR_DSPOR(ppi)->wrPortState = WRS_CALIBRATED;
 		pp_timeout_set(ppi, PP_TO_EXT_0,
 			       WR_DSPOR(ppi)->wrStateTimeout);
 	}
@@ -24,7 +23,6 @@ int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			ppi->next_state = PPS_MASTER;
 		else
 			ppi->next_state = PPS_LISTENING;
-		WR_DSPOR(ppi)->wrPortState = WR_PORT_IDLE;
 		goto out;
 	}
 

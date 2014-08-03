@@ -15,7 +15,6 @@ int wr_locked(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	MsgSignaling wrsig_msg;
 
 	if (ppi->is_new_state) {
-		WR_DSPOR(ppi)->wrPortState = WRS_LOCKED;
 		pp_timeout_set(ppi, PP_TO_EXT_0,
 			       WR_DSPOR(ppi)->wrStateTimeout);
 
@@ -26,7 +25,6 @@ int wr_locked(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
 		ppi->next_state = PPS_LISTENING;
 		WR_DSPOR(ppi)->wrMode = NON_WR;
-		WR_DSPOR(ppi)->wrPortState = WR_PORT_IDLE;
 		goto out;
 	}
 
