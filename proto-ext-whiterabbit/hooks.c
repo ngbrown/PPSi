@@ -67,7 +67,7 @@ static int wr_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	struct wr_dsport *wp = WR_DSPOR(ppi);
 
 	wp->wrMode = NON_WR;
-	wp->wrPortState = WRS_IDLE;
+	wp->wrPortState = WR_PORT_IDLE;
 	return 0;
 }
 

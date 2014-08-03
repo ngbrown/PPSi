@@ -26,7 +26,7 @@ int wr_locked(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
 		ppi->next_state = PPS_LISTENING;
 		WR_DSPOR(ppi)->wrMode = NON_WR;
-		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
+		WR_DSPOR(ppi)->wrPortState = WR_PORT_IDLE;
 		goto out;
 	}
 

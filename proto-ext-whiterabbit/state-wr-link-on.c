@@ -28,7 +28,7 @@ int wr_link_on(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (e != 0)
 		return -1;
 
-	wrp->wrPortState = WRS_IDLE;
+	wrp->wrPortState = WR_PORT_IDLE;
 
 	if (wrp->wrMode == WR_SLAVE)
 		ppi->next_state = PPS_SLAVE;

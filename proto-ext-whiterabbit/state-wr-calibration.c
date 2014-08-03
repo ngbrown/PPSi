@@ -16,13 +16,13 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	uint32_t delta;
 
 	if (ppi->is_new_state) {
-		wrp->wrPortState = WRS_CALIBRATION;
+		wrp->wrPortState = WR_PORT_CALIBRATION_0;
 
 		e = msg_issue_wrsig(ppi, CALIBRATE);
 		pp_timeout_set(ppi, PP_TO_EXT_0,
 			       wrp->calPeriod);
 		if (wrp->calibrated)
-			wrp->wrPortState = WRS_CALIBRATION_2;
+			wrp->wrPortState = WR_PORT_CALIBRATION_2;
 	}
 
 	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
@@ -30,28 +30,28 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			ppi->next_state = PPS_MASTER;
 		else
 			ppi->next_state = PPS_LISTENING;
-		wrp->wrPortState = WRS_IDLE;
+		wrp->wrPortState = WR_PORT_IDLE;
 		goto out;
 	}
 
 	switch (wrp->wrPortState) {
-	case WRS_CALIBRATION:
+	case WR_PORT_CALIBRATION_0:
 		/* enable pattern sending */
 		if (wrp->ops->calib_pattern_enable(ppi, 0, 0, 0) ==
 			WR_HW_CALIB_OK)
-			wrp->wrPortState = WRS_CALIBRATION_1;
+			wrp->wrPortState = WR_PORT_CALIBRATION_1;
 		else
 			break;
 
-	case WRS_CALIBRATION_1:
+	case WR_PORT_CALIBRATION_1:
 		/* enable Tx calibration */
 		if (wrp->ops->calib_enable(ppi, WR_HW_CALIB_TX)
 				== WR_HW_CALIB_OK)
-			wrp->wrPortState = WRS_CALIBRATION_2;
+			wrp->wrPortState = WR_PORT_CALIBRATION_2;
 		else
 			break;
 
-	case WRS_CALIBRATION_2:
+	case WR_PORT_CALIBRATION_2:
 		/* wait until Tx calibration is finished */
 		if (wrp->ops->calib_poll(ppi, WR_HW_CALIB_TX, &delta) ==
 			WR_HW_CALIB_READY) {
@@ -64,35 +64,35 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			pp_diag(ppi, ext, 1, "Tx=>>scaledPicoseconds.lsb = 0x%x\n",
 				wrp->deltaTx.scaledPicoseconds.lsb);
 
-			wrp->wrPortState = WRS_CALIBRATION_3;
+			wrp->wrPortState = WR_PORT_CALIBRATION_3;
 		} else {
 			break; /* again */
 		}
 
-	case WRS_CALIBRATION_3:
+	case WR_PORT_CALIBRATION_3:
 		/* disable Tx calibration */
 		if (wrp->ops->calib_disable(ppi, WR_HW_CALIB_TX)
 				== WR_HW_CALIB_OK)
-			wrp->wrPortState = WRS_CALIBRATION_4;
+			wrp->wrPortState = WR_PORT_CALIBRATION_4;
 		else
 			break;
 
-	case WRS_CALIBRATION_4:
+	case WR_PORT_CALIBRATION_4:
 		/* disable pattern sending */
 		if (wrp->ops->calib_pattern_disable(ppi) == WR_HW_CALIB_OK)
-			wrp->wrPortState = WRS_CALIBRATION_5;
+			wrp->wrPortState = WR_PORT_CALIBRATION_5;
 		else
 			break;
 
-	case WRS_CALIBRATION_5:
+	case WR_PORT_CALIBRATION_5:
 		/* enable Rx calibration using the pattern sent by other port */
 		if (wrp->ops->calib_enable(ppi, WR_HW_CALIB_RX) ==
 				WR_HW_CALIB_OK)
-			wrp->wrPortState = WRS_CALIBRATION_6;
+			wrp->wrPortState = WR_PORT_CALIBRATION_6;
 		else
 			break;
 
-	case WRS_CALIBRATION_6:
+	case WR_PORT_CALIBRATION_6:
 		/* wait until Rx calibration is finished */
 		if (wrp->ops->calib_poll(ppi, WR_HW_CALIB_RX, &delta) ==
 			WR_HW_CALIB_READY) {
@@ -106,19 +106,19 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			pp_diag(ppi, ext, 1, "Rx=>>scaledPicoseconds.lsb = 0x%x\n",
 				wrp->deltaRx.scaledPicoseconds.lsb);
 
-			wrp->wrPortState = WRS_CALIBRATION_7;
+			wrp->wrPortState = WR_PORT_CALIBRATION_7;
 		} else {
 			break; /* again */
 		}
 
-	case WRS_CALIBRATION_7:
+	case WR_PORT_CALIBRATION_7:
 		/* disable Rx calibration */
 		if (wrp->ops->calib_disable(ppi, WR_HW_CALIB_RX)
 				== WR_HW_CALIB_OK)
-			wrp->wrPortState = WRS_CALIBRATION_8;
+			wrp->wrPortState = WR_PORT_CALIBRATION_8;
 		else
 			break;
-	case WRS_CALIBRATION_8:
+	case WR_PORT_CALIBRATION_8:
 		/* send deltas to the other port and go to the next state */
 		e = msg_issue_wrsig(ppi, CALIBRATED);
 		ppi->next_state = WRS_CALIBRATED;

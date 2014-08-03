@@ -31,7 +31,7 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			ppi->next_state = PPS_MASTER;
 		else
 			ppi->next_state = PPS_LISTENING;
-		wrp->wrPortState = WRS_IDLE;
+		wrp->wrPortState = WR_PORT_IDLE;
 		goto out;
 	}
 

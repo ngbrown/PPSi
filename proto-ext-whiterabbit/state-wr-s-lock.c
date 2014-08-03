@@ -15,14 +15,13 @@ int wr_s_lock(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int e = 0;
 
 	if (ppi->is_new_state) {
-		wrp->wrPortState = WRS_S_LOCK;
 		wrp->ops->locking_enable(ppi);
 		pp_timeout_set(ppi, PP_TO_EXT_0, WR_S_LOCK_TIMEOUT_MS);
 	}
 
 	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
 		ppi->next_state = PPS_FAULTY;
-		wrp->wrPortState = WRS_IDLE;
+		wrp->wrPortState = WR_PORT_IDLE;
 		wrp->wrMode = NON_WR;
 		goto out;
 	}

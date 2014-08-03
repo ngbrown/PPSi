@@ -24,7 +24,7 @@ int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 			ppi->next_state = PPS_MASTER;
 		else
 			ppi->next_state = PPS_LISTENING;
-		WR_DSPOR(ppi)->wrPortState = WRS_IDLE;
+		WR_DSPOR(ppi)->wrPortState = WR_PORT_IDLE;
 		goto out;
 	}
 
