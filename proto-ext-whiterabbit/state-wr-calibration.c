@@ -22,7 +22,7 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		pp_timeout_set(ppi, PP_TO_EXT_0,
 			       wrp->calPeriod);
 		if (wrp->calibrated)
-			wrp->wrPortState = WR_PORT_CALIBRATION_2;
+			wrp->wrPortState = WR_PORT_CALIBRATION_8;
 	}
 
 	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
