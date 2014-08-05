@@ -33,6 +33,9 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		goto out;
 	}
 
+	pp_diag(ppi, ext, 1, "%s: substate %i\n", __func__,
+		wrp->wrPortState - WR_PORT_CALIBRATION_0);
+
 	switch (wrp->wrPortState) {
 	case WR_PORT_CALIBRATION_0:
 		/* enable pattern sending */
