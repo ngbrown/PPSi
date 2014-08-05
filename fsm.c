@@ -58,8 +58,8 @@ static void pp_diag_fsm(struct pp_instance *ppi, char *name, int sequence,
 		return;
 	}
 	/* leave has one \n more, so different states are separate */
-	pp_fsm_printf(ppi, "LEAVE %s (next: %3i in %i ms)\n\n",
-		name, ppi->next_state, ppi->next_delay);
+	pp_fsm_printf(ppi, "LEAVE %s (next: %3i)\n\n",
+		      name, ppi->next_state);
 }
 
 /*
@@ -120,7 +120,7 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 			ppi->state = ppi->next_state;
 			ppi->is_new_state = 1;
 			pp_diag_fsm(ppi, ip->name, STATE_LEAVE, 0);
-			return 0;
+			return 0; /* next_delay unused: go to new state now */
 		}
 		ppi->is_new_state = 0;
 		pp_diag_fsm(ppi, ip->name, STATE_LOOP, 0);
