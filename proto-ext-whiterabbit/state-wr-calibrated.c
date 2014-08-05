@@ -9,21 +9,26 @@
 #include <ppsi/ppsi.h>
 #include "wr-api.h"
 
+/*
+ * We enter here from WRS_CALIBRATION.  If master we wait for
+ * a CALIBRATE message, if slave we wait for LINK_ON.
+ */
 int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 	MsgSignaling wrsig_msg;
 
-	if (ppi->is_new_state) {
-		pp_timeout_set(ppi, PP_TO_EXT_0,
-			       WR_DSPOR(ppi)->wrStateTimeout);
-	}
+	if (ppi->is_new_state)
+		pp_timeout_set(ppi, PP_TO_EXT_0, wrp->wrStateTimeout);
 
 	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
-		if (WR_DSPOR(ppi)->wrMode == WR_MASTER)
-			ppi->next_state = PPS_MASTER;
-		else
-			ppi->next_state = PPS_LISTENING;
-		goto out;
+		/*
+		 * FIXME: We should implement a retry by re-sending
+		 * the "calibrated" message, moving it here from the
+		 * previous state (sub-state 8 of "state-wr-calibration"
+		 */
+		wr_handshake_fail(ppi);
+		return 0; /* non-wr */
 	}
 
 	if (plen == 0)
@@ -31,17 +36,17 @@ int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	if (ppi->received_ptp_header.messageType == PPM_SIGNALING) {
 		msg_unpack_wrsig(ppi, pkt, &wrsig_msg,
-			 &(WR_DSPOR(ppi)->msgTmpWrMessageID));
+			 &(wrp->msgTmpWrMessageID));
 
-		if ((WR_DSPOR(ppi)->msgTmpWrMessageID == CALIBRATE) &&
-			(WR_DSPOR(ppi)->wrMode == WR_MASTER))
+		if ((wrp->msgTmpWrMessageID == CALIBRATE) &&
+			(wrp->wrMode == WR_MASTER))
 			ppi->next_state = WRS_RESP_CALIB_REQ;
-		else if ((WR_DSPOR(ppi)->msgTmpWrMessageID == WR_MODE_ON) &&
-			(WR_DSPOR(ppi)->wrMode == WR_SLAVE))
+		else if ((wrp->msgTmpWrMessageID == WR_MODE_ON) &&
+			(wrp->wrMode == WR_SLAVE))
 			ppi->next_state = WRS_WR_LINK_ON;
 	}
 
 out:
-	ppi->next_delay = WR_DSPOR(ppi)->wrStateTimeout;
+	ppi->next_delay = wrp->wrStateTimeout;
 	return 0;
 }

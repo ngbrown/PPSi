@@ -88,6 +88,11 @@ int wr_calibrated(struct pp_instance *ppi, unsigned char *pkt, int plen);
 int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen);
 int wr_link_on(struct pp_instance *ppi, unsigned char *pkt, int plen);
 
+/* Common functions, used by various states and hooks */
+void wr_handshake_init(struct pp_instance *ppi, int mode);
+void wr_handshake_fail(struct pp_instance *ppi); /* goto non-wr */
+int wr_handshake_retry(struct pp_instance *ppi); /* 1 == retry; 0 == failed */
+
 /* White Rabbit hw-dependent functions (code in arch-wrpc and arch-wrs) */
 struct wr_operations {
 	int (*locking_enable)(struct pp_instance *ppi);

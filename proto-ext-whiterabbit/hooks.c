@@ -93,8 +93,10 @@ static int wr_master_msg(struct pp_instance *ppi, unsigned char *pkt, int plen,
 		msg_unpack_wrsig(ppi, pkt, &wrsig_msg,
 				 &(WR_DSPOR(ppi)->msgTmpWrMessageID));
 		if ((WR_DSPOR(ppi)->msgTmpWrMessageID == SLAVE_PRESENT) &&
-		    (WR_DSPOR(ppi)->wrConfig & WR_M_ONLY))
-			ppi->next_state = WRS_M_LOCK;
+		    (WR_DSPOR(ppi)->wrConfig & WR_M_ONLY)) {
+			/* We must start the handshake as a WR master */
+			wr_handshake_init(ppi, PPS_MASTER);
+		}
 		msgtype = PPM_NOTHING_TO_DO;
 		break;
 	}
@@ -173,8 +175,10 @@ static void wr_handle_announce(struct pp_instance *ppi)
 	if ((WR_DSPOR(ppi)->wrConfig & WR_S_ONLY) &&
 	    (1 /* FIXME: Recommended State, see page 33*/) &&
 	    (WR_DSPOR(ppi)->parentWrConfig & WR_M_ONLY) &&
-	    (!WR_DSPOR(ppi)->wrModeOn || !WR_DSPOR(ppi)->parentWrModeOn))
-		ppi->next_state = WRS_PRESENT;
+	    (!WR_DSPOR(ppi)->wrModeOn || !WR_DSPOR(ppi)->parentWrModeOn)) {
+		/* We must start the handshake as a WR slave */
+		wr_handshake_init(ppi, PPS_SLAVE);
+	}
 }
 
 static int wr_handle_followup(struct pp_instance *ppi,

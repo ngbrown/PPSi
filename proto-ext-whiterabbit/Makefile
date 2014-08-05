@@ -4,6 +4,7 @@ D := proto-ext-whiterabbit
 
 OBJ-y += $D/fsm-table.o \
 	$D/hooks.o \
+	$D/common-fun.o \
 	$D/state-wr-present.o \
 	$D/state-wr-m-lock.o \
 	$D/state-wr-s-lock.o \

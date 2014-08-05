@@ -9,28 +9,33 @@
 #include <ppsi/ppsi.h>
 #include "wr-api.h"
 
+/*
+ * We enter this state from  WRS_M_LOCK or WRS_RESP_CALIB_REQ.
+ * We send CALIBRATE and do the hardware steps; finally we send CALIBRATED.
+ */
 int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	struct wr_dsport *wrp = WR_DSPOR(ppi);
-	int e = 0;
+	int e = 0, sendmsg = 0;
 	uint32_t delta;
 
 	if (ppi->is_new_state) {
-		wrp->wrPortState = WR_PORT_CALIBRATION_0;
-
-		e = msg_issue_wrsig(ppi, CALIBRATE);
-		pp_timeout_set(ppi, PP_TO_EXT_0,
-			       wrp->calPeriod);
-		if (wrp->calibrated)
-			wrp->wrPortState = WR_PORT_CALIBRATION_8;
+		wrp->wrStateRetry = WR_STATE_RETRY;
+		sendmsg = 1;
+	} else if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
+		if (wr_handshake_retry(ppi))
+			sendmsg = 1;
+		else
+			return 0; /* non-wr already */
 	}
 
-	if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
-		if (wrp->wrMode == WR_MASTER)
-			ppi->next_state = PPS_MASTER;
-		else
-			ppi->next_state = PPS_LISTENING;
-		goto out;
+	if (sendmsg) {
+		pp_timeout_set(ppi, PP_TO_EXT_0,
+			       wrp->calPeriod);
+		e = msg_issue_wrsig(ppi, CALIBRATE);
+		wrp->wrPortState = WR_PORT_CALIBRATION_0;
+		if (wrp->calibrated)
+			wrp->wrPortState = WR_PORT_CALIBRATION_8;
 	}
 
 	pp_diag(ppi, ext, 1, "%s: substate %i\n", __func__,
@@ -130,7 +135,6 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 	}
 
-out:
 	ppi->next_delay = wrp->wrStateTimeout;
 
 	return e;
