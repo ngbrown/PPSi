@@ -29,7 +29,6 @@
 #define WR_WRS_PRESENT_TIMEOUT_MS	1000
 #define WR_M_LOCK_TIMEOUT_MS		15000
 #define WR_S_LOCK_TIMEOUT_MS		15000
-#define WR_DEFAULT_STATE_REPEAT		3
 #define WR_DEFAULT_INIT_REPEAT		3
 
 /* White Rabbit package Size */

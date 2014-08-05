@@ -9,7 +9,6 @@ static int wr_init(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	struct wr_dsport *wp = WR_DSPOR(ppi);
 
 	wp->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
-	wp->wrStateRetry = WR_DEFAULT_STATE_REPEAT;
 	wp->calPeriod = WR_DEFAULT_CAL_PERIOD;
 	wp->wrModeOn = 0;
 	wp->parentWrConfig = NON_WR;
