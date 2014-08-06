@@ -20,7 +20,8 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		wrp->wrStateRetry = WR_STATE_RETRY;
 		enable = 1;
 	} else if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
-		wrp->ops->calib_pattern_disable(ppi);
+		if (send_pattern)
+			wrp->ops->calib_pattern_disable(ppi);
 		if (wr_handshake_retry(ppi))
 			enable = 1;
 		else
@@ -28,12 +29,10 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 	if (enable) { /* first or retry */
-		if (send_pattern) {
+		if (send_pattern)
 			wrp->ops->calib_pattern_enable(ppi, 0, 0, 0);
-			pp_timeout_set(ppi, PP_TO_EXT_0,
+		pp_timeout_set(ppi, PP_TO_EXT_0,
 			       wrp->otherNodeCalPeriod / 1000);
-		}
-
 	}
 
 	if (plen == 0)
