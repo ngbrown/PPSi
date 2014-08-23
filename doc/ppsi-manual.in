@@ -360,7 +360,7 @@ unfair to hide them.
         at run time (for example, arch-wrpc offers that through a shell
         command). We think this feature is useful
         when you run more than a pair of interfaces and have problems
-	on some of the links but not all of them. 
+	on some of the links but not all of them.
 
 @end table
 
@@ -376,7 +376,7 @@ As of 2013-05 the project suffers from these known bugs:
       this is mostly in place but mut be audited project-wide.
 @item We removed @i{peer-delay} support. We plan to add it back, and
       actually move White Rabbit to use @i{peer-delay} @sc{ptp} instead of
-      @i{end-to-end} @sc{ptp}. 
+      @i{end-to-end} @sc{ptp}.
 @item The servo for standard-@sc{ptp} must be audited. We are doing
       it now using  @i{arch-sim} support,
 @item @sc{udp} over @sc{IPV6} is not yet supported.
@@ -444,7 +444,7 @@ timestamp), while no frame is actually sent.  A diagnostic message
 is generated at @t{frames} level 1, but other than than that nothing
 happens.   Actually, @t{arch-wrs} needs to actually send a frame in
 order to get a timestamp back; in this case the program modifies the
-frame, to use a wrong Ethernet type or a wrong UDP port. 
+frame, to use a wrong Ethernet type or a wrong UDP port.
 
 Dropping received frames is performed by actually receiving (and
 timestamping), but returning a special error code to the caller.
@@ -627,7 +627,7 @@ commented.
 @section Older Diagnostics
 
 We introduced the diagnostic macros described above at the beginning
-of March 2013.  Earlier code used a less-structured approach, which 
+of March 2013.  Earlier code used a less-structured approach, which
 has later been removed. If you used @t{PP_PRINTF}, it's gone by now.
 
 @c ==========================================================================
@@ -803,7 +803,7 @@ system workload.
 
 By running this program you can see the effect of @i{tools/jmptime},
 or the insertion of a leap second (which is why I wrote this program
-in June 2012).  
+in June 2012).
 
 For example, this is what @i{chktime} reports when running
 ``@t{jmptime .002}''. The program doesn't need superuser privileges:
@@ -1115,7 +1115,7 @@ a list of the other ones please see the help message.
 
 @item -g
 
-	Run as slave only. 
+	Run as slave only.
 
 @end table
 
