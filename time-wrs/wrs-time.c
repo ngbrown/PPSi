@@ -6,6 +6,11 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 #include <ppsi/ppsi.h>
 #include <ppsi-wrs.h>
 
@@ -221,6 +226,50 @@ static int wrs_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
 	return wrs_adjust_counters(0, offset_ns);
 }
 
+static int wrs_time_adjust_freq(struct pp_instance *ppi, long freq_ppb)
+{
+	static void *mapaddress;
+	long tmp;
+	int32_t regval;
+	int fd;
+	/*
+	 * This is only called by the non-wr servo. So the softpll is off
+	 * and we can just touch the DAC directly
+	 */
+	if (!mapaddress) {
+		/* FIXME: we should call the wrs library instead */
+		if ((fd = open("/dev/mem", O_RDWR | O_SYNC)) < 0) {
+			fprintf(stderr, "ppsi: /dev/mem: %s\n",
+				strerror(errno));
+			exit(1);
+		}
+		mapaddress = mmap(0, 0x1000, PROT_READ | PROT_WRITE,
+				  MAP_SHARED, fd, 0x10010000);
+		close(fd);
+
+		if (mapaddress == MAP_FAILED) {
+			fprintf(stderr, "ppsi: mmap(/dev/mem): %s\n",
+				strerror(errno));
+			exit(1);
+		}
+	}
+	/*
+	 * Our DAC changes the freqency by 1.2 ppm every 0x1000 counts.
+	 * We have 16 bits (the high bits select which DAC to control: 0 ok
+	 */
+	tmp = freq_ppb * 0x1000 / 1200;
+	if (tmp > 0x7fff)
+		tmp = 0x7fff;
+	if (tmp < -0x8000)
+		tmp = -0x8000;
+	regval = 0x8000 + tmp; /* 0x8000 is the mid-range, nominal value */
+	pp_diag(ppi, time, 1, "Set frequency: 0x%04x (ppb = %li)\n", regval,
+		freq_ppb);
+
+	*(uint32_t *)(mapaddress + 0x144) = regval;
+	return 0;
+}
+
 static int wrs_time_adjust(struct pp_instance *ppi, long offset_ns,
 			   long freq_ppb)
 {
@@ -242,6 +291,6 @@ struct pp_time_operations wrs_time_ops = {
 	.set = wrs_time_set,
 	.adjust = wrs_time_adjust,
 	.adjust_offset = wrs_time_adjust_offset,
-	.adjust_freq = NULL,
+	.adjust_freq = wrs_time_adjust_freq,
 	.calc_timeout = wrs_calc_timeout,
 };
