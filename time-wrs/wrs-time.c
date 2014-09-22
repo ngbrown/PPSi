@@ -222,11 +222,11 @@ static int wrs_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
 }
 
 static int wrs_time_adjust(struct pp_instance *ppi, long offset_ns,
-			   long freq_ppm)
+			   long freq_ppb)
 {
-	if (freq_ppm != 0)
-		pp_diag(ppi, time, 1, "Warning: %s: can not adjust freq_ppm %li\n",
-				__func__, freq_ppm);
+	if (freq_ppb != 0)
+		pp_diag(ppi, time, 1, "Warning: %s: can not adjust freq_ppb %li\n",
+				__func__, freq_ppb);
 	return wrs_time_adjust_offset(ppi, offset_ns);
 }
 

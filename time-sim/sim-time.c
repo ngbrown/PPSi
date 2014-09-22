@@ -23,8 +23,8 @@ int sim_fast_forward_ns(struct pp_globals *ppg, int64_t ff_ns)
 
 	for (i = 0; i < ppg->nlinks; i++) {
 		t_inst = &SIM_PPI_ARCH(INST(ppg, i))->time;
-		tmp = ff_ns + t_inst->freq_ppm_real * ff_ns / 1000 / 1000 / 1000;
-		t_inst->current_ns += tmp + (t_inst->freq_ppm_servo) *
+		tmp = ff_ns + t_inst->freq_ppb_real * ff_ns / 1000 / 1000 / 1000;
+		t_inst->current_ns += tmp + (t_inst->freq_ppb_servo) *
 						tmp / 1000 / 1000 / 1000;
 	}
 	pp_diag(0, ext, 2, "%s: %lli ns\n", __func__, (long long)ff_ns);
@@ -76,26 +76,26 @@ static int sim_time_set(struct pp_instance *ppi, TimeInternal *t)
 }
 
 static int sim_time_adjust(struct pp_instance *ppi, long offset_ns,
-				long freq_ppm)
+				long freq_ppb)
 {
-	if (freq_ppm) {
-		if (freq_ppm > PP_ADJ_FREQ_MAX)
-			freq_ppm = PP_ADJ_FREQ_MAX;
-		if (freq_ppm < -PP_ADJ_FREQ_MAX)
-			freq_ppm = -PP_ADJ_FREQ_MAX;
-		SIM_PPI_ARCH(ppi)->time.freq_ppm_servo = freq_ppm;
+	if (freq_ppb) {
+		if (freq_ppb > PP_ADJ_FREQ_MAX)
+			freq_ppb = PP_ADJ_FREQ_MAX;
+		if (freq_ppb < -PP_ADJ_FREQ_MAX)
+			freq_ppb = -PP_ADJ_FREQ_MAX;
+		SIM_PPI_ARCH(ppi)->time.freq_ppb_servo = freq_ppb;
 	}
 
 	if (offset_ns)
 		SIM_PPI_ARCH(ppi)->time.current_ns += offset_ns;
 
-	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppm);
+	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppb);
 	return 0;
 }
 
-static int sim_adjust_freq(struct pp_instance *ppi, long freq_ppm)
+static int sim_adjust_freq(struct pp_instance *ppi, long freq_ppb)
 {
-	return sim_time_adjust(ppi, 0, freq_ppm);
+	return sim_time_adjust(ppi, 0, freq_ppb);
 }
 
 static int sim_adjust_offset(struct pp_instance *ppi, long offset_ns)
@@ -105,7 +105,7 @@ static int sim_adjust_offset(struct pp_instance *ppi, long offset_ns)
 
 static inline int sim_init_servo(struct pp_instance *ppi)
 {
-	return SIM_PPI_ARCH(ppi)->time.freq_ppm_real;
+	return SIM_PPI_ARCH(ppi)->time.freq_ppb_real;
 }
 
 static unsigned long sim_calc_timeout(struct pp_instance *ppi, int millisec)

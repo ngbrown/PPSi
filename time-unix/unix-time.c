@@ -76,20 +76,20 @@ static int unix_time_init_servo(struct pp_instance *ppi)
 	return (t.freq >> 16) * 1000; /* positive or negative, not -1 */
 }
 
-static int unix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppm)
+static int unix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppb)
 {
 	struct timex t;
 	int ret;
 
 	t.modes = 0;
 
-	if (freq_ppm) {
-		if (freq_ppm > PP_ADJ_FREQ_MAX)
-			freq_ppm = PP_ADJ_FREQ_MAX;
-		if (freq_ppm < -PP_ADJ_FREQ_MAX)
-			freq_ppm = -PP_ADJ_FREQ_MAX;
+	if (freq_ppb) {
+		if (freq_ppb > PP_ADJ_FREQ_MAX)
+			freq_ppb = PP_ADJ_FREQ_MAX;
+		if (freq_ppb < -PP_ADJ_FREQ_MAX)
+			freq_ppb = -PP_ADJ_FREQ_MAX;
 
-		t.freq = freq_ppm * ((1 << 16) / 1000);
+		t.freq = freq_ppb * ((1 << 16) / 1000);
 		t.modes = MOD_FREQUENCY;
 	}
 
@@ -99,7 +99,7 @@ static int unix_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_p
 	}
 
 	ret = adjtimex(&t);
-	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppm);
+	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppb);
 	return ret;
 }
 
@@ -108,9 +108,9 @@ static int unix_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
 	return unix_time_adjust(ppi, offset_ns, 0);
 }
 
-static int unix_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
+static int unix_time_adjust_freq(struct pp_instance *ppi, long freq_ppb)
 {
-	return unix_time_adjust(ppi, 0, freq_ppm);
+	return unix_time_adjust(ppi, 0, freq_ppb);
 }
 
 static unsigned long unix_calc_timeout(struct pp_instance *ppi, int millisec)

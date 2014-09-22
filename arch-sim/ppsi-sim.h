@@ -15,8 +15,8 @@
  */
 struct pp_sim_time_instance {
 	int64_t current_ns; // with nsecs it's enough for ~300 years
-	int64_t freq_ppm_real; // drift of the simulated hw clock
-	int64_t freq_ppm_servo; // drift applied from servo to correct the hw
+	int64_t freq_ppb_real; // drift of the simulated hw clock
+	int64_t freq_ppb_servo; // drift applied from servo to correct the hw
 	// Future parameters can be added
 };
 

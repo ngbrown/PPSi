@@ -37,7 +37,7 @@ static int bare_time_set(struct pp_instance *ppi, TimeInternal *t)
 		if (sys_adjtimex(&t) < 0)
 			pp_diag(ppi, time, 1, "Can't change TAI offset");
 		else
-			pp_diag(ppi, time, 1, "New TAI offset: %i\n", 
+			pp_diag(ppi, time, 1, "New TAI offset: %i\n",
 				DSPRO(ppi)->currentUtcOffset);
 		return 0;
 	}
@@ -56,7 +56,7 @@ static int bare_time_set(struct pp_instance *ppi, TimeInternal *t)
 }
 
 static int bare_time_adjust(struct pp_instance *ppi, long offset_ns,
-			    long freq_ppm)
+			    long freq_ppb)
 {
 	struct bare_timex t;
 	int ret;
@@ -64,17 +64,17 @@ static int bare_time_adjust(struct pp_instance *ppi, long offset_ns,
 	/* FIXME: handle MOD_FREQUENCY and MOD_OFFSET separately, and
 	 * set t.modes only for the mode having non-zero parameter.
 	 * See unix_time_adjust in arch-unix/unix-time.c */
-	if (freq_ppm > PP_ADJ_FREQ_MAX)
-		freq_ppm = PP_ADJ_FREQ_MAX;
-	if (freq_ppm < -PP_ADJ_FREQ_MAX)
-		freq_ppm = -PP_ADJ_FREQ_MAX;
+	if (freq_ppb > PP_ADJ_FREQ_MAX)
+		freq_ppb = PP_ADJ_FREQ_MAX;
+	if (freq_ppb < -PP_ADJ_FREQ_MAX)
+		freq_ppb = -PP_ADJ_FREQ_MAX;
 
 	t.offset = offset_ns / 1000;
-	t.freq = freq_ppm; /* was: "adj * ((1 << 16) / 1000)" */
+	t.freq = freq_ppb * ((1 << 16) / 1000);
 	t.modes = MOD_FREQUENCY | MOD_OFFSET;
 
 	ret = sys_adjtimex(&t);
-	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppm);
+	pp_diag(ppi, time, 1, "%s: %li %li\n", __func__, offset_ns, freq_ppb);
 	return ret;
 }
 
@@ -83,9 +83,9 @@ int bare_time_adjust_offset(struct pp_instance *ppi, long offset_ns)
 	return bare_time_adjust(ppi, offset_ns, 0);
 }
 
-int bare_time_adjust_freq(struct pp_instance *ppi, long freq_ppm)
+int bare_time_adjust_freq(struct pp_instance *ppi, long freq_ppb)
 {
-	return bare_time_adjust(ppi, 0, freq_ppm);
+	return bare_time_adjust(ppi, 0, freq_ppb);
 }
 
 static unsigned long bare_calc_timeout(struct pp_instance *ppi, int millisec)

@@ -16,7 +16,7 @@ static int f_ppm_real(int lineno, struct pp_globals *ppg,
 	/* master clock is supposed to be perfect. parameters about ppm are
 	 * modifiable only for slave ppi */
 	ppi_slave = pp_sim_get_slave(ppg);
-	SIM_PPI_ARCH(ppi_slave)->time.freq_ppm_real = arg->i * 1000;
+	SIM_PPI_ARCH(ppi_slave)->time.freq_ppb_real = arg->i * 1000;
 	return 0;
 }
 
@@ -28,7 +28,7 @@ static int f_ppm_servo(int lineno, struct pp_globals *ppg,
 	/* master clock is supposed to be perfect. parameters about ppm are
 	 * modifiable only for slave ppi */
 	ppi_slave = pp_sim_get_slave(ppg);
-	SIM_PPI_ARCH(ppi_slave)->time.freq_ppm_servo = arg->i * 1000;
+	SIM_PPI_ARCH(ppi_slave)->time.freq_ppb_servo = arg->i * 1000;
 	return 0;
 }
 
