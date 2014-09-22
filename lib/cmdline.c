@@ -159,9 +159,10 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 			break;
 		case 'b':
 			a = argv[++i];
-			if (ppg->nlinks == 1)
+			if (ppg->nlinks == 1) {
 				INST(ppg, 0)->iface_name = a;
-			else {
+				INST(ppg, 0)->port_name = a;
+			} else {
 				/* If ppsi.conf exists and more than one link is
 				 * configured, it makes no sense trying to set an iface
 				 * name */

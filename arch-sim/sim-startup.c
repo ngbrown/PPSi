@@ -139,6 +139,7 @@ int main(int argc, char **argv)
 		ppi = INST(ppg, i);
 		sim_set_global_DS(ppi);
 		ppi->iface_name = ppi->cfg.iface_name;
+		ppi->port_name = ppi->cfg.port_name;
 		if (ppi->cfg.proto == PPSI_PROTO_RAW)
 			pp_printf("Warning: simulator doesn't support raw "
 					"ethernet. Using UDP\n");

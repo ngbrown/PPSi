@@ -154,6 +154,7 @@ int main(int argc, char **argv)
 
 		ppi->glbs = ppg;
 		ppi->iface_name = ppi->cfg.iface_name;
+		ppi->port_name = ppi->cfg.port_name;
 		/* this old-fashioned "ethernet_mode" is a single bit */
 		ppi->ethernet_mode = (ppi->cfg.proto == PPSI_PROTO_RAW);
 		if (ppi->cfg.role == PPSI_ROLE_MASTER) {

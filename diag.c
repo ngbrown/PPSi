@@ -22,7 +22,7 @@ void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 		      int level, char *fmt, ...)
 {
 	va_list args;
-	char *name = ppi ? ppi->iface_name : "ppsi";
+	char *name = ppi ? ppi->port_name : "ppsi";
 
 	if (!__PP_DIAG_ALLOW(ppi, th, level))
 		return;

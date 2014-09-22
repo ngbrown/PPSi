@@ -27,7 +27,7 @@ static void pp_fsm_printf(struct pp_instance *ppi, char *fmt, ...)
 	ppi->t_ops->get(ppi, &t);
 	pp_global_flags = oflags;
 
-	pp_printf("diag-fsm-1-%s: %09d.%03d: ", ppi->iface_name,
+	pp_printf("diag-fsm-1-%s: %09d.%03d: ", ppi->port_name,
 		  (int)t.seconds, (int)t.nanoseconds / 1000000);
 	va_start(args, fmt);
 	pp_vprintf(fmt, args);
@@ -113,7 +113,7 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		err = ip->f1(ppi, packet, plen);
 		if (err)
 			pp_printf("fsm for %s: Error %i in %s\n",
-				  ppi->iface_name, err, ip->name);
+				  ppi->port_name, err, ip->name);
 
 		/* done: if new state mark it, and enter it now (0 ms) */
 		if (ppi->state != ppi->next_state) {
@@ -127,6 +127,6 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		return ppi->next_delay;
 	}
 	/* Unknwon state, can't happen */
-	pp_printf("fsm: Unknown state for iface %s\n", ppi->iface_name);
+	pp_printf("fsm: Unknown state for port %s\n", ppi->port_name);
 	return 10000; /* No way out. Repeat message every 10s */
 }

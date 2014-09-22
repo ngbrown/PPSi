@@ -309,7 +309,7 @@ static int sim_net_init(struct pp_instance *ppi)
 	/* only UDP, RAW is not supported */
 	pp_diag(ppi, frames, 1, "sim_net_init UDP\n");
 	for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
-		if (sim_open_ch(ppi, ppi->iface_name, i))
+		if (sim_open_ch(ppi, ppi->port_name, i))
 			return -1;
 	}
 	return 0;

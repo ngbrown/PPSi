@@ -177,7 +177,8 @@ struct pp_instance {
 		slave_only:1,
 		master_only:1,
 		ethernet_mode:1;
-	char *iface_name;
+	char *iface_name; /* for direct actions on hardware */
+	char *port_name; /* for diagnostics, mainly */
 	int port_idx;
 
 	struct pp_instance_cfg cfg;

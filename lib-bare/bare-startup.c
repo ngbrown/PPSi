@@ -38,6 +38,7 @@ static struct pp_instance ppi_static = {
 	.n_ops			= &bare_net_ops,
 	.t_ops			= &bare_time_ops,
 	.iface_name 		= "eth0",
+	.port_name 		= "eth0",
 	.ethernet_mode		= PP_DEFAULT_ETHERNET_MODE,
 };
 
