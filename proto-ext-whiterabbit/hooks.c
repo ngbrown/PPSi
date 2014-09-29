@@ -6,19 +6,19 @@
 
 static int wr_init(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	struct wr_dsport *wp = WR_DSPOR(ppi);
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 
-	wp->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
-	wp->calPeriod = WR_DEFAULT_CAL_PERIOD;
-	wp->wrModeOn = 0;
-	wp->parentWrConfig = NON_WR;
-	wp->parentWrModeOn = 0;
-	wp->calibrated = !WR_DEFAULT_PHY_CALIBRATION_REQUIRED;
+	wrp->wrStateTimeout = WR_DEFAULT_STATE_TIMEOUT_MS;
+	wrp->calPeriod = WR_DEFAULT_CAL_PERIOD;
+	wrp->wrModeOn = 0;
+	wrp->parentWrConfig = NON_WR;
+	wrp->parentWrModeOn = 0;
+	wrp->calibrated = !WR_DEFAULT_PHY_CALIBRATION_REQUIRED;
 
-	if ((wp->wrConfig & WR_M_AND_S) == WR_M_ONLY)
-		wp->ops->enable_timing_output(ppi, 1);
+	if ((wrp->wrConfig & WR_M_AND_S) == WR_M_ONLY)
+		wrp->ops->enable_timing_output(ppi, 1);
 	else
-		wp->ops->enable_timing_output(ppi, 0);
+		wrp->ops->enable_timing_output(ppi, 0);
 	return 0;
 }
 
@@ -63,9 +63,9 @@ static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 
 static int wr_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	struct wr_dsport *wp = WR_DSPOR(ppi);
+	struct wr_dsport *wrp = WR_DSPOR(ppi);
 
-	wp->wrMode = NON_WR;
+	wrp->wrMode = NON_WR;
 	return 0;
 }
 
