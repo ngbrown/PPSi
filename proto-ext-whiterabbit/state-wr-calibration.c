@@ -35,7 +35,7 @@ int wr_calibration(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		e = msg_issue_wrsig(ppi, CALIBRATE);
 		wrp->wrPortState = WR_PORT_CALIBRATION_0;
 		if (wrp->calibrated)
-			wrp->wrPortState = WR_PORT_CALIBRATION_8;
+			wrp->wrPortState = WR_PORT_CALIBRATION_2;
 	}
 
 	pp_diag(ppi, ext, 1, "%s: substate %i\n", __func__,
