@@ -102,6 +102,16 @@ enum {
 	WR_MASTER = 1,
 };
 
+/* White Rabbit Servo */
+enum {
+	WR_UNINITIALIZED = 0,
+	WR_SYNC_NSEC,
+	WR_SYNC_TAI,
+	WR_SYNC_PHASE,
+	WR_TRACK_PHASE,
+	WR_WAIT_OFFSET_STABLE,
+};
+
 /* Values of Management Actions (extended for WR), see table 38
  */
 enum {

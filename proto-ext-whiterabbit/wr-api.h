@@ -95,6 +95,8 @@ void wr_handshake_init(struct pp_instance *ppi, int mode);
 void wr_handshake_fail(struct pp_instance *ppi); /* goto non-wr */
 int wr_handshake_retry(struct pp_instance *ppi); /* 1 == retry; 0 == failed */
 
+struct wr_servo_state;
+
 /* White Rabbit hw-dependent functions (code in arch-wrpc and arch-wrs) */
 struct wr_operations {
 	int (*locking_enable)(struct pp_instance *ppi);
@@ -118,6 +120,11 @@ struct wr_operations {
 				    unsigned int calibrationPatternLen);
 	int (*calib_pattern_disable)(struct pp_instance *ppi);
 	int (*enable_timing_output)(struct pp_instance *ppi, int enable);
+	int (*servo_hook)(struct wr_servo_state *s, int action);
+};
+
+enum {
+	WR_SERVO_ENTER, WR_SERVO_LEAVE
 };
 
 

@@ -2,13 +2,6 @@
 #include "wr-api.h"
 #include <libwr/shmem.h>
 
-#define WR_SERVO_NONE 0
-#define WR_SYNC_NSEC 1
-#define WR_SYNC_TAI 2
-#define WR_SYNC_PHASE 3
-#define WR_TRACK_PHASE 4
-#define WR_WAIT_OFFSET_STABLE 5
-
 #define WR_SERVO_OFFSET_STABILITY_THRESHOLD 60 /* psec */
 
 #define FIX_ALPHA_FRACBITS 40
@@ -20,7 +13,7 @@
 #define SNMP_MAX_RXTX_DELTAS 1000000
 
 static const char *servo_name[] = {
-	[WR_SERVO_NONE] = "Uninitialized",
+	[WR_UNINITIALIZED] = "Uninitialized",
 	[WR_SYNC_NSEC] = "SYNC_NSEC",
 	[WR_SYNC_TAI] = "SYNC_SEC",
 	[WR_SYNC_PHASE] = "SYNC_PHASE",
@@ -174,7 +167,7 @@ int wr_servo_init(struct pp_instance *ppi)
 	wrp->ops->enable_timing_output(ppi, 0);
 
 	strncpy(s->if_name, ppi->cfg.iface_name, sizeof(s->if_name));
-	s->state = WR_SERVO_NONE; /* Turned into SYNC_TAI at 1st iteration */
+	s->state = WR_UNINITIALIZED; /* Turned into SYNC_TAI at 1st iteration */
 	s->cur_setpoint = 0;
 	s->missed_iters = 0;
 
@@ -262,6 +255,9 @@ int wr_servo_update(struct pp_instance *ppi)
 		return 0;
 	}
 
+	if (wrp->ops->servo_hook)
+		wrp->ops->servo_hook(s, WR_SERVO_ENTER);
+
 	/* shmem lock */
 	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_BEGIN);
 
@@ -310,7 +306,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		 * DSPOR(ppi)->doRestart = TRUE; */
 	}
 
-	if (s->state == WR_SERVO_NONE)
+	if (s->state == WR_UNINITIALIZED)
 		s->state = WR_SYNC_TAI;
 	if (s->state ==WR_SYNC_TAI) /* unsynced: no PPS output */
 		wrp->ops->enable_timing_output(ppi, 0);
@@ -435,5 +431,9 @@ int wr_servo_update(struct pp_instance *ppi)
 out:
 	/* shmem unlock */
 	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
+
+	if (wrp->ops->servo_hook)
+		wrp->ops->servo_hook(s, WR_SERVO_LEAVE);
+
 	return 0;
 }
