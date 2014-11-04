@@ -7,6 +7,10 @@
 #include <stdarg.h>
 #include <ppsi/ppsi.h>
 
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#endif
+
 static char *thing_name[] = {
 	[pp_dt_fsm]	= "diag-fsm",
 	[pp_dt_time]	= "diag-time",
@@ -59,8 +63,9 @@ unsigned long pp_diag_parse(char *diaglevel)
 {
 	unsigned long res = 0;
 	int i = 28; /* number of bits to shift the nibble: 28..31 is first */
+	int nthings = ARRAY_SIZE(thing_name);
 
-	while (*diaglevel && i >= 4) {
+	while (*diaglevel && i >= (32 - 4 * nthings)) {
 		if (*diaglevel < '0' || *diaglevel > '3')
 			break;
 		res |= ((*diaglevel - '0') << i);
