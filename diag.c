@@ -58,11 +58,7 @@ void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 unsigned long pp_diag_parse(char *diaglevel)
 {
 	unsigned long res = 0;
-	int i = 28;
-
-#ifdef VERB_LOG_MSGS /* compatible with older way: this enables all */
-	return ~0xf;
-#endif
+	int i = 28; /* number of bits to shift the nibble: 28..31 is first */
 
 	while (*diaglevel && i >= 4) {
 		if (*diaglevel < '0' || *diaglevel > '3')
