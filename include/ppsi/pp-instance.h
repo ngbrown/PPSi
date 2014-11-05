@@ -140,7 +140,7 @@ struct pp_instance {
 	int next_state, next_delay, is_new_state; /* set by state processing */
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
-	unsigned long flags;		/* ppi-specific flags (diag mainly) */
+	unsigned long d_flags;		/* diagnostics, ppi-specific flags */
 
 	/* Pointer to global instance owning this pp_instance*/
 	struct pp_globals *glbs;

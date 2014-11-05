@@ -19,7 +19,7 @@ static int bare_time_get(struct pp_instance *ppi, TimeInternal *t)
 	/* TAI = UTC + 35 */
 	t->seconds = tv.tv_sec + DSPRO(ppi)->currentUtcOffset;
 	t->nanoseconds = tv.tv_usec * 1000;
-	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
+	if (!(pp_global_d_flags & PP_FLAG_NOTIMELOG))
 		pp_diag(ppi, time, 2, "%s: %9li.%06li\n", __func__,
 			tv.tv_sec, tv.tv_usec);
 	return 0;

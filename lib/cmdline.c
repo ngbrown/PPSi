@@ -110,7 +110,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 		case 'd':
 			/* Use the general flags, per-instance TBD */
 			a = argv[++i];
-			pp_global_flags = pp_diag_parse(a);
+			pp_global_d_flags = pp_diag_parse(a);
 			break;
 		case 'C':
 			if (pp_config_string(ppg, argv[++i]) != 0)

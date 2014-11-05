@@ -112,9 +112,9 @@ static int f_diag(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 	unsigned long level = pp_diag_parse(arg->s);
 
 	if (ppg->cfg.cur_ppi_n >= 0)
-		CUR_PPI(ppg)->flags = level;
+		CUR_PPI(ppg)->d_flags = level;
 	else
-		pp_global_flags = level;
+		pp_global_d_flags = level;
 	return 0;
 }
 

@@ -176,7 +176,7 @@ static int wrs_time_get(struct pp_instance *ppi, TimeInternal *t)
 	t->nanoseconds = p.current_nsec;
 	t->correct = p.pps_valid;
 
-	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
+	if (!(pp_global_d_flags & PP_FLAG_NOTIMELOG))
 		pp_diag(ppi, time, 2, "%s: (valid %x) %9li.%09li\n", __func__,
 			p.pps_valid,
 			(long)p.current_sec, (long)p.current_nsec);

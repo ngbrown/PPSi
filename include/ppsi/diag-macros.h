@@ -6,8 +6,8 @@
 #define pp_error(...) pp_printf("ERROR: " __VA_ARGS__)
 
 /*
- * The "new" diagnostics is based on flags: there are per-instance flags
- * and global flags.
+ * The "new" diagnostics is based on flags: there are per-instance d_flags
+ * and global d_flags.
  *
  * Basically, we may have just bits about what to print, but we might
  * want to add extra-verbose stuff for specific cases, like looking at
@@ -37,17 +37,17 @@ enum pp_diag_things {
 /*
  * Note: we may use less bits and have more things, without changing
  * anything. Set's say levels are ony 0..3 -- still,I prefer to be
- * able to print the active flags as %x while debugging this very
+ * able to print the active d_flags as %x while debugging this very
  * mechanism).
  */
 
-extern unsigned long pp_global_flags; /* Supplement ppi-specific ones */
+extern unsigned long pp_global_d_flags; /* Supplement ppi-specific ones */
 
 #define PP_FLAG_NOTIMELOG      1 /* This is for a special case, I'm sorry */
 
 
 /* So, extract the level */
-#define __PP_FLAGS(ppi) ((ppi ? ppi->flags : 0) | pp_global_flags)
+#define __PP_FLAGS(ppi) ((ppi ? ppi->d_flags : 0) | pp_global_d_flags)
 
 #define __PP_DIAG_ALLOW(ppi, th, level) \
 		((__PP_FLAGS(ppi) >> (4 * (th)) & 0xf) >= level)
