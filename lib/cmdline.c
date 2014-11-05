@@ -198,7 +198,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 				= PP_CLASS_SLAVE_ONLY;
 			/* Apply -g option globally, to each configured link */
 			for (j = 0; j < ppg->nlinks; j++)
-				INST(ppg, j)->flags |= PPI_FLAG_SLAVE_ONLY;
+				INST(ppg, j)->role = PPSI_ROLE_SLAVE;
 			break;
 		case 'v':
 			a = argv[++i];
@@ -229,7 +229,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 		case 'e':
 			/* Apply -e option globally, to each configured link */
 			for (j = 0; j < ppg->nlinks; j++)
-				INST(ppg, j)->flags |= PPI_FLAG_RAW_PROTO;
+				INST(ppg, j)->proto = PPSI_PROTO_RAW;
 			break;
 		case 'G':
 			/* gptp_mode not supported: fall through */

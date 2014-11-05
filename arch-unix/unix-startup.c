@@ -55,6 +55,11 @@ int main(int argc, char **argv)
 	ppg->max_links = PP_MAX_LINKS;
 	ppg->arch_data = calloc(1, sizeof(struct unix_arch_data));
 	ppg->pp_instances = calloc(ppg->max_links, sizeof(struct pp_instance));
+	for (i = 0; i < ppg->max_links; i++) {
+		ppi = INST(ppg, i);
+		ppi->proto = PP_DEFAULT_PROTO;
+		ppi->role = PP_DEFAULT_ROLE;
+	}
 
 	if ((!ppg->arch_data) || (!ppg->pp_instances))
 		exit(__LINE__);
@@ -82,14 +87,8 @@ int main(int argc, char **argv)
 		ppi->iface_name = ppi->cfg.iface_name;
 		ppi->port_name = ppi->cfg.port_name;
 		/* this old-fashioned "ethernet_mode" is a single bit */
-		if (ppi->cfg.proto == PPSI_PROTO_RAW)
-			ppi->flags |= PPI_FLAG_RAW_PROTO;
-		if (ppi->cfg.role == PPSI_ROLE_MASTER) {
-			ppi->flags |= PPI_FLAG_MASTER_ONLY;
-		}
-		else if (ppi->cfg.role == PPSI_ROLE_SLAVE) {
-			ppi->flags |= PPI_FLAG_SLAVE_ONLY;
-		}
+		ppi->proto = ppi->cfg.proto;
+		ppi->role = ppi->cfg.role;
 
 		/* FIXME set ppi ext enable as defined in its pp_link */
 

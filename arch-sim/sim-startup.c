@@ -57,6 +57,7 @@ int sim_set_global_DS(struct pp_instance *ppi)
 static int sim_ppi_init(struct pp_instance *ppi, int which_ppi)
 {
 	struct sim_ppi_arch_data *data;
+	ppi->proto = PP_DEFAULT_PROTO;
 	ppi->arch_data = calloc(1, sizeof(struct sim_ppi_arch_data));
 	ppi->portDS = calloc(1, sizeof(*ppi->portDS));
 	if ((!ppi->arch_data) || (!ppi->portDS))
@@ -144,11 +145,7 @@ int main(int argc, char **argv)
 					"ethernet. Using UDP\n");
 		NP(ppi)->ch[PP_NP_GEN].fd = -1;
 		NP(ppi)->ch[PP_NP_EVT].fd = -1;
-		if (ppi->cfg.role == PPSI_ROLE_MASTER) {
-			ppi->flags |= PPI_FLAG_MASTER_ONLY;
-		} else if (ppi->cfg.role == PPSI_ROLE_SLAVE) {
-			ppi->flags |= PPI_FLAG_SLAVE_ONLY;
-		}
+		ppi->role = ppi->cfg.role;
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 		ppi->n_ops = &DEFAULT_NET_OPS;
 		if (pp_sim_is_master(ppi))

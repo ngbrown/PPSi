@@ -248,7 +248,7 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	struct pp_channel *ch1, *ch2;
 	int ret = -1;
 
-	if (ppi->flags & PPI_FLAG_RAW_PROTO) {
+	if (ppi->proto == PPSI_PROTO_RAW) {
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
 		ret = wrs_recv_msg(ppi, fd, pkt, len, t);
@@ -317,7 +317,7 @@ static void poll_tx_timestamp(struct pp_instance *ppi,
 	 * a tx timestamp. Udp doesn't so don't check in udp mode
 	 * (the pointer is only checked for non-null)
 	 */
-	if (!(ppi->flags & PPI_FLAG_RAW_PROTO))
+	if (!(ppi->proto == PPSI_PROTO_RAW))
 		serr = (void *)1;
 
 	for (cmsg = CMSG_FIRSTHDR(&msg);
@@ -361,7 +361,7 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 	 */
 	drop = ppsi_drop_tx();
 
-	if (ppi->flags & PPI_FLAG_RAW_PROTO) {
+	if (ppi->proto == PPSI_PROTO_RAW) {
 		fd = NP(ppi)->ch[PP_NP_GEN].fd;
 		hdr->h_proto = htons(ETH_P_1588);
 		if (drop)

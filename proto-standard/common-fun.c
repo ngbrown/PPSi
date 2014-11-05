@@ -50,7 +50,7 @@ int st_com_execute_slave(struct pp_instance *ppi)
 	if (pp_timeout_z(ppi, PP_TO_ANN_RECEIPT)) {
 		ppi->frgn_rec_num = 0;
 		if (DSDEF(ppi)->clockQuality.clockClass != PP_CLASS_SLAVE_ONLY
-		    && !(ppi->flags & PPI_FLAG_SLAVE_ONLY)) {
+		    && (ppi->role != PPSI_ROLE_SLAVE)) {
 			m1(ppi);
 			ppi->next_state = PPS_MASTER;
 		} else {

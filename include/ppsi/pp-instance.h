@@ -141,7 +141,9 @@ struct pp_instance {
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
 	unsigned long d_flags;		/* diagnostics, ppi-specific flags */
-	int flags;			/* protocol flags (see below) */
+	unsigned char flags,		/* protocol flags (see below) */
+		role,			/* same as in config file */
+		proto;			/* same as in config file */
 
 	/* Pointer to global instance owning this pp_instance*/
 	struct pp_globals *glbs;
@@ -189,12 +191,9 @@ struct pp_instance {
 
 	struct pp_instance_cfg cfg;
 };
-/* The following things used to be bit fields */
-#define PPI_FLAG_RAW_PROTO		1	/* was: "ethernet_mode" */
-#define PPI_FLAG_SLAVE_ONLY		0x0010
-#define PPI_FLAG_MASTER_ONLY		0x0020
-#define PPI_FLAG_FROM_CURRENT_PARENT	0x0100
-#define PPI_FLAG_WAITING_FOR_F_UP	0x0200
+/* The following things used to be bit fields. Other flags are now enums */
+#define PPI_FLAG_FROM_CURRENT_PARENT	0x01
+#define PPI_FLAG_WAITING_FOR_F_UP	0x02
 
 
 struct pp_globals_cfg {

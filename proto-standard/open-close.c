@@ -62,7 +62,7 @@ int pp_init_globals(struct pp_globals *ppg, struct pp_runtime_opts *pp_rt_opts)
 		   sizeof(ClockQuality));
 
 	if (def->numberPorts == 1)
-		def->slaveOnly = !!(INST(ppg, 0)->flags & PPI_FLAG_SLAVE_ONLY);
+		def->slaveOnly = (INST(ppg, 0)->role == PPSI_ROLE_SLAVE);
 	else
 		def->slaveOnly = 1; /* the for cycle below will set it to 0 if not
 							 * ports are not all slave_only */
@@ -74,7 +74,7 @@ int pp_init_globals(struct pp_globals *ppg, struct pp_runtime_opts *pp_rt_opts)
 	for (i = 0; i < def->numberPorts; i++) {
 		struct pp_instance *ppi = INST(ppg, i);
 
-		if (def->slaveOnly && !(ppi->flags & PPI_FLAG_SLAVE_ONLY))
+		if (def->slaveOnly && ppi->role != PPSI_ROLE_SLAVE)
 			def->slaveOnly = 0;
 
 		ppi->state = PPS_INITIALIZING;
