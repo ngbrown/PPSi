@@ -121,7 +121,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 				return -1;
 			break;
 		case 'x':
-			GOPTS(ppg)->no_rst_clk = 1;
+			GOPTS(ppg)->flags |= PP_FLAG_NO_RESET;
 			break;
 		case 'O':
 			a = argv[++i];
@@ -142,7 +142,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 			}
 			break;
 		case 't':
-			GOPTS(ppg)->no_adjust = 1;
+			GOPTS(ppg)->flags |= PP_FLAG_NO_ADJUST;
 			break;
 		case 'a':
 			a = argv[++i];

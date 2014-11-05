@@ -20,13 +20,14 @@ struct pp_runtime_opts {
 	Integer32 max_rst; /* Maximum number of nanoseconds to reset */
 	Integer32 max_dly; /* Maximum number of nanoseconds of delay */
 	Integer32 ttl;
-	UInteger32	/* slave_only:1, -- moved to ppsi, is no more global */
-			/* master_only:1, -- moved to ppsi, is no more global */
-			no_adjust:1,
-			/* ethernet_mode:1, -- moved to ppsi, is no more global */
-			/* e2e_mode:1, -- no more: we only support e2e */
-			/* gptp_mode:1, -- no more: peer-to-peer unsupported */
-			no_rst_clk:1;
+	int flags;
+	   #define PP_FLAG_NO_ADJUST  0x01
+	   #define PP_FLAG_NO_RESET   0x02
+	/* slave_only:1, -- moved to ppi, no more global */
+	/* master_only:1, -- moved to ppi, no more global */
+	/* ethernet_mode:1, -- moved to ppi, no more global */
+	/* e2e_mode:1, -- no more: we only support e2e */
+	/* gptp_mode:1, -- no more: peer-to-peer unsupported */
 	Integer16 ap, ai;
 	Integer16 s;
 	Integer8 announce_intvl;

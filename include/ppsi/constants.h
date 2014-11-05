@@ -18,7 +18,7 @@
 
 #define PP_DEFAULT_INBOUND_LATENCY		0		/* in nsec */
 #define PP_DEFAULT_OUTBOUND_LATENCY		0		/* in nsec */
-#define PP_DEFAULT_NO_RESET_CLOCK		0
+#define PP_DEFAULT_FLAGS			0
 #define PP_DEFAULT_ETHERNET_MODE		0
 #define PP_DEFAULT_DOMAIN_NUMBER		0
 #define PP_DEFAULT_AP				10
@@ -46,7 +46,6 @@
 #define PP_NR_FOREIGN_RECORDS			5
 #define PP_DEFAULT_MAX_RESET			0
 #define PP_DEFAULT_MAX_DELAY			0
-#define PP_DEFAULT_NO_ADJUST			0
 #define PP_DEFAULT_TTL				1
 
 /* We use an array of timeouts, with these indexes */
