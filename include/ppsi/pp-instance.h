@@ -141,6 +141,7 @@ struct pp_instance {
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
 	unsigned long d_flags;		/* diagnostics, ppi-specific flags */
+	int flags;			/* protocol flags (see below) */
 
 	/* Pointer to global instance owning this pp_instance*/
 	struct pp_globals *glbs;
@@ -182,18 +183,19 @@ struct pp_instance {
 	UInteger16 sent_seq[__PP_NR_MESSAGES_TYPES]; /* last sent this type */
 	MsgHeader received_ptp_header;
 	MsgHeader delay_req_hdr;
-	UInteger32
-		is_from_cur_par:1,
-		waiting_for_follow:1,
-		slave_only:1,
-		master_only:1,
-		ethernet_mode:1;
 	char *iface_name; /* for direct actions on hardware */
 	char *port_name; /* for diagnostics, mainly */
 	int port_idx;
 
 	struct pp_instance_cfg cfg;
 };
+/* The following things used to be bit fields */
+#define PPI_FLAG_RAW_PROTO		1	/* was: "ethernet_mode" */
+#define PPI_FLAG_SLAVE_ONLY		0x0010
+#define PPI_FLAG_MASTER_ONLY		0x0020
+#define PPI_FLAG_FROM_CURRENT_PARENT	0x0100
+#define PPI_FLAG_WAITING_FOR_F_UP	0x0200
+
 
 struct pp_globals_cfg {
 	int cfg_items;			/* Remember how many we parsed */

@@ -142,15 +142,12 @@ int main(int argc, char **argv)
 		if (ppi->cfg.proto == PPSI_PROTO_RAW)
 			pp_printf("Warning: simulator doesn't support raw "
 					"ethernet. Using UDP\n");
-		ppi->ethernet_mode = 0;
 		NP(ppi)->ch[PP_NP_GEN].fd = -1;
 		NP(ppi)->ch[PP_NP_EVT].fd = -1;
 		if (ppi->cfg.role == PPSI_ROLE_MASTER) {
-			ppi->master_only = 1;
-			ppi->slave_only = 0;
+			ppi->flags |= PPI_FLAG_MASTER_ONLY;
 		} else if (ppi->cfg.role == PPSI_ROLE_SLAVE) {
-			ppi->master_only = 0;
-			ppi->slave_only = 1;
+			ppi->flags |= PPI_FLAG_SLAVE_ONLY;
 		}
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 		ppi->n_ops = &DEFAULT_NET_OPS;

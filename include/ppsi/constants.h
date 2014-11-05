@@ -13,13 +13,13 @@
 #define PP_NSEC_PER_SEC (1000*1000*1000)
 
 /* implementation specific constants */
+#define PP_DEFAULT_PPI_FLAGS			0 /* UDP mode */
 #define PP_MAX_LINKS				64
 #define PP_DEFAULT_CONFIGFILE			"/etc/ppsi.conf"
 
 #define PP_DEFAULT_INBOUND_LATENCY		0		/* in nsec */
 #define PP_DEFAULT_OUTBOUND_LATENCY		0		/* in nsec */
 #define PP_DEFAULT_FLAGS			0
-#define PP_DEFAULT_ETHERNET_MODE		0
 #define PP_DEFAULT_DOMAIN_NUMBER		0
 #define PP_DEFAULT_AP				10
 #define PP_DEFAULT_AI				1000

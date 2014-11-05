@@ -50,7 +50,7 @@ int st_com_execute_slave(struct pp_instance *ppi)
 	if (pp_timeout_z(ppi, PP_TO_ANN_RECEIPT)) {
 		ppi->frgn_rec_num = 0;
 		if (DSDEF(ppi)->clockQuality.clockClass != PP_CLASS_SLAVE_ONLY
-		    && !ppi->slave_only) {
+		    && !(ppi->flags & PPI_FLAG_SLAVE_ONLY)) {
 			m1(ppi);
 			ppi->next_state = PPS_MASTER;
 		} else {
@@ -131,7 +131,7 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 
 	if (len < PP_SYNC_LENGTH)
 		return -1;
-	if (!ppi->is_from_cur_par)
+	if (!(ppi->flags & PPI_FLAG_FROM_CURRENT_PARENT))
 		return 0;
 
 	/* t2 may be overriden by follow-up, cField is always valid */
@@ -139,12 +139,12 @@ int st_com_slave_handle_sync(struct pp_instance *ppi, unsigned char *buf,
 	cField_to_TimeInternal(&ppi->cField, hdr->correctionfield);
 
 	if ((hdr->flagField[0] & PP_TWO_STEP_FLAG) != 0) {
-		ppi->waiting_for_follow = TRUE;
+		ppi->flags |= PPI_FLAG_WAITING_FOR_F_UP;
 		ppi->recv_sync_sequence_id = hdr->sequenceId;
 		return 0;
 	}
 	msg_unpack_sync(buf, &sync);
-	ppi->waiting_for_follow = FALSE;
+	ppi->flags &= ~PPI_FLAG_WAITING_FOR_F_UP;
 	to_TimeInternal(&ppi->t1,
 			&sync.originTimestamp);
 	pp_servo_got_sync(ppi);
@@ -163,13 +163,13 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	if (len < PP_FOLLOW_UP_LENGTH)
 		return -1;
 
-	if (!ppi->is_from_cur_par) {
+	if (!(ppi->flags & PPI_FLAG_FROM_CURRENT_PARENT)) {
 		pp_error("%s: Follow up message is not from current parent\n",
 			__func__);
 		return 0;
 	}
 
-	if (!ppi->waiting_for_follow) {
+	if (!(ppi->flags & PPI_FLAG_WAITING_FOR_F_UP)) {
 		pp_error("%s: Slave was not waiting a follow up message\n",
 			__func__);
 		return 0;
@@ -182,7 +182,7 @@ int st_com_slave_handle_followup(struct pp_instance *ppi, unsigned char *buf,
 	}
 
 	msg_unpack_follow_up(buf, &follow);
-	ppi->waiting_for_follow = FALSE;
+	ppi->flags &= ~PPI_FLAG_WAITING_FOR_F_UP;
 	to_TimeInternal(&ppi->t1, &follow.preciseOriginTimestamp);
 
 	/* Call the extension; it may do it all and ask to return */

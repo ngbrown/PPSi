@@ -88,7 +88,7 @@ void wrs_main_loop(struct pp_globals *ppg)
 		* If we are sending or receiving raw ethernet frames,
 		* the ptp payload is one-eth-header bytes into the frame
 		*/
-		if (ppi->ethernet_mode)
+		if (ppi->flags & PPI_FLAG_RAW_PROTO)
 			NP(ppi)->ptp_offset = ETH_HLEN;
 
 		/*

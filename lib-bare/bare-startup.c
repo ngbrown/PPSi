@@ -39,7 +39,7 @@ static struct pp_instance ppi_static = {
 	.t_ops			= &bare_time_ops,
 	.iface_name 		= "eth0",
 	.port_name 		= "eth0",
-	.ethernet_mode		= PP_DEFAULT_ETHERNET_MODE,
+	.flags			= PP_DEFAULT_PPI_FLAGS,
 };
 
 /* We now have a structure with all globals, and multiple ppi inside */
