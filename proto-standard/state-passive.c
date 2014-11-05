@@ -13,7 +13,7 @@ int pp_passive(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
 	int e = 0; /* error var, to check errors in msg handling */
 
-	if (ppi->is_new_state)
+	if (pp_is_new_state(ppi))
 		pp_timeout_restart_annrec(ppi);
 
 	if (plen == 0)

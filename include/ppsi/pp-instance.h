@@ -137,7 +137,7 @@ struct pp_instance_cfg {
  */
 struct pp_instance {
 	int state;
-	int next_state, next_delay, is_new_state; /* set by state processing */
+	int next_state, next_delay;	/* set by state processing */
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
 	unsigned long d_flags;		/* diagnostics, ppi-specific flags */
@@ -195,6 +195,8 @@ struct pp_instance {
 #define PPI_FLAG_MASTER_ONLY		0x0020
 #define PPI_FLAG_FROM_CURRENT_PARENT	0x0100
 #define PPI_FLAG_WAITING_FOR_F_UP	0x0200
+#define PPI_FLAG_IS_NEW_STATE		0x0400
+#define pp_is_new_state(ppi)		((ppi)->flags & PPI_FLAG_IS_NEW_STATE)
 
 
 struct pp_globals_cfg {

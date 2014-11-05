@@ -49,7 +49,7 @@ void sim_main_loop(struct pp_globals *ppg)
 	/* Initialize each link's state machine */
 	for (j = 0; j < ppg->nlinks; j++) {
 		ppi = INST(ppg, j);
-		ppi->is_new_state = 1;
+		ppi->flags |= PPI_FLAG_IS_NEW_STATE;
 	}
 
 	delay_ns = run_all_state_machines(ppg) * 1000LL * 1000LL;
@@ -67,7 +67,7 @@ void sim_main_loop(struct pp_globals *ppg)
 				new_state = bmc(ppi);
 				if (new_state != ppi->state) {
 					ppi->state = new_state;
-					ppi->is_new_state = 1;
+					ppi->flags |= PPI_FLAG_IS_NEW_STATE;
 				}
 			}
 			ppg->ebest_updated = 0;

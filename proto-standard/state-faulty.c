@@ -15,7 +15,7 @@
 
 int pp_faulty(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	if (ppi->is_new_state) {
+	if (pp_is_new_state(ppi)) {
 		pp_timeout_set(ppi, PP_TO_FAULTY, 4000);
 	}
 

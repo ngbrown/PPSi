@@ -60,7 +60,7 @@ void unix_main_loop(struct pp_globals *ppg)
 		* doing anything else but the protocol, this allows extra stuff
 		* to fit.
 		*/
-		ppi->is_new_state = 1;
+		ppi->flags |= PPI_FLAG_IS_NEW_STATE;
 	}
 
 	delay_ms = run_all_state_machines(ppg);
@@ -80,7 +80,7 @@ void unix_main_loop(struct pp_globals *ppg)
 				new_state = bmc(ppi);
 				if (new_state != ppi->state) {
 					ppi->state = new_state;
-					ppi->is_new_state = 1;
+					ppi->flags |= PPI_FLAG_IS_NEW_STATE;
 				}
 			}
 			ppg->ebest_updated = 0;

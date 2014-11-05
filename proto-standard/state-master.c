@@ -15,7 +15,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int msgtype, d1, d2;
 	int e = 0; /* error var, to check errors in msg handling */
 
-	if (ppi->is_new_state) {
+	if (pp_is_new_state(ppi)) {
 		pp_timeout_rand(ppi, PP_TO_SYNC, DSPOR(ppi)->logSyncInterval);
 		pp_timeout_rand(ppi, PP_TO_ANN_INTERVAL,
 				DSPOR(ppi)->logAnnounceInterval);
