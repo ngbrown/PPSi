@@ -26,7 +26,7 @@ void pp_servo_init(struct pp_instance *ppi)
 		SRV(ppi)->obs_drift = -d << 10; /* note "-" */
 	} else {
 		/* level clock */
-		if (!(OPTS(ppi)->flags & PP_FLAG_NO_ADJUST))
+		if (pp_can_adjust(ppi))
 			ppi->t_ops->adjust(ppi, 0, 0);
 		SRV(ppi)->obs_drift = 0;
 	}
@@ -209,8 +209,8 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 		TimeInternal time_tmp;
 
 		/* if secs, reset clock or set freq adjustment to max */
-		if (!(OPTS(ppi)->flags & PP_FLAG_NO_ADJUST)) {
-			if (!(OPTS(ppi)->flags & PP_FLAG_NO_RESET)) {
+		if (pp_can_adjust(ppi)) {
+			if (pp_can_reset_clock(ppi)) {
 				/* Can't use adjust, limited to +/- 2s */
 				time_tmp = ppi->t4;
 				add_TimeInternal(&time_tmp, &time_tmp,
@@ -278,7 +278,7 @@ void pp_servo_got_resp(struct pp_instance *ppi)
 
 	/* apply controller output as a clock tick rate adjustment, if
 	 * provided by arch, or as a raw offset otherwise */
-	if (!(OPTS(ppi)->flags & PP_FLAG_NO_ADJUST)) {
+	if (pp_can_adjust(ppi)) {
 		if (ppi->t_ops->adjust_freq)
 			ppi->t_ops->adjust_freq(ppi, -adj);
 		else

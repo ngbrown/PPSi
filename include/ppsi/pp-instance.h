@@ -20,14 +20,7 @@ struct pp_runtime_opts {
 	Integer32 max_rst; /* Maximum number of nanoseconds to reset */
 	Integer32 max_dly; /* Maximum number of nanoseconds of delay */
 	Integer32 ttl;
-	int flags;
-	   #define PP_FLAG_NO_ADJUST  0x01
-	   #define PP_FLAG_NO_RESET   0x02
-	/* slave_only:1, -- moved to ppi, no more global */
-	/* master_only:1, -- moved to ppi, no more global */
-	/* ethernet_mode:1, -- moved to ppi, no more global */
-	/* e2e_mode:1, -- no more: we only support e2e */
-	/* gptp_mode:1, -- no more: peer-to-peer unsupported */
+	int flags;		/* see below */
 	Integer16 ap, ai;
 	Integer16 s;
 	Integer8 announce_intvl;
@@ -37,6 +30,23 @@ struct pp_runtime_opts {
 	UInteger8 domain_number;
 	void *arch_opts;
 };
+
+/*
+ * Flags for the above structure
+ */
+#define PP_FLAG_NO_ADJUST  0x01
+#define PP_FLAG_NO_RESET   0x02
+/* I'd love to use inlines, but we still miss some structure at this point*/
+#define pp_can_adjust(ppi)      (!(OPTS(ppi)->flags & PP_FLAG_NO_ADJUST))
+#define pp_can_reset_clock(ppi) (!(OPTS(ppi)->flags & PP_FLAG_NO_RESET))
+
+/* slave_only:1, -- moved to ppi, no more global */
+/* master_only:1, -- moved to ppi, no more global */
+/* ethernet_mode:1, -- moved to ppi, no more global */
+/* e2e_mode:1, -- no more: we only support e2e */
+/* gptp_mode:1, -- no more: peer-to-peer unsupported */
+
+
 
 /* We need a globally-accessible structure with preset defaults */
 extern struct pp_runtime_opts __pp_default_rt_opts;
