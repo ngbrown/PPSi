@@ -108,7 +108,7 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		/* found: handle this state */
 		ppi->next_state = state;
 		ppi->next_delay = 0;
-		if (pp_is_new_state(ppi))
+		if (ppi->is_new_state)
 			pp_diag_fsm(ppi, ip->name, STATE_ENTER, plen);
 		err = ip->f1(ppi, packet, plen);
 		if (err)
@@ -118,11 +118,11 @@ int pp_state_machine(struct pp_instance *ppi, uint8_t *packet, int plen)
 		/* done: if new state mark it, and enter it now (0 ms) */
 		if (ppi->state != ppi->next_state) {
 			ppi->state = ppi->next_state;
-			ppi->flags |= PPI_FLAG_IS_NEW_STATE;
+			ppi->is_new_state = 1;
 			pp_diag_fsm(ppi, ip->name, STATE_LEAVE, 0);
 			return 0; /* next_delay unused: go to new state now */
 		}
-		ppi->flags &= ~PPI_FLAG_IS_NEW_STATE;
+		ppi->is_new_state = 0;
 		pp_diag_fsm(ppi, ip->name, STATE_LOOP, 0);
 		return ppi->next_delay;
 	}

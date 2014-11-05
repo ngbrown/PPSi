@@ -23,7 +23,7 @@ int wr_present(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	MsgSignaling wrsig_msg;
 
-	if (pp_is_new_state(ppi)) {
+	if (ppi->is_new_state) {
 		wrp->wrStateRetry = WR_STATE_RETRY;
 		sendmsg = 1;
 	} else if (pp_timeout_z(ppi, PP_TO_EXT_0)) {

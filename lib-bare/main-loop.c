@@ -30,7 +30,7 @@ void bare_main_loop(struct pp_instance *ppi)
 	 * doing anything else but the protocol, this allows extra stuff
 	 * to fit.
 	 */
-	ppi->flags |= PPI_FLAG_IS_NEW_STATE;
+	ppi->is_new_state = 1;
 	delay_ms = pp_state_machine(ppi, NULL, 0);
 	while (1) {
 		struct bare_fd_set set;

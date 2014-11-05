@@ -96,7 +96,7 @@ void wrs_main_loop(struct pp_globals *ppg)
 		* doing anything else but the protocol, this allows extra stuff
 		* to fit.
 		*/
-		ppi->flags |= PPI_FLAG_IS_NEW_STATE;
+		ppi->is_new_state = 1;
 	}
 
 	delay_ms = run_all_state_machines(ppg);
@@ -118,7 +118,7 @@ void wrs_main_loop(struct pp_globals *ppg)
 				new_state = bmc(ppi);
 				if (new_state != ppi->state) {
 					ppi->state = new_state;
-					ppi->flags |= PPI_FLAG_IS_NEW_STATE;
+					ppi->is_new_state = 1;
 				}
 			}
 			ppg->ebest_updated = 0;

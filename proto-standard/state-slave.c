@@ -16,7 +16,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	MsgDelayResp resp;
 	int d1, d2;
 
-	if (pp_is_new_state(ppi)) {
+	if (ppi->is_new_state) {
 		pp_servo_init(ppi);
 
 		if (pp_hooks.new_slave)

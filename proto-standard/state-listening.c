@@ -18,7 +18,7 @@ int pp_listening(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	if (e)
 		goto out;
 
-	if (pp_is_new_state(ppi))
+	if (ppi->is_new_state)
 		pp_timeout_restart_annrec(ppi);
 
 	if (plen == 0)

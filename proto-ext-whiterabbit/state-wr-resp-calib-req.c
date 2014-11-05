@@ -16,7 +16,7 @@ int wr_resp_calib_req(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	int e = 0, enable = 0;
 	int send_pattern = (wrp->otherNodeCalSendPattern != 0);
 
-	if (pp_is_new_state(ppi)) {
+	if (ppi->is_new_state) {
 		wrp->wrStateRetry = WR_STATE_RETRY;
 		enable = 1;
 	} else if (pp_timeout_z(ppi, PP_TO_EXT_0)) {
