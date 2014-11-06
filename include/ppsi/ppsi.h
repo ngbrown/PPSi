@@ -7,6 +7,7 @@
 
 #ifndef __PPSI_PPSI_H__
 #define __PPSI_PPSI_H__
+#include <generated/autoconf.h>
 
 #include <stdint.h>
 #include <stdarg.h>
@@ -19,6 +20,10 @@
 #include <ppsi/diag-macros.h>
 
 #include <arch/arch.h> /* ntohs and so on -- and wr-api.h for wr archs */
+
+/* At this point in time, we need ARRAY_SIZE to conditionally build vlan code */
+#undef ARRAY_SIZE
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 /* We can't include pp-printf.h when building freestading, so have it here */
 extern int pp_printf(const char *fmt, ...)
