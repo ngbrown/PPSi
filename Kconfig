@@ -6,6 +6,8 @@ choice
 
 config ARCH_UNIX
 	bool "Unix (Linux and likely other systems)"
+	select HAS_VLAN
+	select HAS_MULTIPLE_VLAN
 	help
 	  ARCH=unix supports standard Unix system calls, although
 	  the code most likely includes some Linux dependencies.
@@ -33,6 +35,7 @@ config ARCH_BARE_X86_64
 config ARCH_WRPC
 	bool "White Rabbit PTP Core (WR Node)"
 	select CONFIG_EXT_WR
+	select HAS_VLAN
 	help
 	  Build PPSi for use in the WRPC environment (SPEC card or similar
 	  one).  This is a freestanding build, without operating system.
@@ -41,6 +44,8 @@ config ARCH_WRPC
 config ARCH_WRS
 	bool "White Rabbit Switch"
 	select CONFIG_EXT_WR
+	select HAS_VLAN
+	select HAS_MULTIPLE_VLAN
 	help
 	  Build PPSi for use in the WR switch. The computer is a standard
 	  ARM-Linux host with hardware timestamping and internal PLLs
@@ -106,3 +111,45 @@ config WRPCSW_ROOT
        string "Source location of wrpc-sw"
        depends on ARCH_WRPC
        default "../wrpc-sw"
+
+# Vlan support: not all architectures have it, so this is set by them
+config HAS_VLAN
+	bool
+
+config HAS_MULTIPLE_VLAN
+	bool
+
+config VLAN
+	bool "Enable VLAN support for raw Ethernet"
+	depends on HAS_VLAN || HAS_MULTIPLE_VLAN
+	default y
+	help
+	  PPSI is able to directly emit and receive tagged frames,
+	  with some architectures (if you see this option, it means
+	  the architecture you selected has such support). A
+	  designated master port can send announce on several VLANs,
+	  but the other roles (designated slave or auto) can only bind
+	  to a single VLAN.  This choice is a tradeoff between code
+	  complexity and flexibility.
+	  
+	  Please note that you can always create several PTP ports that
+	  act on different VLANs on the same physical port, and you can
+	  also run VLAN support in your OS without special PPSI code.
+	  Please see the PPSI documentation for details.
+
+config MAX_VLANS_PER_PORT
+	int "Maximum number of VLANs per port"
+	depends on HAS_MULTIPLE_VLAN
+	default 32
+	help
+	  This configuration option is mainly used to support
+	  the special case of 1 VLAN per port, useful for
+	  microcontroller-class architectures.  Hosted builds
+	  feature a bigger default, because they have no size constraints.
+
+# I want a number, to be used without ifdef
+config VLAN_ARRAY_SIZE
+       int
+       default 0 if !VLAN
+       default 1 if !HAS_MULTIPLE_VLAN
+       default MAX_VLANS_PER_PORT
