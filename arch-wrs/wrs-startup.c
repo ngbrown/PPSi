@@ -203,6 +203,7 @@ int main(int argc, char **argv)
 		NP(ppi)->ch[PP_NP_GEN].fd = -1;
 
 		ppi->glbs = ppg;
+		ppi->vlans_array_len = CONFIG_VLAN_ARRAY_SIZE;
 		ppi->iface_name = ppi->cfg.iface_name;
 		ppi->port_name = ppi->cfg.port_name;
 		ppi->portDS = calloc(1, sizeof(*ppi->portDS));

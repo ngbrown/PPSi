@@ -185,7 +185,9 @@ struct pp_instance {
 	char *iface_name; /* for direct actions on hardware */
 	char *port_name; /* for diagnostics, mainly */
 	int port_idx;
-
+	int vlans_array_len; /* those looking at shared mem must check */
+	int vlans[CONFIG_VLAN_ARRAY_SIZE];
+	int nvlans; /* according to configuration */
 	struct pp_instance_cfg cfg;
 
 	unsigned long ptp_tx_count;

@@ -12,9 +12,7 @@
 #include <ppsi/lib.h>
 #include "wr-constants.h"
 
-#define WRS_PPSI_SHMEM_VERSION 6 /* added fields n_err_state, n_err_offset,
-				  * n_err_rtt, n_err_deltas to
-				  * wr_servo_state_t */
+#define WRS_PPSI_SHMEM_VERSION 7 /* added vlans */
 
 /*
  * This structure is used as extension-specific data in the DSPort
