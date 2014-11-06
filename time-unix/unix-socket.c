@@ -368,6 +368,11 @@ static int unix_net_init(struct pp_instance *ppi)
 
 	/* else: UDP */
 	pp_diag(ppi, frames, 1, "unix_net_init UDP\n");
+	if (ppi->nvlans) {
+		/* If "proto udp" is set after setting vlans... */
+		pp_printf("Error: can't use UDP with VLAN support\n");
+		exit(1);
+	}
 	for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
 		if (unix_open_ch(ppi, ppi->iface_name, i))
 			return -1;
