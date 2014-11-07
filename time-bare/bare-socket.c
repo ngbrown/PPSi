@@ -63,7 +63,7 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 	struct bare_packet_mreq pmr;
 	char *context;
 
-	if (ppi->ethernet_mode) {
+	if (ppi->proto == PPSI_PROTO_RAW) {
 		/* open socket */
 		context = "socket()";
 		sock = sys_socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
@@ -141,7 +141,7 @@ static int bare_net_init(struct pp_instance *ppi)
 	/* The buffer is inside ppi, but we need to set pointers and align */
 	pp_prepare_pointers(ppi);
 
-	if (ppi->ethernet_mode) {
+	if (ppi->proto == PPSI_PROTO_RAW) {
 		pp_diag(ppi, frames, 1, "bare_net_init IEEE 802.3\n");
 
 		/* raw sockets implementation always use gen socket */

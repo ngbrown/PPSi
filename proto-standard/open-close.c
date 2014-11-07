@@ -21,8 +21,7 @@ struct pp_runtime_opts __pp_default_rt_opts = {
 	.outbound_latency =	{0, PP_DEFAULT_OUTBOUND_LATENCY},
 	.max_rst =		PP_DEFAULT_MAX_RESET,
 	.max_dly =		PP_DEFAULT_MAX_DELAY,
-	.no_adjust =		PP_DEFAULT_NO_ADJUST,
-	.no_rst_clk =		PP_DEFAULT_NO_RESET_CLOCK,
+	.flags =		PP_DEFAULT_FLAGS,
 	.ap =			PP_DEFAULT_AP,
 	.ai =			PP_DEFAULT_AI,
 	.s =			PP_DEFAULT_DELAY_S,
@@ -63,7 +62,7 @@ int pp_init_globals(struct pp_globals *ppg, struct pp_runtime_opts *pp_rt_opts)
 		   sizeof(ClockQuality));
 
 	if (def->numberPorts == 1)
-		def->slaveOnly = INST(ppg, 0)->slave_only;
+		def->slaveOnly = (INST(ppg, 0)->role == PPSI_ROLE_SLAVE);
 	else
 		def->slaveOnly = 1; /* the for cycle below will set it to 0 if not
 							 * ports are not all slave_only */
@@ -75,7 +74,7 @@ int pp_init_globals(struct pp_globals *ppg, struct pp_runtime_opts *pp_rt_opts)
 	for (i = 0; i < def->numberPorts; i++) {
 		struct pp_instance *ppi = INST(ppg, i);
 
-		if (def->slaveOnly && !ppi->slave_only)
+		if (def->slaveOnly && ppi->role != PPSI_ROLE_SLAVE)
 			def->slaveOnly = 0;
 
 		ppi->state = PPS_INITIALIZING;

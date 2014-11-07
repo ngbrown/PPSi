@@ -18,7 +18,7 @@ static int wrpc_time_get(struct pp_instance *ppi, TimeInternal *t)
 
 	t->seconds = sec;
 	t->nanoseconds = nsec;
-	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
+	if (!(pp_global_d_flags & PP_FLAG_NOTIMELOG))
 		pp_diag(ppi, time, 2, "%s: %9lu.%09li\n", __func__,
 			(long)sec, (long)nsec);
 	return 0;

@@ -6,7 +6,7 @@
  */
 #include <ppsi/ppsi.h>
 
-unsigned long pp_global_flags; /* This is the only "global" file in ppsi */
+unsigned long pp_global_d_flags; /* This is the only "global" file in ppsi */
 
 /*
  * This is somehow a duplicate of __pp_diag, but I still want
@@ -17,15 +17,15 @@ static void pp_fsm_printf(struct pp_instance *ppi, char *fmt, ...)
 {
 	va_list args;
 	TimeInternal t;
-	unsigned long oflags = pp_global_flags;
+	unsigned long oflags = pp_global_d_flags;
 
 	if (!pp_diag_allow(ppi, fsm, 1))
 		return;
 
 	/* temporarily set NOTIMELOG, as we'll print the time ourselves */
-	pp_global_flags |= PP_FLAG_NOTIMELOG;
+	pp_global_d_flags |= PP_FLAG_NOTIMELOG;
 	ppi->t_ops->get(ppi, &t);
-	pp_global_flags = oflags;
+	pp_global_d_flags = oflags;
 
 	pp_printf("diag-fsm-1-%s: %09d.%03d: ", ppi->port_name,
 		  (int)t.seconds, (int)t.nanoseconds / 1000000);

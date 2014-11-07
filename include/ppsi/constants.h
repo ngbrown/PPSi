@@ -13,13 +13,15 @@
 #define PP_NSEC_PER_SEC (1000*1000*1000)
 
 /* implementation specific constants */
+#define PP_DEFAULT_PPI_FLAGS			0 /* UDP mode */
 #define PP_MAX_LINKS				64
 #define PP_DEFAULT_CONFIGFILE			"/etc/ppsi.conf"
 
 #define PP_DEFAULT_INBOUND_LATENCY		0		/* in nsec */
 #define PP_DEFAULT_OUTBOUND_LATENCY		0		/* in nsec */
-#define PP_DEFAULT_NO_RESET_CLOCK		0
-#define PP_DEFAULT_ETHERNET_MODE		0
+#define PP_DEFAULT_FLAGS			0
+#define PP_DEFAULT_ROLE				PPSI_ROLE_AUTO
+#define PP_DEFAULT_PROTO			PPSI_PROTO_UDP /* overridden by arch */
 #define PP_DEFAULT_DOMAIN_NUMBER		0
 #define PP_DEFAULT_AP				10
 #define PP_DEFAULT_AI				1000
@@ -46,7 +48,6 @@
 #define PP_NR_FOREIGN_RECORDS			5
 #define PP_DEFAULT_MAX_RESET			0
 #define PP_DEFAULT_MAX_DELAY			0
-#define PP_DEFAULT_NO_ADJUST			0
 #define PP_DEFAULT_TTL				1
 
 /* We use an array of timeouts, with these indexes */

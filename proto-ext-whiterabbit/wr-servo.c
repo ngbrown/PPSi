@@ -260,7 +260,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	got_sync = 0;
 
-	if (__PP_DIAG_ALLOW_FLAGS(pp_global_flags, pp_dt_servo, 1)) {
+	if (__PP_DIAG_ALLOW_FLAGS(pp_global_d_flags, pp_dt_servo, 1)) {
 		dump_timestamp(ppi, "servo:t1", s->t1);
 		dump_timestamp(ppi, "servo:t2", s->t2);
 		dump_timestamp(ppi, "servo:t3", s->t3);

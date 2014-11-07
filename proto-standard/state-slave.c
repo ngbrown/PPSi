@@ -24,7 +24,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		if (e)
 			goto out;
 
-		ppi->waiting_for_follow = FALSE;
+		ppi->flags &= ~PPI_FLAG_WAITING_FOR_F_UP;
 
 		pp_timeout_restart_annrec(ppi);
 
@@ -69,7 +69,7 @@ int pp_slave(struct pp_instance *ppi, unsigned char *pkt, int plen)
 				hdr->sequenceId) &&
 			(DSPOR(ppi)->portIdentity.portNumber ==
 			resp.requestingPortIdentity.portNumber)
-			&& ppi->is_from_cur_par) {
+			&& (ppi->flags & PPI_FLAG_FROM_CURRENT_PARENT)) {
 
 			to_TimeInternal(&ppi->t4, &resp.receiveTimestamp);
 

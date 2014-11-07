@@ -155,17 +155,8 @@ int main(int argc, char **argv)
 		ppi->glbs = ppg;
 		ppi->iface_name = ppi->cfg.iface_name;
 		ppi->port_name = ppi->cfg.port_name;
-		/* this old-fashioned "ethernet_mode" is a single bit */
-		ppi->ethernet_mode = (ppi->cfg.proto == PPSI_PROTO_RAW);
-		if (ppi->cfg.role == PPSI_ROLE_MASTER) {
-			ppi->master_only = 1;
-			ppi->slave_only = 0;
-		}
-		else if (ppi->cfg.role == PPSI_ROLE_SLAVE) {
-			ppi->master_only = 0;
-			ppi->slave_only = 1;
-		}
-
+		ppi->proto = ppi->cfg.proto;
+		ppi->role = ppi->cfg.role;
 		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
 		if (!ppi->portDS)
 			exit(__LINE__);

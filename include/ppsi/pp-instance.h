@@ -20,13 +20,7 @@ struct pp_runtime_opts {
 	Integer32 max_rst; /* Maximum number of nanoseconds to reset */
 	Integer32 max_dly; /* Maximum number of nanoseconds of delay */
 	Integer32 ttl;
-	UInteger32	/* slave_only:1, -- moved to ppsi, is no more global */
-			/* master_only:1, -- moved to ppsi, is no more global */
-			no_adjust:1,
-			/* ethernet_mode:1, -- moved to ppsi, is no more global */
-			/* e2e_mode:1, -- no more: we only support e2e */
-			/* gptp_mode:1, -- no more: peer-to-peer unsupported */
-			no_rst_clk:1;
+	int flags;		/* see below */
 	Integer16 ap, ai;
 	Integer16 s;
 	Integer8 announce_intvl;
@@ -36,6 +30,23 @@ struct pp_runtime_opts {
 	UInteger8 domain_number;
 	void *arch_opts;
 };
+
+/*
+ * Flags for the above structure
+ */
+#define PP_FLAG_NO_ADJUST  0x01
+#define PP_FLAG_NO_RESET   0x02
+/* I'd love to use inlines, but we still miss some structure at this point*/
+#define pp_can_adjust(ppi)      (!(OPTS(ppi)->flags & PP_FLAG_NO_ADJUST))
+#define pp_can_reset_clock(ppi) (!(OPTS(ppi)->flags & PP_FLAG_NO_RESET))
+
+/* slave_only:1, -- moved to ppi, no more global */
+/* master_only:1, -- moved to ppi, no more global */
+/* ethernet_mode:1, -- moved to ppi, no more global */
+/* e2e_mode:1, -- no more: we only support e2e */
+/* gptp_mode:1, -- no more: peer-to-peer unsupported */
+
+
 
 /* We need a globally-accessible structure with preset defaults */
 extern struct pp_runtime_opts __pp_default_rt_opts;
@@ -129,7 +140,10 @@ struct pp_instance {
 	int next_state, next_delay, is_new_state; /* set by state processing */
 	void *arch_data;		/* if arch needs it */
 	void *ext_data;			/* if protocol ext needs it */
-	unsigned long flags;		/* ppi-specific flags (diag mainly) */
+	unsigned long d_flags;		/* diagnostics, ppi-specific flags */
+	unsigned char flags,		/* protocol flags (see below) */
+		role,			/* same as in config file */
+		proto;			/* same as in config file */
 
 	/* Pointer to global instance owning this pp_instance*/
 	struct pp_globals *glbs;
@@ -171,18 +185,16 @@ struct pp_instance {
 	UInteger16 sent_seq[__PP_NR_MESSAGES_TYPES]; /* last sent this type */
 	MsgHeader received_ptp_header;
 	MsgHeader delay_req_hdr;
-	UInteger32
-		is_from_cur_par:1,
-		waiting_for_follow:1,
-		slave_only:1,
-		master_only:1,
-		ethernet_mode:1;
 	char *iface_name; /* for direct actions on hardware */
 	char *port_name; /* for diagnostics, mainly */
 	int port_idx;
 
 	struct pp_instance_cfg cfg;
 };
+/* The following things used to be bit fields. Other flags are now enums */
+#define PPI_FLAG_FROM_CURRENT_PARENT	0x01
+#define PPI_FLAG_WAITING_FOR_F_UP	0x02
+
 
 struct pp_globals_cfg {
 	int cfg_items;			/* Remember how many we parsed */

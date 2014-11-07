@@ -98,7 +98,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 out:
 	if (e == 0) {
 		if (DSDEF(ppi)->clockQuality.clockClass == PP_CLASS_SLAVE_ONLY
-		    || ppi->slave_only)
+		    || (ppi->role == PPSI_ROLE_SLAVE))
 			ppi->next_state = PPS_LISTENING;
 	} else {
 		ppi->next_state = PPS_FAULTY;

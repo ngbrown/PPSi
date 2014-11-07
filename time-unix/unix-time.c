@@ -32,7 +32,7 @@ static int unix_time_get(struct pp_instance *ppi, TimeInternal *t)
 	t->seconds = tp.tv_sec + DSPRO(ppi)->currentUtcOffset;
 	t->nanoseconds = tp.tv_nsec;
 	t->correct = 1;
-	if (!(pp_global_flags & PP_FLAG_NOTIMELOG))
+	if (!(pp_global_d_flags & PP_FLAG_NOTIMELOG))
 		pp_diag(ppi, time, 2, "%s: %9li.%09li\n", __func__,
 			tp.tv_sec, tp.tv_nsec);
 	return 0;

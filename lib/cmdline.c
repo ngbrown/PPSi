@@ -110,7 +110,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 		case 'd':
 			/* Use the general flags, per-instance TBD */
 			a = argv[++i];
-			pp_global_flags = pp_diag_parse(a);
+			pp_global_d_flags = pp_diag_parse(a);
 			break;
 		case 'C':
 			if (pp_config_string(ppg, argv[++i]) != 0)
@@ -121,7 +121,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 				return -1;
 			break;
 		case 'x':
-			GOPTS(ppg)->no_rst_clk = 1;
+			GOPTS(ppg)->flags |= PP_FLAG_NO_RESET;
 			break;
 		case 'O':
 			a = argv[++i];
@@ -142,7 +142,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 			}
 			break;
 		case 't':
-			GOPTS(ppg)->no_adjust = 1;
+			GOPTS(ppg)->flags |= PP_FLAG_NO_ADJUST;
 			break;
 		case 'a':
 			a = argv[++i];
@@ -198,7 +198,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 				= PP_CLASS_SLAVE_ONLY;
 			/* Apply -g option globally, to each configured link */
 			for (j = 0; j < ppg->nlinks; j++)
-				INST(ppg, j)->slave_only = 1;
+				INST(ppg, j)->role = PPSI_ROLE_SLAVE;
 			break;
 		case 'v':
 			a = argv[++i];
@@ -229,7 +229,7 @@ int pp_parse_cmdline(struct pp_globals *ppg, int argc, char **argv)
 		case 'e':
 			/* Apply -e option globally, to each configured link */
 			for (j = 0; j < ppg->nlinks; j++)
-				INST(ppg, j)->ethernet_mode = 1;
+				INST(ppg, j)->proto = PPSI_PROTO_RAW;
 			break;
 		case 'G':
 			/* gptp_mode not supported: fall through */

@@ -74,6 +74,7 @@ struct pp_instance ppi_static = {
 	.portDS			= &portDS,
 	.n_ops			= &wrpc_net_ops,
 	.t_ops			= &wrpc_time_ops,
+	.proto			= PP_DEFAULT_PROTO,
 	.iface_name		= "wr1",
 	.port_name		= "wr1",
 };
@@ -124,8 +125,7 @@ int wrc_ptp_set_mode(int mode)
 	switch (mode) {
 	case WRC_MODE_GM:
 		wrp->wrConfig = WR_M_ONLY;
-		ppi->master_only = TRUE;
-		ppi->slave_only = FALSE;
+		ppi->role = PPSI_ROLE_MASTER;
 		*class_ptr = PP_CLASS_WR_GM_LOCKED;
 		spll_init(SPLL_MODE_GRAND_MASTER, 0, 1);
 		lock_timeout = LOCK_TIMEOUT_GM;
@@ -133,8 +133,7 @@ int wrc_ptp_set_mode(int mode)
 
 	case WRC_MODE_MASTER:
 		wrp->wrConfig = WR_M_ONLY;
-		ppi->master_only = TRUE;
-		ppi->slave_only = FALSE;
+		ppi->role = PPSI_ROLE_MASTER;
 		*class_ptr = PP_CLASS_DEFAULT;
 		spll_init(SPLL_MODE_FREE_RUNNING_MASTER, 0, 1);
 		lock_timeout = LOCK_TIMEOUT_FM;
@@ -142,8 +141,7 @@ int wrc_ptp_set_mode(int mode)
 
 	case WRC_MODE_SLAVE:
 		wrp->wrConfig = WR_S_ONLY;
-		ppi->master_only = FALSE;
-		ppi->slave_only = TRUE;
+		ppi->role = PPSI_ROLE_SLAVE;
 		*class_ptr = PP_CLASS_SLAVE_ONLY;
 		spll_init(SPLL_MODE_SLAVE, 0, 1);
 		break;

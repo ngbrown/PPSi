@@ -49,7 +49,7 @@ int msg_unpack_header(struct pp_instance *ppi, void *buf, int plen)
 		return -1;
 
 	/*
-	 * This "is_from_cur_par" must be killed. Meanwhile, say it's
+	 * This FLAG_FROM_CURRENT_PARENT must be killed. Meanwhile, say it's
 	 * from current parent if we have no current parent, so the rest works
 	 */
 	if (!DSPAR(ppi)->parentPortIdentity.portNumber ||
@@ -58,9 +58,9 @@ int msg_unpack_header(struct pp_instance *ppi, void *buf, int plen)
 			PP_CLOCK_IDENTITY_LENGTH) &&
 			(DSPAR(ppi)->parentPortIdentity.portNumber ==
 			 hdr->sourcePortIdentity.portNumber)))
-		ppi->is_from_cur_par = 1;
+		ppi->flags |= PPI_FLAG_FROM_CURRENT_PARENT;
 	else
-		ppi->is_from_cur_par = 0;
+		ppi->flags &= ~PPI_FLAG_FROM_CURRENT_PARENT;
 	return 0;
 }
 

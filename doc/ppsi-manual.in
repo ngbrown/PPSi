@@ -35,7 +35,7 @@
 
 @setchapternewpage off
 
-@set update-month July 2014
+@set update-month November 2014
 @set release __RELEASE_GIT_ID__
 
 @finalout
@@ -356,7 +356,8 @@ unfair to hide them.
 
 	We want to allow run-time modification of diagnostics flags
         with a per-link granularity.  Currently we have configuration-based
-        per-link diagnostic flags and global flags that can be changed
+        per-link diagnostic flags and global diagnostic
+        flags that can be changed
         at run time (for example, arch-wrpc offers that through a shell
         command). We think this feature is useful
         when you run more than a pair of interfaces and have problems

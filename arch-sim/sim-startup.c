@@ -20,8 +20,7 @@ static struct pp_runtime_opts sim_master_rt_opts = {
 	.outbound_latency =	{0, PP_DEFAULT_OUTBOUND_LATENCY},
 	.max_rst =		PP_DEFAULT_MAX_RESET,
 	.max_dly =		PP_DEFAULT_MAX_DELAY,
-	.no_adjust =		PP_DEFAULT_NO_ADJUST,
-	.no_rst_clk =		PP_DEFAULT_NO_RESET_CLOCK,
+	.flags =		PP_DEFAULT_FLAGS,
 	.ap =			PP_DEFAULT_AP,
 	.ai =			PP_DEFAULT_AI,
 	.s =			PP_DEFAULT_DELAY_S,
@@ -58,6 +57,7 @@ int sim_set_global_DS(struct pp_instance *ppi)
 static int sim_ppi_init(struct pp_instance *ppi, int which_ppi)
 {
 	struct sim_ppi_arch_data *data;
+	ppi->proto = PP_DEFAULT_PROTO;
 	ppi->arch_data = calloc(1, sizeof(struct sim_ppi_arch_data));
 	ppi->portDS = calloc(1, sizeof(*ppi->portDS));
 	if ((!ppi->arch_data) || (!ppi->portDS))
@@ -143,16 +143,9 @@ int main(int argc, char **argv)
 		if (ppi->cfg.proto == PPSI_PROTO_RAW)
 			pp_printf("Warning: simulator doesn't support raw "
 					"ethernet. Using UDP\n");
-		ppi->ethernet_mode = 0;
 		NP(ppi)->ch[PP_NP_GEN].fd = -1;
 		NP(ppi)->ch[PP_NP_EVT].fd = -1;
-		if (ppi->cfg.role == PPSI_ROLE_MASTER) {
-			ppi->master_only = 1;
-			ppi->slave_only = 0;
-		} else if (ppi->cfg.role == PPSI_ROLE_SLAVE) {
-			ppi->master_only = 0;
-			ppi->slave_only = 1;
-		}
+		ppi->role = ppi->cfg.role;
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 		ppi->n_ops = &DEFAULT_NET_OPS;
 		if (pp_sim_is_master(ppi))

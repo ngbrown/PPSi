@@ -106,7 +106,7 @@ static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	struct pp_channel *ch1, *ch2;
 	int ret;
 
-	if (ppi->ethernet_mode) {
+	if (ppi->proto == PPSI_PROTO_RAW) {
 		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
 		ret = unix_recv_msg(ppi, fd, pkt, len, t);
@@ -146,7 +146,7 @@ static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 		return len;
 	}
 
-	if (ppi->ethernet_mode) {
+	if (ppi->proto == PPSI_PROTO_RAW) {
 		hdr->h_proto = htons(ETH_P_1588);
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
@@ -193,7 +193,7 @@ static int unix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	char addr_str[INET_ADDRSTRLEN];
 	char *context;
 
-	if (ppi->ethernet_mode) {
+	if (ppi->proto == PPSI_PROTO_RAW) {
 		/* open socket */
 		context = "socket()";
 		sock = socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
@@ -359,7 +359,7 @@ static int unix_net_init(struct pp_instance *ppi)
 	/* The buffer is inside ppi, but we need to set pointers and align */
 	pp_prepare_pointers(ppi);
 
-	if (ppi->ethernet_mode) {
+	if (ppi->proto == PPSI_PROTO_RAW) {
 		pp_diag(ppi, frames, 1, "unix_net_init IEEE 802.3\n");
 
 		/* raw sockets implementation always use gen socket */
@@ -385,7 +385,7 @@ static int unix_net_exit(struct pp_instance *ppi)
 	int fd;
 	int i;
 
-	if (ppi->ethernet_mode) {
+	if (ppi->proto == PPSI_PROTO_RAW) {
 		fd = NP(ppi)->ch[PP_NP_GEN].fd;
 		if (fd > 0) {
 			close(fd);

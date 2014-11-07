@@ -68,7 +68,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	msg_pack_header(ppi, ppi->tx_ptp); /* This is used for all tx */
 
-	if (!ppi->master_only)
+	if (ppi->role != PPSI_ROLE_MASTER)
 		ppi->next_state = PPS_LISTENING;
 	else
 		ppi->next_state = PPS_MASTER;
