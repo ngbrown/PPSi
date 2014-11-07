@@ -86,11 +86,6 @@ int main(int argc, char **argv)
 		ppi->glbs = ppg;
 		ppi->iface_name = ppi->cfg.iface_name;
 		ppi->port_name = ppi->cfg.port_name;
-		/* this old-fashioned "ethernet_mode" is a single bit */
-		ppi->proto = ppi->cfg.proto;
-		ppi->role = ppi->cfg.role;
-
-		/* FIXME set ppi ext enable as defined in its pp_link */
 
 		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
 

@@ -73,14 +73,14 @@ static int f_if(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 static int f_proto(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	CUR_PPI(ppg)->cfg.proto = arg->i;
+	CUR_PPI(ppg)->proto = arg->i;
 	return 0;
 }
 
 static int f_role(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
 	CHECK_PPI(1);
-	CUR_PPI(ppg)->cfg.role = arg->i;
+	CUR_PPI(ppg)->role = arg->i;
 	return 0;
 }
 

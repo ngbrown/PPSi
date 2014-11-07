@@ -43,7 +43,7 @@ static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 		INST(ppg, i)->ext_data = &wr_data;
 
 		if (ppi->cfg.ext == PPSI_EXT_WR) {
-			switch (ppi->cfg.role) {
+			switch (ppi->role) {
 				case PPSI_ROLE_MASTER:
 					WR_DSPOR(ppi)->wrConfig = WR_M_ONLY;
 					break;

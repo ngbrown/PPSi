@@ -140,12 +140,11 @@ int main(int argc, char **argv)
 		sim_set_global_DS(ppi);
 		ppi->iface_name = ppi->cfg.iface_name;
 		ppi->port_name = ppi->cfg.port_name;
-		if (ppi->cfg.proto == PPSI_PROTO_RAW)
+		if (ppi->proto == PPSI_PROTO_RAW)
 			pp_printf("Warning: simulator doesn't support raw "
 					"ethernet. Using UDP\n");
 		NP(ppi)->ch[PP_NP_GEN].fd = -1;
 		NP(ppi)->ch[PP_NP_EVT].fd = -1;
-		ppi->role = ppi->cfg.role;
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 		ppi->n_ops = &DEFAULT_NET_OPS;
 		if (pp_sim_is_master(ppi))

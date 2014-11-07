@@ -122,13 +122,11 @@ struct pp_net_path {
 
 /*
  * Struct containg the result of ppsi.conf parsing: one for each link
- * (see lib/conf.c)
+ * (see lib/conf.c). Actually, protocol and role are in the main ppi.
  */
 struct pp_instance_cfg {
 	char port_name[16];
 	char iface_name[16];
-	int proto; /* 0: raw, 1: udp */
-	int role;  /* 0: auto, 1: master, 2: slave */
 	int ext;   /* 0: none, 1: whiterabbit */ /* FIXME extension enumeration */
 };
 
