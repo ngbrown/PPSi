@@ -39,7 +39,7 @@ static struct minipc_pd __rpcdef_cmd = {
 /* Fill struct ptpdexp_sync_state_t with current servo state */
 static int wrsipc_get_sync_state(ptpdexp_sync_state_t *state)
 {
-	if(servo_state_valid) {
+	if (BUILT_WITH_WHITERABBIT && servo_state_valid) {
 		memcpy(state, &cur_servo_state, sizeof(ptpdexp_sync_state_t));
 		state->valid = 1;
 	} else
@@ -51,11 +51,13 @@ static int wrsipc_get_sync_state(ptpdexp_sync_state_t *state)
 /* Execute command coming ipc */
 static int wrsipc_cmd(int cmd, int value)
 {
-	if(cmd == PTPDEXP_COMMAND_TRACKING)
-		wr_servo_enable_tracking(value);
+	if (BUILT_WITH_WHITERABBIT) {
+		if(cmd == PTPDEXP_COMMAND_TRACKING)
+			wr_servo_enable_tracking(value);
 
-	if(cmd == PTPDEXP_COMMAND_MAN_ADJUST_PHASE)
-		wr_servo_man_adjust_phase(value);
+		if(cmd == PTPDEXP_COMMAND_MAN_ADJUST_PHASE)
+			wr_servo_man_adjust_phase(value);
+	}
 	return 0;
 
 }

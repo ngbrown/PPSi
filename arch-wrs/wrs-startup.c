@@ -25,7 +25,12 @@
 #include <ppsi/ppsi.h>
 #include <ppsi-wrs.h>
 
-#define WRSW_HAL_RETRIES 1000
+#if BUILT_WITH_WHITERABBIT
+#  define WRSW_HAL_RETRIES 1000
+#else
+#  define WRSW_HAL_RETRIES 0
+#endif
+
 #define WRSW_HAL_TIMEOUT 2000000 /* us */
 
 static struct wr_operations wrs_wr_operations = {
@@ -75,15 +80,12 @@ int main(int argc, char **argv)
 
 	/* try connecting to HAL multiple times in case it's still not ready */
 	hal_retries = WRSW_HAL_RETRIES;
-	for(;;) {
+	while (hal_retries) { /* may be never, if built without WR extension */
 		hal_ch = minipc_client_create(WRSW_HAL_SERVER_ADDR,
 					      MINIPC_FLAG_VERBOSE);
-		if (!hal_ch)
-			hal_retries--;
-
-		if(hal_ch || !hal_retries)
+		if (hal_ch)
 			break;
-
+		hal_retries--;
 		usleep(WRSW_HAL_TIMEOUT);
 	}
 
@@ -92,12 +94,14 @@ int main(int argc, char **argv)
 		exit(__LINE__);
 	}
 
-	ppsi_ch = minipc_server_create("ptpd", 0);
-	if (!ppsi_ch) { /* FIXME should we retry with minipc_server_create? */
-		pp_printf("Fatal: could not create minipc server");
-		exit(__LINE__);
+	if (BUILT_WITH_WHITERABBIT) {
+		ppsi_ch = minipc_server_create("ptpd", 0);
+		if (!ppsi_ch) { /* FIXME should we retry ? */
+			pp_printf("Fatal: could not create minipc server");
+			exit(__LINE__);
+		}
+		wrs_init_ipcserver(ppsi_ch);
 	}
-	wrs_init_ipcserver(ppsi_ch);
 
 	ppg = &ppg_static;
 	ppg->defaultDS = &defaultDS;
