@@ -245,15 +245,18 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
 	struct pp_channel *ch1, *ch2;
-	int ret = -1;
+	int fd, ret = -1;
 
-	if (ppi->proto == PPSI_PROTO_RAW) {
-		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
+	switch(ppi->proto) {
+	case PPSI_PROTO_RAW:
+		fd = NP(ppi)->ch[PP_NP_GEN].fd;
 
 		ret = wrs_recv_msg(ppi, fd, pkt, len, t);
 		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("recv: ", pkt, ret, t);
-	} else {
+		break;
+
+	case PPSI_PROTO_UDP:
 		/* UDP: always handle EVT msgs before GEN */
 		ch1 = &(NP(ppi)->ch[PP_NP_EVT]);
 		ch2 = &(NP(ppi)->ch[PP_NP_GEN]);
@@ -265,7 +268,14 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 
 		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
 			dump_payloadpkt("recv: ", pkt, ret, t);
+		break;
+
+	case PPSI_PROTO_VLAN:
+		/* FIXME */
+	default:
+		return -1;
 	}
+
 	if (ret < 0)
 		return ret;
 	pp_diag(ppi, time, 1, "recv stamp: (correct %i) %9li.%09li\n",
@@ -337,10 +347,10 @@ static void poll_tx_timestamp(struct pp_instance *ppi, void *pkt, int len,
 
 	/*
 	 * Raw frames return "sock_extended_err" too, telling this is
-	 * a tx timestamp. Udp doesn't so don't check in udp mode
+	 * a tx timestamp. UDP does not; so don't check in udp mode
 	 * (the pointer is only checked for non-null)
 	 */
-	if (!(ppi->proto == PPSI_PROTO_RAW))
+	if (!(ppi->proto != PPSI_PROTO_UDP))
 		serr = (void *)1;
 
 	for (cmsg = CMSG_FIRSTHDR(&msg);
@@ -384,7 +394,8 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 	 */
 	drop = ppsi_drop_tx();
 
-	if (ppi->proto == PPSI_PROTO_RAW) {
+	switch (ppi->proto) {
+	case PPSI_PROTO_RAW:
 		fd = NP(ppi)->ch[PP_NP_GEN].fd;
 		hdr->h_proto = htons(ETH_P_1588);
 		if (drop)
@@ -401,7 +412,7 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 		poll_tx_timestamp(ppi, pkt, len, s, fd, t);
 
 		if (drop) /* avoid messaging about stamps that are not used */
-			goto drop_msg;
+			break;
 
 		if (pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("send: ", pkt, len, t);
@@ -409,28 +420,35 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 			t->correct, (long)t->seconds,
 			(long)t->nanoseconds);
 		return ret;
+
+	case PPSI_PROTO_UDP:
+		fd = NP(ppi)->ch[chtype].fd;
+		addr.sin_family = AF_INET;
+		addr.sin_port = htons(chtype == PP_NP_GEN
+				      ? PP_GEN_PORT : PP_EVT_PORT);
+		addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
+		if (drop)
+			addr.sin_port = 3200;
+		ret = sendto(fd, pkt, len, 0, (struct sockaddr *)&addr,
+			     sizeof(struct sockaddr_in));
+		poll_tx_timestamp(ppi, pkt, len, s, fd, t);
+
+		if (drop) /* like above: skil messages about timestamps */
+			break;
+
+		if (pp_diag_allow(ppi, frames, 2))
+			dump_payloadpkt("send: ", pkt, len, t);
+		pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
+			t->correct, (long)t->seconds,
+			(long)t->nanoseconds);
+		return ret;
+
+	case PPSI_PROTO_VLAN:
+		/* FIXME */
+	default:
+		return -1;
 	}
 
-	/* else: UDP */
-	fd = NP(ppi)->ch[chtype].fd;
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(chtype == PP_NP_GEN ? PP_GEN_PORT : PP_EVT_PORT);
-	addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
-	if (drop)
-		addr.sin_port = 3200;
-	ret = sendto(fd, pkt, len, 0,
-		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-	poll_tx_timestamp(ppi, pkt, len, s, fd, t);
-
-	if (drop) /* like above: skil messages about timestamps */
-		goto drop_msg;
-
-	if (pp_diag_allow(ppi, frames, 2))
-		dump_payloadpkt("send: ", pkt, len, t);
-	pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
-		t->correct, (long)t->seconds,
-		(long)t->nanoseconds);
-drop_msg:
 	if (drop)
 		pp_diag(ppi, frames, 1, "Drop sent frame\n");
 

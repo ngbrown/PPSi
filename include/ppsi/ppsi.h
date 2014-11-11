@@ -316,6 +316,7 @@ extern int pp_config_file(struct pp_globals *ppg, int force, char *fname);
 
 #define PPSI_PROTO_RAW		0
 #define PPSI_PROTO_UDP		1
+#define PPSI_PROTO_VLAN		2	/* Actually: vlan over raw eth */
 
 #define PPSI_ROLE_AUTO		0
 #define PPSI_ROLE_MASTER	1
