@@ -193,168 +193,174 @@ static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 }
 
 /* To open a channel we must bind to an interface and so on */
-static int unix_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
+static int unix_open_ch_raw(struct pp_instance *ppi, char *ifname, int chtype)
 {
-
 	int sock = -1;
 	int temp, iindex;
-	struct in_addr iface_addr, net_addr;
 	struct ifreq ifr;
 	struct sockaddr_in addr;
 	struct sockaddr_ll addr_ll;
-	struct ip_mreq imr;
 	struct packet_mreq pmr;
+	char *context;
+
+	/* open socket */
+	context = "socket()";
+	sock = socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
+	if (sock < 0)
+		goto err_out;
+
+	/* hw interface information */
+	memset(&ifr, 0, sizeof(ifr));
+	strcpy(ifr.ifr_name, ifname);
+	context = "ioctl(SIOCGIFINDEX)";
+	if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
+		goto err_out;
+
+	iindex = ifr.ifr_ifindex;
+	context = "ioctl(SIOCGIFHWADDR)";
+	if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
+		goto err_out;
+
+	memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
+
+	/* bind */
+	memset(&addr_ll, 0, sizeof(addr));
+	addr_ll.sll_family = AF_PACKET;
+	addr_ll.sll_protocol = htons(ETH_P_1588);
+	addr_ll.sll_ifindex = iindex;
+	context = "bind()";
+	if (bind(sock, (struct sockaddr *)&addr_ll,
+		 sizeof(addr_ll)) < 0)
+		goto err_out;
+
+	/* accept the multicast address for raw-ethernet ptp */
+	memset(&pmr, 0, sizeof(pmr));
+	pmr.mr_ifindex = iindex;
+	pmr.mr_type = PACKET_MR_MULTICAST;
+	pmr.mr_alen = ETH_ALEN;
+	memcpy(pmr.mr_address, PP_MCAST_MACADDRESS, ETH_ALEN);
+	setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
+		   &pmr, sizeof(pmr)); /* lazily ignore errors */
+
+	NP(ppi)->ch[chtype].fd = sock;
+
+	/* make timestamps available through recvmsg() -- FIXME: hw? */
+	setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
+		   &temp, sizeof(int));
+
+	return 0;
+
+err_out:
+	pp_printf("%s: %s: %s\n", __func__, context, strerror(errno));
+	if (sock >= 0)
+		close(sock);
+	NP(ppi)->ch[chtype].fd = -1;
+	return -1;
+}
+
+static int unix_open_ch_udp(struct pp_instance *ppi, char *ifname, int chtype)
+{
+	int sock = -1;
+	int temp;
+	struct in_addr iface_addr, net_addr;
+	struct ifreq ifr;
+	struct sockaddr_in addr;
+	struct ip_mreq imr;
 	char addr_str[INET_ADDRSTRLEN];
 	char *context;
 
-	switch(ppi->proto) {
-	case PPSI_PROTO_RAW:
-		/* open socket */
-		context = "socket()";
-		sock = socket(PF_PACKET, SOCK_RAW, ETH_P_1588);
-		if (sock < 0)
-			goto err_out;
+	context = "socket()";
+	sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (sock < 0)
+		goto err_out;
 
-		/* hw interface information */
-		memset(&ifr, 0, sizeof(ifr));
-		strcpy(ifr.ifr_name, ifname);
-		context = "ioctl(SIOCGIFINDEX)";
-		if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
-			goto err_out;
+	NP(ppi)->ch[chtype].fd = sock;
 
-		iindex = ifr.ifr_ifindex;
-		context = "ioctl(SIOCGIFHWADDR)";
-		if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
-			goto err_out;
+	/* hw interface information */
+	memset(&ifr, 0, sizeof(ifr));
+	strcpy(ifr.ifr_name, ifname);
+	context = "ioctl(SIOCGIFINDEX)";
+	if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
+		goto err_out;
 
-		memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
+	context = "ioctl(SIOCGIFHWADDR)";
+	if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
+		goto err_out;
 
-		/* bind */
-		memset(&addr_ll, 0, sizeof(addr));
-		addr_ll.sll_family = AF_PACKET;
-		addr_ll.sll_protocol = htons(ETH_P_1588);
-		addr_ll.sll_ifindex = iindex;
-		context = "bind()";
-		if (bind(sock, (struct sockaddr *)&addr_ll,
-			 sizeof(addr_ll)) < 0)
-			goto err_out;
+	memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
+	context = "ioctl(SIOCGIFADDR)";
+	if (ioctl(sock, SIOCGIFADDR, &ifr) < 0)
+		goto err_out;
 
-		/* accept the multicast address for raw-ethernet ptp */
-		memset(&pmr, 0, sizeof(pmr));
-		pmr.mr_ifindex = iindex;
-		pmr.mr_type = PACKET_MR_MULTICAST;
-		pmr.mr_alen = ETH_ALEN;
-		memcpy(pmr.mr_address, PP_MCAST_MACADDRESS, ETH_ALEN);
-		setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
-			   &pmr, sizeof(pmr)); /* lazily ignore errors */
+	iface_addr.s_addr =
+		((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
 
-		NP(ppi)->ch[chtype].fd = sock;
+	pp_diag(ppi, frames, 2, "Local IP address used : %s\n",
+		inet_ntoa(iface_addr));
 
-		/* make timestamps available through recvmsg() -- FIXME: hw? */
-		setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
-			   &temp, sizeof(int));
+	temp = 1; /* allow address reuse */
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+		       &temp, sizeof(int)) < 0)
+		pp_printf("%s: ioctl(SO_REUSEADDR): %s\n", __func__,
+			  strerror(errno));
 
-		return 0;
+	/* bind sockets */
+	/* need INADDR_ANY to allow receipt of multi-cast and uni-cast
+	 * messages */
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr.sin_port = htons(chtype == PP_NP_GEN
+			      ? PP_GEN_PORT : PP_EVT_PORT);
+	context = "bind()";
+	if (bind(sock, (struct sockaddr *)&addr,
+		 sizeof(struct sockaddr_in)) < 0)
+		goto err_out;
 
-	case PPSI_PROTO_UDP:
-		context = "socket()";
-		sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-		if (sock < 0)
-			goto err_out;
+	/* Init General multicast IP address */
+	memcpy(addr_str, PP_DEFAULT_DOMAIN_ADDRESS, INET_ADDRSTRLEN);
 
-		NP(ppi)->ch[chtype].fd = sock;
+	context = addr_str; errno = EINVAL;
+	if (!inet_aton(addr_str, &net_addr))
+		goto err_out;
+	NP(ppi)->mcast_addr = net_addr.s_addr;
 
-		/* hw interface information */
-		memset(&ifr, 0, sizeof(ifr));
-		strcpy(ifr.ifr_name, ifname);
-		context = "ioctl(SIOCGIFINDEX)";
-		if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
-			goto err_out;
+	/* multicast sends only on specified interface */
+	imr.imr_multiaddr.s_addr = net_addr.s_addr;
+	imr.imr_interface.s_addr = iface_addr.s_addr;
+	context = "setsockopt(IP_MULTICAST_IF)";
+	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF,
+		       &imr.imr_interface.s_addr,
+		       sizeof(struct in_addr)) < 0)
+		goto err_out;
 
-		context = "ioctl(SIOCGIFHWADDR)";
-		if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
-			goto err_out;
+	/* join multicast group (for recv) on specified interface */
+	context = "setsockopt(IP_ADD_MEMBERSHIP)";
+	if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+		       &imr, sizeof(struct ip_mreq)) < 0)
+		goto err_out;
+	/* End of General multicast Ip address init */
 
-		memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
-		context = "ioctl(SIOCGIFADDR)";
-		if (ioctl(sock, SIOCGIFADDR, &ifr) < 0)
-			goto err_out;
+	/* set socket time-to-live */
+	context = "setsockopt(IP_MULTICAST_TTL)";
+	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL,
+		       &OPTS(ppi)->ttl, sizeof(int)) < 0)
+		goto err_out;
 
-		iface_addr.s_addr =
-			((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
+	/* forcibly disable loopback */
+	temp = 0;
+	context = "setsockopt(IP_MULTICAST_LOOP)";
+	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP,
+		       &temp, sizeof(int)) < 0)
+		goto err_out;
 
-		pp_diag(ppi, frames, 2, "Local IP address used : %s\n",
-			inet_ntoa(iface_addr));
+	/* make timestamps available through recvmsg() */
+	context = "setsockopt(SO_TIMESTAMP)";
+	if (setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
+		       &temp, sizeof(int)) < 0)
+		goto err_out;
 
-		temp = 1; /* allow address reuse */
-		if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-			       &temp, sizeof(int)) < 0)
-			pp_printf("%s: ioctl(SO_REUSEADDR): %s\n", __func__,
-				  strerror(errno));
-
-		/* bind sockets */
-		/* need INADDR_ANY to allow receipt of multi-cast and uni-cast
-		 * messages */
-		addr.sin_family = AF_INET;
-		addr.sin_addr.s_addr = htonl(INADDR_ANY);
-		addr.sin_port = htons(chtype == PP_NP_GEN
-				      ? PP_GEN_PORT : PP_EVT_PORT);
-		context = "bind()";
-		if (bind(sock, (struct sockaddr *)&addr,
-			 sizeof(struct sockaddr_in)) < 0)
-			goto err_out;
-
-		/* Init General multicast IP address */
-		memcpy(addr_str, PP_DEFAULT_DOMAIN_ADDRESS, INET_ADDRSTRLEN);
-
-		context = addr_str; errno = EINVAL;
-		if (!inet_aton(addr_str, &net_addr))
-			goto err_out;
-		NP(ppi)->mcast_addr = net_addr.s_addr;
-
-		/* multicast sends only on specified interface */
-		imr.imr_multiaddr.s_addr = net_addr.s_addr;
-		imr.imr_interface.s_addr = iface_addr.s_addr;
-		context = "setsockopt(IP_MULTICAST_IF)";
-		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF,
-			       &imr.imr_interface.s_addr,
-			       sizeof(struct in_addr)) < 0)
-			goto err_out;
-
-		/* join multicast group (for recv) on specified interface */
-		context = "setsockopt(IP_ADD_MEMBERSHIP)";
-		if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-			       &imr, sizeof(struct ip_mreq)) < 0)
-			goto err_out;
-		/* End of General multicast Ip address init */
-
-		/* set socket time-to-live */
-		context = "setsockopt(IP_MULTICAST_TTL)";
-		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL,
-			       &OPTS(ppi)->ttl, sizeof(int)) < 0)
-			goto err_out;
-
-		/* forcibly disable loopback */
-		temp = 0;
-		context = "setsockopt(IP_MULTICAST_LOOP)";
-		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP,
-			       &temp, sizeof(int)) < 0)
-			goto err_out;
-
-		/* make timestamps available through recvmsg() */
-		context = "setsockopt(SO_TIMESTAMP)";
-		if (setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
-			       &temp, sizeof(int)) < 0)
-			goto err_out;
-
-		NP(ppi)->ch[chtype].fd = sock;
-		return 0;
-
-	case PPSI_PROTO_VLAN:
-		/* FIXME */
-	default:
-		return -1;
-	}
+	NP(ppi)->ch[chtype].fd = sock;
+	return 0;
 
 err_out:
 	pp_printf("%s: %s: %s\n", __func__, context, strerror(errno));
@@ -383,15 +389,20 @@ static int unix_net_init(struct pp_instance *ppi)
 
 	switch(ppi->proto) {
 	case PPSI_PROTO_RAW:
-		pp_diag(ppi, frames, 1, "unix_net_init IEEE 802.3\n");
+		pp_diag(ppi, frames, 1, "unix_net_init raw Ethernet\n");
 
 		/* raw sockets implementation always use gen socket */
-		return unix_open_ch(ppi, ppi->iface_name, PP_NP_GEN);
+		return unix_open_ch_raw(ppi, ppi->iface_name, PP_NP_GEN);
 
 	case PPSI_PROTO_UDP:
+		if (ppi->nvlans) {
+			/* If "proto udp" is set after setting vlans... */
+			pp_printf("Error: can't use UDP with VLAN support\n");
+			exit(1);
+		}
 		pp_diag(ppi, frames, 1, "unix_net_init UDP\n");
 		for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
-			if (unix_open_ch(ppi, ppi->iface_name, i))
+			if (unix_open_ch_udp(ppi, ppi->iface_name, i))
 				return -1;
 		}
 		return 0;
