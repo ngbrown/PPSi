@@ -71,8 +71,6 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		break;
 
 	case PPM_DELAY_REQ:
-		msg_copy_header(&ppi->delay_req_hdr,
-				&ppi->received_ptp_header);
 		msg_issue_delay_resp(ppi, &ppi->last_rcv_time);
 		break;
 

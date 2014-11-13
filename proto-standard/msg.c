@@ -398,7 +398,7 @@ int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time)
 	Timestamp rcv_tstamp;
 	from_TimeInternal(time, &rcv_tstamp);
 
-	msg_pack_delay_resp(ppi, &ppi->delay_req_hdr, &rcv_tstamp);
+	msg_pack_delay_resp(ppi, &ppi->received_ptp_header, &rcv_tstamp);
 
 	return __send_and_log(ppi, PP_DELAY_RESP_LENGTH, PPM_DELAY_RESP,
 			      PP_NP_GEN);

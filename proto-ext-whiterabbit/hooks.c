@@ -80,9 +80,8 @@ static int wr_master_msg(struct pp_instance *ppi, unsigned char *pkt, int plen,
 
 	/* This case is modified from the default one */
 	case PPM_DELAY_REQ:
-		msg_copy_header(&ppi->delay_req_hdr, hdr);
-		ppi->delay_req_hdr.correctionfield.msb = 0;
-		ppi->delay_req_hdr.correctionfield.lsb =
+		hdr->correctionfield.msb = 0;
+		hdr->correctionfield.lsb =
 			phase_to_cf_units(ppi->last_rcv_time.phase);
 		msg_issue_delay_resp(ppi, time);
 		msgtype = PPM_NOTHING_TO_DO;
