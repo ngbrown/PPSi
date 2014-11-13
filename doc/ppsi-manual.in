@@ -509,6 +509,125 @@ transmission jitter, you can run like this:
 
 
 @c ##########################################################################
+@node VLAN Support
+@chapter VLAN Support
+
+PPSi can support vlans, or use support the Operating System offers.
+
+@c ==========================================================================
+@node OS VLAN
+@section OS VLAN
+
+If the OS supports vlans, PPSi can rely on it. For example a
+Linux-based architecture can be configured to run on interface
+@t{eth0.20} and thus work on vlan 20.  In this case, use of
+@i{vconfig} is left to the user, and nothing special is performed by
+PPSi itself, nor any special configuration is needed.  In this setup
+both raw Ethernet and UDP can be used.
+
+@c ==========================================================================
+@node PPSi VLAN
+@section PPSi VLAN
+
+Freestanding architectures, like the WR PTP Core (@t{arch-wrpc}) can't
+rely on the underlying Operating System, so the daemon must read and
+write vlan Ethernet headers by itself -- in this situation UDP is not
+supported, unless your own architecture's network operations build and
+decode IP and UDP headers (in official PPSi no such support is there).
+
+Another situation where PPSi should deal with vlans directly is when
+you want a port to be master on several vlans at the same time, but
+this is only supported for @i{mandated} masters, at this point in
+time.  A mandated master is a port configured as ``@t{role master}''
+in the configuration file.  If you want to run multiple vlans on the
+same physical ports, without forcing the port to be a mandated master,
+you can create multiple PTP interfaces, one per vlan, all relying on
+the same physical port (or different OS-specific vlan ports).
+
+When running a fully-PTP network in end-to-end mode, you won't usually
+need to configure multiple vlans on a single port. In particular, this
+never happens in a White Rabbit network, because each link connects
+two clocks, without any non-compliant switches in the middle.
+However, if you have
+transparent clocks or normal switches, you may want to behave
+as a master for the whole network connected to your port, which may
+be split in several vlans. Clearly this only applies to a @i{trunk}
+port in your PTP switch or workstation.
+
+To support this we rely on @i{Kconfig} and architecture-specific
+code, in the following way.
+
+@itemize @bullet
+   @item Each architecture states, in @t{Kconfig}, whether it supports
+   vlans (@t{HAS_VLAN}) and multiple vlans (@t{HAS_MULTIPLE_VLAN}).
+
+   @item The configuration parser (@t{lib/conf.c}) accepts a @t{vlan}
+   keyword, specifying one or more vlans. If several, they are
+   comma-separated.
+
+   @item Configuration fails (and PPSi refuses to start) if the architecture
+   has no vlan support, or of multiple vlans are specified for an
+   architecture that supports one vlan only.
+
+   @item Configuration fails also if several vlans are specified for
+   a port that is not a mandated master.
+@end itemize
+
+When only one vlan is specified, the network operations for the
+architecture are responsible: they must do the right thing. Currently,
+@t{wrpc} builds and decodes Ethernet frames (FIXME: NOT YET), ignoring
+any received frame not belonging to the proper vlan. Code for @t{wrs} and
+@t{unix} handles a single vlan like multiple ones; I thought
+about automatically creating the vlan-specific interface, but that
+would be very Linux-specific and I see no real need for it.
+
+When multiple vlans are specified for a master port, current code
+(i.e. @t{arch-wrs} and @t{arch-unix}) binds to @t{ETH_P_ALL}, in order
+to receive all frames from that interface, and thus be able to tell
+which vlan they belong to.  A multiple-vlan master sends announce and
+sync (plus follow-up) to all vlans at the same time, and will reply to
+delay requests using the same vlan it receives it from.  Frames from
+other vlans, as well as non-PTP frames, are ignored.
+
+Because of the @t{ETH_P_ALL} binding, a multiple-vlan master port will
+receive all the non-PTP traffic that flows on the interface. Please be
+warned that this may increase the load on your PPSi process.  With the
+current release of the White Rabbit Switch this is not a problem,
+because the switching core routes only PTP frames to the CPU. This
+applies to single-vlan ports, because PPSi is not creating the
+Linux-specific interface to have the kernel select traffic for us.
+
+@c ==========================================================================
+@node Note about vlans in Linux
+@section Note about vlans in Linux
+
+The choices described above depend on how vlans work in Linux (the
+architecture we use in the White Rabbit Switch, and the one we support
+in @t{arch-unix}).
+
+If a packet socket is bound to a specific Ethernet protocol (for
+example, the PTP Ethernet type, 0x88f7), on a generic Ethernet port
+like @t{eth0}, it receives all frames for that @i{ethertype}, whether
+or not they are tagged on the wire.  To our knowledge there is no way,
+in this situation, to tell whether the frame was tagged, and which tag
+were there if any.  Only traffic to vlan-specific ports, like
+@t{eth0.20}, si guaranteed to belong to vlan 20 (or a double-tagged
+frame, whose external tag is 20).
+
+Only a socket bound to all @i{ethertypes} (i.e. @t{ETH_P_ALL}) is able
+to receive auxiliary metadata that reports whether the frame was
+tagged and which tag it was carrying.
+
+The behavior above depends on how hardware acceleration for tags work,
+and even if it is suboptimal for this use case, we don't know about
+alternatives. Thus, a PPSi port configured for vlan frames, is bound
+to the base ethernet port, but it must receive all @i{ethertypes}.
+
+If this is not ok for your configuration, you can create your own
+vlan-aware Linux port and bind to it. It works correctly with smaller
+CPU overhead, but more administrative work.
+
+@c ##########################################################################
 @node PTP Clock Class
 @chapter PTP Clock Class
 
