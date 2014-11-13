@@ -26,7 +26,7 @@
 
 /* unix_recv_msg uses recvmsg for timestamp query */
 static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
-			 TimeInternal *t, uint16_t *peer_vid)
+			 TimeInternal *t)
 {
 	struct ethhdr *hdr = pkt;
 	ssize_t ret;
@@ -108,9 +108,9 @@ static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 				break; /* ok */
 		if (i == ppi->nvlans)
 			return -2; /* not ours: say it's dropped */
-		*peer_vid = ppi->vlans[i];
+		ppi->peer_vid = ppi->vlans[i];
 	} else {
-		*peer_vid = 0;
+		ppi->peer_vid = 0;
 	}
 
 	if (ppsi_drop_rx()) {
@@ -137,16 +137,16 @@ static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	case PPSI_PROTO_VLAN:
 		ch2 = ppi->ch + PP_NP_GEN;
 
-		ret = unix_recv_msg(ppi, ch2->fd, pkt, len, t, &ch2->peer_vid);
+		ret = unix_recv_msg(ppi, ch2->fd, pkt, len, t);
 		if (ret <= 0)
 			return ret;
 		if (hdr->h_proto != htons(ETH_P_1588))
 			return 0;
 
-		memcpy(ppi->ch[PP_NP_GEN].peer, hdr->h_source, ETH_ALEN);
+		memcpy(ppi->peer, hdr->h_source, ETH_ALEN);
 		if (pp_diag_allow(ppi, frames, 2)) {
 			if (ppi->proto == PPSI_PROTO_VLAN)
-				pp_printf("recv: VLAN %i\n", ch2->peer_vid);
+				pp_printf("recv: VLAN %i\n", ppi->peer_vid);
 			dump_1588pkt("recv: ", pkt, ret, t);
 		}
 		return ret;
@@ -159,9 +159,9 @@ static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 
 		ret = -1;
 		if (ch1->pkt_present)
-			ret = unix_recv_msg(ppi, ch1->fd, pkt, len, t, NULL);
+			ret = unix_recv_msg(ppi, ch1->fd, pkt, len, t);
 		else if (ch2->pkt_present)
-			ret = unix_recv_msg(ppi, ch2->fd, pkt, len, t, NULL);
+			ret = unix_recv_msg(ppi, ch2->fd, pkt, len, t);
 		if (ret <= 0)
 			return ret;
 		/* We can't save the peer's mac address in UDP mode */
@@ -216,7 +216,7 @@ static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 		/* similar to sending raw frames, but w/ different header */
 		ch = ppi->ch + PP_NP_GEN;
 		vhdr->h_proto = htons(ETH_P_1588);
-		vhdr->h_tci = htons(ch->peer_vid); /* prio is 0 */
+		vhdr->h_tci = htons(ppi->peer_vid); /* prio is 0 */
 		vhdr->h_tpid = htons(0x8100);
 
 		memcpy(vhdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);

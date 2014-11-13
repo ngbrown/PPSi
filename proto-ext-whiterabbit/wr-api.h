@@ -12,7 +12,7 @@
 #include <ppsi/lib.h>
 #include "wr-constants.h"
 
-#define WRS_PPSI_SHMEM_VERSION 10 /* added peer_vid */
+#define WRS_PPSI_SHMEM_VERSION 11 /* peer is per-ppi, not per-chan */
 
 /*
  * This structure is used as extension-specific data in the DSPort

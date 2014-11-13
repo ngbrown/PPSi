@@ -158,7 +158,7 @@ static void wrs_linearize_rx_timestamp(TimeInternal *ts,
 
 
 static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
-			TimeInternal *t, uint16_t *peer_vid)
+			TimeInternal *t)
 {
 	struct ethhdr *hdr = pkt;
 	struct wrs_socket *s;
@@ -250,9 +250,9 @@ drop:
 				break; /* ok */
 		if (i == ppi->nvlans)
 			return 0; /* not ours */
-		*peer_vid = ppi->vlans[i];
+		ppi->peer_vid = ppi->vlans[i];
 	} else {
-		*peer_vid = 0;
+		ppi->peer_vid = 0;
 	}
 
 	if (ppsi_drop_rx()) {
@@ -275,16 +275,16 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	case PPSI_PROTO_VLAN:
 		ch2 = ppi->ch + PP_NP_GEN;
 
-		ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t, &ch2->peer_vid);
+		ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t);
 		if (ret <= 0)
 			return ret;
 		if (hdr->h_proto != htons(ETH_P_1588))
 			return 0;
 
-		memcpy(ppi->ch[PP_NP_GEN].peer, hdr->h_source, ETH_ALEN);
+		memcpy(ppi->peer, hdr->h_source, ETH_ALEN);
 		if (pp_diag_allow(ppi, frames, 2)) {
 			if (ppi->proto == PPSI_PROTO_VLAN)
-				pp_printf("recv: VLAN %i\n", ch2->peer_vid);
+				pp_printf("recv: VLAN %i\n", ppi->peer_vid);
 			dump_1588pkt("recv: ", pkt, ret, t);
 		}
 		break;
@@ -295,9 +295,9 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		ch2 = &(ppi->ch[PP_NP_GEN]);
 
 		if (ch1->pkt_present)
-			ret = wrs_recv_msg(ppi, ch1->fd, pkt, len, t, NULL);
+			ret = wrs_recv_msg(ppi, ch1->fd, pkt, len, t);
 		else if (ch2->pkt_present)
-			ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t, NULL);
+			ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t);
 		if (ret < 0)
 			break;
 		if (pp_diag_allow(ppi, frames, 2))
@@ -463,7 +463,7 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 		/* similar to sending raw frames, but w/ different header */
 		ch = ppi->ch + PP_NP_GEN;
 		vhdr->h_proto = htons(ETH_P_1588);
-		vhdr->h_tci = htons(ch->peer_vid); /* prio is 0 */
+		vhdr->h_tci = htons(ppi->peer_vid); /* prio is 0 */
 		vhdr->h_tpid = htons(0x8100);
 		if (drop)
 			hdr->h_proto++;
