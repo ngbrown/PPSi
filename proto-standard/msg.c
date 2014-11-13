@@ -83,12 +83,6 @@ void msg_pack_header(struct pp_instance *ppi, void *buf)
 	/* Default value(spec Table 24) */
 }
 
-void *msg_copy_header(MsgHeader *dest, MsgHeader *src)
-{
-	return memcpy(dest, src, sizeof(MsgHeader));
-}
-
-
 /* Pack Sync message into out buffer of ppi */
 void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {

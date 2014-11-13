@@ -339,7 +339,6 @@ extern int bmc(struct pp_instance *ppi);
 extern void msg_pack_header(struct pp_instance *ppi, void *buf);
 extern int __attribute__((warn_unused_result))
 	msg_unpack_header(struct pp_instance *ppi, void *buf, int plen);
-void *msg_copy_header(MsgHeader *dest, MsgHeader *src);
 extern void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp);
 extern void msg_unpack_sync(void *buf, MsgSync *sync);
 extern int msg_pack_announce(struct pp_instance *ppi);

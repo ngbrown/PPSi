@@ -8,6 +8,11 @@
 #include <ppsi/ppsi.h>
 #include "common-fun.h"
 
+static void *msg_copy_header(MsgHeader *dest, MsgHeader *src)
+{
+	return memcpy(dest, src, sizeof(MsgHeader));
+}
+
 static void *__align_pointer(void *p)
 {
 	unsigned long ip, align = 0;
