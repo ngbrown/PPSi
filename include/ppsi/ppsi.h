@@ -356,8 +356,7 @@ extern void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp);
 
 /* each of them returns 0 if no error and -1 in case of error in send */
 extern int msg_issue_announce(struct pp_instance *ppi);
-extern int msg_issue_sync(struct pp_instance *ppi);
-extern int msg_issue_followup(struct pp_instance *ppi, TimeInternal *time);
+extern int msg_issue_sync_followup(struct pp_instance *ppi);
 extern int msg_issue_delay_req(struct pp_instance *ppi);
 extern int msg_issue_delay_resp(struct pp_instance *ppi, TimeInternal *time);
 

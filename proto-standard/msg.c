@@ -355,26 +355,25 @@ int msg_issue_announce(struct pp_instance *ppi)
 }
 
 /* Pack and send on event multicast ip adress a Sync message */
-int msg_issue_sync(struct pp_instance *ppi)
+int msg_issue_sync_followup(struct pp_instance *ppi)
 {
-	Timestamp orig_tstamp;
-	TimeInternal now;
+	Timestamp tstamp;
+	TimeInternal now, *time_snt;
+	int e;
+
+	/* Send sync on the event channel with the "current" timestamp */
 	ppi->t_ops->get(ppi, &now);
-	from_TimeInternal(&now, &orig_tstamp);
+	from_TimeInternal(&now, &tstamp);
+	msg_pack_sync(ppi, &tstamp);
+	e = __send_and_log(ppi, PP_SYNC_LENGTH, PPM_SYNC, PP_NP_EVT);
+	if (e) return e;
 
-	msg_pack_sync(ppi, &orig_tstamp);
-
-	return __send_and_log(ppi, PP_SYNC_LENGTH, PPM_SYNC, PP_NP_EVT);
-}
-
-/* Pack and send on general multicast ip address a FollowUp message */
-int msg_issue_followup(struct pp_instance *ppi, TimeInternal *time)
-{
-	Timestamp prec_orig_tstamp;
-	from_TimeInternal(time, &prec_orig_tstamp);
-
-	msg_pack_follow_up(ppi, &prec_orig_tstamp);
-
+	/* Send followup on general channel with sent-stamp of sync */
+	time_snt = &ppi->last_snt_time;
+	add_TimeInternal(time_snt, time_snt,
+			 &OPTS(ppi)->outbound_latency);
+	from_TimeInternal(time_snt, &tstamp);
+	msg_pack_follow_up(ppi, &tstamp);
 	return __send_and_log(ppi, PP_FOLLOW_UP_LENGTH, PPM_FOLLOW_UP,
 			      PP_NP_GEN);
 }

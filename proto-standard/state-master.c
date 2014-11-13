@@ -11,7 +11,6 @@
 
 int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 {
-	TimeInternal *time_snt;
 	int msgtype, d1, d2;
 	int e = 0; /* error var, to check errors in msg handling */
 
@@ -26,13 +25,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 	if (pp_timeout_z(ppi, PP_TO_SYNC)) {
-		if ((e = msg_issue_sync(ppi) < 0))
-			goto out;
-
-		time_snt = &ppi->last_snt_time;
-		add_TimeInternal(time_snt, time_snt,
-				 &OPTS(ppi)->outbound_latency);
-		if ((e = msg_issue_followup(ppi, time_snt)))
+		if ((e = msg_issue_sync_followup(ppi) < 0))
 			goto out;
 
 		/* Restart the timeout for next time */
