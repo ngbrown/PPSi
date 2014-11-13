@@ -89,6 +89,9 @@ static inline struct DSTimeProperties *DSPRO(struct pp_instance *ppi)
 }
 
 /* We used to have a "netpath" structure. Keep this until we merge pdelay */
+static struct pp_instance *NP(struct pp_instance *ppi)
+	__attribute__((deprecated));
+
 static inline struct pp_instance *NP(struct pp_instance *ppi)
 {
 	return ppi;
