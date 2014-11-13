@@ -35,6 +35,15 @@ extern int pp_sprintf(char *s, const char *fmt, ...)
 extern int pp_vsprintf(char *buf, const char *, va_list)
 	__attribute__ ((format (printf, 2, 0)));
 
+/* This structure is never defined, it seems */
+struct pp_vlanhdr {
+	uint8_t h_dest[6];
+	uint8_t h_source[6];
+	uint16_t h_tpid;
+	uint16_t h_tci;
+	uint16_t h_proto;
+};
+
 
 /* We use data sets a lot, so have these helpers */
 static inline struct pp_globals *GLBS(struct pp_instance *ppi)

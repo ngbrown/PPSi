@@ -5,9 +5,9 @@
  *
  * Released according to the GNU LGPL, version 2.1 or any later version.
  */
-#include <linux/if_ether.h>
 #include <ppsi/ppsi.h>
 #include "common-fun.h"
+#include "../lib/network_types.h"
 
 static void *msg_copy_header(MsgHeader *dest, MsgHeader *src)
 {

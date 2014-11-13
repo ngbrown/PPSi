@@ -63,6 +63,7 @@ struct pp_channel {
 	void *arch_data;	/* Other arch-private info, if any */
 	unsigned char addr[6];	/* Our own MAC address */
 	unsigned char peer[6];	/* Our peer's MAC address */
+	uint16_t peer_vid;	/* Our peer's VID (for PROTO_VLAN) */
 	int pkt_present;
 };
 
