@@ -51,15 +51,25 @@ static void dump_time(char *prefix, struct TimeInternal *ti)
 }
 #endif
 
-static void dump_eth(char *prefix, struct ethhdr *eth)
+/* Returns the header size, used by the caller to adjust the next pointer */
+static int dump_eth(char *prefix, struct ethhdr *eth)
 {
 	unsigned char *d = eth->h_dest;
 	unsigned char *s = eth->h_source;
+	int proto = ntohs(eth->h_proto);
+	struct pp_vlanhdr *vhdr = (void *)eth;
+	int ret = sizeof(*eth);
 
+	if (proto == 0x8100) {
+		ret = sizeof(*vhdr);
+		proto = ntohs(vhdr->h_proto);
+		printf("%sVLAN %i\n", prefix, ntohs(vhdr->h_tci) & 0xfff);
+	}
 	printf("%sETH: %04x (%02x:%02x:%02x:%02x:%02x:%02x -> "
-	       "%02x:%02x:%02x:%02x:%02x:%02x)\n", prefix, ntohs(eth->h_proto),
+	       "%02x:%02x:%02x:%02x:%02x:%02x)\n", prefix, proto,
 	       s[0], s[1], s[2], s[3], s[4], s[5],
 	       d[0], d[1], d[2], d[3], d[4], d[5]);
+	return ret;
 }
 
 static void dump_ip(char *prefix, struct iphdr *ip)
@@ -256,16 +266,22 @@ static void dump_payload(char *prefix, void *pl, int len)
 int dump_udppkt(char *prefix, void *buf, int len, struct TimeInternal *ti)
 {
 	struct ethhdr *eth = buf;
-	struct iphdr *ip = buf + ETH_HLEN;
-	struct udphdr *udp = (void *)(ip + 1);
-	void *payload = (void *)(udp + 1);
+	struct iphdr *ip;
+	struct udphdr *udp;
+	void *payload;
 
 	if (ti)
 		dump_time(prefix, ti);
-	dump_eth(prefix, eth);
+
+	ip = buf + dump_eth(prefix, eth);
 	dump_ip(prefix, ip);
+
+	udp = (void *)(ip + 1);
 	dump_udp(prefix, udp);
+
+	payload = (void *)(udp + 1);
 	dump_payload(prefix, payload, len - (payload - buf));
+
 	return 0;
 }
 
@@ -282,11 +298,12 @@ int dump_payloadpkt(char *prefix, void *buf, int len, struct TimeInternal *ti)
 int dump_1588pkt(char *prefix, void *buf, int len, struct TimeInternal *ti)
 {
 	struct ethhdr *eth = buf;
-	void *payload = (void *)(eth + 1);
+	void *payload;
 
 	if (ti)
 		dump_time(prefix, ti);
-	dump_eth(prefix, eth);
+	payload = buf + dump_eth(prefix, eth);
 	dump_payload(prefix, payload, len - (payload - buf));
+
 	return 0;
 }

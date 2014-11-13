@@ -41,3 +41,14 @@ struct udphdr {
 	uint16_t len;
 	uint16_t check;
 };
+
+#ifndef __PPSI_PPSI_H__
+/* from ppsi.h -- never defined elsewhere */
+struct pp_vlanhdr {
+	uint8_t h_dest[6];
+	uint8_t h_source[6];
+	uint16_t h_tpid;
+	uint16_t h_tci;
+	uint16_t h_proto;
+};
+#endif /* __PPSI_PPSI_H__ */
