@@ -108,7 +108,7 @@ static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 
 	switch(ppi->proto) {
 	case PPSI_PROTO_RAW:
-		fd = NP(ppi)->ch[PP_NP_GEN].fd;
+		fd = ppi->ch[PP_NP_GEN].fd;
 
 		ret = unix_recv_msg(ppi, fd, pkt, len, t);
 		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
@@ -118,8 +118,8 @@ static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	case PPSI_PROTO_UDP:
 		/* we can return one frame only, always handle EVT msgs
 		 * before GEN */
-		ch1 = &(NP(ppi)->ch[PP_NP_EVT]);
-		ch2 = &(NP(ppi)->ch[PP_NP_GEN]);
+		ch1 = &(ppi->ch[PP_NP_EVT]);
+		ch2 = &(ppi->ch[PP_NP_GEN]);
 
 		ret = -1;
 		if (ch1->pkt_present)
@@ -159,12 +159,12 @@ static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
 		/* raw socket implementation always uses gen socket */
-		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
+		memcpy(hdr->h_source, ppi->ch[PP_NP_GEN].addr, ETH_ALEN);
 
 		if (t)
 			ppi->t_ops->get(ppi, t);
 
-		ret = send(NP(ppi)->ch[PP_NP_GEN].fd, hdr, len, 0);
+		ret = send(ppi->ch[PP_NP_GEN].fd, hdr, len, 0);
 		if (pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("send: ", pkt, len, t);
 		return ret;
@@ -173,12 +173,12 @@ static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(chtype == PP_NP_GEN
 				      ? PP_GEN_PORT : PP_EVT_PORT);
-		addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
+		addr.sin_addr.s_addr = ppi->mcast_addr;
 
 		if (t)
 			ppi->t_ops->get(ppi, t);
 
-		ret = sendto(NP(ppi)->ch[chtype].fd, pkt, len, 0,
+		ret = sendto(ppi->ch[chtype].fd, pkt, len, 0,
 			     (struct sockaddr *)&addr,
 			     sizeof(struct sockaddr_in));
 		if (pp_diag_allow(ppi, frames, 2))
@@ -221,7 +221,7 @@ static int unix_open_ch_raw(struct pp_instance *ppi, char *ifname, int chtype)
 	if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
 		goto err_out;
 
-	memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
+	memcpy(ppi->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
 
 	/* bind */
 	memset(&addr_ll, 0, sizeof(addr));
@@ -242,7 +242,7 @@ static int unix_open_ch_raw(struct pp_instance *ppi, char *ifname, int chtype)
 	setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
 		   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
-	NP(ppi)->ch[chtype].fd = sock;
+	ppi->ch[chtype].fd = sock;
 
 	/* make timestamps available through recvmsg() -- FIXME: hw? */
 	setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
@@ -254,7 +254,7 @@ err_out:
 	pp_printf("%s: %s: %s\n", __func__, context, strerror(errno));
 	if (sock >= 0)
 		close(sock);
-	NP(ppi)->ch[chtype].fd = -1;
+	ppi->ch[chtype].fd = -1;
 	return -1;
 }
 
@@ -274,7 +274,7 @@ static int unix_open_ch_udp(struct pp_instance *ppi, char *ifname, int chtype)
 	if (sock < 0)
 		goto err_out;
 
-	NP(ppi)->ch[chtype].fd = sock;
+	ppi->ch[chtype].fd = sock;
 
 	/* hw interface information */
 	memset(&ifr, 0, sizeof(ifr));
@@ -287,7 +287,7 @@ static int unix_open_ch_udp(struct pp_instance *ppi, char *ifname, int chtype)
 	if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
 		goto err_out;
 
-	memcpy(NP(ppi)->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
+	memcpy(ppi->ch[chtype].addr, ifr.ifr_hwaddr.sa_data, 6);
 	context = "ioctl(SIOCGIFADDR)";
 	if (ioctl(sock, SIOCGIFADDR, &ifr) < 0)
 		goto err_out;
@@ -322,7 +322,7 @@ static int unix_open_ch_udp(struct pp_instance *ppi, char *ifname, int chtype)
 	context = addr_str; errno = EINVAL;
 	if (!inet_aton(addr_str, &net_addr))
 		goto err_out;
-	NP(ppi)->mcast_addr = net_addr.s_addr;
+	ppi->mcast_addr = net_addr.s_addr;
 
 	/* multicast sends only on specified interface */
 	imr.imr_multiaddr.s_addr = net_addr.s_addr;
@@ -359,14 +359,14 @@ static int unix_open_ch_udp(struct pp_instance *ppi, char *ifname, int chtype)
 		       &temp, sizeof(int)) < 0)
 		goto err_out;
 
-	NP(ppi)->ch[chtype].fd = sock;
+	ppi->ch[chtype].fd = sock;
 	return 0;
 
 err_out:
 	pp_printf("%s: %s: %s\n", __func__, context, strerror(errno));
 	if (sock >= 0)
 		close(sock);
-	NP(ppi)->ch[chtype].fd = -1;
+	ppi->ch[chtype].fd = -1;
 	return -1;
 }
 
@@ -381,7 +381,7 @@ static int unix_net_init(struct pp_instance *ppi)
 {
 	int i;
 
-	if (NP(ppi)->ch[0].fd > 0)
+	if (ppi->ch[0].fd > 0)
 		unix_net_exit(ppi);
 
 	/* The buffer is inside ppi, but we need to set pointers and align */
@@ -425,30 +425,30 @@ static int unix_net_exit(struct pp_instance *ppi)
 
 	switch(ppi->proto) {
 	case PPSI_PROTO_RAW:
-		fd = NP(ppi)->ch[PP_NP_GEN].fd;
+		fd = ppi->ch[PP_NP_GEN].fd;
 		if (fd > 0) {
 			close(fd);
-			NP(ppi)->ch[PP_NP_GEN].fd = -1;
+			ppi->ch[PP_NP_GEN].fd = -1;
 		}
 		return 0;
 
 	case PPSI_PROTO_UDP:
 		for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
-			fd = NP(ppi)->ch[i].fd;
+			fd = ppi->ch[i].fd;
 			if (fd < 0)
 				continue;
 
 			/* Close General Multicast */
-			imr.imr_multiaddr.s_addr = NP(ppi)->mcast_addr;
+			imr.imr_multiaddr.s_addr = ppi->mcast_addr;
 			imr.imr_interface.s_addr = htonl(INADDR_ANY);
 
 			setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
 				   &imr, sizeof(struct ip_mreq));
 			close(fd);
 
-			NP(ppi)->ch[i].fd = -1;
+			ppi->ch[i].fd = -1;
 		}
-		NP(ppi)->mcast_addr = 0;
+		ppi->mcast_addr = 0;
 		return 0;
 	case PPSI_PROTO_VLAN:
 		/* FIXME */
@@ -488,8 +488,8 @@ static int unix_net_check_packet(struct pp_globals *ppg, int delay_ms)
 
 		/* Use either fd that is valid, irrespective of ether/udp */
 		for (k = 0; k < 2; k++) {
-			NP(ppi)->ch[k].pkt_present = 0;
-			fd_to_set = NP(ppi)->ch[k].fd;
+			ppi->ch[k].pkt_present = 0;
+			fd_to_set = ppi->ch[k].fd;
 			if (fd_to_set < 0)
 				continue;
 
@@ -510,18 +510,18 @@ static int unix_net_check_packet(struct pp_globals *ppg, int delay_ms)
 
 	for (j = 0; j < ppg->nlinks; j++) {
 		struct pp_instance *ppi = INST(ppg, j);
-		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
+		int fd = ppi->ch[PP_NP_GEN].fd;
 
 		if (fd >= 0 && FD_ISSET(fd, &set)) {
 			ret++;
-			NP(ppi)->ch[PP_NP_GEN].pkt_present = 1;
+			ppi->ch[PP_NP_GEN].pkt_present = 1;
 		}
 
-		fd = NP(ppi)->ch[PP_NP_EVT].fd;
+		fd = ppi->ch[PP_NP_EVT].fd;
 
 		if (fd >= 0 && FD_ISSET(fd, &set)) {
 			ret++;
-			NP(ppi)->ch[PP_NP_EVT].pkt_present = 1;
+			ppi->ch[PP_NP_EVT].pkt_present = 1;
 		}
 	}
 	return ret;

@@ -146,8 +146,8 @@ int main(int argc, char **argv)
 		if (ppi->proto == PPSI_PROTO_RAW)
 			pp_printf("Warning: simulator doesn't support raw "
 					"ethernet. Using UDP\n");
-		NP(ppi)->ch[PP_NP_GEN].fd = -1;
-		NP(ppi)->ch[PP_NP_EVT].fd = -1;
+		ppi->ch[PP_NP_GEN].fd = -1;
+		ppi->ch[PP_NP_EVT].fd = -1;
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 		ppi->n_ops = &DEFAULT_NET_OPS;
 		if (pp_sim_is_master(ppi))

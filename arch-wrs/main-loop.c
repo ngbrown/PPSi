@@ -93,7 +93,7 @@ void wrs_main_loop(struct pp_globals *ppg)
 		* the ptp payload is one-eth-header bytes into the frame
 		*/
 		if (ppi->proto == PPSI_PROTO_RAW)
-			NP(ppi)->ptp_offset = ETH_HLEN;
+			ppi->ptp_offset = ETH_HLEN;
 
 		/*
 		* The main loop here is based on select. While we are not
@@ -148,8 +148,8 @@ void wrs_main_loop(struct pp_globals *ppg)
 			int tmp_d;
 			ppi = INST(ppg, j);
 
-			if ((NP(ppi)->ch[PP_NP_GEN].pkt_present) ||
-			    (NP(ppi)->ch[PP_NP_EVT].pkt_present)) {
+			if ((ppi->ch[PP_NP_GEN].pkt_present) ||
+			    (ppi->ch[PP_NP_EVT].pkt_present)) {
 
 				i = __recv_and_count(ppi, ppi->rx_frame,
 						PP_MAX_FRAME_LENGTH - 4,
@@ -172,7 +172,7 @@ void wrs_main_loop(struct pp_globals *ppg)
 				}
 
 				tmp_d = pp_state_machine(ppi, ppi->rx_ptp,
-					i - NP(ppi)->ptp_offset);
+					i - ppi->ptp_offset);
 
 				if ((delay_ms == -1) || (tmp_d < delay_ms))
 					delay_ms = tmp_d;

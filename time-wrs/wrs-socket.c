@@ -171,7 +171,7 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	struct cmsghdr *cmsg;
 	struct scm_timestamping *sts = NULL;
 
-	s = (struct wrs_socket*)NP(ppi)->ch[PP_NP_GEN].arch_data;
+	s = (struct wrs_socket*)ppi->ch[PP_NP_GEN].arch_data;
 
 	memset(&msg, 0, sizeof(msg));
 	msg.msg_iov = &entry;
@@ -249,7 +249,7 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 
 	switch(ppi->proto) {
 	case PPSI_PROTO_RAW:
-		fd = NP(ppi)->ch[PP_NP_GEN].fd;
+		fd = ppi->ch[PP_NP_GEN].fd;
 
 		ret = wrs_recv_msg(ppi, fd, pkt, len, t);
 		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
@@ -258,8 +258,8 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 
 	case PPSI_PROTO_UDP:
 		/* UDP: always handle EVT msgs before GEN */
-		ch1 = &(NP(ppi)->ch[PP_NP_EVT]);
-		ch2 = &(NP(ppi)->ch[PP_NP_GEN]);
+		ch1 = &(ppi->ch[PP_NP_EVT]);
+		ch2 = &(ppi->ch[PP_NP_GEN]);
 
 		if (ch1->pkt_present)
 			ret = wrs_recv_msg(ppi, ch1->fd, pkt, len, t);
@@ -385,7 +385,7 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 	struct wrs_socket *s;
 	int ret, fd, drop;
 
-	s = (struct wrs_socket *)NP(ppi)->ch[PP_NP_GEN].arch_data;
+	s = (struct wrs_socket *)ppi->ch[PP_NP_GEN].arch_data;
 
 	/*
 	 * To fake a packet loss, we must corrupt the frame; we need
@@ -396,14 +396,14 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 	switch (ppi->proto) {
 	case PPSI_PROTO_RAW:
-		fd = NP(ppi)->ch[PP_NP_GEN].fd;
+		fd = ppi->ch[PP_NP_GEN].fd;
 		hdr->h_proto = htons(ETH_P_1588);
 		if (drop)
 			hdr->h_proto++;
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
 		/* raw socket implementation always uses gen socket */
-		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
+		memcpy(hdr->h_source, ppi->ch[PP_NP_GEN].addr, ETH_ALEN);
 
 		if (t)
 			ppi->t_ops->get(ppi, t);
@@ -422,11 +422,11 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 		return ret;
 
 	case PPSI_PROTO_UDP:
-		fd = NP(ppi)->ch[chtype].fd;
+		fd = ppi->ch[chtype].fd;
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(chtype == PP_NP_GEN
 				      ? PP_GEN_PORT : PP_EVT_PORT);
-		addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
+		addr.sin_addr.s_addr = ppi->mcast_addr;
 		if (drop)
 			addr.sin_port = 3200;
 		ret = sendto(fd, pkt, len, 0, (struct sockaddr *)&addr,
@@ -496,7 +496,7 @@ static int wrs_net_init(struct pp_instance *ppi)
 	int r, i;
 	struct hal_port_state *p;
 
-	if (NP(ppi)->ch[PP_NP_GEN].arch_data)
+	if (ppi->ch[PP_NP_GEN].arch_data)
 		wrs_net_exit(ppi);
 
 	/* Generic OS work is done by standard Unix stuff */
@@ -530,15 +530,15 @@ static int wrs_net_init(struct pp_instance *ppi)
 
 	s->dmtd_phase_valid = 0;
 
-	NP(ppi)->ch[PP_NP_GEN].arch_data = s;
-	NP(ppi)->ch[PP_NP_EVT].arch_data = s;
+	ppi->ch[PP_NP_GEN].arch_data = s;
+	ppi->ch[PP_NP_EVT].arch_data = s;
 	tmo_init(&s->dmtd_update_tmo, DMTD_UPDATE_INTERVAL);
 
 	for (i = PP_NP_GEN, r = 0; i <= PP_NP_EVT && r == 0; i++)
-		r = wrs_enable_timestamps(ppi, NP(ppi)->ch[i].fd);
+		r = wrs_enable_timestamps(ppi, ppi->ch[i].fd);
 	if (r) {
-		NP(ppi)->ch[PP_NP_GEN].arch_data = NULL;
-		NP(ppi)->ch[PP_NP_EVT].arch_data = NULL;
+		ppi->ch[PP_NP_GEN].arch_data = NULL;
+		ppi->ch[PP_NP_EVT].arch_data = NULL;
 		free(s);
 	}
 	return r;
@@ -547,9 +547,9 @@ static int wrs_net_init(struct pp_instance *ppi)
 static int wrs_net_exit(struct pp_instance *ppi)
 {
 	unix_net_ops.exit(ppi);
-	free(NP(ppi)->ch[PP_NP_GEN].arch_data);
-	NP(ppi)->ch[PP_NP_GEN].arch_data = NULL;
-	NP(ppi)->ch[PP_NP_EVT].arch_data = NULL;
+	free(ppi->ch[PP_NP_GEN].arch_data);
+	ppi->ch[PP_NP_GEN].arch_data = NULL;
+	ppi->ch[PP_NP_EVT].arch_data = NULL;
 	return 0;
 }
 
