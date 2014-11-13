@@ -102,22 +102,10 @@ struct pp_servo {
 	struct pp_avg_fltr mpd_fltr;
 };
 
-/*
- * Net Path. Struct which contains the network configuration parameters and
- * the event/general channels (sockets on most platforms, see above)
- */
-
-enum {
+enum { /* The two sockets. They are called "net path" for historical reasons */
 	PP_NP_GEN =	0,
 	PP_NP_EVT,
 	__NR_PP_NP,
-};
-
-struct pp_net_path {
-	struct pp_channel ch[__NR_PP_NP];	/* general and event ch */
-	Integer32 mcast_addr;			/* FIXME: only ipv4/udp */
-
-	int ptp_offset;
 };
 
 /*
@@ -159,7 +147,9 @@ struct pp_instance {
 	void *tx_frame, *rx_frame, *tx_ptp, *rx_ptp;
 
 	/* The net_path used to be allocated separately, but there's no need */
-	struct pp_net_path np;
+	struct pp_channel ch[__NR_PP_NP];	/* general and event ch */
+	Integer32 mcast_addr;			/* FIXME: only ipv4/udp */
+	int ptp_offset;
 
 	/* Times, for the various offset computations */
 	TimeInternal t1, t2, t3, t4;			/* *the* stamps */

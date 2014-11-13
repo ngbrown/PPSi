@@ -88,9 +88,10 @@ static inline struct DSTimeProperties *DSPRO(struct pp_instance *ppi)
 	return GLBS(ppi)->timePropertiesDS;
 }
 
-static inline struct pp_net_path *NP(struct pp_instance *ppi)
+/* We used to have a "netpath" structure. Keep this until we merge pdelay */
+static inline struct pp_instance *NP(struct pp_instance *ppi)
 {
-	return &ppi->np;
+	return ppi;
 }
 
 static inline struct pp_servo *SRV(struct pp_instance *ppi)
