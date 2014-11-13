@@ -36,12 +36,13 @@ void pp_prepare_pointers(struct pp_instance *ppi)
 		ppi->tx_offset = ETH_HLEN; /* 14, I know! */
 		ppi->rx_offset = ETH_HLEN;
 		break;
-	case PPSI_PROTO_UDP:
-		ppi->tx_offset = 0; /* 14, I know! */
-		ppi->rx_offset = 0;
-		break;
 	case PPSI_PROTO_VLAN:
-		/* FIXME */
+		ppi->tx_offset = sizeof(struct pp_vlanhdr);
+		ppi->rx_offset = ETH_HLEN;
+		break;
+	case PPSI_PROTO_UDP:
+		ppi->tx_offset = 0;
+		ppi->rx_offset = 0;
 		break;
 	}
 	ppi->tx_ptp = __align_pointer(ppi->__tx_buffer + ppi->tx_offset);

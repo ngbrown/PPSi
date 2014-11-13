@@ -158,18 +158,21 @@ static void wrs_linearize_rx_timestamp(TimeInternal *ts,
 
 
 static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
-			  TimeInternal *t)
+			TimeInternal *t, uint16_t *peer_vid)
 {
+	struct ethhdr *hdr = pkt;
 	struct wrs_socket *s;
 	struct msghdr msg;
 	struct iovec entry;
 	struct sockaddr_ll from_addr;
-	struct {
+	int i;
+	union {
 		struct cmsghdr cm;
 		char control[1024];
 	} control;
 	struct cmsghdr *cmsg;
 	struct scm_timestamping *sts = NULL;
+	struct tpacket_auxdata *aux = NULL;
 
 	s = (struct wrs_socket*)ppi->ch[PP_NP_GEN].arch_data;
 
@@ -205,8 +208,11 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 
 		if(cmsg->cmsg_level == SOL_SOCKET
 		   && cmsg->cmsg_type == SO_TIMESTAMPING)
-			sts = (struct scm_timestamping *) dp;
+			sts = (struct scm_timestamping *)dp;
 
+		if (cmsg->cmsg_level == SOL_PACKET &&
+		    cmsg->cmsg_type == PACKET_AUXDATA)
+			aux = (struct tpacket_auxdata *)dp;
 	}
 
 	if(sts && t)
@@ -233,6 +239,22 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	}
 
 drop:
+	/* aux is only there if we asked for it, thus PROTO_VLAN */
+	if (aux) {
+		/* With PROTO_VLAN, we bound to ETH_P_ALL: we got all frames */
+		if (hdr->h_proto != htons(ETH_P_1588))
+			return 0;
+		/* Also, we got the vlan, and we can discard it if not ours */
+		for (i = 0; i < ppi->nvlans; i++)
+			if (ppi->vlans[i] == aux->tp_vlan_tci)
+				break; /* ok */
+		if (i == ppi->nvlans)
+			return 0; /* not ours */
+		*peer_vid = ppi->vlans[i];
+	} else {
+		*peer_vid = 0;
+	}
+
 	if (ppsi_drop_rx()) {
 		pp_diag(ppi, frames, 1, "Drop received frame\n");
 		return -2;
@@ -245,15 +267,26 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
 	struct pp_channel *ch1, *ch2;
-	int fd, ret = -1;
+	struct ethhdr *hdr = pkt;
+	int ret = -1;
 
 	switch(ppi->proto) {
 	case PPSI_PROTO_RAW:
-		fd = ppi->ch[PP_NP_GEN].fd;
+	case PPSI_PROTO_VLAN:
+		ch2 = ppi->ch + PP_NP_GEN;
 
-		ret = wrs_recv_msg(ppi, fd, pkt, len, t);
-		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+		ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t, &ch2->peer_vid);
+		if (ret <= 0)
+			return ret;
+		if (hdr->h_proto != htons(ETH_P_1588))
+			return 0;
+
+		memcpy(ppi->ch[PP_NP_GEN].peer, hdr->h_source, ETH_ALEN);
+		if (pp_diag_allow(ppi, frames, 2)) {
+			if (ppi->proto == PPSI_PROTO_VLAN)
+				pp_printf("recv: VLAN %i\n", ch2->peer_vid);
 			dump_1588pkt("recv: ", pkt, ret, t);
+		}
 		break;
 
 	case PPSI_PROTO_UDP:
@@ -262,16 +295,15 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		ch2 = &(ppi->ch[PP_NP_GEN]);
 
 		if (ch1->pkt_present)
-			ret = wrs_recv_msg(ppi, ch1->fd, pkt, len, t);
+			ret = wrs_recv_msg(ppi, ch1->fd, pkt, len, t, NULL);
 		else if (ch2->pkt_present)
-			ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t);
-
-		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+			ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t, NULL);
+		if (ret < 0)
+			break;
+		if (pp_diag_allow(ppi, frames, 2))
 			dump_payloadpkt("recv: ", pkt, ret, t);
 		break;
 
-	case PPSI_PROTO_VLAN:
-		/* FIXME */
 	default:
 		return -1;
 	}
@@ -382,6 +414,12 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 {
 	struct sockaddr_in addr;
 	struct ethhdr *hdr = pkt;
+	struct pp_vlanhdr *vhdr = pkt;
+	struct pp_channel *ch = ppi->ch + chtype;
+	static uint16_t udpport[] = {
+		[PP_NP_GEN] = PP_GEN_PORT,
+		[PP_NP_EVT] = PP_EVT_PORT,
+	};
 	struct wrs_socket *s;
 	int ret, fd, drop;
 
@@ -396,20 +434,48 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 	switch (ppi->proto) {
 	case PPSI_PROTO_RAW:
-		fd = ppi->ch[PP_NP_GEN].fd;
+		/* raw socket implementation always uses gen socket */
+		ch = ppi->ch + PP_NP_GEN;
 		hdr->h_proto = htons(ETH_P_1588);
 		if (drop)
 			hdr->h_proto++;
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
-		/* raw socket implementation always uses gen socket */
-		memcpy(hdr->h_source, ppi->ch[PP_NP_GEN].addr, ETH_ALEN);
+		memcpy(hdr->h_source, ch->addr, ETH_ALEN);
 
 		if (t)
 			ppi->t_ops->get(ppi, t);
 
-		ret = send(fd, hdr, len, 0);
-		poll_tx_timestamp(ppi, pkt, len, s, fd, t);
+		ret = send(ch->fd, hdr, len, 0);
+		poll_tx_timestamp(ppi, pkt, len, s, ch->fd, t);
+
+		if (drop) /* avoid messaging about stamps that are not used */
+			break;
+
+		if (pp_diag_allow(ppi, frames, 2))
+			dump_1588pkt("send: ", pkt, len, t);
+		pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
+			t->correct, (long)t->seconds,
+			(long)t->nanoseconds);
+		return ret;
+
+	case PPSI_PROTO_VLAN:
+		/* similar to sending raw frames, but w/ different header */
+		ch = ppi->ch + PP_NP_GEN;
+		vhdr->h_proto = htons(ETH_P_1588);
+		vhdr->h_tci = htons(ch->peer_vid); /* prio is 0 */
+		vhdr->h_tpid = htons(0x8100);
+		if (drop)
+			hdr->h_proto++;
+
+		memcpy(vhdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
+		memcpy(vhdr->h_source, ch->addr, ETH_ALEN);
+
+		if (t)
+			ppi->t_ops->get(ppi, t);
+
+		ret = send(ch->fd, vhdr, len, 0);
+		poll_tx_timestamp(ppi,  pkt, len, s, ch->fd, t);
 
 		if (drop) /* avoid messaging about stamps that are not used */
 			break;
@@ -424,8 +490,7 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 	case PPSI_PROTO_UDP:
 		fd = ppi->ch[chtype].fd;
 		addr.sin_family = AF_INET;
-		addr.sin_port = htons(chtype == PP_NP_GEN
-				      ? PP_GEN_PORT : PP_EVT_PORT);
+		addr.sin_port = htons(udpport[chtype]);
 		addr.sin_addr.s_addr = ppi->mcast_addr;
 		if (drop)
 			addr.sin_port = 3200;
@@ -443,8 +508,6 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 			(long)t->nanoseconds);
 		return ret;
 
-	case PPSI_PROTO_VLAN:
-		/* FIXME */
 	default:
 		return -1;
 	}

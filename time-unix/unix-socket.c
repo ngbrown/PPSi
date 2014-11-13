@@ -14,10 +14,11 @@
 #include <errno.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
-#include <netpacket/packet.h>
 #include <net/if.h>
 #include <net/ethernet.h>
 #include <arpa/inet.h>
+#include <linux/if_packet.h>
+#include <linux/if_vlan.h>
 
 #include <ppsi/ppsi.h>
 #include "ptpdump.h"
@@ -25,11 +26,13 @@
 
 /* unix_recv_msg uses recvmsg for timestamp query */
 static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
-			  TimeInternal *t)
+			 TimeInternal *t, uint16_t *peer_vid)
 {
+	struct ethhdr *hdr = pkt;
 	ssize_t ret;
 	struct msghdr msg;
 	struct iovec vec[1];
+	int i;
 
 	union {
 		struct cmsghdr cm;
@@ -38,6 +41,7 @@ static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 
 	struct cmsghdr *cmsg;
 	struct timeval *tv;
+	struct tpacket_auxdata *aux = NULL;
 
 	vec[0].iov_base = pkt;
 	vec[0].iov_len = PP_MAX_FRAME_LENGTH;
@@ -71,9 +75,14 @@ static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	tv = NULL;
 	for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL;
 	     cmsg = CMSG_NXTHDR(&msg, cmsg)) {
+
 		if (cmsg->cmsg_level == SOL_SOCKET &&
 		    cmsg->cmsg_type == SCM_TIMESTAMP)
 			tv = (struct timeval *)CMSG_DATA(cmsg);
+
+		if (cmsg->cmsg_level == SOL_PACKET &&
+		    cmsg->cmsg_type == PACKET_AUXDATA)
+			aux = (struct tpacket_auxdata *)CMSG_DATA(cmsg);
 	}
 
 	if (tv) {
@@ -86,6 +95,22 @@ static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 		 * spike in the offset signal sent to the clock servo
 		 */
 		ppi->t_ops->get(ppi, t);
+	}
+
+	/* aux is only there if we asked for it, thus PROTO_VLAN */
+	if (aux) {
+		/* With PROTO_VLAN, we bound to ETH_P_ALL: we got all frames */
+		if (hdr->h_proto != htons(ETH_P_1588))
+			return -2; /* like "dropped", so no error message */
+		/* Also, we got the vlan, and we can discard it if not ours */
+		for (i = 0; i < ppi->nvlans; i++)
+			if (ppi->vlans[i] == (aux->tp_vlan_tci & 0xfff))
+				break; /* ok */
+		if (i == ppi->nvlans)
+			return -2; /* not ours: say it's dropped */
+		*peer_vid = ppi->vlans[i];
+	} else {
+		*peer_vid = 0;
 	}
 
 	if (ppsi_drop_rx()) {
@@ -104,15 +129,26 @@ static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
 	struct pp_channel *ch1, *ch2;
-	int ret, fd;
+	struct ethhdr *hdr = pkt;
+	int ret;
 
 	switch(ppi->proto) {
 	case PPSI_PROTO_RAW:
-		fd = ppi->ch[PP_NP_GEN].fd;
+	case PPSI_PROTO_VLAN:
+		ch2 = ppi->ch + PP_NP_GEN;
 
-		ret = unix_recv_msg(ppi, fd, pkt, len, t);
-		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+		ret = unix_recv_msg(ppi, ch2->fd, pkt, len, t, &ch2->peer_vid);
+		if (ret <= 0)
+			return ret;
+		if (hdr->h_proto != htons(ETH_P_1588))
+			return 0;
+
+		memcpy(ppi->ch[PP_NP_GEN].peer, hdr->h_source, ETH_ALEN);
+		if (pp_diag_allow(ppi, frames, 2)) {
+			if (ppi->proto == PPSI_PROTO_VLAN)
+				pp_printf("recv: VLAN %i\n", ch2->peer_vid);
 			dump_1588pkt("recv: ", pkt, ret, t);
+		}
 		return ret;
 
 	case PPSI_PROTO_UDP:
@@ -123,16 +159,16 @@ static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 
 		ret = -1;
 		if (ch1->pkt_present)
-			ret = unix_recv_msg(ppi, ch1->fd, pkt, len, t);
+			ret = unix_recv_msg(ppi, ch1->fd, pkt, len, t, NULL);
 		else if (ch2->pkt_present)
-			ret = unix_recv_msg(ppi, ch2->fd, pkt, len, t);
-
-		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+			ret = unix_recv_msg(ppi, ch2->fd, pkt, len, t, NULL);
+		if (ret <= 0)
+			return ret;
+		/* We can't save the peer's mac address in UDP mode */
+		if (pp_diag_allow(ppi, frames, 2))
 			dump_payloadpkt("recv: ", pkt, ret, t);
 		return ret;
 
-	case PPSI_PROTO_VLAN:
-		/* FIXME */
 	default:
 		return -1;
 	}
@@ -143,6 +179,12 @@ static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 {
 	struct sockaddr_in addr;
 	struct ethhdr *hdr = pkt;
+	struct pp_vlanhdr *vhdr = pkt;
+	struct pp_channel *ch = ppi->ch + chtype;
+	static uint16_t udpport[] = {
+		[PP_NP_GEN] = PP_GEN_PORT,
+		[PP_NP_EVT] = PP_EVT_PORT,
+	};
 	int ret;
 
 	/* To fake a network frame loss, set the timestamp and do not send */
@@ -155,24 +197,42 @@ static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 	switch(ppi->proto) {
 	case PPSI_PROTO_RAW:
+		/* raw socket implementation always uses gen socket */
+		ch = ppi->ch + PP_NP_GEN;
 		hdr->h_proto = htons(ETH_P_1588);
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
-		/* raw socket implementation always uses gen socket */
-		memcpy(hdr->h_source, ppi->ch[PP_NP_GEN].addr, ETH_ALEN);
+		memcpy(hdr->h_source, ch->addr, ETH_ALEN);
 
 		if (t)
 			ppi->t_ops->get(ppi, t);
 
-		ret = send(ppi->ch[PP_NP_GEN].fd, hdr, len, 0);
+		ret = send(ch->fd, hdr, len, 0);
 		if (pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("send: ", pkt, len, t);
 		return ret;
 
+	case PPSI_PROTO_VLAN:
+		/* similar to sending raw frames, but w/ different header */
+		ch = ppi->ch + PP_NP_GEN;
+		vhdr->h_proto = htons(ETH_P_1588);
+		vhdr->h_tci = htons(ch->peer_vid); /* prio is 0 */
+		vhdr->h_tpid = htons(0x8100);
+
+		memcpy(vhdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
+		memcpy(vhdr->h_source, ch->addr, ETH_ALEN);
+
+		if (t)
+			ppi->t_ops->get(ppi, t);
+
+		ret = send(ch->fd, vhdr, len, 0);
+		if (pp_diag_allow(ppi, frames, 2))
+			dump_1588pkt("send: ", vhdr, len, t);
+		return ret;
+
 	case PPSI_PROTO_UDP:
 		addr.sin_family = AF_INET;
-		addr.sin_port = htons(chtype == PP_NP_GEN
-				      ? PP_GEN_PORT : PP_EVT_PORT);
+		addr.sin_port = htons(udpport[chtype]);
 		addr.sin_addr.s_addr = ppi->mcast_addr;
 
 		if (t)
@@ -185,8 +245,6 @@ static int unix_net_send(struct pp_instance *ppi, void *pkt, int len,
 			dump_payloadpkt("send: ", pkt, len, t);
 		return ret;
 
-	case PPSI_PROTO_VLAN:
-		/* FIXME */
 	default:
 		return -1;
 	}
@@ -226,7 +284,10 @@ static int unix_open_ch_raw(struct pp_instance *ppi, char *ifname, int chtype)
 	/* bind */
 	memset(&addr_ll, 0, sizeof(addr));
 	addr_ll.sll_family = AF_PACKET;
-	addr_ll.sll_protocol = htons(ETH_P_1588);
+	if (ppi->nvlans)
+		addr_ll.sll_protocol = htons(ETH_P_ALL);
+	else
+		addr_ll.sll_protocol = htons(ETH_P_1588);
 	addr_ll.sll_ifindex = iindex;
 	context = "bind()";
 	if (bind(sock, (struct sockaddr *)&addr_ll,
@@ -242,12 +303,18 @@ static int unix_open_ch_raw(struct pp_instance *ppi, char *ifname, int chtype)
 	setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
 		   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
-	ppi->ch[chtype].fd = sock;
-
 	/* make timestamps available through recvmsg() -- FIXME: hw? */
+	temp = 1;
 	setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
 		   &temp, sizeof(int));
 
+	if (ppi->proto == PPSI_PROTO_VLAN) {
+		/* allow the kernel to tell us the source VLAN */
+		setsockopt(sock, SOL_PACKET, PACKET_AUXDATA,
+			   &temp, sizeof(temp));
+	}
+
+	ppi->ch[chtype].fd = sock;
 	return 0;
 
 err_out:
@@ -355,6 +422,7 @@ static int unix_open_ch_udp(struct pp_instance *ppi, char *ifname, int chtype)
 
 	/* make timestamps available through recvmsg() */
 	context = "setsockopt(SO_TIMESTAMP)";
+	temp = 1;
 	if (setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
 		       &temp, sizeof(int)) < 0)
 		goto err_out;
@@ -394,6 +462,13 @@ static int unix_net_init(struct pp_instance *ppi)
 		/* raw sockets implementation always use gen socket */
 		return unix_open_ch_raw(ppi, ppi->iface_name, PP_NP_GEN);
 
+	case PPSI_PROTO_VLAN:
+		pp_diag(ppi, frames, 1, "unix_net_init raw Ethernet "
+			"with VLAN\n");
+
+		/* same as PROTO_RAW above, the differences are minimal */
+		return unix_open_ch_raw(ppi, ppi->iface_name, PP_NP_GEN);
+
 	case PPSI_PROTO_UDP:
 		if (ppi->nvlans) {
 			/* If "proto udp" is set after setting vlans... */
@@ -407,8 +482,6 @@ static int unix_net_init(struct pp_instance *ppi)
 		}
 		return 0;
 
-	case PPSI_PROTO_VLAN:
-		/* FIXME */
 	default:
 		return -1;
 	}
@@ -425,6 +498,7 @@ static int unix_net_exit(struct pp_instance *ppi)
 
 	switch(ppi->proto) {
 	case PPSI_PROTO_RAW:
+	case PPSI_PROTO_VLAN:
 		fd = ppi->ch[PP_NP_GEN].fd;
 		if (fd > 0) {
 			close(fd);
@@ -450,8 +524,7 @@ static int unix_net_exit(struct pp_instance *ppi)
 		}
 		ppi->mcast_addr = 0;
 		return 0;
-	case PPSI_PROTO_VLAN:
-		/* FIXME */
+
 	default:
 		return -1;
 	}
