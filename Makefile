@@ -91,6 +91,8 @@ $(TARGET).o: silentoldconfig $(OBJ-y)
 	$(LD) -Map $(TARGET).map1 -r -o $@ $(PPSI_O_LDFLAGS) \
 		--start-group $(OBJ-y) --end-group
 
+$(OBJ-y): $(wildcard include/ppsi/*.h)
+
 # Finally, "make clean" is expected to work
 clean:
 	rm -f $$(find . -name '*.[oa]' ! -path './scripts/kconfig/*') *.bin $(TARGET) *~ $(TARGET).map*
