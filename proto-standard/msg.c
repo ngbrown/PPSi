@@ -84,7 +84,7 @@ void msg_pack_header(struct pp_instance *ppi, void *buf)
 }
 
 /* Pack Sync message into out buffer of ppi */
-void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp)
+static void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
 	void *buf;
 
@@ -123,7 +123,7 @@ void msg_unpack_sync(void *buf, MsgSync *sync)
 }
 
 /* Pack Announce message into out buffer of ppi */
-int msg_pack_announce(struct pp_instance *ppi)
+static int msg_pack_announce(struct pp_instance *ppi)
 {
 	void *buf;
 
@@ -187,7 +187,7 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 }
 
 /* Pack Follow Up message into out buffer of ppi*/
-void msg_pack_follow_up(struct pp_instance *ppi, Timestamp *prec_orig_tstamp)
+static void msg_pack_follow_up(struct pp_instance *ppi, Timestamp *prec_orig_tstamp)
 {
 	void *buf;
 
@@ -229,7 +229,7 @@ void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup)
 }
 
 /* pack DelayReq message into out buffer of ppi */
-void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
+static void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
 	void *buf;
 
@@ -259,7 +259,7 @@ void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 }
 
 /* pack DelayResp message into OUT buffer of ppi */
-void msg_pack_delay_resp(struct pp_instance *ppi,
+static void msg_pack_delay_resp(struct pp_instance *ppi,
 			 MsgHeader *hdr, Timestamp *rcv_tstamp)
 {
 	void *buf;
