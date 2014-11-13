@@ -24,8 +24,6 @@ void bare_main_loop(struct pp_instance *ppi)
 {
 	int delay_ms;
 
-	ppi->ptp_offset = 14;
-
 	/*
 	 * The main loop here is based on select. While we are not
 	 * doing anything else but the protocol, this allows extra stuff
@@ -77,6 +75,6 @@ void bare_main_loop(struct pp_instance *ppi)
 			goto again;
 
 		delay_ms = pp_state_machine(ppi, ppi->rx_ptp,
-					    i - ppi->ptp_offset);
+					    i - ppi->rx_offset);
 	}
 }

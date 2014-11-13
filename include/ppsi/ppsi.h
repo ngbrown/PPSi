@@ -102,20 +102,7 @@ static inline struct pp_servo *SRV(struct pp_instance *ppi)
 	return GLBS(ppi)->servo;
 }
 
-
-/* Sometimes (e.g., raw ethernet frames), we need to consider an offset */
-static inline void *pp_get_header(struct pp_instance *ppi, void *ptp_payload)
-{
-	return ptp_payload - ppi->ptp_offset;
-}
-
-static inline void *pp_get_payload(struct pp_instance *ppi, void *frame_ptr)
-{
-	return frame_ptr + ppi->ptp_offset;
-}
-
 extern void pp_prepare_pointers(struct pp_instance *ppi);
-
 
 /*
  * Each extension should fill this structure that is used to augment

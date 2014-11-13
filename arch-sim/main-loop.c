@@ -92,7 +92,7 @@ void sim_main_loop(struct pp_globals *ppg)
 
 			sim_set_global_DS(ppi);
 			tmp_ns = 1000LL * 1000LL * pp_state_machine(ppi,
-					ppi->rx_ptp, i - ppi->ptp_offset);
+					ppi->rx_ptp, i - ppi->rx_offset);
 
 			if (tmp_ns < delay_ns)
 				delay_ns = tmp_ns;

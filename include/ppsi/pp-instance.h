@@ -148,8 +148,8 @@ struct pp_instance {
 
 	/* The net_path used to be allocated separately, but there's no need */
 	struct pp_channel ch[__NR_PP_NP];	/* general and event ch */
-	Integer32 mcast_addr;			/* FIXME: only ipv4/udp */
-	int ptp_offset;
+	Integer32 mcast_addr;			/* only ipv4/udp */
+	int tx_offset, rx_offset;		/* ptp payload vs send/recv */
 
 	/* Times, for the various offset computations */
 	TimeInternal t1, t2, t3, t4;			/* *the* stamps */

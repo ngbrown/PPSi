@@ -12,7 +12,7 @@
 #include <ppsi/lib.h>
 #include "wr-constants.h"
 
-#define WRS_PPSI_SHMEM_VERSION 8 /* removed netpath in ppsi */
+#define WRS_PPSI_SHMEM_VERSION 9 /* tx and rx offsets are split */
 
 /*
  * This structure is used as extension-specific data in the DSPort
