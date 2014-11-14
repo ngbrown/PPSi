@@ -153,6 +153,7 @@ int wrc_ptp_set_mode(int mode)
 	wrp->ops->enable_timing_output(ppi, 0); /* later, wr_init chooses */
 
 	while (!spll_check_lock(0) && lock_timeout) {
+		spll_update();
 		timer_delay(TICS_PER_SECOND);
 		if (timer_get_tics() - start_tics > lock_timeout) {
 			pp_printf("\nLock timeout.");
