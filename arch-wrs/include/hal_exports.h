@@ -90,7 +90,7 @@ typedef struct {
 #define HEXP_PORT_TSC_FALLING 2
 */
 
-typedef struct {
+typedef struct hexp_port_state {
   /* When non-zero: port state is valid */
   int valid;
 
@@ -134,7 +134,7 @@ typedef struct {
   int32_t fiber_fix_alpha;
 } hexp_port_state_t;
 
-typedef struct {
+typedef struct hexp_port_list {
   int num_ports;					/* Number of ports in the list */
   int num_physical_ports; /* Number of physical ports compiled into the FPGA bitstream */
   char port_names[HAL_MAX_PORTS][16];
