@@ -18,7 +18,6 @@
 #include <ppsi-wrs.h>
 #include <wr-api.h>
 #include <hal_exports.h>
-extern struct minipc_pd __rpcdef_get_port_state;
 
 /* Call pp_state_machine for each instance. To be called periodically,
  * when no packets are incoming */
@@ -30,15 +29,14 @@ static int run_all_state_machines(struct pp_globals *ppg)
 	for (j = 0; j < ppg->nlinks; j++) {
 		struct pp_instance *ppi = INST(ppg, j);
 		int old_lu = WR_DSPOR(ppi)->linkUP;
-		hexp_port_state_t state;
+		struct hal_port_state *p;
 
-		minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_get_port_state,
-			&state, ppi->iface_name);
+		/* FIXME: we should save this pointer in the ppi itself */
+		p = pp_wrs_lookup_port(ppi->iface_name);
 
-		if ((state.valid) && (state.up))
-			WR_DSPOR(ppi)->linkUP = 1;
-		else
-			WR_DSPOR(ppi)->linkUP = 0;
+		WR_DSPOR(ppi)->linkUP =
+			(p->state != HAL_PORT_STATE_LINK_DOWN &&
+			 p->state != HAL_PORT_STATE_DISABLED);
 
 		if (old_lu != WR_DSPOR(ppi)->linkUP) {
 

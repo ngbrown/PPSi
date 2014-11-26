@@ -63,6 +63,8 @@ static struct pp_servo servo;
 
 struct minipc_ch *hal_ch;
 struct minipc_ch *ppsi_ch;
+struct hal_port_state *hal_ports;
+int hal_nports;
 
 int main(int argc, char **argv)
 {
@@ -72,6 +74,8 @@ int main(int argc, char **argv)
 	unsigned long seed;
 	struct timex t;
 	int i, hal_retries;
+	struct wrs_shm_head *hal_head;
+	struct hal_shmem_header *h;
 
 	setbuf(stdout, NULL);
 
@@ -95,6 +99,18 @@ int main(int argc, char **argv)
 	}
 
 	if (BUILT_WITH_WHITERABBIT) {
+		/* If we connected, we also know "for sure" shmem is there */
+		hal_head = wrs_shm_get(wrs_shm_hal,"", WRS_SHM_READ);
+		if (!hal_head) {
+			pp_printf("ppsi: Can't connect with HAL "
+				  "shared memory\n");
+			exit(1);
+		}
+		h = (void *)hal_head + hal_head->data_off;
+		hal_nports = h->nports;
+		hal_ports = wrs_shm_follow(hal_head, h->ports);
+
+		/* And create your own channel, until we move to shmem too */
 		ppsi_ch = minipc_server_create("ptpd", 0);
 		if (!ppsi_ch) { /* FIXME should we retry ? */
 			pp_printf("ppsi: could not create minipc server");

@@ -33,8 +33,6 @@
 #include <hal_exports.h>
 #include "../proto-ext-whiterabbit/wr-api.h"
 
-extern struct minipc_pd __rpcdef_get_port_state;
-
 #define ETHER_MTU 1518
 #define DMTD_UPDATE_INTERVAL 500
 #define PACKED __attribute__((packed))
@@ -101,17 +99,17 @@ static inline int inside_range(int min, int max, int x)
 		return (x<=max || x>=min);
 }
 
-static void update_dmtd(struct wrs_socket *s, char *ifname)
+static void update_dmtd(struct wrs_socket *s, struct pp_instance *ppi)
 {
-	hexp_port_state_t pstate;
+	struct hal_port_state *p;
 
 	if (tmo_expired(&s->dmtd_update_tmo))
 	{
-		minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_get_port_state,
-			 &pstate, ifname);
-
-		s->dmtd_phase = pstate.phase_val;
-		s->dmtd_phase_valid = pstate.phase_val_valid;
+		p = pp_wrs_lookup_port(ppi->iface_name);
+		if (!p)
+			return;
+		s->dmtd_phase = p->phase_val;
+		s->dmtd_phase_valid = p->phase_val_valid;
 
 		tmo_restart(&s->dmtd_update_tmo);
 	}
@@ -219,7 +217,7 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 
 		t->raw_ahead = cntr_ahead;
 
-		update_dmtd(s, ppi->iface_name);
+		update_dmtd(s, ppi);
 		if (!WR_DSPOR(ppi)->wrModeOn) {
 			/* for non-wr-mode any reported stamp is correct */
 			t->correct = 1;
@@ -453,7 +451,7 @@ static int wrs_net_exit(struct pp_instance *ppi);
 static int wrs_net_init(struct pp_instance *ppi)
 {
 	int r, i;
-	hexp_port_state_t pstate;
+	struct hal_port_state *p;
 
 	if (NP(ppi)->ch[PP_NP_GEN].arch_data)
 		wrs_net_exit(ppi);
@@ -464,11 +462,10 @@ static int wrs_net_init(struct pp_instance *ppi)
 	if (r)
 		return r;
 
-	r = minipc_call(hal_ch, DEFAULT_TO, &__rpcdef_get_port_state,
-		 &pstate, ppi->iface_name);
-
-	if (r)
-		return r;
+	/* We used to have a mini-rpc call, but we now access shmem */
+	p = pp_wrs_lookup_port(ppi->iface_name);
+	if (!p)
+		return -1;
 
 	/* Only one wrs_socket is created for each pp_instance, because
 	 * wrs_socket is related to the interface and not to the pp_channel */
@@ -477,10 +474,18 @@ static int wrs_net_init(struct pp_instance *ppi)
 	if (!s)
 		return -1;
 
-	s->clock_period = pstate.clock_period;
-	s->phase_transition = pstate.t2_phase_transition;
+	/*
+	 * The following 3 values used to come from an RPC call.  But
+	 * the RPC structure is not the same as the one exported in
+	 * shared memory (don't know why); so here I unroll the
+	 * conversions, and what is constant in the HAL becomes
+	 * constant here (ARub)
+	 */
+	s->clock_period = 16000; /* REF_CLOCK_PERIOD_PS */
+	s->phase_transition = 0; /* DEFAULT_T2_PHASE_TRANS */
+	s->dmtd_phase = p->phase_val;
+
 	s->dmtd_phase_valid = 0;
-	s->dmtd_phase = pstate.phase_val;
 
 	NP(ppi)->ch[PP_NP_GEN].arch_data = s;
 	NP(ppi)->ch[PP_NP_EVT].arch_data = s;

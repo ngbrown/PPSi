@@ -16,9 +16,23 @@
  */
 
 #include <minipc.h>
+#include <libwr/shmem.h>
+#include <libwr/hal_shmem.h>
 
 extern struct minipc_ch *hal_ch;
 extern struct minipc_ch *ppsi_ch;
+extern struct hal_port_state *hal_ports;
+extern int hal_nports;
+
+static inline struct hal_port_state *pp_wrs_lookup_port(char *name)
+{
+	int i;
+
+	for (i = 0; i < hal_nports; i++)
+		if (hal_ports[i].in_use &&!strcmp(name, hal_ports[i].name))
+                        return hal_ports + i;
+	return NULL;
+}
 
 #define DEFAULT_TO 200000 /* ms */
 
