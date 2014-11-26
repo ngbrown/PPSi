@@ -89,16 +89,16 @@ int main(int argc, char **argv)
 		usleep(WRSW_HAL_TIMEOUT);
 	}
 
-	if (!hal_ch) {
-		pp_printf("Fatal: could not connect to HAL");
-		exit(__LINE__);
+	if (BUILT_WITH_WHITERABBIT && !hal_ch) {
+		pp_printf("ppsi: could not connect to HAL RPC");
+		exit(1);
 	}
 
 	if (BUILT_WITH_WHITERABBIT) {
 		ppsi_ch = minipc_server_create("ptpd", 0);
 		if (!ppsi_ch) { /* FIXME should we retry ? */
-			pp_printf("Fatal: could not create minipc server");
-			exit(__LINE__);
+			pp_printf("ppsi: could not create minipc server");
+			exit(1);
 		}
 		wrs_init_ipcserver(ppsi_ch);
 	}
