@@ -4,7 +4,7 @@
  *
  * Released to the public domain
  */
-#ifdef CONFIG_EXT_WRS
+#ifdef CONFIG_EXT_WR
 #  define BUILT_WITH_WHITERABBIT 1
 #else
 #  define BUILT_WITH_WHITERABBIT 0
