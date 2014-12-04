@@ -238,6 +238,7 @@ int wr_servo_update(struct pp_instance *ppi)
 	uint64_t big_delta_fix;
 	uint64_t delay_ms_fix;
 	static int errcount;
+	int remaining_offset;
 
 	TimeInternal ts_offset, ts_offset_hw /*, ts_phase_adjust */;
 
@@ -360,23 +361,22 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	case WR_WAIT_OFFSET_STABLE:
-	{
-		int64_t remaining_offset = abs(ts_to_picos(ts_offset_hw));
 
-		if (ts_offset_hw.seconds !=0 || ts_offset_hw.nanoseconds != 0)
+		if (ts_offset_hw.seconds || ts_offset_hw.nanoseconds) {
 			s->state = WR_SYNC_TAI;
-		else
-			if(remaining_offset < WR_SERVO_OFFSET_STABILITY_THRESHOLD) {
-				wrp->ops->enable_timing_output(ppi, 1);
-				s->state = WR_TRACK_PHASE;
-			} else {
-				s->missed_iters++;
-			}
-
+			break;
+		}
+		/* ts_to_picos() below returns phase alone */
+		remaining_offset = abs(ts_to_picos(ts_offset_hw));
+		if(remaining_offset < WR_SERVO_OFFSET_STABILITY_THRESHOLD) {
+			wrp->ops->enable_timing_output(ppi, 1);
+			s->state = WR_TRACK_PHASE;
+		} else {
+			s->missed_iters++;
+		}
 		if (s->missed_iters >= 10)
 			s->state = WR_SYNC_TAI;
 		break;
-	}
 
 	case WR_TRACK_PHASE:
 		cur_servo_state.cur_setpoint = s->cur_setpoint;
