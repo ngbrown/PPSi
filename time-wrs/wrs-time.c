@@ -208,12 +208,13 @@ static int wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 	if (abs(diff.nanoseconds) > 10 * 1000 * 1000) {
 		pp_diag(ppi, time, 1, "%s: adjusting nanoseconds: %li\n",
 			__func__, (long)diff.nanoseconds);
-		wrs_adjust_counters(0, diff.nanoseconds);
-		return 0;
+		diff.seconds = 0;
+	} else {
+		pp_diag(ppi, time, 1, "%s: adjusting seconds: %li\n",
+			__func__, (long)diff.seconds);
+		diff.nanoseconds = 0;
 	}
-	pp_diag(ppi, time, 1, "%s: adjusting seconds: %li\n",
-		__func__, (long)diff.seconds);
-	wrs_adjust_counters(diff.seconds, 0);
+	wrs_adjust_counters(diff.seconds, diff.nanoseconds);
 
 	/* Finally, set unix time too */
 	unix_time_ops.set(ppi, t);
