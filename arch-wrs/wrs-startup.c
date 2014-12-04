@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 	if (BUILT_WITH_WHITERABBIT) {
 		/* If we connected, we also know "for sure" shmem is there */
 		hal_head = wrs_shm_get(wrs_shm_hal,"", WRS_SHM_READ);
-		if (!hal_head) {
+		if (!hal_head || !hal_head->data_off) {
 			pp_printf("ppsi: Can't connect with HAL "
 				  "shared memory\n");
 			exit(1);
