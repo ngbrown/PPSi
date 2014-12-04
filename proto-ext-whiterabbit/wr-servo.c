@@ -21,8 +21,7 @@ const char *servo_state_str[] = {
 	[WR_WAIT_OFFSET_STABLE] = "OFFSET_STABLE",
 };
 
-int servo_state_valid = 0; /* FIXME: why? */
-ptpdexp_sync_state_t cur_servo_state; /* FIXME: why? */
+ptpdexp_sync_state_t cur_servo_state; /* Exported with mini-rpc */
 
 static int tracking_enabled = 1; /* FIXME: why? */
 
@@ -141,7 +140,6 @@ static int got_sync = 0;
 void wr_servo_reset()
 {
 	cur_servo_state.valid = 0;
-	servo_state_valid = 0;
 }
 
 int wr_servo_init(struct pp_instance *ppi)
@@ -183,7 +181,6 @@ int wr_servo_init(struct pp_instance *ppi)
 
 	strcpy(cur_servo_state.slave_servo_state, "Uninitialized");
 
-	servo_state_valid = 1;
 	cur_servo_state.valid = 1;
 	cur_servo_state.update_count = 0;
 

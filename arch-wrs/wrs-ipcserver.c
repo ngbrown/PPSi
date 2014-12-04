@@ -10,7 +10,6 @@
 #include <hal_exports.h>
 #include <wr-api.h>
 
-extern int servo_state_valid;
 extern ptpdexp_sync_state_t cur_servo_state;
 
 /* minipc Encoding  of the supported commands */
@@ -39,12 +38,9 @@ static struct minipc_pd __rpcdef_cmd = {
 /* Fill struct ptpdexp_sync_state_t with current servo state */
 static int wrsipc_get_sync_state(ptpdexp_sync_state_t *state)
 {
-	if (BUILT_WITH_WHITERABBIT && servo_state_valid) {
-		memcpy(state, &cur_servo_state, sizeof(ptpdexp_sync_state_t));
-		state->valid = 1;
-	} else
-		state->valid = 0;
-
+	if (!BUILT_WITH_WHITERABBIT)
+		cur_servo_state.valid = 0; /* unneeded, likely */
+	memcpy(state, &cur_servo_state, sizeof(*state));
 	return 0;
 }
 
