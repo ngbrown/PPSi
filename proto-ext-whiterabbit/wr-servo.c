@@ -1,6 +1,7 @@
 #include <ppsi/ppsi.h>
 #include "wr-api.h"
 
+#define WR_SERVO_NONE 0
 #define WR_SYNC_NSEC 1
 #define WR_SYNC_TAI 2
 #define WR_SYNC_PHASE 3
@@ -12,13 +13,14 @@
 
 #define FIX_ALPHA_FRACBITS 40
 
-const char *servo_state_str[] = {
+static const char *servo_name[] = {
+	[WR_SERVO_NONE] = "Uninitialized",
 	[WR_SYNC_NSEC] = "SYNC_NSEC",
 	[WR_SYNC_TAI] = "SYNC_SEC",
 	[WR_SYNC_PHASE] = "SYNC_PHASE",
 	[WR_TRACK_PHASE] = "TRACK_PHASE",
-	[WR_WAIT_SYNC_IDLE] = "SYNC_IDLE",
-	[WR_WAIT_OFFSET_STABLE] = "OFFSET_STABLE",
+	[WR_WAIT_SYNC_IDLE] = "WAIT_SYNC_IDLE",
+	[WR_WAIT_OFFSET_STABLE] = "WAIT_OFFSET_STABLE",
 };
 
 ptpdexp_sync_state_t cur_servo_state; /* Exported with mini-rpc */
@@ -159,7 +161,7 @@ int wr_servo_init(struct pp_instance *ppi)
 	strncpy(s->if_name, clock->netPath.ifaceName, 16);
 	*/
 
-	s->state = WR_SYNC_TAI;
+	s->state = WR_SERVO_NONE; /* Turned into SYNC_TAI at 1st iteration */
 	s->cur_setpoint = 0;
 	s->missed_iters = 0;
 
@@ -301,8 +303,23 @@ int wr_servo_update(struct pp_instance *ppi)
 		 * DSPOR(ppi)->doRestart = TRUE; */
 	}
 
-	pp_diag(ppi, servo, 1, "wr_servo state: %s\n",
-		cur_servo_state.slave_servo_state);
+	if (s->state == WR_SERVO_NONE)
+		s->state = WR_SYNC_TAI;
+	if (s->state ==WR_SYNC_TAI) /* unsynced: no PPS output */
+		wrp->ops->enable_timing_output(ppi, 0);
+	if (s->state == WR_SYNC_TAI && ts_offset_hw.seconds == 0)
+		s->state = WR_SYNC_NSEC;
+	if (s->state == WR_SYNC_NSEC && ts_offset_hw.nanoseconds == 0)
+		s->state = WR_SYNC_PHASE;
+
+	pp_diag(ppi, servo, 2, "offset_hw: %li.%09li\n",
+		(long)ts_offset_hw.seconds, (long)ts_offset_hw.nanoseconds);
+
+	/* The string (the whole cur_servo_state) is exported to wr_mon */
+	strcpy(cur_servo_state.slave_servo_state, servo_name[s->state]);
+	pp_diag(ppi, servo, 1, "wr_servo state: %s %s\n",
+		servo_name[s->state], s->state == WR_WAIT_SYNC_IDLE ?
+		servo_name[s->next_state] : "");
 
 	switch (s->state) {
 	case WR_WAIT_SYNC_IDLE:
@@ -314,39 +331,23 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	case WR_SYNC_TAI:
-		wrp->ops->enable_timing_output(ppi, 0);
+		wrp->ops->adjust_counters(ts_offset_hw.seconds, 0);
+		wrp->ops->adjust_phase(0);
 
-		if (ts_offset_hw.seconds != 0) {
-			strcpy(cur_servo_state.slave_servo_state, "SYNC_SEC");
-			wrp->ops->adjust_counters(ts_offset_hw.seconds, 0);
-			wrp->ops->adjust_phase(0);
-
-			s->next_state = WR_SYNC_NSEC;
-			s->state = WR_WAIT_SYNC_IDLE;
-			s->last_tics = tics;
-
-		} else {
-			s->state = WR_SYNC_NSEC;
-		}
+		s->next_state = WR_SYNC_NSEC;
+		s->state = WR_WAIT_SYNC_IDLE;
+		s->last_tics = tics;
 		break;
 
 	case WR_SYNC_NSEC:
-		strcpy(cur_servo_state.slave_servo_state, "SYNC_NSEC");
+		wrp->ops->adjust_counters(0, ts_offset_hw.nanoseconds);
 
-		if (ts_offset_hw.nanoseconds != 0) {
-			wrp->ops->adjust_counters(0, ts_offset_hw.nanoseconds);
-
-			s->next_state = WR_SYNC_NSEC;
-			s->state = WR_WAIT_SYNC_IDLE;
-			s->last_tics = tics;
-
-		} else {
-			s->state = WR_SYNC_PHASE;
-		}
+		s->next_state = WR_SYNC_NSEC;
+		s->state = WR_WAIT_SYNC_IDLE;
+		s->last_tics = tics;
 		break;
 
 	case WR_SYNC_PHASE:
-		strcpy(cur_servo_state.slave_servo_state, "SYNC_PHASE");
 		s->cur_setpoint = ts_offset_hw.phase
 			+ ts_offset_hw.nanoseconds * 1000;
 
@@ -378,7 +379,6 @@ int wr_servo_update(struct pp_instance *ppi)
 	}
 
 	case WR_TRACK_PHASE:
-		strcpy(cur_servo_state.slave_servo_state, "TRACK_PHASE");
 		cur_servo_state.cur_setpoint = s->cur_setpoint;
 		cur_servo_state.cur_skew = s->delta_ms - s->delta_ms_prev;
 
@@ -386,11 +386,12 @@ int wr_servo_update(struct pp_instance *ppi)
 				s->state = WR_SYNC_TAI;
 
 		if(tracking_enabled) {
-//         	shw_pps_gen_enable_output(1);
 			// just follow the changes of deltaMS
 			s->cur_setpoint += (s->delta_ms - s->delta_ms_prev);
 
 			wrp->ops->adjust_phase(s->cur_setpoint);
+			pp_diag(ppi, time, 1, "adjust phase %i\n",
+				s->cur_setpoint);
 
 			s->delta_ms_prev = s->delta_ms;
 			s->next_state = WR_TRACK_PHASE;
