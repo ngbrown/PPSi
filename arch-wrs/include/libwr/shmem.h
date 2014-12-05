@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #define WRS_SHM_FILE  "/dev/shm/wrs-shmem"
-#define WRS_SHM_SIZE  (32*1024) /* each */
+#define WRS_SHM_SIZE  (64*1024) /* each */
 
 /* Every process gets 8 pages (32k) to be safe for the future */
 enum wrs_shm_name {
