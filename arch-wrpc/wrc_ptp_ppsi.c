@@ -67,6 +67,8 @@ static int start_tics = 0;
 static int last_link_up = 0;
 
 static struct pp_globals ppg_static; /* forward declaration */
+static unsigned char __tx_buffer[PP_MAX_FRAME_LENGTH];
+static unsigned char __rx_buffer[PP_MAX_FRAME_LENGTH];
 
 /* despite the name, ppi_static is not static: tests/measure_t24p.c uses it */
 struct pp_instance ppi_static = {
@@ -77,6 +79,8 @@ struct pp_instance ppi_static = {
 	.proto			= PP_DEFAULT_PROTO,
 	.iface_name		= "wr1",
 	.port_name		= "wr1",
+	.__tx_buffer		= __tx_buffer,
+	.__rx_buffer		= __rx_buffer,
 };
 
 /* We now have a structure with all globals, and multiple ppi inside */

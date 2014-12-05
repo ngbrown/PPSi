@@ -151,11 +151,11 @@ struct pp_instance {
 	struct pp_time_operations *t_ops;
 
 	/*
-	 * We host the buffer for this fsm here, tracking both frame
-	 * and payload. send/recv get the frame, pack/unpack the payload
+	 * The buffer for this fsm are allocated. Then we need two
+	 * extra pointer to track separately the frame and payload.
+	 * So send/recv use the frame, pack/unpack use the payload.
 	 */
-	unsigned char tx_buffer[PP_MAX_FRAME_LENGTH];
-	unsigned char rx_buffer[PP_MAX_FRAME_LENGTH];
+	void *__tx_buffer, *__rx_buffer;
 	void *tx_frame, *rx_frame, *tx_ptp, *rx_ptp;
 
 	/* The net_path used to be allocated separately, but there's no need */

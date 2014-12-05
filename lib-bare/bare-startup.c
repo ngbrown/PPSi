@@ -31,6 +31,8 @@ static DSTimeProperties timePropertiesDS;
 static struct pp_servo servo;
 
 static struct pp_globals ppg_static; /* forward declaration */
+static unsigned char __tx_buffer[PP_MAX_FRAME_LENGTH];
+static unsigned char __rx_buffer[PP_MAX_FRAME_LENGTH];
 
 static struct pp_instance ppi_static = {
 	.glbs			= &ppg_static,
@@ -40,6 +42,8 @@ static struct pp_instance ppi_static = {
 	.iface_name 		= "eth0",
 	.port_name 		= "eth0",
 	.proto			= PP_DEFAULT_PROTO,
+	.__tx_buffer		= __tx_buffer,
+	.__rx_buffer		= __rx_buffer,
 };
 
 /* We now have a structure with all globals, and multiple ppi inside */

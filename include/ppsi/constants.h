@@ -79,7 +79,7 @@ enum pp_timeouts {
 #define PP_MANAGEMENT_LENGTH		48
 
 #define PP_MINIMUM_LENGTH	44
-#define PP_MAX_FRAME_LENGTH	200 /* must fit extension and ethhdr */
+#define PP_MAX_FRAME_LENGTH	128 /* must fit extension and ethhdr */
 
 #define PP_DEFAULT_NEXT_DELAY_MS	1000
 

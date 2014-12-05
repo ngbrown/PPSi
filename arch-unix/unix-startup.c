@@ -55,14 +55,18 @@ int main(int argc, char **argv)
 	ppg->max_links = PP_MAX_LINKS;
 	ppg->arch_data = calloc(1, sizeof(struct unix_arch_data));
 	ppg->pp_instances = calloc(ppg->max_links, sizeof(struct pp_instance));
+
+	if ((!ppg->arch_data) || (!ppg->pp_instances)) {
+		fprintf(stderr, "ppsi: out of memory\n");
+		exit(1);
+	}
+
+	/* Before the configuration is parsed, set defaults */
 	for (i = 0; i < ppg->max_links; i++) {
 		ppi = INST(ppg, i);
 		ppi->proto = PP_DEFAULT_PROTO;
 		ppi->role = PP_DEFAULT_ROLE;
 	}
-
-	if ((!ppg->arch_data) || (!ppg->pp_instances))
-		exit(__LINE__);
 
 	/* Set offset here, so config parsing can override it */
 	if (adjtimex(&t) >= 0)
@@ -87,16 +91,19 @@ int main(int argc, char **argv)
 		ppi->iface_name = ppi->cfg.iface_name;
 		ppi->port_name = ppi->cfg.port_name;
 
-		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
-
 		/* The following default names depend on TIME= at build time */
 		ppi->n_ops = &DEFAULT_NET_OPS;
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 
-		if (!ppi->portDS)
-			exit(__LINE__);
-	}
+		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
+		ppi->__tx_buffer = malloc(PP_MAX_FRAME_LENGTH);
+		ppi->__rx_buffer = malloc(PP_MAX_FRAME_LENGTH);
 
+		if (!ppi->portDS || !ppi->__tx_buffer || !ppi->__rx_buffer) {
+			fprintf(stderr, "ppsi: out of memory\n");
+			exit(1);
+		}
+	}
 	pp_init_globals(ppg, &__pp_default_rt_opts);
 
 	seed = time(NULL);

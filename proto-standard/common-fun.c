@@ -25,8 +25,8 @@ static void *__align_pointer(void *p)
 
 void pp_prepare_pointers(struct pp_instance *ppi)
 {
-	ppi->tx_ptp = __align_pointer(pp_get_payload(ppi, ppi->tx_buffer));
-	ppi->rx_ptp = __align_pointer(pp_get_payload(ppi, ppi->rx_buffer));
+	ppi->tx_ptp = __align_pointer(pp_get_payload(ppi, ppi->__tx_buffer));
+	ppi->rx_ptp = __align_pointer(pp_get_payload(ppi, ppi->__rx_buffer));
 
 	/* Now that ptp payload is aligned, get back the header */
 	ppi->tx_frame = pp_get_header(ppi, ppi->tx_ptp);
@@ -34,9 +34,9 @@ void pp_prepare_pointers(struct pp_instance *ppi)
 
 	if (0) { /* enable to verify... it works for me though */
 		pp_printf("%p -> %p %p\n",
-			  ppi->tx_buffer, ppi->tx_frame, ppi->tx_ptp);
+			  ppi->__tx_buffer, ppi->tx_frame, ppi->tx_ptp);
 		pp_printf("%p -> %p %p\n",
-			  ppi->rx_buffer, ppi->rx_frame, ppi->rx_ptp);
+			  ppi->__rx_buffer, ppi->rx_frame, ppi->rx_ptp);
 	}
 }
 

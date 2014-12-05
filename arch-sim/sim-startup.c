@@ -58,6 +58,8 @@ static int sim_ppi_init(struct pp_instance *ppi, int which_ppi)
 {
 	struct sim_ppi_arch_data *data;
 	ppi->proto = PP_DEFAULT_PROTO;
+	ppi->__tx_buffer = malloc(PP_MAX_FRAME_LENGTH);
+	ppi->__rx_buffer = malloc(PP_MAX_FRAME_LENGTH);
 	ppi->arch_data = calloc(1, sizeof(struct sim_ppi_arch_data));
 	ppi->portDS = calloc(1, sizeof(*ppi->portDS));
 	if ((!ppi->arch_data) || (!ppi->portDS))
