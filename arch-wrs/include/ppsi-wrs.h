@@ -10,6 +10,7 @@
 #  define BUILT_WITH_WHITERABBIT 0
 #endif
 
+#define WRS_PPSI_SHMEM_VERSION 1
 
 /*
  * These are the functions provided by the various wrs files

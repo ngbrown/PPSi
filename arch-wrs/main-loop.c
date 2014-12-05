@@ -33,6 +33,11 @@ static int run_all_state_machines(struct pp_globals *ppg)
 
 		/* FIXME: we should save this pointer in the ppi itself */
 		p = pp_wrs_lookup_port(ppi->iface_name);
+		if (!p) {
+			fprintf(stderr, "ppsi: can't find %s in shmem\n",
+				ppi->iface_name);
+			continue;
+		}
 
 		WR_DSPOR(ppi)->linkUP =
 			(p->state != HAL_PORT_STATE_LINK_DOWN &&

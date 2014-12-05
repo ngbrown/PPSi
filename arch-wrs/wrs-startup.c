@@ -24,6 +24,7 @@
 
 #include <ppsi/ppsi.h>
 #include <ppsi-wrs.h>
+#include <libwr/shmem.h>
 
 #if BUILT_WITH_WHITERABBIT
 #  define WRSW_HAL_RETRIES 1000
@@ -53,18 +54,23 @@ static struct wr_operations wrs_wr_operations = {
 	.enable_timing_output = wrs_enable_timing_output,
 };
 
-/* ppg and fields */
-static struct pp_globals ppg_static;
-static DSDefault defaultDS;
-static DSCurrent currentDS;
-static DSParent parentDS;
-static DSTimeProperties timePropertiesDS;
-static struct pp_servo servo;
-
 struct minipc_ch *hal_ch;
 struct minipc_ch *ppsi_ch;
 struct hal_port_state *hal_ports;
 int hal_nports;
+
+/*
+ * we need to call calloc, to reset all stuff that used to be static,
+ * but we'd better have a simple prototype, compatilble with wrs_shm_alloc()
+ */
+void *local_malloc(void *headptr, size_t size)
+{
+	void *retval = malloc(size);
+
+	if (retval)
+		memset(retval, 0, size);
+	return retval;
+}
 
 int main(int argc, char **argv)
 {
@@ -74,8 +80,9 @@ int main(int argc, char **argv)
 	unsigned long seed;
 	struct timex t;
 	int i, hal_retries;
-	struct wrs_shm_head *hal_head;
+	struct wrs_shm_head *hal_head, *ppsi_head;
 	struct hal_shmem_header *h;
+	void *(*alloc_fn)(void *headptr, size_t size) = local_malloc;
 
 	setbuf(stdout, NULL);
 
@@ -117,20 +124,30 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 		wrs_init_ipcserver(ppsi_ch);
+
+		ppsi_head = wrs_shm_get(wrs_shm_ptp, "ppsi", WRS_SHM_WRITE);
+		if (!ppsi_head) {
+			fprintf(stderr, "Fatal: could not create shmem: %s\n",
+				strerror(errno));
+			exit(1);
+		}
+		alloc_fn = wrs_shm_alloc;
+		ppsi_head->version = WRS_PPSI_SHMEM_VERSION;
 	}
 
-	ppg = &ppg_static;
-	ppg->defaultDS = &defaultDS;
-	ppg->currentDS = &currentDS;
-	ppg->parentDS = &parentDS;
-	ppg->timePropertiesDS = &timePropertiesDS;
-	ppg->servo = &servo;
+	ppg = alloc_fn(ppsi_head, sizeof(*ppg));
+	ppg->defaultDS = alloc_fn(ppsi_head, sizeof(*ppg->defaultDS));
+	ppg->currentDS = alloc_fn(ppsi_head, sizeof(*ppg->currentDS));
+	ppg->parentDS =  alloc_fn(ppsi_head, sizeof(*ppg->parentDS));
+	ppg->timePropertiesDS = alloc_fn(ppsi_head,
+					 sizeof(*ppg->timePropertiesDS));
+	ppg->servo = alloc_fn(ppsi_head, sizeof(*ppg->servo));
 	ppg->rt_opts = &__pp_default_rt_opts;
 
-	/* We are hosted, so we can allocate */
 	ppg->max_links = PP_MAX_LINKS;
-	ppg->arch_data = calloc(1, sizeof(struct unix_arch_data));
-	ppg->pp_instances = calloc(ppg->max_links, sizeof(struct pp_instance));
+	ppg->arch_data = malloc( sizeof(struct unix_arch_data));
+	ppg->pp_instances = alloc_fn(ppsi_head,
+				     ppg->max_links * sizeof(*ppi));
 
 	if ((!ppg->arch_data) || (!ppg->pp_instances)) {
 		fprintf(stderr, "ppsi: out of memory\n");
@@ -146,7 +163,7 @@ int main(int argc, char **argv)
 		 * exactly after stbcnt. It's a bad hack, but it works
 		 */
 		p = (int *)(&t.stbcnt) + 1;
-		timePropertiesDS.currentUtcOffset = *p;
+		ppg->timePropertiesDS->currentUtcOffset = *p;
 	}
 
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
@@ -192,7 +209,6 @@ int main(int argc, char **argv)
 		ppi->n_ops = &DEFAULT_NET_OPS;
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 
-		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
 		ppi->__tx_buffer = malloc(PP_MAX_FRAME_LENGTH);
 		ppi->__rx_buffer = malloc(PP_MAX_FRAME_LENGTH);
 
