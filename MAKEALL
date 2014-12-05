@@ -2,6 +2,10 @@
 # A trivial script to build with all known configurations
 # (please add a configs/ file to test your special case)
 
+# Prevent random user setup to invalidate building for all.
+unset CROSS_COMPILE
+unset ARCH
+
 # Backup previous .config file, if present
 rm -f .config.backup 2> /dev/null
 cp -a .config .config.backup 2> /dev/null
