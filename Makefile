@@ -91,7 +91,7 @@ $(TARGET).o: $(OBJ-y)
 	$(LD) -Map $(TARGET).map1 -r -o $@ $(PPSI_O_LDFLAGS) \
 		--start-group $(OBJ-y) --end-group
 
-$(OBJ-y): silentoldconfig $(wildcard include/ppsi/*.h)
+$(OBJ-y): .config $(wildcard include/ppsi/*.h)
 
 # Finally, "make clean" is expected to work
 clean:
