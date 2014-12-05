@@ -93,6 +93,7 @@ void *wrs_shm_alloc(void *headptr, size_t size)
 		return NULL; /* no space left */
 	nextptr = headptr + head->data_off + head->data_size;
 	head->data_size += (size + 7) & ~7; /* force 8-alignment */
+	memset(nextptr, 0, size);
 	return nextptr;
 }
 
