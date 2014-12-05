@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/timex.h>
 #include <ppsi/ppsi.h>
 #include <ppsi-wrs.h>
 
@@ -186,6 +187,9 @@ static int wrs_time_get(struct pp_instance *ppi, TimeInternal *t)
 static int wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
 	TimeInternal diff;
+	struct timex tx;
+	int tai_offset = 0;
+
 	/*
 	 * This is almost unused in ppsi, only proto-standard/servo.c
 	 * calls it, at initialization time, when the offset is bigger
@@ -216,7 +220,20 @@ static int wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 	}
 	wrs_adjust_counters(diff.seconds, diff.nanoseconds);
 
-	/* Finally, set unix time too */
+	/*
+	 * Finally, set unix time too, but count the UTC/TAI difference
+	 * assuming somebody has set up up for us
+	 */
+	memset(&tx, 0, sizeof(tx));
+	if (adjtimex(&tx) >= 0) {
+		/*
+		 * Our WRS kernel has tai support, but our compiler does not.
+		 * We are 32-bit only, and we know for sure that tai is
+		 * exactly after stbcnt. It's a bad hack, but it works
+		 */
+		tai_offset = *((int *)(&tx.stbcnt) + 1);
+	}
+	t->seconds -= tai_offset;
 	unix_time_ops.set(ppi, t);
 	return 0;
 }
