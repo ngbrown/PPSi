@@ -4,7 +4,7 @@
 
 # Backup previous .config file, if present
 rm -f .config.backup 2> /dev/null
-mv -f .config .config.backup 2> /dev/null
+cp -a .config .config.backup 2> /dev/null
 
 # make some temporary files for logs
 C=$(mktemp /tmp/ppsi-config.XXXXXX)
