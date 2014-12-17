@@ -23,12 +23,21 @@
 
 struct shw_sfp_caldata {
 	int flags;
-	char part_num[16];	/* part number of device as found in DB */
+	/*
+	 * Part number used to identify it. Serial number because we
+	 * may specify per-specimen delays, but it is not used at this
+	 * point in time
+	 */
+	char part_num[16];
 	char vendor_serial[16];
 	/* Callibration data */
 	double alpha;
 	uint32_t delta_tx;
 	uint32_t delta_rx;
+	/* wavelengths, used to get alpha from fiber type */
+	int tx_wl;
+	int rx_wl;
+	/* and link as a list */
 	struct shw_sfp_caldata *next;
 };
 
@@ -87,8 +96,8 @@ static inline void shw_sfp_set_generic(int num, int status, int type)
 	shw_sfp_gpio_set(num, state);
 }
 
-/* Load the db from a file */
-int shw_sfp_read_db(char *filename);
+/* Load the db from dot-config to internal structures */
+int shw_sfp_read_db(void);
 
 /* Read and verify the header all at once. returns -1 on failure */
 int shw_sfp_read_verify_header(int num, struct shw_sfp_header *head);

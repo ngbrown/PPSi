@@ -91,7 +91,7 @@ struct hal_port_state {
 };
 
 /* This is the overall structure stored in shared memory */
-#define HAL_SHMEM_VERSION 1
+#define HAL_SHMEM_VERSION 2 /* Version 2 because sfp calib changed */
 struct hal_shmem_header {
 	int nports;
 	struct hal_port_state *ports;
