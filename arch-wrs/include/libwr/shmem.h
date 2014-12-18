@@ -6,10 +6,11 @@
 #define __WRS_SHM_H__
 #include <stdint.h>
 
-#define WRS_SHM_FILE  "/dev/shm/wrs-shmem"
-#define WRS_SHM_SIZE  (64*1024) /* each */
+#define WRS_SHM_FILE  "/dev/shm/wrs-shmem-%i"
+#define WRS_SHM_MIN_SIZE    (4*1024)
+#define WRS_SHM_MAX_SIZE  (256*1024)
 
-/* Every process gets 8 pages (32k) to be safe for the future */
+/* Each process "name" (i.e. id) is added to the filename above */
 enum wrs_shm_name {
 	wrs_shm_ptp,
 	wrs_shm_rtu,
@@ -25,7 +26,7 @@ struct wrs_shm_head {
 
 	unsigned long stamp;	/* Last modified, w/ CLOCK_MONOTONIC */
 	unsigned long data_off;	/* Where the structure lives */
-	int shm_name;		/* The enum above, for cross-checking */
+	int fd;			/* So we can enlarge it using fd */
 	int pid;		/* The current pid owning the area */
 
 	unsigned pidsequence;	/* Each new pid must increments this */
