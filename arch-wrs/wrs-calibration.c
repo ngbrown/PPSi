@@ -36,9 +36,9 @@ int wrs_read_calibration_data(struct pp_instance *ppi,
 	 * Formulas copied from libwr/hal_shmem.c (get_exported_state).
 	 */
 	port_delta_tx = p->calib.delta_tx_phy
-		+ p->calib.sfp.delta_tx + p->calib.delta_tx_board;
+		+ p->calib.sfp.delta_tx_ps + p->calib.delta_tx_board;
 	port_delta_rx = p->calib.delta_rx_phy
-		+ p->calib.sfp.delta_rx + p->calib.delta_rx_board;
+		+ p->calib.sfp.delta_rx_ps + p->calib.delta_rx_board;
 	port_fix_alpha =  (double)pow(2.0, 40.0) *
 		((p->calib.sfp.alpha + 1.0) / (p->calib.sfp.alpha + 2.0)
 		 - 0.5);

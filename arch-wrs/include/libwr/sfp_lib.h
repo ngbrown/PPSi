@@ -32,8 +32,8 @@ struct shw_sfp_caldata {
 	char vendor_serial[16];
 	/* Callibration data */
 	double alpha;
-	uint32_t delta_tx;
-	uint32_t delta_rx;
+	int delta_tx_ps; /* "delta" of this SFP type WRT calibration type */
+	int delta_rx_ps;
 	/* wavelengths, used to get alpha from fiber type */
 	int tx_wl;
 	int rx_wl;

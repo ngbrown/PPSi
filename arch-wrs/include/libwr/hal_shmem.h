@@ -3,6 +3,7 @@
 
 #include <hal_exports.h>
 #include <libwr/sfp_lib.h>
+#include <string.h>
 
 /* Port state machine states */
 #define HAL_PORT_STATE_DISABLED 0
@@ -70,8 +71,8 @@ struct hal_port_state {
 	/* port FSM state (HAL_PORT_STATE_xxxx) */
 	int state;
 
-	/* unused */
-	int index;
+	/* fiber type, used to get alpha for SFP frequency */
+	int fiber_index;
 
 	/* 1: PLL is locked to this port */
 	int locked;
@@ -91,7 +92,7 @@ struct hal_port_state {
 };
 
 /* This is the overall structure stored in shared memory */
-#define HAL_SHMEM_VERSION 2 /* Version 2 because sfp calib changed */
+#define HAL_SHMEM_VERSION 3 /* Version 3 because sfp delta is signed */
 struct hal_shmem_header {
 	int nports;
 	struct hal_port_state *ports;
@@ -105,10 +106,26 @@ struct hal_shmem_header {
  */
 struct hal_port_state *hal_port_lookup(struct hal_port_state *ports,
 				       const char *name);
-int hal_port_query_ports(struct hexp_port_list *list,
-			 const struct hal_port_state *ports);
+
 int hal_port_get_exported_state(struct hexp_port_state *state,
 				struct hal_port_state *ports,
 				const char *port_name);
+
+static inline int state_up(int state)
+{
+	return (state != HAL_PORT_STATE_LINK_DOWN
+		     && state != HAL_PORT_STATE_DISABLED);
+}
+
+static inline struct hal_port_state *hal_lookup_port(
+			struct hal_port_state *ports, int nports, char *name)
+{
+	int i;
+
+	for (i = 0; i < nports; i++)
+		if (ports[i].in_use && (!strcmp(name, ports[i].name)))
+			return ports + i;
+	return NULL;
+}
 
 #endif /*  __LIBWR_HAL_SHMEM_H__ */

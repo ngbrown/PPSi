@@ -36,8 +36,9 @@ struct wrs_shm_head {
 };
 
 /* flags */
-#define WRS_SHM_READ  0x0000
-#define WRS_SHM_WRITE 0x0001
+#define WRS_SHM_READ   0x0000
+#define WRS_SHM_WRITE  0x0001
+#define WRS_SHM_LOCKED 0x0002 /* at init time: writers locks, readers wait  */
 
 /* get vs. put, like in the kernel. Errors are in errno (see source) */
 void *wrs_shm_get(enum wrs_shm_name name_id, char *name, unsigned long flags);
@@ -50,7 +51,9 @@ void *wrs_shm_alloc(void *headptr, size_t size);
 void *wrs_shm_follow(void *headptr, void *ptr);
 
 /* Before and after writing a chunk of data, act on sequence and stamp */
-extern void wrs_shm_write(void *headptr, int begin);
+#define WRS_SHM_WRITE_BEGIN	1
+#define WRS_SHM_WRITE_END	0
+extern void wrs_shm_write(void *headptr, int flags);
 
 /* A reader can rely on the sequence number (in the <linux/seqlock.h> way) */
 extern unsigned wrs_shm_seqbegin(void *headptr);
