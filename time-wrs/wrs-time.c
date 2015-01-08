@@ -198,6 +198,13 @@ static int wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 	if (!t) /* ... when the utc/tai offset changes, if t is NULL */
 		return unix_time_ops.set(ppi, t);
 
+	/*
+	 * We say "weird" because we are not expected to set time here;
+	 * rather, time setting goes usually from the WR servo, straight
+	 * to the HAL process, where a difference is injected into the fpga;
+	 * rather then "setting" an absolute time, which we can't do
+	 * and thus T3 is referenced below, to get some approximate value...
+	 */
 	pp_diag(ppi, time, 1, "%s: (weird) %9li.%09li\n", __func__,
 		(long)t->seconds, (long)t->nanoseconds);
 	/* We have no way to get the WR time, currently. So use our T3 */
@@ -219,6 +226,11 @@ static int wrs_time_set(struct pp_instance *ppi, TimeInternal *t)
 		diff.nanoseconds = 0;
 	}
 	wrs_adjust_counters(diff.seconds, diff.nanoseconds);
+
+
+	/* If WR time is unrelated to real-world time, we are done. */
+	if (t->seconds < 1420730822 /* "now" as I write this */)
+		return 0;
 
 	/*
 	 * Finally, set unix time too, but count the UTC/TAI difference
