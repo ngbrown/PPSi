@@ -146,7 +146,6 @@ extern int halexp_check_running(void);
 extern int halexp_reset_port(const char *port_name);
 extern int halexp_calibration_cmd(const char *port_name, int command, int on_off);
 extern int halexp_lock_cmd(const char *port_name, int command, int priority);
-extern int halexp_get_port_state(hexp_port_state_t *state, const char *port_name);
 extern int halexp_pps_cmd(int cmd, hexp_pps_params_t *params);
 extern int halexp_get_timing_state(hexp_timing_state_t *state);
 
@@ -192,16 +191,6 @@ struct minipc_pd __rpcdef_lock_cmd = {
 		 MINIPC_ARG_ENCODE(MINIPC_ATYPE_STRING, char *),
 		 MINIPC_ARG_ENCODE(MINIPC_ATYPE_INT, int),
 		 MINIPC_ARG_ENCODE(MINIPC_ATYPE_INT, int),
-		 MINIPC_ARG_END,
-		 },
-};
-
-//int halexp_get_port_state(hexp_port_state_t *state, const char *port_name);
-struct minipc_pd __rpcdef_get_port_state = {
-	.name = "get_port_state",
-	.retval = MINIPC_ARG_ENCODE(MINIPC_ATYPE_STRUCT, hexp_port_state_t),
-	.args = {
-		 MINIPC_ARG_ENCODE(MINIPC_ATYPE_STRING, char *),
 		 MINIPC_ARG_END,
 		 },
 };
