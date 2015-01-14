@@ -12,45 +12,45 @@
 #include "wrpc.h"
 #include "../proto-ext-whiterabbit/wr-constants.h"
 
+extern int32_t sfp_alpha;
+
 int wrpc_read_calibration_data(struct pp_instance *ppi,
-  uint32_t *deltaTx, uint32_t *deltaRx, int32_t *fix_alpha,
-  int32_t *clock_period)
+	uint32_t *deltaTx, uint32_t *deltaRx, int32_t *fix_alpha,
+	int32_t *clock_period)
 {
-  hexp_port_state_t state;
+	struct hal_port_state state;
 
-  halexp_get_port_state(&state, ppi->iface_name);
+	wrpc_get_port_state(&state, ppi->iface_name);
 
-  // check if the data is available
-  if(state.valid)
-  {
+	/* check if the data is available */
+	if (fix_alpha)
+		/* take local alpha instead of HAL */
+		*fix_alpha = sfp_alpha;
 
-    if(fix_alpha)
-      *fix_alpha = state.fiber_fix_alpha;
+	if (clock_period)
+		*clock_period = state.clock_period;
 
-    if(clock_period)
-      *clock_period = state.clock_period;
+	/* check if tx is calibrated,
+	 * if so read data */
+	if (state.calib.tx_calibrated) {
+		if (deltaTx)
+			*deltaTx = state.calib.delta_tx_phy
+					+ state.calib.sfp.delta_tx_ps
+					+ state.calib.delta_tx_board;
+	} else
+		return WR_HW_CALIB_NOT_FOUND;
 
-    //check if tx is calibrated,
-    // if so read data
-    if(state.tx_calibrated)
-    {
-      if(deltaTx) *deltaTx = state.delta_tx;
-    }
-    else
-      return WR_HW_CALIB_NOT_FOUND;
+	/* check if rx is calibrated,
+	 * if so read data */
+	if (state.calib.rx_calibrated) {
+		if (deltaRx)
+			*deltaRx = state.calib.delta_rx_phy
+					+ state.calib.sfp.delta_rx_ps
+					+ state.calib.delta_rx_board;
+	} else
+		return WR_HW_CALIB_NOT_FOUND;
 
-    //check if rx is calibrated,
-    // if so read data
-    if(state.rx_calibrated)
-    {
-      if(deltaRx) *deltaRx = state.delta_rx;
-    }
-    else
-      return WR_HW_CALIB_NOT_FOUND;
-
-  }
-  return WR_HW_CALIB_OK;
-
+	return WR_HW_CALIB_OK;
 }
 
 

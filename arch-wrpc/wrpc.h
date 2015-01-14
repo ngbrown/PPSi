@@ -11,6 +11,7 @@
 
 #include <ppsi/ppsi.h>
 #include <hw/memlayout.h>
+#include <libwr/hal_shmem.h>
 
 /* This part is exactly wrpc-sw::wrc_ptp.h */
 #define WRC_MODE_UNKNOWN 0
@@ -60,5 +61,6 @@ int wrpc_calibration_pattern_enable(struct pp_instance *ppi,
 				    unsigned int calibrationPattern,
 				    unsigned int calibrationPatternLen);
 int wrpc_calibration_pattern_disable(struct pp_instance *ppi);
+int wrpc_get_port_state(struct hal_port_state *port, const char *port_name);
 
 #endif /* __WRPC_H */
