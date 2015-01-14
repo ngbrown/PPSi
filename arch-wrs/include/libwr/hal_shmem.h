@@ -87,12 +87,24 @@ struct hal_port_state {
 	/* locking FSM state */
 	int lock_state;
 
+	/*reference lock period in picoseconds*/
+	uint32_t clock_period;
+
+	/* approximate DMTD phase value (on slave port) at which RX timestamp
+	 * (T2) counter transistion occurs (picoseconds) */
+	uint32_t t2_phase_transition;
+
+	/* approximate phase value (on master port) at which RX timestamp (T4)
+	 * counter transistion occurs (picoseconds) */
+	uint32_t t4_phase_transition;
+
 	/* Endpoint's base address */
 	uint32_t ep_base;
 };
 
 /* This is the overall structure stored in shared memory */
-#define HAL_SHMEM_VERSION 3 /* Version 3 because sfp delta is signed */
+#define HAL_SHMEM_VERSION 4 /* Version 4 because of new fields in struct
+			     * hal_port_state */
 struct hal_shmem_header {
 	int nports;
 	struct hal_port_state *ports;
