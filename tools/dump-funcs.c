@@ -179,7 +179,7 @@ static void dump_payload(char *prefix, void *pl, int len)
 
 	if (version != 2) {
 		printf("%sVERSION: unsupported (%i)\n", prefix, version);
-		return;
+		goto out;
 	}
 	printf("%sVERSION: %i (type %i, len %i, domain %i)\n", prefix,
 	       version, messageType,
@@ -221,7 +221,7 @@ static void dump_payload(char *prefix, void *pl, int len)
 		donelen = 44;
 		break;
 
-#if __STDC_HOSTED__ /* Avoid pdelay dump withing ppsi, we don't use it */
+#if __STDC_HOSTED__ /* Avoid pdelay dump within ppsi, we don't use it */
 		CASE(E, PDELAY_REQ);
 		dump_msg_sync_etc(prefix, "MSG-PDELAY_REQ: ", msg_specific);
 		donelen = 54;
@@ -257,7 +257,7 @@ static void dump_payload(char *prefix, void *pl, int len)
 		}
 		donelen += dump_tlv(prefix, pl + donelen, n);
 	}
-
+out:
 	/* Finally, binary dump of it all */
 	dumpstruct(prefix, "DUMP: ", "payload", pl, len);
 }
