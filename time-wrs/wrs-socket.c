@@ -161,6 +161,7 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 			TimeInternal *t)
 {
 	struct ethhdr *hdr = pkt;
+	struct pp_vlanhdr *vhdr = pkt;
 	struct wrs_socket *s;
 	struct msghdr msg;
 	struct iovec entry;
@@ -239,19 +240,40 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	}
 
 drop:
-	/* aux is only there if we asked for it, thus PROTO_VLAN */
 	if (aux) {
+		printf("aux: %x   proto %x\n", aux->tp_vlan_tci,
+		       ntohs(hdr->h_proto));
+
+		if (0) {
+			fprintf(stderr,
+				"PPSi error: unexpected auxiliary data\n");
+			errno = EINVAL;
+			return -1;
+		}
+	}
+
+	/*
+	 * While on PC-class ethernet driver we see the internal frame,
+	 * our simple WR driver returns the whole frame. No aux pointer
+	 * is there, at this point in time. So unroll vlan header.
+	 */
+	if (vhdr->h_tpid == htons(0x8100)) {
+		int vlan = ntohs(vhdr->h_tci) & 0xfff;
+
 		/* With PROTO_VLAN, we bound to ETH_P_ALL: we got all frames */
-		if (hdr->h_proto != htons(ETH_P_1588))
-			return 0;
+		if (vhdr->h_proto != htons(ETH_P_1588))
+			return -2; /* like "dropped", so no error message */
+
 		/* Also, we got the vlan, and we can discard it if not ours */
 		for (i = 0; i < ppi->nvlans; i++)
-			if (ppi->vlans[i] == aux->tp_vlan_tci)
+			if (ppi->vlans[i] == vlan)
 				break; /* ok */
 		if (i == ppi->nvlans)
-			return 0; /* not ours */
+			return -2; /* not ours: say it's dropped */
 		ppi->peer_vid = ppi->vlans[i];
 	} else {
+		if (hdr->h_proto != htons(ETH_P_1588))
+			return -2; /* again: drop unrelated frames */
 		ppi->peer_vid = 0;
 	}
 
@@ -278,9 +300,6 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t);
 		if (ret <= 0)
 			return ret;
-		if (hdr->h_proto != htons(ETH_P_1588))
-			return 0;
-
 		memcpy(ppi->peer, hdr->h_source, ETH_ALEN);
 		if (pp_diag_allow(ppi, frames, 2)) {
 			if (ppi->proto == PPSI_PROTO_VLAN)

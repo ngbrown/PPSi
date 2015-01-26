@@ -9,6 +9,12 @@
 #include "common-fun.h"
 #include "../lib/network_types.h"
 
+#ifdef CONFIG_ARCH_WRS
+#define ARCH_IS_WRS 1
+#else
+#define ARCH_IS_WRS 0
+#endif
+
 static void *msg_copy_header(MsgHeader *dest, MsgHeader *src)
 {
 	return memcpy(dest, src, sizeof(MsgHeader));
@@ -38,7 +44,11 @@ void pp_prepare_pointers(struct pp_instance *ppi)
 		break;
 	case PPSI_PROTO_VLAN:
 		ppi->tx_offset = sizeof(struct pp_vlanhdr);
-		ppi->rx_offset = ETH_HLEN;
+		/* Hack warning: with wrs we get the whole header */
+		if (ARCH_IS_WRS)
+			ppi->rx_offset = sizeof(struct pp_vlanhdr);
+		else
+			ppi->rx_offset = ETH_HLEN;
 		break;
 	case PPSI_PROTO_UDP:
 		ppi->tx_offset = 0;
