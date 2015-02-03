@@ -25,20 +25,22 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 	if (pp_timeout_z(ppi, PP_TO_SYNC)) {
+		/* Restart the timeout for next time */
+		pp_timeout_rand(ppi, PP_TO_SYNC, DSPOR(ppi)->logSyncInterval);
+
 		if ((e = msg_issue_sync_followup(ppi) < 0))
 			goto out;
 
-		/* Restart the timeout for next time */
-		pp_timeout_rand(ppi, PP_TO_SYNC, DSPOR(ppi)->logSyncInterval);
 	}
 
 	if (pp_timeout_z(ppi, PP_TO_ANN_INTERVAL)) {
-		if ((e = msg_issue_announce(ppi) < 0))
-			goto out;
-
 		/* Restart the timeout for next time */
 		pp_timeout_rand(ppi, PP_TO_ANN_INTERVAL,
 				DSPOR(ppi)->logAnnounceInterval);
+
+		if ((e = msg_issue_announce(ppi) < 0))
+			goto out;
+
 	}
 
 	if (plen == 0)
