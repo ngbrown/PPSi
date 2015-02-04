@@ -493,6 +493,8 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 		if (t)
 			ppi->t_ops->get(ppi, t);
 
+		if (len < 64)
+			len = 64;
 		ret = send(ch->fd, vhdr, len, 0);
 		poll_tx_timestamp(ppi,  pkt, len, s, ch->fd, t);
 
