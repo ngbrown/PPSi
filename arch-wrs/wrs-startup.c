@@ -145,6 +145,9 @@ int main(int argc, char **argv)
 	ppg->rt_opts = &__pp_default_rt_opts;
 
 	ppg->max_links = PP_MAX_LINKS;
+	ppg->global_ext_data = alloc_fn(ppsi_head,
+					sizeof(struct wr_servo_state_t));
+	/* NOTE: arch_data is not in shmem */
 	ppg->arch_data = malloc( sizeof(struct unix_arch_data));
 	ppg->pp_instances = alloc_fn(ppsi_head,
 				     ppg->max_links * sizeof(*ppi));
@@ -186,7 +189,6 @@ int main(int argc, char **argv)
 		}
 	}
 	for (i = 0; i < ppg->nlinks; i++) {
-
 		ppi = INST(ppg, i);
 		NP(ppi)->ch[PP_NP_EVT].fd = -1;
 		NP(ppi)->ch[PP_NP_GEN].fd = -1;

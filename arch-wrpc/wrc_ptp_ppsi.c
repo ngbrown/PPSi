@@ -53,6 +53,7 @@ static DSCurrent  currentDS;
 static DSParent   parentDS;
 static DSTimeProperties timePropertiesDS;
 static struct pp_servo servo;
+static struct wr_servo_state_t servo_state;
 
 static struct wr_dsport wr_dsport = {
 	.ops = &wrpc_wr_operations,
@@ -91,6 +92,7 @@ static struct pp_globals ppg_static = {
 	.currentDS		= &currentDS,
 	.parentDS		= &parentDS,
 	.timePropertiesDS	= &timePropertiesDS,
+	.global_ext_data	= &servo_state,
 };
 
 int wrc_ptp_init()

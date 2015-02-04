@@ -226,6 +226,7 @@ struct pp_globals {
 	int rxdrop, txdrop;		/* fault injection, per thousand */
 
 	void *arch_data;		/* if arch needs it */
+	void *global_ext_data;		/* if protocol ext needs it */
 	/* FIXME Here include all is common to many interfaces */
 };
 
