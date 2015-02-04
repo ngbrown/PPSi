@@ -10,7 +10,8 @@
 #  define BUILT_WITH_WHITERABBIT 0
 #endif
 
-#define WRS_PPSI_SHMEM_VERSION 2 /* added global_ext_data to pp_globals */
+#define WRS_PPSI_SHMEM_VERSION 3 /* added fields to pp_globals and
+				    wr_servo_state_t */
 
 /*
  * These are the functions provided by the various wrs files

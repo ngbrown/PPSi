@@ -133,9 +133,8 @@ struct wr_servo_state_t {
 	char if_name[16];
 	int state;
 	int next_state;
-	TimeInternal prev_t4;
 	TimeInternal mu;		/* half of the RTT */
-	TimeInternal nsec_offset;
+	int64_t picos_mu;
 	int32_t delta_tx_m;
 	int32_t delta_rx_m;
 	int32_t delta_tx_s;
@@ -148,6 +147,13 @@ struct wr_servo_state_t {
 	int32_t fiber_fix_alpha;
 	int32_t clock_period_ps;
 	int missed_iters;
+
+	int valid;
+	uint32_t update_count;
+	int tracking_enabled;
+	char servo_state_name[32];
+	int64_t skew;
+	int64_t offset;
 };
 
 /* FIXME: what is the difference with the above? */

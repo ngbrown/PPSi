@@ -182,9 +182,12 @@ int wr_servo_init(struct pp_instance *ppi)
 	*/
 
 	strcpy(cur_servo_state.slave_servo_state, "Uninitialized");
+	strcpy(s->servo_state_name, "Uninitialized");
 
 	cur_servo_state.valid = 1;
+	s->valid = 1;
 	cur_servo_state.update_count = 0;
+	s->update_count = 0;
 
 	got_sync = 0;
 	return 0;
@@ -257,6 +260,7 @@ int wr_servo_update(struct pp_instance *ppi)
 	errcount = 0;
 
 	cur_servo_state.update_count++;
+	s->update_count++;
 
 	got_sync = 0;
 
@@ -269,12 +273,12 @@ int wr_servo_update(struct pp_instance *ppi)
 	}
 
 	s->mu = ts_sub(ts_sub(s->t4, s->t1), ts_sub(s->t3, s->t2));
-
+	s->picos_mu = ts_to_picos(s->mu);
 	big_delta_fix =  s->delta_tx_m + s->delta_tx_s
 		       + s->delta_rx_m + s->delta_rx_s;
 
-	delay_ms_fix = (((int64_t)(ts_to_picos(s->mu) - big_delta_fix) * (int64_t) s->fiber_fix_alpha) >> FIX_ALPHA_FRACBITS)
-		+ ((ts_to_picos(s->mu) - big_delta_fix) >> 1)
+	delay_ms_fix = (((int64_t)(s->picos_mu - big_delta_fix) * (int64_t) s->fiber_fix_alpha) >> FIX_ALPHA_FRACBITS)
+		+ ((s->picos_mu - big_delta_fix) >> 1)
 		+ s->delta_tx_m + s->delta_rx_s + ph_adjust;
 
 	ts_offset = ts_add(ts_sub(s->t1, s->t2), picos_to_ts(delay_ms_fix));
@@ -282,6 +286,9 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	cur_servo_state.mu = (uint64_t)ts_to_picos(s->mu);
 	cur_servo_state.cur_offset = ts_to_picos(ts_offset);
+	/* is it possible to calculate it in client,
+	 * but then t1 and t2 require shmem locks */
+	s->offset = ts_to_picos(ts_offset);
 
 	cur_servo_state.delay_ms = delay_ms_fix;
 	cur_servo_state.total_asymmetry =
@@ -292,6 +299,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		+ (s->delta_rx_m + s->delta_tx_s);
 
 	cur_servo_state.tracking_enabled = tracking_enabled;
+	s->tracking_enabled =  tracking_enabled;
 
 	s->delta_ms = delay_ms_fix;
 
@@ -318,6 +326,7 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	/* The string (the whole cur_servo_state) is exported to wr_mon */
 	strcpy(cur_servo_state.slave_servo_state, servo_name[s->state]);
+	strcpy(s->servo_state_name, servo_name[s->state]);
 	pp_diag(ppi, servo, 1, "wr_servo state: %s %s\n",
 		servo_name[s->state], s->state == WR_WAIT_SYNC_IDLE ?
 		servo_name[s->next_state] : "");
@@ -381,6 +390,7 @@ int wr_servo_update(struct pp_instance *ppi)
 	case WR_TRACK_PHASE:
 		cur_servo_state.cur_setpoint = s->cur_setpoint;
 		cur_servo_state.cur_skew = s->delta_ms - s->delta_ms_prev;
+		s->skew = s->delta_ms - s->delta_ms_prev;
 
 		if (ts_offset_hw.seconds !=0 || ts_offset_hw.nanoseconds != 0)
 				s->state = WR_SYNC_TAI;
