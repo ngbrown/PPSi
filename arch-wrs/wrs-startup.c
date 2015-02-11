@@ -58,7 +58,7 @@ struct minipc_ch *hal_ch;
 struct minipc_ch *ppsi_ch;
 struct hal_port_state *hal_ports;
 int hal_nports;
-
+struct wrs_shm_head *ppsi_head;
 /*
  * we need to call calloc, to reset all stuff that used to be static,
  * but we'd better have a simple prototype, compatilble with wrs_shm_alloc()
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 	unsigned long seed;
 	struct timex t;
 	int i, hal_retries;
-	struct wrs_shm_head *hal_head, *ppsi_head;
+	struct wrs_shm_head *hal_head;
 	struct hal_shmem_header *h;
 	void *(*alloc_fn)(void *headptr, size_t size) = local_malloc;
 
@@ -139,7 +139,8 @@ int main(int argc, char **argv)
 		}
 		wrs_init_ipcserver(ppsi_ch);
 
-		ppsi_head = wrs_shm_get(wrs_shm_ptp, "ppsi", WRS_SHM_WRITE);
+		ppsi_head = wrs_shm_get(wrs_shm_ptp, "ppsi",
+					WRS_SHM_WRITE | WRS_SHM_LOCKED);
 		if (!ppsi_head) {
 			fprintf(stderr, "Fatal: could not create shmem: %s\n",
 				strerror(errno));
@@ -240,6 +241,10 @@ int main(int argc, char **argv)
 	if (getenv("PPSI_DROP_SEED"))
 		seed = atoi(getenv("PPSI_DROP_SEED"));
 	ppsi_drop_init(ppg, seed);
+
+	/* release lock from wrs_shm_get */
+	if (BUILT_WITH_WHITERABBIT)
+		wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
 
 	wrs_main_loop(ppg);
 	return 0; /* never reached */

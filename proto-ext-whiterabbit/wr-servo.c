@@ -1,5 +1,6 @@
 #include <ppsi/ppsi.h>
 #include "wr-api.h"
+#include <libwr/shmem.h>
 
 #define WR_SERVO_NONE 0
 #define WR_SYNC_NSEC 1
@@ -26,6 +27,7 @@ static const char *servo_name[] = {
 ptpdexp_sync_state_t cur_servo_state; /* Exported with mini-rpc */
 
 static int tracking_enabled = 1; /* FIXME: why? */
+extern struct wrs_shm_head *ppsi_head;
 
 void wr_servo_enable_tracking(int enable)
 {
@@ -149,7 +151,8 @@ int wr_servo_init(struct pp_instance *ppi)
 	struct wr_dsport *wrp = WR_DSPOR(ppi);
 	struct wr_servo_state_t *s =
 			&((struct wr_data_t *)ppi->ext_data)->servo_state;
-
+	/* shmem lock */
+	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_BEGIN);
 	/* Determine the alpha coefficient */
 	if (wrp->ops->read_calib_data(ppi, 0, 0,
 		&s->fiber_fix_alpha, &s->clock_period_ps) != WR_HW_CALIB_OK)
@@ -190,6 +193,9 @@ int wr_servo_init(struct pp_instance *ppi)
 	s->update_count = 0;
 
 	got_sync = 0;
+
+	/* shmem unlock */
+	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
 	return 0;
 }
 
@@ -257,6 +263,10 @@ int wr_servo_update(struct pp_instance *ppi)
 				 s->t3.correct, s->t4.correct);
 		return 0;
 	}
+
+	/* shmem lock */
+	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_BEGIN);
+
 	errcount = 0;
 
 	cur_servo_state.update_count++;
@@ -411,5 +421,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	}
+	/* shmem unlock */
+	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
 	return 0;
 }
