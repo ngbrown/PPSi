@@ -113,8 +113,16 @@ int main(int argc, char **argv)
 				  "shared memory\n");
 			exit(1);
 		}
+		if (hal_head->version != HAL_SHMEM_VERSION) {
+			pp_printf("ppsi: unknown HAL's shm version %i "
+				"(known is %i)\n", hal_head->version,
+				HAL_SHMEM_VERSION);
+			exit(1);
+		}
+
 		h = (void *)hal_head + hal_head->data_off;
 		hal_nports = h->nports;
+
 		hal_ports = wrs_shm_follow(hal_head, h->ports);
 
 		/* And create your own channel, until we move to shmem too */
