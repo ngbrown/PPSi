@@ -12,6 +12,9 @@
 #include <ppsi/lib.h>
 #include "wr-constants.h"
 
+#define WRS_PPSI_SHMEM_VERSION 3 /* added fields to pp_globals and
+				    wr_servo_state_t */
+
 /*
  * This structure is used as extension-specific data in the DSPort
  * (see wrspec.v2-06-07-2011, page 17)
