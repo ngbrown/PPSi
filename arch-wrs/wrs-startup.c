@@ -125,6 +125,12 @@ int main(int argc, char **argv)
 
 		hal_ports = wrs_shm_follow(hal_head, h->ports);
 
+		if (!hal_ports) {
+			pp_printf("ppsi: unable to follow hal_ports pointer "
+				  "in HAL's shmem\n");
+			exit(1);
+		}
+
 		/* And create your own channel, until we move to shmem too */
 		ppsi_ch = minipc_server_create("ptpd", 0);
 		if (!ppsi_ch) { /* FIXME should we retry ? */
