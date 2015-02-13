@@ -103,21 +103,12 @@ struct hal_port_state {
 };
 
 /* This is the overall structure stored in shared memory */
-#define HAL_SHMEM_VERSION 4 /* Version 4 because of new fields in struct
-			     * hal_port_state */
+#define HAL_SHMEM_VERSION 5 /* Version 5 because of new field vendor_name in
+			     * struct shw_sfp_caldata */
 struct hal_shmem_header {
 	int nports;
 	struct hal_port_state *ports;
 };
-
-/*
- * The following functions were in userspace/wrsw_hal/hal_ports.c,
- * and are used to marshall data for the RPC format. Now that we
- * offer shared memory, it is the caller who must convert data to
- * the expected format (which remains the RPC one as I write this).
- */
-struct hal_port_state *hal_port_lookup(struct hal_port_state *ports,
-				       const char *name);
 
 static inline int state_up(int state)
 {
@@ -126,7 +117,8 @@ static inline int state_up(int state)
 }
 
 static inline struct hal_port_state *hal_lookup_port(
-			struct hal_port_state *ports, int nports, char *name)
+			struct hal_port_state *ports, int nports,
+			const char *name)
 {
 	int i;
 
