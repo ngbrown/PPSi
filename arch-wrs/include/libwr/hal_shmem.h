@@ -102,12 +102,24 @@ struct hal_port_state {
 	uint32_t ep_base;
 };
 
+struct hal_temp_sensors {
+	int fpga;	/* IC19 */
+	int pll;	/* IC18 */
+	int psl;	/* IC20 Power Supply Left (PSL) */
+	int psr;	/* IC17 Power Supply Right (PSR) */
+	int fpga_thold;	/* Threshold value for FPGA temperature */
+	int pll_thold;	/* Threshold value for PLL temperature */
+	int psl_thold;	/* Threshold value for PSL temperature */
+	int psr_thold;	/* Threshold value for PSR temperature */
+};
+
 /* This is the overall structure stored in shared memory */
-#define HAL_SHMEM_VERSION 5 /* Version 5 because of new field vendor_name in
-			     * struct shw_sfp_caldata */
+#define HAL_SHMEM_VERSION 6 /* Version 6 because of new structure
+			     * hal_temp_sensors in hal_shmem_header */
 struct hal_shmem_header {
 	int nports;
 	struct hal_port_state *ports;
+	struct hal_temp_sensors temp;
 };
 
 static inline int state_up(int state)
