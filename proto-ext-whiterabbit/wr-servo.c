@@ -24,8 +24,6 @@ static const char *servo_name[] = {
 	[WR_WAIT_OFFSET_STABLE] = "WAIT_OFFSET_STABLE",
 };
 
-ptpdexp_sync_state_t cur_servo_state; /* Exported with mini-rpc */
-
 static int tracking_enabled = 1; /* FIXME: why? */
 extern struct wrs_shm_head *ppsi_head;
 static struct wr_servo_state_t *saved_servo_pointer; /* required for
@@ -146,7 +144,6 @@ static int got_sync = 0;
 
 void wr_servo_reset(void)
 {
-	cur_servo_state.valid = 0;
 	if (saved_servo_pointer)
 		saved_servo_pointer->valid = 0;
 }
@@ -179,23 +176,15 @@ int wr_servo_init(struct pp_instance *ppi)
 	s->delta_tx_s = ((((int32_t)WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.msb) << 16);
 	s->delta_rx_s = ((((int32_t)WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.msb) << 16);
 
-	cur_servo_state.delta_tx_m = (int64_t)s->delta_tx_m;
-	cur_servo_state.delta_rx_m = (int64_t)s->delta_rx_m;
-	cur_servo_state.delta_tx_s = (int64_t)s->delta_tx_s;
-	cur_servo_state.delta_rx_s = (int64_t)s->delta_rx_s;
-
 	/* FIXME: useful?
 	strncpy(cur_servo_state.sync_source,
 			  clock->netPath.ifaceName, 16);//fixme
 	*/
 
-	strcpy(cur_servo_state.slave_servo_state, "Uninitialized");
 	strcpy(s->servo_state_name, "Uninitialized");
 
-	cur_servo_state.valid = 1;
 	saved_servo_pointer = s;
 	saved_servo_pointer->valid = 1;
-	cur_servo_state.update_count = 0;
 	s->update_count = 0;
 
 	got_sync = 0;
@@ -275,7 +264,6 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	errcount = 0;
 
-	cur_servo_state.update_count++;
 	s->update_count++;
 
 	got_sync = 0;
@@ -300,21 +288,10 @@ int wr_servo_update(struct pp_instance *ppi)
 	ts_offset = ts_add(ts_sub(s->t1, s->t2), picos_to_ts(delay_ms_fix));
 	ts_offset_hw = ts_hardwarize(ts_offset, s->clock_period_ps);
 
-	cur_servo_state.mu = (uint64_t)ts_to_picos(s->mu);
-	cur_servo_state.cur_offset = ts_to_picos(ts_offset);
 	/* is it possible to calculate it in client,
 	 * but then t1 and t2 require shmem locks */
 	s->offset = ts_to_picos(ts_offset);
 
-	cur_servo_state.delay_ms = delay_ms_fix;
-	cur_servo_state.total_asymmetry =
-		(cur_servo_state.mu - 2LL * (int64_t)delay_ms_fix);
-	cur_servo_state.fiber_asymmetry =
-		cur_servo_state.total_asymmetry
-		- (s->delta_tx_m + s->delta_rx_s)
-		+ (s->delta_rx_m + s->delta_tx_s);
-
-	cur_servo_state.tracking_enabled = tracking_enabled;
 	s->tracking_enabled =  tracking_enabled;
 
 	s->delta_ms = delay_ms_fix;
@@ -401,8 +378,6 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	case WR_TRACK_PHASE:
-		cur_servo_state.cur_setpoint = s->cur_setpoint;
-		cur_servo_state.cur_skew = s->delta_ms - s->delta_ms_prev;
 		s->skew = s->delta_ms - s->delta_ms_prev;
 
 		if (ts_offset_hw.seconds !=0 || ts_offset_hw.nanoseconds != 0)
@@ -424,8 +399,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	}
-	/* The string (the whole cur_servo_state) is exported to pps_shmem */
-	strcpy(cur_servo_state.slave_servo_state, servo_name[s->state]);
+	/* update string state name */
 	strcpy(s->servo_state_name, servo_name[s->state]);
 
 	/* shmem unlock */
