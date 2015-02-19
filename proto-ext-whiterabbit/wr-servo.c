@@ -334,9 +334,6 @@ int wr_servo_update(struct pp_instance *ppi)
 	pp_diag(ppi, servo, 2, "offset_hw: %li.%09li\n",
 		(long)ts_offset_hw.seconds, (long)ts_offset_hw.nanoseconds);
 
-	/* The string (the whole cur_servo_state) is exported to wr_mon */
-	strcpy(cur_servo_state.slave_servo_state, servo_name[s->state]);
-	strcpy(s->servo_state_name, servo_name[s->state]);
 	pp_diag(ppi, servo, 1, "wr_servo state: %s %s\n",
 		servo_name[s->state], s->state == WR_WAIT_SYNC_IDLE ?
 		servo_name[s->next_state] : "");
@@ -421,6 +418,10 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	}
+	/* The string (the whole cur_servo_state) is exported to pps_shmem */
+	strcpy(cur_servo_state.slave_servo_state, servo_name[s->state]);
+	strcpy(s->servo_state_name, servo_name[s->state]);
+
 	/* shmem unlock */
 	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
 	return 0;
