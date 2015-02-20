@@ -28,6 +28,9 @@ ptpdexp_sync_state_t cur_servo_state; /* Exported with mini-rpc */
 
 static int tracking_enabled = 1; /* FIXME: why? */
 extern struct wrs_shm_head *ppsi_head;
+static struct wr_servo_state_t *saved_servo_pointer; /* required for
+						* wr_servo_reset, which doesn't
+						* have ppi context. */
 
 void wr_servo_enable_tracking(int enable)
 {
@@ -141,9 +144,11 @@ static TimeInternal ts_hardwarize(TimeInternal ts, int clock_period_ps)
 
 static int got_sync = 0;
 
-void wr_servo_reset()
+void wr_servo_reset(void)
 {
 	cur_servo_state.valid = 0;
+	if (saved_servo_pointer)
+		saved_servo_pointer->valid = 0;
 }
 
 int wr_servo_init(struct pp_instance *ppi)
@@ -188,7 +193,8 @@ int wr_servo_init(struct pp_instance *ppi)
 	strcpy(s->servo_state_name, "Uninitialized");
 
 	cur_servo_state.valid = 1;
-	s->valid = 1;
+	saved_servo_pointer = s;
+	saved_servo_pointer->valid = 1;
 	cur_servo_state.update_count = 0;
 	s->update_count = 0;
 
