@@ -11,13 +11,14 @@
 #include <sys/mman.h>
 
 #include <libwr/shmem.h>
-
+#define SHM_LOCK_TIMEOUT 2
 /* Get wrs shared memory */
 /* return NULL and set errno on error */
 void *wrs_shm_get(enum wrs_shm_name name_id, char *name, unsigned long flags)
 {
 	struct wrs_shm_head *head;
 	struct stat stbuf;
+	struct timespec tv1, tv2;
 	void *map;
 	char fname[64];
 	int write_access = flags & WRS_SHM_WRITE;
@@ -46,11 +47,32 @@ void *wrs_shm_get(enum wrs_shm_name name_id, char *name, unsigned long flags)
 		   MAP_SHARED, fd, 0);
 	if (map == MAP_FAILED)
 		return NULL; /* keep errno */
-	if (!write_access)
-		return map;
-
-	/* Init the fields */
 	head = map;
+
+	if (!write_access) {
+		/* This is a reader: if locked, wait for a writer */
+		if (!(flags & WRS_SHM_LOCKED))
+			return map;
+
+		clock_gettime(CLOCK_MONOTONIC, &tv1);
+		while (1) {
+			/* Releasing does not mean initial data is in place! */
+			/* Read data with wrs_shm_seqbegin and
+			   wrs_shm_seqend! */
+			if (head->pid && kill(head->pid, 0) == 0)
+				return map;
+
+			usleep(10 * 1000);
+			clock_gettime(CLOCK_MONOTONIC, &tv2);
+			if (tv2.tv_sec - tv1.tv_sec < SHM_LOCK_TIMEOUT)
+				continue;
+
+			errno = ETIMEDOUT;
+			return NULL;
+		}
+	}
+
+	/* Writer: init the fields */
 	if (head->pid && kill(head->pid, 0) == 0) {
 		munmap(map, WRS_SHM_MAX_SIZE);
 		errno = EBUSY;
@@ -64,10 +86,14 @@ void *wrs_shm_get(enum wrs_shm_name name_id, char *name, unsigned long flags)
 	head->stamp = 0;
 	head->data_off = sizeof(*head);
 	head->data_size = 0;
-	head->pid = getpid();
+	if (flags & WRS_SHM_LOCKED)
+		head->sequence = 1; /* a sort of lock */
+	else
+		head->sequence = 0;
+
+	head->pid = getpid(); /* getpid() is a memory barrier, too */
 	head->pidsequence++;
 	/* version and size are up to the user (or to allocation) */
-	head->sequence = 0; /* a sort of unlock */
 
 	return map;
 }
@@ -119,12 +145,12 @@ void *wrs_shm_follow(void *headptr, void *ptr)
 }
 
 /* Before and after writing a chunk of data, act on sequence and stamp */
-void wrs_shm_write(void *headptr, int begin)
+void wrs_shm_write(void *headptr, int flags)
 {
 	struct wrs_shm_head *head = headptr;
 	struct timespec tv;
 
-	if (!begin) {
+	if (flags == WRS_SHM_WRITE_END) {
 		/* At end-of-writing update the timestamp too */
 		clock_gettime(CLOCK_MONOTONIC, &tv);
 		head->stamp = tv.tv_sec;
