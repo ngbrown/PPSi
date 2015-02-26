@@ -58,7 +58,7 @@ struct minipc_ch *hal_ch;
 struct minipc_ch *ppsi_ch;
 struct hal_port_state *hal_ports;
 int hal_nports;
-
+struct wrs_shm_head *ppsi_head;
 /*
  * we need to call calloc, to reset all stuff that used to be static,
  * but we'd better have a simple prototype, compatilble with wrs_shm_alloc()
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 	unsigned long seed;
 	struct timex t;
 	int i, hal_retries;
-	struct wrs_shm_head *hal_head, *ppsi_head;
+	struct wrs_shm_head *hal_head;
 	struct hal_shmem_header *h;
 	void *(*alloc_fn)(void *headptr, size_t size) = local_malloc;
 
@@ -113,9 +113,23 @@ int main(int argc, char **argv)
 				  "shared memory\n");
 			exit(1);
 		}
+		if (hal_head->version != HAL_SHMEM_VERSION) {
+			pp_printf("ppsi: unknown HAL's shm version %i "
+				"(known is %i)\n", hal_head->version,
+				HAL_SHMEM_VERSION);
+			exit(1);
+		}
+
 		h = (void *)hal_head + hal_head->data_off;
 		hal_nports = h->nports;
+
 		hal_ports = wrs_shm_follow(hal_head, h->ports);
+
+		if (!hal_ports) {
+			pp_printf("ppsi: unable to follow hal_ports pointer "
+				  "in HAL's shmem\n");
+			exit(1);
+		}
 
 		/* And create your own channel, until we move to shmem too */
 		ppsi_ch = minipc_server_create("ptpd", 0);
@@ -125,7 +139,8 @@ int main(int argc, char **argv)
 		}
 		wrs_init_ipcserver(ppsi_ch);
 
-		ppsi_head = wrs_shm_get(wrs_shm_ptp, "ppsi", WRS_SHM_WRITE);
+		ppsi_head = wrs_shm_get(wrs_shm_ptp, "ppsi",
+					WRS_SHM_WRITE | WRS_SHM_LOCKED);
 		if (!ppsi_head) {
 			fprintf(stderr, "Fatal: could not create shmem: %s\n",
 				strerror(errno));
@@ -145,6 +160,9 @@ int main(int argc, char **argv)
 	ppg->rt_opts = &__pp_default_rt_opts;
 
 	ppg->max_links = PP_MAX_LINKS;
+	ppg->global_ext_data = alloc_fn(ppsi_head,
+					sizeof(struct wr_servo_state_t));
+	/* NOTE: arch_data is not in shmem */
 	ppg->arch_data = malloc( sizeof(struct unix_arch_data));
 	ppg->pp_instances = alloc_fn(ppsi_head,
 				     ppg->max_links * sizeof(*ppi));
@@ -186,7 +204,6 @@ int main(int argc, char **argv)
 		}
 	}
 	for (i = 0; i < ppg->nlinks; i++) {
-
 		ppi = INST(ppg, i);
 		NP(ppi)->ch[PP_NP_EVT].fd = -1;
 		NP(ppi)->ch[PP_NP_GEN].fd = -1;
@@ -224,6 +241,10 @@ int main(int argc, char **argv)
 	if (getenv("PPSI_DROP_SEED"))
 		seed = atoi(getenv("PPSI_DROP_SEED"));
 	ppsi_drop_init(ppg, seed);
+
+	/* release lock from wrs_shm_get */
+	if (BUILT_WITH_WHITERABBIT)
+		wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
 
 	wrs_main_loop(ppg);
 	return 0; /* never reached */

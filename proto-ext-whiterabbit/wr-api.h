@@ -12,6 +12,9 @@
 #include <ppsi/lib.h>
 #include "wr-constants.h"
 
+#define WRS_PPSI_SHMEM_VERSION 3 /* added fields to pp_globals and
+				    wr_servo_state_t */
+
 /*
  * This structure is used as extension-specific data in the DSPort
  * (see wrspec.v2-06-07-2011, page 17)
@@ -121,7 +124,7 @@ struct wr_operations {
 
 /* wr_servo interface */
 int wr_servo_init(struct pp_instance *ppi);
-void wr_servo_reset();
+void wr_servo_reset(void);
 int wr_servo_man_adjust_phase(int phase);
 void wr_servo_enable_tracking(int enable);
 int wr_servo_got_sync(struct pp_instance *ppi, TimeInternal *t1,
@@ -133,9 +136,8 @@ struct wr_servo_state_t {
 	char if_name[16];
 	int state;
 	int next_state;
-	TimeInternal prev_t4;
 	TimeInternal mu;		/* half of the RTT */
-	TimeInternal nsec_offset;
+	int64_t picos_mu;
 	int32_t delta_tx_m;
 	int32_t delta_rx_m;
 	int32_t delta_tx_s;
@@ -148,27 +150,14 @@ struct wr_servo_state_t {
 	int32_t fiber_fix_alpha;
 	int32_t clock_period_ps;
 	int missed_iters;
-};
 
-/* FIXME: what is the difference with the above? */
-typedef struct{
 	int valid;
-	char slave_servo_state[32];
-	char sync_source[32];
+	uint32_t update_count;
 	int tracking_enabled;
-	int64_t mu;
-	int64_t delay_ms;
-	int64_t delta_tx_m;
-	int64_t delta_rx_m;
-	int64_t delta_tx_s;
-	int64_t delta_rx_s;
-	int64_t fiber_asymmetry;
-	int64_t total_asymmetry;
-	int64_t cur_offset;
-	int64_t cur_setpoint;
-	int64_t cur_skew;
-	int64_t update_count;
-}  ptpdexp_sync_state_t ;
+	char servo_state_name[32];
+	int64_t skew;
+	int64_t offset;
+};
 
 /* All data used as extension ppsi-wr must be put here */
 struct wr_data_t {

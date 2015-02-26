@@ -1,5 +1,6 @@
 #include <ppsi/ppsi.h>
 #include "wr-api.h"
+#include <libwr/shmem.h>
 
 #define WR_SERVO_NONE 0
 #define WR_SYNC_NSEC 1
@@ -23,9 +24,11 @@ static const char *servo_name[] = {
 	[WR_WAIT_OFFSET_STABLE] = "WAIT_OFFSET_STABLE",
 };
 
-ptpdexp_sync_state_t cur_servo_state; /* Exported with mini-rpc */
-
 static int tracking_enabled = 1; /* FIXME: why? */
+extern struct wrs_shm_head *ppsi_head;
+static struct wr_servo_state_t *saved_servo_pointer; /* required for
+						* wr_servo_reset, which doesn't
+						* have ppi context. */
 
 void wr_servo_enable_tracking(int enable)
 {
@@ -139,9 +142,10 @@ static TimeInternal ts_hardwarize(TimeInternal ts, int clock_period_ps)
 
 static int got_sync = 0;
 
-void wr_servo_reset()
+void wr_servo_reset(void)
 {
-	cur_servo_state.valid = 0;
+	if (saved_servo_pointer)
+		saved_servo_pointer->valid = 0;
 }
 
 int wr_servo_init(struct pp_instance *ppi)
@@ -149,7 +153,8 @@ int wr_servo_init(struct pp_instance *ppi)
 	struct wr_dsport *wrp = WR_DSPOR(ppi);
 	struct wr_servo_state_t *s =
 			&((struct wr_data_t *)ppi->ext_data)->servo_state;
-
+	/* shmem lock */
+	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_BEGIN);
 	/* Determine the alpha coefficient */
 	if (wrp->ops->read_calib_data(ppi, 0, 0,
 		&s->fiber_fix_alpha, &s->clock_period_ps) != WR_HW_CALIB_OK)
@@ -171,22 +176,21 @@ int wr_servo_init(struct pp_instance *ppi)
 	s->delta_tx_s = ((((int32_t)WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.msb) << 16);
 	s->delta_rx_s = ((((int32_t)WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.msb) << 16);
 
-	cur_servo_state.delta_tx_m = (int64_t)s->delta_tx_m;
-	cur_servo_state.delta_rx_m = (int64_t)s->delta_rx_m;
-	cur_servo_state.delta_tx_s = (int64_t)s->delta_tx_s;
-	cur_servo_state.delta_rx_s = (int64_t)s->delta_rx_s;
-
 	/* FIXME: useful?
 	strncpy(cur_servo_state.sync_source,
 			  clock->netPath.ifaceName, 16);//fixme
 	*/
 
-	strcpy(cur_servo_state.slave_servo_state, "Uninitialized");
+	strcpy(s->servo_state_name, "Uninitialized");
 
-	cur_servo_state.valid = 1;
-	cur_servo_state.update_count = 0;
+	saved_servo_pointer = s;
+	saved_servo_pointer->valid = 1;
+	s->update_count = 0;
 
 	got_sync = 0;
+
+	/* shmem unlock */
+	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
 	return 0;
 }
 
@@ -254,9 +258,13 @@ int wr_servo_update(struct pp_instance *ppi)
 				 s->t3.correct, s->t4.correct);
 		return 0;
 	}
+
+	/* shmem lock */
+	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_BEGIN);
+
 	errcount = 0;
 
-	cur_servo_state.update_count++;
+	s->update_count++;
 
 	got_sync = 0;
 
@@ -269,29 +277,22 @@ int wr_servo_update(struct pp_instance *ppi)
 	}
 
 	s->mu = ts_sub(ts_sub(s->t4, s->t1), ts_sub(s->t3, s->t2));
-
+	s->picos_mu = ts_to_picos(s->mu);
 	big_delta_fix =  s->delta_tx_m + s->delta_tx_s
 		       + s->delta_rx_m + s->delta_rx_s;
 
-	delay_ms_fix = (((int64_t)(ts_to_picos(s->mu) - big_delta_fix) * (int64_t) s->fiber_fix_alpha) >> FIX_ALPHA_FRACBITS)
-		+ ((ts_to_picos(s->mu) - big_delta_fix) >> 1)
+	delay_ms_fix = (((int64_t)(s->picos_mu - big_delta_fix) * (int64_t) s->fiber_fix_alpha) >> FIX_ALPHA_FRACBITS)
+		+ ((s->picos_mu - big_delta_fix) >> 1)
 		+ s->delta_tx_m + s->delta_rx_s + ph_adjust;
 
 	ts_offset = ts_add(ts_sub(s->t1, s->t2), picos_to_ts(delay_ms_fix));
 	ts_offset_hw = ts_hardwarize(ts_offset, s->clock_period_ps);
 
-	cur_servo_state.mu = (uint64_t)ts_to_picos(s->mu);
-	cur_servo_state.cur_offset = ts_to_picos(ts_offset);
+	/* is it possible to calculate it in client,
+	 * but then t1 and t2 require shmem locks */
+	s->offset = ts_to_picos(ts_offset);
 
-	cur_servo_state.delay_ms = delay_ms_fix;
-	cur_servo_state.total_asymmetry =
-		(cur_servo_state.mu - 2LL * (int64_t)delay_ms_fix);
-	cur_servo_state.fiber_asymmetry =
-		cur_servo_state.total_asymmetry
-		- (s->delta_tx_m + s->delta_rx_s)
-		+ (s->delta_rx_m + s->delta_tx_s);
-
-	cur_servo_state.tracking_enabled = tracking_enabled;
+	s->tracking_enabled =  tracking_enabled;
 
 	s->delta_ms = delay_ms_fix;
 
@@ -316,8 +317,6 @@ int wr_servo_update(struct pp_instance *ppi)
 	pp_diag(ppi, servo, 2, "offset_hw: %li.%09li\n",
 		(long)ts_offset_hw.seconds, (long)ts_offset_hw.nanoseconds);
 
-	/* The string (the whole cur_servo_state) is exported to wr_mon */
-	strcpy(cur_servo_state.slave_servo_state, servo_name[s->state]);
 	pp_diag(ppi, servo, 1, "wr_servo state: %s %s\n",
 		servo_name[s->state], s->state == WR_WAIT_SYNC_IDLE ?
 		servo_name[s->next_state] : "");
@@ -379,8 +378,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	case WR_TRACK_PHASE:
-		cur_servo_state.cur_setpoint = s->cur_setpoint;
-		cur_servo_state.cur_skew = s->delta_ms - s->delta_ms_prev;
+		s->skew = s->delta_ms - s->delta_ms_prev;
 
 		if (ts_offset_hw.seconds !=0 || ts_offset_hw.nanoseconds != 0)
 				s->state = WR_SYNC_TAI;
@@ -401,5 +399,10 @@ int wr_servo_update(struct pp_instance *ppi)
 		break;
 
 	}
+	/* update string state name */
+	strcpy(s->servo_state_name, servo_name[s->state]);
+
+	/* shmem unlock */
+	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
 	return 0;
 }

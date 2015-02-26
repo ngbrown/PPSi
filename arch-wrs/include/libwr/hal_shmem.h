@@ -102,22 +102,25 @@ struct hal_port_state {
 	uint32_t ep_base;
 };
 
+struct hal_temp_sensors {
+	int fpga;	/* IC19 */
+	int pll;	/* IC18 */
+	int psl;	/* IC20 Power Supply Left (PSL) */
+	int psr;	/* IC17 Power Supply Right (PSR) */
+	int fpga_thold;	/* Threshold value for FPGA temperature */
+	int pll_thold;	/* Threshold value for PLL temperature */
+	int psl_thold;	/* Threshold value for PSL temperature */
+	int psr_thold;	/* Threshold value for PSR temperature */
+};
+
 /* This is the overall structure stored in shared memory */
-#define HAL_SHMEM_VERSION 4 /* Version 4 because of new fields in struct
-			     * hal_port_state */
+#define HAL_SHMEM_VERSION 6 /* Version 6 because of new structure
+			     * hal_temp_sensors in hal_shmem_header */
 struct hal_shmem_header {
 	int nports;
 	struct hal_port_state *ports;
+	struct hal_temp_sensors temp;
 };
-
-/*
- * The following functions were in userspace/wrsw_hal/hal_ports.c,
- * and are used to marshall data for the RPC format. Now that we
- * offer shared memory, it is the caller who must convert data to
- * the expected format (which remains the RPC one as I write this).
- */
-struct hal_port_state *hal_port_lookup(struct hal_port_state *ports,
-				       const char *name);
 
 static inline int state_up(int state)
 {
@@ -126,7 +129,8 @@ static inline int state_up(int state)
 }
 
 static inline struct hal_port_state *hal_lookup_port(
-			struct hal_port_state *ports, int nports, char *name)
+			struct hal_port_state *ports, int nports,
+			const char *name)
 {
 	int i;
 

@@ -24,14 +24,13 @@ static int wr_init(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 {
-	static struct wr_data_t wr_data; /* WR-specific global data */
 	int i;
 
 	/* If current arch (e.g. wrpc) is not using the 'pp_links style'
 	 * configuration, just assume there is one ppi instance,
 	 * already configured properly by the arch's main loop */
 	if (ppg->nlinks == 0) {
-		INST(ppg, 0)->ext_data = &wr_data;
+		INST(ppg, 0)->ext_data = ppg->global_ext_data;
 		return 0;
 	}
 
@@ -40,7 +39,7 @@ static int wr_open(struct pp_globals *ppg, struct pp_runtime_opts *rt_opts)
 
 		/* FIXME check if correct: assign to each instance the same
 		 * wr_data. May I move it to pp_globals? */
-		INST(ppg, i)->ext_data = &wr_data;
+		INST(ppg, i)->ext_data = ppg->global_ext_data;
 
 		if (ppi->cfg.ext == PPSI_EXT_WR) {
 			switch (ppi->role) {
