@@ -144,10 +144,10 @@ static int msg_pack_announce(struct pp_instance *ppi)
 	memset((buf + 34), 0, 10);
 	*(Integer16 *) (buf + 44) = htons(DSPRO(ppi)->currentUtcOffset);
 	*(UInteger8 *) (buf + 47) = DSPAR(ppi)->grandmasterPriority1;
-	*(UInteger8 *) (buf + 48) = DSDEF(ppi)->clockQuality.clockClass;
-	*(Enumeration8 *) (buf + 49) = DSDEF(ppi)->clockQuality.clockAccuracy;
+	*(UInteger8 *) (buf + 48) = DSPAR(ppi)->grandmasterClockQuality.clockClass;
+	*(Enumeration8 *) (buf + 49) = DSPAR(ppi)->grandmasterClockQuality.clockAccuracy;
 	*(UInteger16 *) (buf + 50) =
-		htons(DSDEF(ppi)->clockQuality.offsetScaledLogVariance);
+		htons(DSPAR(ppi)->grandmasterClockQuality.offsetScaledLogVariance);
 	*(UInteger8 *) (buf + 52) = DSPAR(ppi)->grandmasterPriority2;
 	memcpy((buf + 53), &DSPAR(ppi)->grandmasterIdentity,
 	       PP_CLOCK_IDENTITY_LENGTH);
