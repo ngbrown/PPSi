@@ -246,7 +246,9 @@ passive:
 	return PPS_PASSIVE;
 
 master:
-	m1(ppi);
+	//TODO: consider whether a smarter solution is needed for non-simple cases
+	if(cmpres < 0) // it is M1 and M2, see IEEE1588-2008, page 87, in short switch is a GM
+		m1(ppi); //GM
 	pp_diag(ppi, bmc, 1,"%s: master\n", __func__);
 	return PPS_MASTER;
 
