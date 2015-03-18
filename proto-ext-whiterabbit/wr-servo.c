@@ -242,7 +242,7 @@ int wr_servo_update(struct pp_instance *ppi)
 	uint64_t big_delta_fix;
 	uint64_t delay_ms_fix;
 	static int errcount;
-	int remaining_offset;
+	int i, remaining_offset;
 
 	TimeInternal ts_offset, ts_offset_hw /*, ts_phase_adjust */;
 
@@ -400,7 +400,11 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	}
 	/* update string state name */
-	strcpy(s->servo_state_name, servo_name[s->state]);
+	if (s->state == WR_WAIT_SYNC_IDLE)
+		i = s->next_state;
+	else
+		i = s->state;
+	strcpy(s->servo_state_name, servo_name[i]);
 
 	/* shmem unlock */
 	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
