@@ -56,7 +56,6 @@ int st_com_execute_slave(struct pp_instance *ppi)
 		ppi->frgn_rec_num = 0;
 		if (DSDEF(ppi)->clockQuality.clockClass != PP_CLASS_SLAVE_ONLY
 		    && (ppi->role != PPSI_ROLE_SLAVE)) {
-			m1(ppi);
 			ppi->next_state = PPS_MASTER;
 		} else {
 			ppi->next_state = PPS_LISTENING;
