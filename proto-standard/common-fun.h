@@ -49,6 +49,8 @@ static inline int __send_and_log(struct pp_instance *ppi, int msglen,
 		(int)(ppi->last_snt_time.seconds),
 		(int)(ppi->last_snt_time.nanoseconds),
 		pp_msg_names[msgtype]);
+	if (ppi->last_snt_time.correct == 0)
+		return -1;
 	return 0;
 }
 

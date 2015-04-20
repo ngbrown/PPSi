@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <poll.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -274,11 +275,10 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 }
 
 /* Waits for the transmission timestamp and stores it in t (if not null). */
-static void poll_tx_timestamp(struct pp_instance *ppi,
+static void poll_tx_timestamp(struct pp_instance *ppi, void *pkt, int len,
 			      struct wrs_socket *s, int fd, TimeInternal *t)
 {
 	char data[16384];
-
 	struct msghdr msg;
 	struct iovec entry;
 	struct sockaddr_ll from_addr;
@@ -287,7 +287,8 @@ static void poll_tx_timestamp(struct pp_instance *ppi,
 		char control[1024];
 	} control;
 	struct cmsghdr *cmsg;
-	int res;
+	struct pollfd pfd;
+	int res, retry = 0;;
 
 	struct sock_extended_err *serr = NULL;
 	struct scm_timestamping *sts = NULL;
@@ -302,12 +303,36 @@ static void poll_tx_timestamp(struct pp_instance *ppi,
 	msg.msg_control = &control;
 	msg.msg_controllen = sizeof(control);
 
-	res = recvmsg(fd, &msg, MSG_ERRQUEUE);
+	if (t) /* poison the stamp */
+		t->seconds = t->correct = 0;
 
-	if (t)
-		t->correct = 0;
+	pfd.fd = fd;
+	pfd.events = POLLIN;
+	while (1) { /* Not forever: we break after a few runs */
+		errno = 0;
+		res = poll(&pfd, 1, 20 /* ms */);
+		if (res != 1) {
+			pp_diag(ppi, time, 1, "%s: poll() = %i (%s)\n",
+				__func__, res, strerror(errno));
+			return;
+		}
 
-	if (res <= 0 || !t)
+		res = recvmsg(fd, &msg, MSG_ERRQUEUE);
+		if (res <= 0) {
+			pp_diag(ppi, time, 1, "%s: recvmsg() = %i (%s)\n",
+				__func__, res, strerror(errno));
+			return;
+		}
+		/* Now, check if this frame is our frame. If not, retry */
+		if (!memcmp(data, pkt, len))
+			break;
+		pp_diag(ppi, time, 1, "%s: recvmsg(): not our frame\n",
+			__func__);
+		/* We won't pop out wrong stamps forever... */
+		if (retry++ > 5)
+			return;
+	}
+	if (!t) /* maybe caller is not interested, though we popped it out */
 		return;
 
 	/*
@@ -373,7 +398,7 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 			ppi->t_ops->get(ppi, t);
 
 		ret = send(fd, hdr, len, 0);
-		poll_tx_timestamp(ppi, s, fd, t);
+		poll_tx_timestamp(ppi, pkt, len, s, fd, t);
 
 		if (drop) /* avoid messaging about stamps that are not used */
 			goto drop_msg;
@@ -395,7 +420,7 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 		addr.sin_port = 3200;
 	ret = sendto(fd, pkt, len, 0,
 		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-	poll_tx_timestamp(ppi, s, fd, t);
+	poll_tx_timestamp(ppi, pkt, len, s, fd, t);
 
 	if (drop) /* like above: skil messages about timestamps */
 		goto drop_msg;
