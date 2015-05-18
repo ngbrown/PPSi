@@ -14,6 +14,7 @@
 #include <linux/if_ether.h>
 
 #include <ppsi/ppsi.h>
+#include <common-fun.h>
 #include "ppsi-sim.h"
 
 /* Call pp_state_machine for each instance. To be called periodically,
@@ -79,7 +80,7 @@ void sim_main_loop(struct pp_globals *ppg)
 			sim_fast_forward_ns(ppg, data->pending->delay_ns);
 			delay_ns -= data->pending->delay_ns;
 
-			i = ppi->n_ops->recv(ppi, ppi->rx_frame,
+			i = __recv_and_count(ppi, ppi->rx_frame,
 						PP_MAX_FRAME_LENGTH - 4,
 						&ppi->last_rcv_time);
 

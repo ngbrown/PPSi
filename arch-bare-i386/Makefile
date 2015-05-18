@@ -11,7 +11,7 @@ CFLAGS += -U_FORTIFY_SOURCE
 A := arch-$(ARCH)
 L := lib-bare
 
-CFLAGS += -Ilib-bare
+CFLAGS += -Ilib-bare -Iproto-standard
 
 OBJ-y += $A/crt0.o \
 	$L/bare-startup.o \

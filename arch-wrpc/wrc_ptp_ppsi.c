@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <ppsi/ppsi.h>
 #include "wrpc.h"
+#include <common-fun.h>
 #include "../proto-ext-whiterabbit/wr-api.h"
 #include "../proto-ext-whiterabbit/wr-constants.h"
 
@@ -243,7 +244,7 @@ int wrc_ptp_update()
 	if (!ptp_enabled)
 		return 0;
 
-	i = ppi->n_ops->recv(ppi, ppi->rx_frame, PP_MAX_FRAME_LENGTH - 4,
+	i = __recv_and_count(ppi, ppi->rx_frame, PP_MAX_FRAME_LENGTH - 4,
 			     &ppi->last_rcv_time);
 
 	if ((!i) && (timer_get_tics() - start_tics < delay_ms))

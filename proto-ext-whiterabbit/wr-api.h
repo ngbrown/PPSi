@@ -12,7 +12,8 @@
 #include <ppsi/lib.h>
 #include "wr-constants.h"
 
-#define WRS_PPSI_SHMEM_VERSION 4 /* several changes to wr_servo_state */
+#define WRS_PPSI_SHMEM_VERSION 5 /* added fields tx_count and rx_count to
+				  * pp_instance */
 
 /*
  * This structure is used as extension-specific data in the DSPort

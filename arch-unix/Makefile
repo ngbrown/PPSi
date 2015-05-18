@@ -24,7 +24,7 @@ include time-$(TIME)/Makefile
 ifneq ($(TIME),unix)
 include time-unix/Makefile
 endif
-CFLAGS += -Itime-unix
+CFLAGS += -Itime-unix -Iproto-standard
 
 all: $(TARGET)
 

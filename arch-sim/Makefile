@@ -2,7 +2,7 @@
 # All files are under A (short for ARCH): I'm lazy
 A := arch-$(ARCH)
 
-CFLAGS += -Itools
+CFLAGS += -Itools -Iproto-standard
 
 OBJ-y += $A/sim-startup.o \
 	$A/main-loop.o \

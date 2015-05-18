@@ -10,6 +10,7 @@
  */
 #include <ppsi/ppsi.h>
 #include "bare-linux.h"
+#include <common-fun.h>
 
 /* Define other hackish stuff */
 struct bare_fd_set {
@@ -66,7 +67,7 @@ void bare_main_loop(struct pp_instance *ppi)
 		 *
 		 * FIXME: we don't know which socket to receive from
 		 */
-		i = ppi->n_ops->recv(ppi, ppi->rx_frame,
+		i = __recv_and_count(ppi, ppi->rx_frame,
 				     PP_MAX_FRAME_LENGTH - 4,
 				     &ppi->last_rcv_time);
 
