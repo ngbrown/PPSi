@@ -589,8 +589,9 @@ and frames at level 2.   The header itself is more detailed about
 the conventions.
 
 To parse the diagnostic string, PPSi offers @i{pp_diag_parse}.  The
-function is used by both the code that reads the command line
-and code that parses configuration.
+function is used by both the code that reads the command line (string after
+@t{-d} switch)
+and code that parses configuration (@t{diagnostics} option in config file).
 
 Within PPSi, developers should insert diagnostic messages by means
 of the @i{pp_diag} function:
