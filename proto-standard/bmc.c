@@ -192,9 +192,6 @@ static int bmc_state_decision(struct pp_instance *ppi,
 	int cmpres;
 	struct pp_frgn_master myself;
 
-	if (ppi->role == PPSI_ROLE_MASTER)
-		goto master;
-
 	if (ppi->role == PPSI_ROLE_SLAVE)
 		goto slave;
 
@@ -207,6 +204,9 @@ static int bmc_state_decision(struct pp_instance *ppi,
 	/* dataset_cmp is "a - b" but lower values win */
 	cmpres = bmc_dataset_cmp(ppi, &myself, m);
 
+	if (ppi->role == PPSI_ROLE_MASTER)
+		goto master;
+	
 	if (DSDEF(ppi)->clockQuality.clockClass < 128) {
 		if (cmpres < 0)
 			goto master;
