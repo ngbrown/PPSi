@@ -345,7 +345,11 @@ extern void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup);
 extern void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req);
 extern void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp);
 
-/* each of them returns 0 if no error and -1 in case of error in send */
+/* each of them returns 0 if ok, -1 in case of error in send, 1 if stamp err */
+#define PP_SEND_OK		0
+#define PP_SEND_ERROR		-1
+#define PP_SEND_NO_STAMP	1
+
 extern int msg_issue_announce(struct pp_instance *ppi);
 extern int msg_issue_sync_followup(struct pp_instance *ppi);
 extern int msg_issue_delay_req(struct pp_instance *ppi);
