@@ -56,7 +56,7 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 		msgtype = pp_hooks.master_msg(ppi, pkt, plen, msgtype);
 	if (msgtype < 0) {
 		e = msgtype;
-		goto out;
+		goto out_fault;
 	}
 
 	switch (msgtype) {
@@ -89,16 +89,28 @@ int pp_master(struct pp_instance *ppi, unsigned char *pkt, int plen)
 	}
 
 out:
-	if (e == 0) {
+	switch(e) {
+	case PP_SEND_OK: /* 0 */
 		if (DSDEF(ppi)->clockQuality.clockClass == PP_CLASS_SLAVE_ONLY
 		    || (ppi->role == PPSI_ROLE_SLAVE))
 			ppi->next_state = PPS_LISTENING;
-	} else {
-		ppi->next_state = PPS_FAULTY;
+		break;
+	case PP_SEND_ERROR:
+		goto out_fault;
+
+	case PP_SEND_NO_STAMP:
+		/* nothing, just keep the ball rolling */
+		e = 0;
+		break;
 	}
 
 	d1 = pp_ms_to_timeout(ppi, PP_TO_ANN_INTERVAL);
 	d2 = pp_ms_to_timeout(ppi, PP_TO_SYNC);
 	ppi->next_delay = d1 < d2 ? d1 : d2;
-	return 0;
+	return e;
+
+out_fault:
+	ppi->next_state = PPS_FAULTY;
+	ppi->next_delay = 500; /* just a delay to releif the system */
+	return e;
 }

@@ -128,12 +128,18 @@ out:
 				 &OPTS(ppi)->outbound_latency);
 	}
 
-	if (e) {
+	switch(e) {
+	case PP_SEND_OK: /* 0 */
+		break;
+	case PP_SEND_ERROR:
 		ppi->next_state = PPS_FAULTY;
-		return 0;
+		break;
+	case PP_SEND_NO_STAMP:
+		/* nothing, just keep the ball rolling */
+		e = 0;
+		break;
 	}
 
-	/* Leaving this state */
 	if (ppi->next_state != ppi->state) {
 		pp_timeout_clr(ppi, PP_TO_ANN_RECEIPT);
 		pp_timeout_clr(ppi, PP_TO_DELAYREQ);
@@ -144,5 +150,5 @@ out:
 	if (ppi->timeouts[PP_TO_DELAYREQ])
 		d2 = pp_ms_to_timeout(ppi, PP_TO_DELAYREQ);
 	ppi->next_delay = d1 < d2 ? d1 : d2;
-	return 0;
+	return e;
 }
