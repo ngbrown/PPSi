@@ -343,7 +343,7 @@ int wr_servo_update(struct pp_instance *ppi)
 	case WR_SYNC_NSEC:
 		wrp->ops->adjust_counters(0, ts_offset_hw.nanoseconds);
 
-		s->next_state = WR_SYNC_NSEC;
+		s->next_state = WR_SYNC_PHASE;
 		s->state = WR_WAIT_SYNC_IDLE;
 		s->last_tics = tics;
 		break;
