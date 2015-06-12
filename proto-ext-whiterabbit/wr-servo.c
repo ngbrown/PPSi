@@ -282,6 +282,11 @@ int wr_servo_update(struct pp_instance *ppi)
 	big_delta_fix =  s->delta_tx_m + s->delta_tx_s
 		       + s->delta_rx_m + s->delta_rx_s;
 
+	if ((signed)s->picos_mu < (signed)big_delta_fix) {
+		/* avoid negatives in calculations */
+		s->picos_mu = big_delta_fix;
+	}
+
 	delay_ms_fix = (((int64_t)(s->picos_mu - big_delta_fix) * (int64_t) s->fiber_fix_alpha) >> FIX_ALPHA_FRACBITS)
 		+ ((s->picos_mu - big_delta_fix) >> 1)
 		+ s->delta_tx_m + s->delta_rx_s + ph_adjust;
