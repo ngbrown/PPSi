@@ -61,7 +61,8 @@ ifndef CONFIG_NO_PRINTF
 OBJ-y += pp_printf/pp-printf.o
 
 pp_printf/pp-printf.o: $(wildcard pp_printf/*.[ch])
-	$(MAKE) -C pp_printf pp-printf.o CC="$(CC)" LD="$(LD)"
+	$(MAKE) -C pp_printf pp-printf.o CC="$(CC)" LD="$(LD)" \
+		CONFIG_PRINTF_64BIT=y
 endif
 
 # We need this -I so <arch/arch.h> can be found
