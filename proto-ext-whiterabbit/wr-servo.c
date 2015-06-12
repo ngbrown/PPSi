@@ -379,15 +379,19 @@ int wr_servo_update(struct pp_instance *ppi)
 		} else {
 			s->missed_iters++;
 		}
-		if (s->missed_iters >= 10)
+		if (s->missed_iters >= 10) {
+			s->missed_iters = 0;
 			s->state = WR_SYNC_TAI;
+		}
 		break;
 
 	case WR_TRACK_PHASE:
 		s->skew = s->delta_ms - s->delta_ms_prev;
 
-		if (ts_offset_hw.seconds !=0 || ts_offset_hw.nanoseconds != 0)
+		if (ts_offset_hw.seconds || ts_offset_hw.nanoseconds) {
 				s->state = WR_SYNC_TAI;
+				break;
+		}
 
 		if(tracking_enabled) {
 			// just follow the changes of deltaMS
