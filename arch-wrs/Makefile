@@ -2,6 +2,8 @@
 A := arch-$(ARCH)
 
 CFLAGS += -Itools
+# Prevent a warning for a missing prototype in pp_printf, bug since ever
+ARCH_PP_PRINTF_CFLAGS += -include ../$A/include/strnlen.h
 
 OBJ-y += $A/wrs-startup.o \
 	$A/main-loop.o \

@@ -61,6 +61,7 @@ ifndef CONFIG_NO_PRINTF
 OBJ-y += pp_printf/pp-printf.o
 
 pp_printf/pp-printf.o: $(wildcard pp_printf/*.[ch])
+	CFLAGS="$(ARCH_PP_PRINTF_CFLAGS)" \
 	$(MAKE) -C pp_printf pp-printf.o CC="$(CC)" LD="$(LD)" \
 		CONFIG_PRINTF_64BIT=y
 endif
