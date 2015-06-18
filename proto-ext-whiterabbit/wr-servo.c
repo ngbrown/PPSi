@@ -148,6 +148,13 @@ void wr_servo_reset(void)
 		saved_servo_pointer->valid = 0;
 }
 
+static inline int32_t delta_to_ps(struct FixedDelta d)
+{
+	UInteger64 *sps = &d.scaledPicoseconds; /* ieee type :( */
+
+	return (sps->lsb >> 16) | (sps->msb << 16);
+}
+
 int wr_servo_init(struct pp_instance *ppi)
 {
 	struct wr_dsport *wrp = WR_DSPOR(ppi);
@@ -167,16 +174,10 @@ int wr_servo_init(struct pp_instance *ppi)
 	s->cur_setpoint = 0;
 	s->missed_iters = 0;
 
-	s->delta_tx_m = ((((int32_t)WR_DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->otherNodeDeltaTx.scaledPicoseconds.msb) << 16);
-	s->delta_rx_m = ((((int32_t)WR_DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->otherNodeDeltaRx.scaledPicoseconds.msb) << 16);
-
-	s->delta_tx_s = ((((int32_t)WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->deltaTx.scaledPicoseconds.msb) << 16);
-	s->delta_rx_s = ((((int32_t)WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.lsb) >> 16) & 0xffff) | (((int32_t)WR_DSPOR(ppi)->deltaRx.scaledPicoseconds.msb) << 16);
-
-	/* FIXME: useful?
-	strncpy(cur_servo_state.sync_source,
-			  clock->netPath.ifaceName, 16);//fixme
-	*/
+	s->delta_tx_m = delta_to_ps(wrp->otherNodeDeltaTx);
+	s->delta_rx_m = delta_to_ps(wrp->otherNodeDeltaRx);
+	s->delta_tx_s = delta_to_ps(wrp->deltaTx);
+	s->delta_rx_s = delta_to_ps(wrp->deltaRx);
 
 	strcpy(s->servo_state_name, "Uninitialized");
 
