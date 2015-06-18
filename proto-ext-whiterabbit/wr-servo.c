@@ -145,7 +145,7 @@ static int got_sync = 0;
 void wr_servo_reset(void)
 {
 	if (saved_servo_pointer)
-		saved_servo_pointer->valid = 0;
+		saved_servo_pointer->flags = 0;
 }
 
 static inline int32_t delta_to_ps(struct FixedDelta d)
@@ -182,7 +182,7 @@ int wr_servo_init(struct pp_instance *ppi)
 	strcpy(s->servo_state_name, "Uninitialized");
 
 	saved_servo_pointer = s;
-	saved_servo_pointer->valid = 1;
+	saved_servo_pointer->flags |= WR_FLAG_VALID;
 	s->update_count = 0;
 
 	got_sync = 0;

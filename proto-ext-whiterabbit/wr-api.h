@@ -134,9 +134,12 @@ int wr_servo_update(struct pp_instance *ppi);
 
 struct wr_servo_state {
 	char if_name[16]; /* Informative, for wr_mon through shmem */
+	unsigned long flags;
+
+#define WR_FLAG_VALID	1
+
 	int state;
 	int next_state;
-	int valid;
 
 	/* These fields are used by servo code, after asetting at init time */
 	int32_t delta_tx_m;
