@@ -162,10 +162,7 @@ int wr_servo_init(struct pp_instance *ppi)
 
 	wrp->ops->enable_timing_output(ppi, 0);
 
-	/* FIXME useful?
-	strncpy(s->if_name, clock->netPath.ifaceName, 16);
-	*/
-
+	strncpy(s->if_name, ppi->cfg.iface_name, sizeof(s->if_name));
 	s->state = WR_SERVO_NONE; /* Turned into SYNC_TAI at 1st iteration */
 	s->cur_setpoint = 0;
 	s->missed_iters = 0;
