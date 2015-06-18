@@ -133,25 +133,29 @@ int wr_servo_got_delay(struct pp_instance *ppi, Integer32 cf);
 int wr_servo_update(struct pp_instance *ppi);
 
 struct wr_servo_state_t {
-	char if_name[16];
+	char if_name[16]; /* Informative, for wr_mon through shmem */
 	int state;
 	int next_state;
-	TimeInternal mu;		/* half of the RTT */
-	int64_t picos_mu;
+	int valid;
+
+	/* These fields are used by servo code, after asetting at init time */
 	int32_t delta_tx_m;
 	int32_t delta_rx_m;
 	int32_t delta_tx_s;
 	int32_t delta_rx_s;
-	int32_t cur_setpoint;
-	int64_t delta_ms;
-	int64_t delta_ms_prev;
-	TimeInternal t1, t2, t3, t4;
-	uint64_t last_tics;
 	int32_t fiber_fix_alpha;
 	int32_t clock_period_ps;
+
+	/* These fields are used by servo code, across iterations */
+	TimeInternal t1, t2, t3, t4;
+	int64_t delta_ms_prev;
 	int missed_iters;
 
-	int valid;
+	/* Following fields are for monitoring/diagnostics (use w/ shmem) */
+	TimeInternal mu;
+	int64_t picos_mu;
+	int32_t cur_setpoint;
+	int64_t delta_ms;
 	uint32_t update_count;
 	int tracking_enabled;
 	char servo_state_name[32];

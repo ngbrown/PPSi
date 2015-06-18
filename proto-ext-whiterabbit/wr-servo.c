@@ -236,7 +236,6 @@ int wr_servo_update(struct pp_instance *ppi)
 	struct wr_servo_state_t *s =
 			&((struct wr_data_t *)ppi->ext_data)->servo_state;
 
-	uint64_t tics;
 	uint64_t big_delta_fix;
 	uint64_t delay_ms_fix;
 	static int errcount;
@@ -300,8 +299,6 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	s->delta_ms = delay_ms_fix;
 
-	tics = ppi->t_ops->calc_timeout(ppi, 0);
-
 	if (wrp->ops->locking_poll(ppi, 0) != WR_SPLL_READY) {
 		pp_diag(ppi, servo, 1, "PLL OutOfLock, should restart sync\n");
 		wrp->ops->enable_timing_output(ppi, 0);
@@ -340,7 +337,6 @@ int wr_servo_update(struct pp_instance *ppi)
 
 		s->next_state = WR_SYNC_NSEC;
 		s->state = WR_WAIT_SYNC_IDLE;
-		s->last_tics = tics;
 		break;
 
 	case WR_SYNC_NSEC:
@@ -348,7 +344,6 @@ int wr_servo_update(struct pp_instance *ppi)
 
 		s->next_state = WR_SYNC_PHASE;
 		s->state = WR_WAIT_SYNC_IDLE;
-		s->last_tics = tics;
 		break;
 
 	case WR_SYNC_PHASE:
@@ -359,7 +354,6 @@ int wr_servo_update(struct pp_instance *ppi)
 
 		s->next_state = WR_WAIT_OFFSET_STABLE;
 		s->state = WR_WAIT_SYNC_IDLE;
-		s->last_tics = tics;
 		s->delta_ms_prev = s->delta_ms;
 		break;
 
@@ -402,7 +396,6 @@ int wr_servo_update(struct pp_instance *ppi)
 			s->delta_ms_prev = s->delta_ms;
 			s->next_state = WR_TRACK_PHASE;
 			s->state = WR_WAIT_SYNC_IDLE;
-			s->last_tics = tics;
 		}
 		break;
 
