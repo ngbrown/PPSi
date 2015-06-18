@@ -137,9 +137,9 @@ struct wr_servo_state {
 	unsigned long flags;
 
 #define WR_FLAG_VALID	1
+#define WR_FLAG_WAIT_HW	2
 
 	int state;
-	int next_state;
 
 	/* These fields are used by servo code, after asetting at init time */
 	int32_t delta_tx_m;

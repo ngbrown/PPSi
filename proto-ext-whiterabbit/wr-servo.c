@@ -7,8 +7,7 @@
 #define WR_SYNC_TAI 2
 #define WR_SYNC_PHASE 3
 #define WR_TRACK_PHASE 4
-#define WR_WAIT_SYNC_IDLE 5
-#define WR_WAIT_OFFSET_STABLE 6
+#define WR_WAIT_OFFSET_STABLE 5
 
 #define WR_SERVO_OFFSET_STABILITY_THRESHOLD 60 /* psec */
 
@@ -20,7 +19,6 @@ static const char *servo_name[] = {
 	[WR_SYNC_TAI] = "SYNC_SEC",
 	[WR_SYNC_PHASE] = "SYNC_PHASE",
 	[WR_TRACK_PHASE] = "TRACK_PHASE",
-	[WR_WAIT_SYNC_IDLE] = "WAIT_SYNC_IDLE",
 	[WR_WAIT_OFFSET_STABLE] = "WAIT_OFFSET_STABLE",
 };
 
@@ -239,7 +237,7 @@ int wr_servo_update(struct pp_instance *ppi)
 	uint64_t big_delta_fix;
 	uint64_t delay_ms_fix;
 	static int errcount;
-	int i, remaining_offset;
+	int remaining_offset;
 
 	TimeInternal ts_offset, ts_offset_hw /*, ts_phase_adjust */;
 
@@ -318,32 +316,34 @@ int wr_servo_update(struct pp_instance *ppi)
 	pp_diag(ppi, servo, 2, "offset_hw: %li.%09li\n",
 		(long)ts_offset_hw.seconds, (long)ts_offset_hw.nanoseconds);
 
-	pp_diag(ppi, servo, 1, "wr_servo state: %s %s\n",
-		servo_name[s->state], s->state == WR_WAIT_SYNC_IDLE ?
-		servo_name[s->next_state] : "");
+	pp_diag(ppi, servo, 1, "wr_servo state: %s%s\n",
+		servo_name[s->state],
+		s->flags & WR_FLAG_WAIT_HW ? " (wait for hw)" : "");
+
+	/*
+	 * After each action on the hardware, we must verify if it is over.
+	 * However, we loose one iteration every two. To be audited later.
+	 */
+	if (s->flags & WR_FLAG_WAIT_HW) {
+		if (!wrp->ops->adjust_in_progress())
+			s->flags &= ~WR_FLAG_WAIT_HW;
+		else
+			pp_diag(ppi, servo, 1, "servo:busy\n");
+		goto out;
+	}
 
 	switch (s->state) {
-	case WR_WAIT_SYNC_IDLE:
-		if (!wrp->ops->adjust_in_progress()) {
-			s->state = s->next_state;
-		} else {
-			pp_diag(ppi, servo, 1, "servo:busy\n");
-		}
-		break;
-
 	case WR_SYNC_TAI:
 		wrp->ops->adjust_counters(ts_offset_hw.seconds, 0);
 		wrp->ops->adjust_phase(0);
-
-		s->next_state = WR_SYNC_NSEC;
-		s->state = WR_WAIT_SYNC_IDLE;
+		s->flags |= WR_FLAG_WAIT_HW;
+		s->state = WR_SYNC_NSEC;
 		break;
 
 	case WR_SYNC_NSEC:
 		wrp->ops->adjust_counters(0, ts_offset_hw.nanoseconds);
-
-		s->next_state = WR_SYNC_PHASE;
-		s->state = WR_WAIT_SYNC_IDLE;
+		s->flags |= WR_FLAG_WAIT_HW;
+		s->state = WR_SYNC_PHASE;
 		break;
 
 	case WR_SYNC_PHASE:
@@ -352,8 +352,8 @@ int wr_servo_update(struct pp_instance *ppi)
 
 		wrp->ops->adjust_phase(s->cur_setpoint);
 
-		s->next_state = WR_WAIT_OFFSET_STABLE;
-		s->state = WR_WAIT_SYNC_IDLE;
+		s->flags |= WR_FLAG_WAIT_HW;
+		s->state = WR_WAIT_OFFSET_STABLE;
 		s->delta_ms_prev = s->delta_ms;
 		break;
 
@@ -394,19 +394,16 @@ int wr_servo_update(struct pp_instance *ppi)
 				s->cur_setpoint);
 
 			s->delta_ms_prev = s->delta_ms;
-			s->next_state = WR_TRACK_PHASE;
-			s->state = WR_WAIT_SYNC_IDLE;
+			s->flags |= WR_FLAG_WAIT_HW;
+			s->state = WR_TRACK_PHASE;
 		}
 		break;
 
 	}
 	/* update string state name */
-	if (s->state == WR_WAIT_SYNC_IDLE)
-		i = s->next_state;
-	else
-		i = s->state;
-	strcpy(s->servo_state_name, servo_name[i]);
+	strcpy(s->servo_state_name, servo_name[s->state]);
 
+out:
 	/* shmem unlock */
 	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
 	return 0;
