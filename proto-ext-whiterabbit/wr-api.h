@@ -132,7 +132,7 @@ int wr_servo_got_sync(struct pp_instance *ppi, TimeInternal *t1,
 int wr_servo_got_delay(struct pp_instance *ppi, Integer32 cf);
 int wr_servo_update(struct pp_instance *ppi);
 
-struct wr_servo_state_t {
+struct wr_servo_state {
 	char if_name[16]; /* Informative, for wr_mon through shmem */
 	int state;
 	int next_state;
@@ -164,8 +164,8 @@ struct wr_servo_state_t {
 };
 
 /* All data used as extension ppsi-wr must be put here */
-struct wr_data_t {
-	struct wr_servo_state_t servo_state;
+struct wr_data {
+	struct wr_servo_state servo_state;
 };
 
 #endif /* __WREXT_WR_API_H__ */

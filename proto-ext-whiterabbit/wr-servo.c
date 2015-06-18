@@ -26,7 +26,7 @@ static const char *servo_name[] = {
 
 static int tracking_enabled = 1; /* FIXME: why? */
 extern struct wrs_shm_head *ppsi_head;
-static struct wr_servo_state_t *saved_servo_pointer; /* required for
+static struct wr_servo_state *saved_servo_pointer; /* required for
 						* wr_servo_reset, which doesn't
 						* have ppi context. */
 
@@ -158,8 +158,8 @@ static inline int32_t delta_to_ps(struct FixedDelta d)
 int wr_servo_init(struct pp_instance *ppi)
 {
 	struct wr_dsport *wrp = WR_DSPOR(ppi);
-	struct wr_servo_state_t *s =
-			&((struct wr_data_t *)ppi->ext_data)->servo_state;
+	struct wr_servo_state *s =
+			&((struct wr_data *)ppi->ext_data)->servo_state;
 	/* shmem lock */
 	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_BEGIN);
 	/* Determine the alpha coefficient */
@@ -203,8 +203,8 @@ int wr_servo_man_adjust_phase(int phase)
 int wr_servo_got_sync(struct pp_instance *ppi, TimeInternal *t1,
 		      TimeInternal *t2)
 {
-	struct wr_servo_state_t *s =
-			&((struct wr_data_t *)ppi->ext_data)->servo_state;
+	struct wr_servo_state *s =
+			&((struct wr_data *)ppi->ext_data)->servo_state;
 
 	s->t1 = *t1;
 	s->t1.correct = 1;
@@ -217,8 +217,8 @@ int wr_servo_got_sync(struct pp_instance *ppi, TimeInternal *t1,
 
 int wr_servo_got_delay(struct pp_instance *ppi, Integer32 cf)
 {
-	struct wr_servo_state_t *s =
-			&((struct wr_data_t *)ppi->ext_data)->servo_state;
+	struct wr_servo_state *s =
+			&((struct wr_data *)ppi->ext_data)->servo_state;
 
 	s->t3 = ppi->t3;
 	/*  s->t3.phase = 0; */
@@ -233,8 +233,8 @@ int wr_servo_got_delay(struct pp_instance *ppi, Integer32 cf)
 int wr_servo_update(struct pp_instance *ppi)
 {
 	struct wr_dsport *wrp = WR_DSPOR(ppi);
-	struct wr_servo_state_t *s =
-			&((struct wr_data_t *)ppi->ext_data)->servo_state;
+	struct wr_servo_state *s =
+			&((struct wr_data *)ppi->ext_data)->servo_state;
 
 	uint64_t big_delta_fix;
 	uint64_t delay_ms_fix;

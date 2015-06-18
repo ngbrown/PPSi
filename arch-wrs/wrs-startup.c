@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 
 	ppg->max_links = PP_MAX_LINKS;
 	ppg->global_ext_data = alloc_fn(ppsi_head,
-					sizeof(struct wr_servo_state_t));
+					sizeof(struct wr_servo_state));
 	/* NOTE: arch_data is not in shmem */
 	ppg->arch_data = malloc( sizeof(struct unix_arch_data));
 	ppg->pp_instances = alloc_fn(ppsi_head,
