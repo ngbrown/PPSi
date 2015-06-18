@@ -12,8 +12,7 @@
 #include <ppsi/lib.h>
 #include "wr-constants.h"
 
-#define WRS_PPSI_SHMEM_VERSION 3 /* added fields to pp_globals and
-				    wr_servo_state_t */
+#define WRS_PPSI_SHMEM_VERSION 4 /* several changes to wr_servo_state */
 
 /*
  * This structure is used as extension-specific data in the DSPort
@@ -132,26 +131,33 @@ int wr_servo_got_sync(struct pp_instance *ppi, TimeInternal *t1,
 int wr_servo_got_delay(struct pp_instance *ppi, Integer32 cf);
 int wr_servo_update(struct pp_instance *ppi);
 
-struct wr_servo_state_t {
-	char if_name[16];
+struct wr_servo_state {
+	char if_name[16]; /* Informative, for wr_mon through shmem */
+	unsigned long flags;
+
+#define WR_FLAG_VALID	1
+#define WR_FLAG_WAIT_HW	2
+
 	int state;
-	int next_state;
-	TimeInternal mu;		/* half of the RTT */
-	int64_t picos_mu;
+
+	/* These fields are used by servo code, after asetting at init time */
 	int32_t delta_tx_m;
 	int32_t delta_rx_m;
 	int32_t delta_tx_s;
 	int32_t delta_rx_s;
-	int32_t cur_setpoint;
-	int64_t delta_ms;
-	int64_t delta_ms_prev;
-	TimeInternal t1, t2, t3, t4;
-	uint64_t last_tics;
 	int32_t fiber_fix_alpha;
 	int32_t clock_period_ps;
+
+	/* These fields are used by servo code, across iterations */
+	TimeInternal t1, t2, t3, t4;
+	int64_t delta_ms_prev;
 	int missed_iters;
 
-	int valid;
+	/* Following fields are for monitoring/diagnostics (use w/ shmem) */
+	TimeInternal mu;
+	int64_t picos_mu;
+	int32_t cur_setpoint;
+	int64_t delta_ms;
 	uint32_t update_count;
 	int tracking_enabled;
 	char servo_state_name[32];
@@ -160,8 +166,8 @@ struct wr_servo_state_t {
 };
 
 /* All data used as extension ppsi-wr must be put here */
-struct wr_data_t {
-	struct wr_servo_state_t servo_state;
+struct wr_data {
+	struct wr_servo_state servo_state;
 };
 
 #endif /* __WREXT_WR_API_H__ */

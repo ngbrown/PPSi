@@ -53,7 +53,7 @@ static DSCurrent  currentDS;
 static DSParent   parentDS;
 static DSTimeProperties timePropertiesDS;
 static struct pp_servo servo;
-static struct wr_servo_state_t servo_state;
+static struct wr_servo_state servo_state;
 
 static struct wr_dsport wr_dsport = {
 	.ops = &wrpc_wr_operations,
