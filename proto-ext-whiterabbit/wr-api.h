@@ -12,7 +12,9 @@
 #include <ppsi/lib.h>
 #include "wr-constants.h"
 
-#define WRS_PPSI_SHMEM_VERSION 4 /* several changes to wr_servo_state */
+#define WRS_PPSI_SHMEM_VERSION 6 /* added fields n_err_state, n_err_offset,
+				  * n_err_rtt, n_err_deltas to
+				  * wr_servo_state_t */
 
 /*
  * This structure is used as extension-specific data in the DSPort
@@ -163,6 +165,13 @@ struct wr_servo_state {
 	char servo_state_name[32];
 	int64_t skew;
 	int64_t offset;
+
+	/* Values used by snmp. Values are increased at servo update when
+	 * erroneous condition occurs. */
+	uint32_t n_err_state;
+	uint32_t n_err_offset;
+	uint32_t n_err_delta_rtt;
+	uint32_t n_err_rxtx_deltas;
 };
 
 /* All data used as extension ppsi-wr must be put here */

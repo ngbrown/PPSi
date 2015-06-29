@@ -107,15 +107,11 @@ struct hal_temp_sensors {
 	int pll;	/* IC18 */
 	int psl;	/* IC20 Power Supply Left (PSL) */
 	int psr;	/* IC17 Power Supply Right (PSR) */
-	int fpga_thold;	/* Threshold value for FPGA temperature */
-	int pll_thold;	/* Threshold value for PLL temperature */
-	int psl_thold;	/* Threshold value for PSL temperature */
-	int psr_thold;	/* Threshold value for PSR temperature */
 };
 
 /* This is the overall structure stored in shared memory */
-#define HAL_SHMEM_VERSION 6 /* Version 6 because of new structure
-			     * hal_temp_sensors in hal_shmem_header */
+#define HAL_SHMEM_VERSION 7 /* Version 7 because of moving of reading
+			     * temperature treshold values to snmpd */
 struct hal_shmem_header {
 	int nports;
 	struct hal_port_state *ports;

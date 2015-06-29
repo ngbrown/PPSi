@@ -2,7 +2,7 @@
 CFLAGS += -ffreestanding -Os \
 	-ffunction-sections -fdata-sections \
 	-mmultiply-enabled -mbarrel-shift-enabled \
-	-Itools
+	-Itools -Iproto-standard
 
 # Root of wrpc-sw project
 WRPCSW_ROOT ?= $(CONFIG_WRPCSW_ROOT)

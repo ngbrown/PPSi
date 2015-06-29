@@ -13,6 +13,12 @@
 
 #define FIX_ALPHA_FRACBITS 40
 
+/* Define threshold values for SNMP */
+/* TODO: These values need to be tuned! */
+#define SNMP_MAX_OFFSET 1000000
+#define SNMP_MAX_DELTA_RTT 1000000
+#define SNMP_MAX_RXTX_DELTAS 1000000
+
 static const char *servo_name[] = {
 	[WR_SERVO_NONE] = "Uninitialized",
 	[WR_SYNC_NSEC] = "SYNC_NSEC",
@@ -238,7 +244,7 @@ int wr_servo_update(struct pp_instance *ppi)
 	uint64_t delay_ms_fix;
 	static int errcount;
 	int remaining_offset;
-
+	int64_t picos_mu_prev = 0;
 	TimeInternal ts_offset, ts_offset_hw /*, ts_phase_adjust */;
 
 	if(!got_sync)
@@ -272,7 +278,7 @@ int wr_servo_update(struct pp_instance *ppi)
 		dump_timestamp(ppi, "servo:t4", s->t4);
 		dump_timestamp(ppi, "->mdelay", s->mu);
 	}
-
+	picos_mu_prev = s->picos_mu;
 	s->picos_mu = ts_to_picos(s->mu);
 	big_delta_fix =  s->delta_tx_m + s->delta_tx_s
 		       + s->delta_rx_m + s->delta_rx_s;
@@ -402,6 +408,29 @@ int wr_servo_update(struct pp_instance *ppi)
 	}
 	/* update string state name */
 	strcpy(s->servo_state_name, servo_name[s->state]);
+
+	/* Increase number of servo updates with state different than
+	 * WR_TRACK_PHASE. (Used by SNMP) */
+	if (s->state != WR_TRACK_PHASE)
+		s->n_err_state++;
+
+	/* Increase number of servo updates with offset exceeded
+	 * SNMP_MAX_OFFSET (Used by SNMP) */
+	if (s->offset > SNMP_MAX_OFFSET)
+		s->n_err_offset++;
+
+	/* Increase number of servo updates with delta rtt exceeded
+	 * SNMP_MAX_DELTA_RTT (Used by SNMP) */
+	if (picos_mu_prev - s->picos_mu > SNMP_MAX_DELTA_RTT)
+		s->n_err_delta_rtt++;
+
+	/* Increase number of servo updates with delta_*x_* bigger than
+	 * SNMP_MAX_RXTX_DELTAS. (Used by SNMP) */
+	if ((s->delta_tx_m > SNMP_MAX_RXTX_DELTAS)
+	    || (s->delta_rx_m > SNMP_MAX_RXTX_DELTAS)
+	    || (s->delta_tx_s > SNMP_MAX_RXTX_DELTAS)
+	    || (s->delta_rx_s > SNMP_MAX_RXTX_DELTAS))
+		s->n_err_rxtx_deltas++;
 
 out:
 	/* shmem unlock */

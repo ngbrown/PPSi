@@ -187,6 +187,9 @@ struct pp_instance {
 	int port_idx;
 
 	struct pp_instance_cfg cfg;
+
+	unsigned long ptp_tx_count;
+	unsigned long ptp_rx_count;
 };
 /* The following things used to be bit fields. Other flags are now enums */
 #define PPI_FLAG_FROM_CURRENT_PARENT	0x01

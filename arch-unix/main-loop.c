@@ -14,6 +14,7 @@
 #include <linux/if_ether.h>
 
 #include <ppsi/ppsi.h>
+#include <common-fun.h>
 #include "ppsi-unix.h"
 
 /* Call pp_state_machine for each instance. To be called periodically,
@@ -109,7 +110,7 @@ void unix_main_loop(struct pp_globals *ppg)
 			if ((NP(ppi)->ch[PP_NP_GEN].pkt_present) ||
 			    (NP(ppi)->ch[PP_NP_EVT].pkt_present)) {
 
-				i = ppi->n_ops->recv(ppi, ppi->rx_frame,
+				i = __recv_and_count(ppi, ppi->rx_frame,
 						PP_MAX_FRAME_LENGTH - 4,
 						&ppi->last_rcv_time);
 

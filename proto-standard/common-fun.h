@@ -51,7 +51,22 @@ static inline int __send_and_log(struct pp_instance *ppi, int msglen,
 		pp_msg_names[msgtype]);
 	if (chtype == PP_NP_EVT && ppi->last_snt_time.correct == 0)
 		return PP_SEND_NO_STAMP;
+
+	/* count sent packets */
+	ppi->ptp_tx_count++;
+
 	return 0;
+}
+
+/* Count successfully received PTP packets */
+static inline int __recv_and_count(struct pp_instance *ppi, void *pkt, int len,
+		   TimeInternal *t)
+{
+	int ret;
+	ret = ppi->n_ops->recv(ppi, pkt, len, t);
+	if (ret >= 0)
+		ppi->ptp_rx_count++;
+	return ret;
 }
 
 #endif /* __COMMON_FUN_H */
