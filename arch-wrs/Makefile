@@ -19,8 +19,9 @@ OBJ-y += $A/wrs-startup.o \
 	lib/drop.o \
 	lib/div64.o
 
-# The user can set TIME=, but wrs is default
-TIME ?= wrs
+# These two are mandatory for arch-wrs
+TIME = wrs
+PROTO_EXT = whiterabbit
 
 include time-$(TIME)/Makefile
 

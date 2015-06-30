@@ -68,23 +68,14 @@ config ARCH
        default "sim" if ARCH_SIMULATOR
 
 
-
-choice EXTENSION
-	prompt "Protocol Extension"
-
+# This is not a choice any more: it is mandated by the architecture
 config EXT_WR
-	bool "White Rabbit" if ARCH_WRS || ARCH_WRPC
-	help
-	  Build WR-PTP (which is able to works as a standard PTP agent,
-	  when the peer is not WR-aware).
+	bool
+	default y if ARCH_WRS || ARCH_WRPC
 
 config EXT_NONE
-	bool "None"
-	default y
-	help
-	  Select not protocol extension (build standard PTP-V2 daemon).
-
-endchoice
+	bool
+	default !EXT_WR
 
 config EXTENSION
        string

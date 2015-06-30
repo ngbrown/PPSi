@@ -28,13 +28,11 @@ static struct minipc_pd __rpcdef_cmd = {
 /* Execute command coming ipc */
 static int wrsipc_cmd(int cmd, int value)
 {
-	if (BUILT_WITH_WHITERABBIT) {
-		if(cmd == PTPDEXP_COMMAND_TRACKING)
-			wr_servo_enable_tracking(value);
+	if(cmd == PTPDEXP_COMMAND_TRACKING)
+		wr_servo_enable_tracking(value);
 
-		if(cmd == PTPDEXP_COMMAND_MAN_ADJUST_PHASE)
-			wr_servo_man_adjust_phase(value);
-	}
+	if(cmd == PTPDEXP_COMMAND_MAN_ADJUST_PHASE)
+		wr_servo_man_adjust_phase(value);
 	return 0;
 
 }

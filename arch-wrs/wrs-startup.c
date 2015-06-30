@@ -26,11 +26,7 @@
 #include <ppsi-wrs.h>
 #include <libwr/shmem.h>
 
-#if BUILT_WITH_WHITERABBIT
 #  define WRSW_HAL_RETRIES 1000
-#else
-#  define WRSW_HAL_RETRIES 0
-#endif
 
 #define WRSW_HAL_TIMEOUT 2000000 /* us */
 
@@ -100,55 +96,53 @@ int main(int argc, char **argv)
 		usleep(WRSW_HAL_TIMEOUT);
 	}
 
-	if (BUILT_WITH_WHITERABBIT && !hal_ch) {
+	if (!hal_ch) {
 		pp_printf("ppsi: could not connect to HAL RPC");
 		exit(1);
 	}
 
-	if (BUILT_WITH_WHITERABBIT) {
-		/* If we connected, we also know "for sure" shmem is there */
-		hal_head = wrs_shm_get(wrs_shm_hal,"", WRS_SHM_READ);
-		if (!hal_head || !hal_head->data_off) {
-			pp_printf("ppsi: Can't connect with HAL "
-				  "shared memory\n");
-			exit(1);
-		}
-		if (hal_head->version != HAL_SHMEM_VERSION) {
-			pp_printf("ppsi: unknown HAL's shm version %i "
-				"(known is %i)\n", hal_head->version,
-				HAL_SHMEM_VERSION);
-			exit(1);
-		}
-
-		h = (void *)hal_head + hal_head->data_off;
-		hal_nports = h->nports;
-
-		hal_ports = wrs_shm_follow(hal_head, h->ports);
-
-		if (!hal_ports) {
-			pp_printf("ppsi: unable to follow hal_ports pointer "
-				  "in HAL's shmem\n");
-			exit(1);
-		}
-
-		/* And create your own channel, until we move to shmem too */
-		ppsi_ch = minipc_server_create("ptpd", 0);
-		if (!ppsi_ch) { /* FIXME should we retry ? */
-			pp_printf("ppsi: could not create minipc server");
-			exit(1);
-		}
-		wrs_init_ipcserver(ppsi_ch);
-
-		ppsi_head = wrs_shm_get(wrs_shm_ptp, "ppsi",
-					WRS_SHM_WRITE | WRS_SHM_LOCKED);
-		if (!ppsi_head) {
-			fprintf(stderr, "Fatal: could not create shmem: %s\n",
-				strerror(errno));
-			exit(1);
-		}
-		alloc_fn = wrs_shm_alloc;
-		ppsi_head->version = WRS_PPSI_SHMEM_VERSION;
+	/* If we connected, we also know "for sure" shmem is there */
+	hal_head = wrs_shm_get(wrs_shm_hal,"", WRS_SHM_READ);
+	if (!hal_head || !hal_head->data_off) {
+		pp_printf("ppsi: Can't connect with HAL "
+			  "shared memory\n");
+		exit(1);
 	}
+	if (hal_head->version != HAL_SHMEM_VERSION) {
+		pp_printf("ppsi: unknown HAL's shm version %i "
+			  "(known is %i)\n", hal_head->version,
+			  HAL_SHMEM_VERSION);
+		exit(1);
+	}
+
+	h = (void *)hal_head + hal_head->data_off;
+	hal_nports = h->nports;
+
+	hal_ports = wrs_shm_follow(hal_head, h->ports);
+
+	if (!hal_ports) {
+		pp_printf("ppsi: unable to follow hal_ports pointer "
+			  "in HAL's shmem\n");
+		exit(1);
+	}
+
+	/* And create your own channel, until we move to shmem too */
+	ppsi_ch = minipc_server_create("ptpd", 0);
+	if (!ppsi_ch) { /* FIXME should we retry ? */
+		pp_printf("ppsi: could not create minipc server");
+		exit(1);
+	}
+	wrs_init_ipcserver(ppsi_ch);
+
+	ppsi_head = wrs_shm_get(wrs_shm_ptp, "ppsi",
+				WRS_SHM_WRITE | WRS_SHM_LOCKED);
+	if (!ppsi_head) {
+		fprintf(stderr, "Fatal: could not create shmem: %s\n",
+			strerror(errno));
+		exit(1);
+	}
+	alloc_fn = wrs_shm_alloc;
+	ppsi_head->version = WRS_PPSI_SHMEM_VERSION;
 
 	ppg = alloc_fn(ppsi_head, sizeof(*ppg));
 	ppg->defaultDS = alloc_fn(ppsi_head, sizeof(*ppg->defaultDS));
@@ -243,8 +237,7 @@ int main(int argc, char **argv)
 	ppsi_drop_init(ppg, seed);
 
 	/* release lock from wrs_shm_get */
-	if (BUILT_WITH_WHITERABBIT)
-		wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
+	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_END);
 
 	wrs_main_loop(ppg);
 	return 0; /* never reached */
