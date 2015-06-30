@@ -416,12 +416,12 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	/* Increase number of servo updates with offset exceeded
 	 * SNMP_MAX_OFFSET (Used by SNMP) */
-	if (s->offset > SNMP_MAX_OFFSET)
+	if (abs(s->offset) > SNMP_MAX_OFFSET)
 		s->n_err_offset++;
 
 	/* Increase number of servo updates with delta rtt exceeded
 	 * SNMP_MAX_DELTA_RTT (Used by SNMP) */
-	if (picos_mu_prev - s->picos_mu > SNMP_MAX_DELTA_RTT)
+	if (abs(picos_mu_prev - s->picos_mu) > SNMP_MAX_DELTA_RTT)
 		s->n_err_delta_rtt++;
 
 	/* Increase number of servo updates with delta_*x_* bigger than
