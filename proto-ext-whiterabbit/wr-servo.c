@@ -253,17 +253,17 @@ int wr_servo_update(struct pp_instance *ppi)
 	if(!s->t1.correct || !s->t2.correct ||
 	   !s->t3.correct || !s->t4.correct) {
 		errcount++;
-		if (errcount > 5) /* a 2-3 in a row are expected */
+		if (errcount > 5) { /* a 2-3 in a row are expected */
 			pp_error("%s: TimestampsIncorrect: %d %d %d %d\n",
 				 __func__, s->t1.correct, s->t2.correct,
 				 s->t3.correct, s->t4.correct);
+			errcount = 0;
+		}
 		return 0;
 	}
 
 	/* shmem lock */
 	wrs_shm_write(ppsi_head, WRS_SHM_WRITE_BEGIN);
-
-	errcount = 0;
 
 	s->update_count++;
 
