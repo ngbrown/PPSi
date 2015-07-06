@@ -158,20 +158,24 @@ static void wrs_linearize_rx_timestamp(TimeInternal *ts,
 
 
 static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
-			  TimeInternal *t)
+			TimeInternal *t)
 {
+	struct ethhdr *hdr = pkt;
+	struct pp_vlanhdr *vhdr = pkt;
 	struct wrs_socket *s;
 	struct msghdr msg;
 	struct iovec entry;
 	struct sockaddr_ll from_addr;
-	struct {
+	int i;
+	union {
 		struct cmsghdr cm;
 		char control[1024];
 	} control;
 	struct cmsghdr *cmsg;
 	struct scm_timestamping *sts = NULL;
+	struct tpacket_auxdata *aux = NULL;
 
-	s = (struct wrs_socket*)NP(ppi)->ch[PP_NP_GEN].arch_data;
+	s = (struct wrs_socket*)ppi->ch[PP_NP_GEN].arch_data;
 
 	memset(&msg, 0, sizeof(msg));
 	msg.msg_iov = &entry;
@@ -205,8 +209,11 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 
 		if(cmsg->cmsg_level == SOL_SOCKET
 		   && cmsg->cmsg_type == SO_TIMESTAMPING)
-			sts = (struct scm_timestamping *) dp;
+			sts = (struct scm_timestamping *)dp;
 
+		if (cmsg->cmsg_level == SOL_PACKET &&
+		    cmsg->cmsg_type == PACKET_AUXDATA)
+			aux = (struct tpacket_auxdata *)dp;
 	}
 
 	if(sts && t)
@@ -233,6 +240,43 @@ static int wrs_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 	}
 
 drop:
+	if (aux) {
+		printf("aux: %x   proto %x\n", aux->tp_vlan_tci,
+		       ntohs(hdr->h_proto));
+
+		if (0) {
+			fprintf(stderr,
+				"PPSi error: unexpected auxiliary data\n");
+			errno = EINVAL;
+			return -1;
+		}
+	}
+
+	/*
+	 * While on PC-class ethernet driver we see the internal frame,
+	 * our simple WR driver returns the whole frame. No aux pointer
+	 * is there, at this point in time. So unroll vlan header.
+	 */
+	if (vhdr->h_tpid == htons(0x8100)) {
+		int vlan = ntohs(vhdr->h_tci) & 0xfff;
+
+		/* With PROTO_VLAN, we bound to ETH_P_ALL: we got all frames */
+		if (vhdr->h_proto != htons(ETH_P_1588))
+			return -2; /* like "dropped", so no error message */
+
+		/* Also, we got the vlan, and we can discard it if not ours */
+		for (i = 0; i < ppi->nvlans; i++)
+			if (ppi->vlans[i] == vlan)
+				break; /* ok */
+		if (i == ppi->nvlans)
+			return -2; /* not ours: say it's dropped */
+		ppi->peer_vid = ppi->vlans[i];
+	} else {
+		if (hdr->h_proto != htons(ETH_P_1588))
+			return -2; /* again: drop unrelated frames */
+		ppi->peer_vid = 0;
+	}
+
 	if (ppsi_drop_rx()) {
 		pp_diag(ppi, frames, 1, "Drop received frame\n");
 		return -2;
@@ -245,27 +289,44 @@ int wrs_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		   TimeInternal *t)
 {
 	struct pp_channel *ch1, *ch2;
+	struct ethhdr *hdr = pkt;
 	int ret = -1;
 
-	if (ppi->proto == PPSI_PROTO_RAW) {
-		int fd = NP(ppi)->ch[PP_NP_GEN].fd;
+	switch(ppi->proto) {
+	case PPSI_PROTO_RAW:
+	case PPSI_PROTO_VLAN:
+		ch2 = ppi->ch + PP_NP_GEN;
 
-		ret = wrs_recv_msg(ppi, fd, pkt, len, t);
-		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+		ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t);
+		if (ret <= 0)
+			return ret;
+		memcpy(ppi->peer, hdr->h_source, ETH_ALEN);
+		if (pp_diag_allow(ppi, frames, 2)) {
+			if (ppi->proto == PPSI_PROTO_VLAN)
+				pp_printf("recv: VLAN %i\n", ppi->peer_vid);
 			dump_1588pkt("recv: ", pkt, ret, t);
-	} else {
+		}
+		break;
+
+	case PPSI_PROTO_UDP:
 		/* UDP: always handle EVT msgs before GEN */
-		ch1 = &(NP(ppi)->ch[PP_NP_EVT]);
-		ch2 = &(NP(ppi)->ch[PP_NP_GEN]);
+		ch1 = &(ppi->ch[PP_NP_EVT]);
+		ch2 = &(ppi->ch[PP_NP_GEN]);
 
 		if (ch1->pkt_present)
 			ret = wrs_recv_msg(ppi, ch1->fd, pkt, len, t);
 		else if (ch2->pkt_present)
 			ret = wrs_recv_msg(ppi, ch2->fd, pkt, len, t);
-
-		if (ret > 0 && pp_diag_allow(ppi, frames, 2))
+		if (ret < 0)
+			break;
+		if (pp_diag_allow(ppi, frames, 2))
 			dump_payloadpkt("recv: ", pkt, ret, t);
+		break;
+
+	default:
+		return -1;
 	}
+
 	if (ret < 0)
 		return ret;
 	pp_diag(ppi, time, 1, "recv stamp: (correct %i) %9li.%09li\n",
@@ -337,10 +398,10 @@ static void poll_tx_timestamp(struct pp_instance *ppi, void *pkt, int len,
 
 	/*
 	 * Raw frames return "sock_extended_err" too, telling this is
-	 * a tx timestamp. Udp doesn't so don't check in udp mode
+	 * a tx timestamp. UDP does not; so don't check in udp mode
 	 * (the pointer is only checked for non-null)
 	 */
-	if (!(ppi->proto == PPSI_PROTO_RAW))
+	if (!(ppi->proto != PPSI_PROTO_UDP))
 		serr = (void *)1;
 
 	for (cmsg = CMSG_FIRSTHDR(&msg);
@@ -372,10 +433,16 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 {
 	struct sockaddr_in addr;
 	struct ethhdr *hdr = pkt;
+	struct pp_vlanhdr *vhdr = pkt;
+	struct pp_channel *ch = ppi->ch + chtype;
+	static uint16_t udpport[] = {
+		[PP_NP_GEN] = PP_GEN_PORT,
+		[PP_NP_EVT] = PP_EVT_PORT,
+	};
 	struct wrs_socket *s;
 	int ret, fd, drop;
 
-	s = (struct wrs_socket *)NP(ppi)->ch[PP_NP_GEN].arch_data;
+	s = (struct wrs_socket *)ppi->ch[PP_NP_GEN].arch_data;
 
 	/*
 	 * To fake a packet loss, we must corrupt the frame; we need
@@ -384,24 +451,25 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 	 */
 	drop = ppsi_drop_tx();
 
-	if (ppi->proto == PPSI_PROTO_RAW) {
-		fd = NP(ppi)->ch[PP_NP_GEN].fd;
+	switch (ppi->proto) {
+	case PPSI_PROTO_RAW:
+		/* raw socket implementation always uses gen socket */
+		ch = ppi->ch + PP_NP_GEN;
 		hdr->h_proto = htons(ETH_P_1588);
 		if (drop)
 			hdr->h_proto++;
 
 		memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
-		/* raw socket implementation always uses gen socket */
-		memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, ETH_ALEN);
+		memcpy(hdr->h_source, ch->addr, ETH_ALEN);
 
 		if (t)
 			ppi->t_ops->get(ppi, t);
 
-		ret = send(fd, hdr, len, 0);
-		poll_tx_timestamp(ppi, pkt, len, s, fd, t);
+		ret = send(ch->fd, hdr, len, 0);
+		poll_tx_timestamp(ppi, pkt, len, s, ch->fd, t);
 
 		if (drop) /* avoid messaging about stamps that are not used */
-			goto drop_msg;
+			break;
 
 		if (pp_diag_allow(ppi, frames, 2))
 			dump_1588pkt("send: ", pkt, len, t);
@@ -409,28 +477,62 @@ int wrs_net_send(struct pp_instance *ppi, void *pkt, int len,
 			t->correct, (long)t->seconds,
 			(long)t->nanoseconds);
 		return ret;
+
+	case PPSI_PROTO_VLAN:
+		/* similar to sending raw frames, but w/ different header */
+		ch = ppi->ch + PP_NP_GEN;
+		vhdr->h_proto = htons(ETH_P_1588);
+		vhdr->h_tci = htons(ppi->peer_vid); /* prio is 0 */
+		vhdr->h_tpid = htons(0x8100);
+		if (drop)
+			hdr->h_proto++;
+
+		memcpy(vhdr->h_dest, PP_MCAST_MACADDRESS, ETH_ALEN);
+		memcpy(vhdr->h_source, ch->addr, ETH_ALEN);
+
+		if (t)
+			ppi->t_ops->get(ppi, t);
+
+		if (len < 64)
+			len = 64;
+		ret = send(ch->fd, vhdr, len, 0);
+		poll_tx_timestamp(ppi,  pkt, len, s, ch->fd, t);
+
+		if (drop) /* avoid messaging about stamps that are not used */
+			break;
+
+		if (pp_diag_allow(ppi, frames, 2))
+			dump_1588pkt("send: ", pkt, len, t);
+		pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
+			t->correct, (long)t->seconds,
+			(long)t->nanoseconds);
+		return ret;
+
+	case PPSI_PROTO_UDP:
+		fd = ppi->ch[chtype].fd;
+		addr.sin_family = AF_INET;
+		addr.sin_port = htons(udpport[chtype]);
+		addr.sin_addr.s_addr = ppi->mcast_addr;
+		if (drop)
+			addr.sin_port = 3200;
+		ret = sendto(fd, pkt, len, 0, (struct sockaddr *)&addr,
+			     sizeof(struct sockaddr_in));
+		poll_tx_timestamp(ppi, pkt, len, s, fd, t);
+
+		if (drop) /* like above: skil messages about timestamps */
+			break;
+
+		if (pp_diag_allow(ppi, frames, 2))
+			dump_payloadpkt("send: ", pkt, len, t);
+		pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
+			t->correct, (long)t->seconds,
+			(long)t->nanoseconds);
+		return ret;
+
+	default:
+		return -1;
 	}
 
-	/* else: UDP */
-	fd = NP(ppi)->ch[chtype].fd;
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(chtype == PP_NP_GEN ? PP_GEN_PORT : PP_EVT_PORT);
-	addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
-	if (drop)
-		addr.sin_port = 3200;
-	ret = sendto(fd, pkt, len, 0,
-		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-	poll_tx_timestamp(ppi, pkt, len, s, fd, t);
-
-	if (drop) /* like above: skil messages about timestamps */
-		goto drop_msg;
-
-	if (pp_diag_allow(ppi, frames, 2))
-		dump_payloadpkt("send: ", pkt, len, t);
-	pp_diag(ppi, time, 1, "send stamp: (correct %i) %9li.%09li\n",
-		t->correct, (long)t->seconds,
-		(long)t->nanoseconds);
-drop_msg:
 	if (drop)
 		pp_diag(ppi, frames, 1, "Drop sent frame\n");
 
@@ -478,7 +580,7 @@ static int wrs_net_init(struct pp_instance *ppi)
 	int r, i;
 	struct hal_port_state *p;
 
-	if (NP(ppi)->ch[PP_NP_GEN].arch_data)
+	if (ppi->ch[PP_NP_GEN].arch_data)
 		wrs_net_exit(ppi);
 
 	/* Generic OS work is done by standard Unix stuff */
@@ -512,15 +614,15 @@ static int wrs_net_init(struct pp_instance *ppi)
 
 	s->dmtd_phase_valid = 0;
 
-	NP(ppi)->ch[PP_NP_GEN].arch_data = s;
-	NP(ppi)->ch[PP_NP_EVT].arch_data = s;
+	ppi->ch[PP_NP_GEN].arch_data = s;
+	ppi->ch[PP_NP_EVT].arch_data = s;
 	tmo_init(&s->dmtd_update_tmo, DMTD_UPDATE_INTERVAL);
 
 	for (i = PP_NP_GEN, r = 0; i <= PP_NP_EVT && r == 0; i++)
-		r = wrs_enable_timestamps(ppi, NP(ppi)->ch[i].fd);
+		r = wrs_enable_timestamps(ppi, ppi->ch[i].fd);
 	if (r) {
-		NP(ppi)->ch[PP_NP_GEN].arch_data = NULL;
-		NP(ppi)->ch[PP_NP_EVT].arch_data = NULL;
+		ppi->ch[PP_NP_GEN].arch_data = NULL;
+		ppi->ch[PP_NP_EVT].arch_data = NULL;
 		free(s);
 	}
 	return r;
@@ -529,9 +631,9 @@ static int wrs_net_init(struct pp_instance *ppi)
 static int wrs_net_exit(struct pp_instance *ppi)
 {
 	unix_net_ops.exit(ppi);
-	free(NP(ppi)->ch[PP_NP_GEN].arch_data);
-	NP(ppi)->ch[PP_NP_GEN].arch_data = NULL;
-	NP(ppi)->ch[PP_NP_EVT].arch_data = NULL;
+	free(ppi->ch[PP_NP_GEN].arch_data);
+	ppi->ch[PP_NP_GEN].arch_data = NULL;
+	ppi->ch[PP_NP_EVT].arch_data = NULL;
 	return 0;
 }
 

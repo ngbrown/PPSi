@@ -7,6 +7,13 @@
  */
 #include <ppsi/ppsi.h>
 #include "common-fun.h"
+#include "../lib/network_types.h"
+
+#ifdef CONFIG_ARCH_WRS
+#define ARCH_IS_WRS 1
+#else
+#define ARCH_IS_WRS 0
+#endif
 
 static void *msg_copy_header(MsgHeader *dest, MsgHeader *src)
 {
@@ -25,12 +32,35 @@ static void *__align_pointer(void *p)
 
 void pp_prepare_pointers(struct pp_instance *ppi)
 {
-	ppi->tx_ptp = __align_pointer(pp_get_payload(ppi, ppi->__tx_buffer));
-	ppi->rx_ptp = __align_pointer(pp_get_payload(ppi, ppi->__rx_buffer));
+	/*
+	 * Horrible thing: when we receive vlan, we get standard eth header,
+	 * but when we send we must fill the complete vlan header.
+	 * So we reserve a different number of bytes.
+	 */
+	switch(ppi->proto) {
+	case PPSI_PROTO_RAW:
+		ppi->tx_offset = ETH_HLEN; /* 14, I know! */
+		ppi->rx_offset = ETH_HLEN;
+		break;
+	case PPSI_PROTO_VLAN:
+		ppi->tx_offset = sizeof(struct pp_vlanhdr);
+		/* Hack warning: with wrs we get the whole header */
+		if (ARCH_IS_WRS)
+			ppi->rx_offset = sizeof(struct pp_vlanhdr);
+		else
+			ppi->rx_offset = ETH_HLEN;
+		break;
+	case PPSI_PROTO_UDP:
+		ppi->tx_offset = 0;
+		ppi->rx_offset = 0;
+		break;
+	}
+	ppi->tx_ptp = __align_pointer(ppi->__tx_buffer + ppi->tx_offset);
+	ppi->rx_ptp = __align_pointer(ppi->__rx_buffer + ppi->rx_offset);
 
 	/* Now that ptp payload is aligned, get back the header */
-	ppi->tx_frame = pp_get_header(ppi, ppi->tx_ptp);
-	ppi->rx_frame = pp_get_header(ppi, ppi->rx_ptp);
+	ppi->tx_frame = ppi->tx_ptp - ppi->tx_offset;
+	ppi->rx_frame = ppi->rx_ptp - ppi->rx_offset;
 
 	if (0) { /* enable to verify... it works for me though */
 		pp_printf("%p -> %p %p\n",

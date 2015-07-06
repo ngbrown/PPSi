@@ -24,7 +24,7 @@ int pp_initializing(struct pp_instance *ppi, unsigned char *pkt, int plen)
 
 	/* Clock identity comes from mac address with 0xff:0xfe intermixed */
 	id = (unsigned char *)&DSDEF(ppi)->clockIdentity;
-	mac = NP(ppi)->ch[PP_NP_GEN].addr;
+	mac = ppi->ch[PP_NP_GEN].addr;
 	id[0] = mac[0];
 	id[1] = mac[1];
 	id[2] = mac[2];

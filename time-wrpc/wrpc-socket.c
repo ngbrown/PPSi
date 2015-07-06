@@ -26,10 +26,10 @@ static int wrpc_open_ch(struct pp_instance *ppi)
 		return -1;
 
 	ptpd_netif_get_hw_addr(sock, &mac);
-	memcpy(NP(ppi)->ch[PP_NP_EVT].addr, &mac, sizeof(mac_addr_t));
-	NP(ppi)->ch[PP_NP_EVT].custom = sock;
-	memcpy(NP(ppi)->ch[PP_NP_GEN].addr, &mac, sizeof(mac_addr_t));
-	NP(ppi)->ch[PP_NP_GEN].custom = sock;
+	memcpy(ppi->ch[PP_NP_EVT].addr, &mac, sizeof(mac_addr_t));
+	ppi->ch[PP_NP_EVT].custom = sock;
+	memcpy(ppi->ch[PP_NP_GEN].addr, &mac, sizeof(mac_addr_t));
+	ppi->ch[PP_NP_GEN].custom = sock;
 
 	return 0;
 }
@@ -42,7 +42,7 @@ static int wrpc_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	wr_socket_t *sock;
 	wr_timestamp_t wr_ts;
 	wr_sockaddr_t addr;
-	sock = NP(ppi)->ch[PP_NP_EVT].custom;
+	sock = ppi->ch[PP_NP_EVT].custom;
 	got = ptpd_netif_recvfrom(sock, &addr, pkt, len, &wr_ts);
 
 	if (t) {
@@ -74,7 +74,7 @@ static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
 	wr_socket_t *sock;
 	wr_timestamp_t wr_ts;
 	wr_sockaddr_t addr;
-	sock = NP(ppi)->ch[PP_NP_EVT].custom;
+	sock = ppi->ch[PP_NP_EVT].custom;
 
 	addr.ethertype = ETH_P_1588;
 	memcpy(&addr.mac, PP_MCAST_MACADDRESS, sizeof(mac_addr_t));
@@ -102,14 +102,14 @@ static int wrpc_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 static int wrpc_net_exit(struct pp_instance *ppi)
 {
-	ptpd_netif_close_socket(NP(ppi)->ch[PP_NP_EVT].custom);
+	ptpd_netif_close_socket(ppi->ch[PP_NP_EVT].custom);
 	return 0;
 }
 
 /* This function must be able to be called twice, and clean-up internally */
 static int wrpc_net_init(struct pp_instance *ppi)
 {
-	if (NP(ppi)->ch[PP_NP_EVT].custom)
+	if (ppi->ch[PP_NP_EVT].custom)
 		wrpc_net_exit(ppi);
 	pp_prepare_pointers(ppi);
 	wrpc_open_ch(ppi);

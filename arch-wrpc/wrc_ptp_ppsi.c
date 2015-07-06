@@ -78,6 +78,7 @@ struct pp_instance ppi_static = {
 	.portDS			= &portDS,
 	.n_ops			= &wrpc_net_ops,
 	.t_ops			= &wrpc_time_ops,
+	.vlans_array_len	= CONFIG_VLAN_ARRAY_SIZE,
 	.proto			= PP_DEFAULT_PROTO,
 	.iface_name		= "wr1",
 	.port_name		= "wr1",

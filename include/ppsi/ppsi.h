@@ -35,6 +35,15 @@ extern int pp_sprintf(char *s, const char *fmt, ...)
 extern int pp_vsprintf(char *buf, const char *, va_list)
 	__attribute__ ((format (printf, 2, 0)));
 
+/* This structure is never defined, it seems */
+struct pp_vlanhdr {
+	uint8_t h_dest[6];
+	uint8_t h_source[6];
+	uint16_t h_tpid;
+	uint16_t h_tci;
+	uint16_t h_proto;
+};
+
 
 /* We use data sets a lot, so have these helpers */
 static inline struct pp_globals *GLBS(struct pp_instance *ppi)
@@ -88,9 +97,13 @@ static inline struct DSTimeProperties *DSPRO(struct pp_instance *ppi)
 	return GLBS(ppi)->timePropertiesDS;
 }
 
-static inline struct pp_net_path *NP(struct pp_instance *ppi)
+/* We used to have a "netpath" structure. Keep this until we merge pdelay */
+static struct pp_instance *NP(struct pp_instance *ppi)
+	__attribute__((deprecated));
+
+static inline struct pp_instance *NP(struct pp_instance *ppi)
 {
-	return &ppi->np;
+	return ppi;
 }
 
 static inline struct pp_servo *SRV(struct pp_instance *ppi)
@@ -98,20 +111,7 @@ static inline struct pp_servo *SRV(struct pp_instance *ppi)
 	return GLBS(ppi)->servo;
 }
 
-
-/* Sometimes (e.g., raw ethernet frames), we need to consider an offset */
-static inline void *pp_get_header(struct pp_instance *ppi, void *ptp_payload)
-{
-	return ptp_payload - NP(ppi)->ptp_offset;
-}
-
-static inline void *pp_get_payload(struct pp_instance *ppi, void *frame_ptr)
-{
-	return frame_ptr + NP(ppi)->ptp_offset;
-}
-
 extern void pp_prepare_pointers(struct pp_instance *ppi);
-
 
 /*
  * Each extension should fill this structure that is used to augment
@@ -316,6 +316,7 @@ extern int pp_config_file(struct pp_globals *ppg, int force, char *fname);
 
 #define PPSI_PROTO_RAW		0
 #define PPSI_PROTO_UDP		1
+#define PPSI_PROTO_VLAN		2	/* Actually: vlan over raw eth */
 
 #define PPSI_ROLE_AUTO		0
 #define PPSI_ROLE_MASTER	1

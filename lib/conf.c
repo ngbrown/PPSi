@@ -118,10 +118,76 @@ static int f_diag(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 	return 0;
 }
 
+/* VLAN support is per-port, and it depends on configuration itmes */
+static int f_vlan(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
+{
+	struct pp_instance *ppi = CUR_PPI(ppg);
+	int i, n, *v;
+	char ch, *s;
+
+	CHECK_PPI(1);
+
+	/* Refuse to add vlan support in non-raw mode */
+	if (ppi->proto == PPSI_PROTO_UDP) {
+		pp_printf("config line %i: VLANs with UDP: not supported\n",
+			  lineno);
+		return -1;
+	}
+	/* If there is no support, just warn */
+	if (CONFIG_VLAN_ARRAY_SIZE == 0) {
+		pp_printf("Warning: config line %i ignored:"
+			  " this PPSI binary has no VLAN support\n",
+			  lineno);
+		return 0;
+	}
+	if (ppi->nvlans)
+		pp_printf("Warning: config line %i overrides "
+			  "previous vlan settings\n", lineno);
+
+	s = arg->s;
+	for (v = ppi->vlans, n = 0; n < CONFIG_VLAN_ARRAY_SIZE; n++, v++) {
+		i = sscanf(s, "%i %c", v, &ch);
+		if (!i)
+			break;
+		if (*v > 4095 || *v < 0) {
+			pp_printf("config line %i: vlan out of range: %i "
+				  "(valid is 0..4095)\n", lineno, *v);
+			return -1;
+		}
+		if (i == 2 && ch != ',') {
+			pp_printf("config line %i: unexpected char '%c' "
+				  "after %i\n", lineno, ch, *v);
+			return -1;
+		}
+		if (i == 2)
+			s = strchr(s, ',') + 1;
+		else break;
+	}
+	if (n == CONFIG_VLAN_ARRAY_SIZE) {
+		pp_printf("config line %i: too many vlans (%i): max is %i\n",
+			  lineno, n + 1, CONFIG_VLAN_ARRAY_SIZE);
+		return -1;
+	}
+	ppi->nvlans = n + 1; /* item "n" has been assigend too, 0-based */
+
+	for (i = 0; i < ppi->nvlans; i++)
+		pp_diag(NULL, config, 2, "  parsed vlan %4i for %s (%s)\n",
+			ppi->vlans[i], ppi->cfg.port_name, ppi->cfg.iface_name);
+	pp_diag(NULL, config, 2, "role %i\n", ppi->role);
+	if (ppi->role != PPSI_ROLE_MASTER && ppi->nvlans > 1) {
+		pp_printf("config line %i: too many vlans (%i) for slave "
+			  "or auto role\n", lineno, ppi->nvlans);
+		return -1;
+	}
+	ppi->proto = PPSI_PROTO_VLAN;
+	return 0;
+}
+
 /* These are the tables for the parser */
 static struct pp_argname arg_proto[] = {
 	{"raw", PPSI_PROTO_RAW},
 	{"udp", PPSI_PROTO_UDP},
+	/* PROTO_VLAN is an internal modification of PROTO_RAW */
 	{},
 };
 static struct pp_argname arg_role[] = {
@@ -143,6 +209,7 @@ static struct pp_argline pp_global_arglines[] = {
 	{ f_proto,	"proto",	ARG_NAMES,	arg_proto},
 	{ f_role,	"role",		ARG_NAMES,	arg_role},
 	{ f_ext,	"extension",	ARG_NAMES,	arg_ext},
+	{ f_vlan,	"vlan",		ARG_STR},
 	{ f_diag,	"diagnostics",	ARG_STR},
 	{ f_class,	"clock-class",	ARG_INT},
 	{ f_accuracy,	"clock-accuracy", ARG_INT},

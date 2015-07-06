@@ -89,6 +89,7 @@ int main(int argc, char **argv)
 	/* Ok, now we are promiscuous. Just read stuff forever */
 	while(1) {
 		struct ethhdr *eth;
+		struct pp_vlanhdr *vhdr;
 		struct iphdr *ip;
 		static unsigned char prev[1500];
 		static int prevlen;
@@ -98,7 +99,7 @@ int main(int argc, char **argv)
 
 		struct sockaddr_in from;
 		socklen_t fromlen = sizeof(from);
-		int len;
+		int len, proto;
 
 		len = recvfrom(sock, buf, sizeof(buf), MSG_TRUNC,
 			       (struct sockaddr *) &from, &fromlen);
@@ -120,7 +121,15 @@ int main(int argc, char **argv)
 			continue;
 		eth = (void *)buf;
 		ip = (void *)(buf + ETH_HLEN);
-		switch(ntohs(eth->h_proto)) {
+
+		proto = ntohs(eth->h_proto);
+		if (proto == 0x8100) { /* VLAN is visible (e.g.: outgoing) */
+			vhdr = (void *)buf;
+			proto = ntohs(vhdr->h_proto);
+			ip = (void *)(buf + sizeof(*vhdr));
+		}
+
+		switch(proto) {
 		case ETH_P_IP:
 		{
 			struct udphdr *udp = (void *)(ip + 1);

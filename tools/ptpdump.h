@@ -1,6 +1,7 @@
 #ifndef __PTPDUMP_H__
 #define __PTPDUMP_H__
 
+#include <ppsi/ppsi.h>
 #if __STDC_HOSTED__
 #include <time.h>
 #include <sys/time.h>
@@ -8,7 +9,6 @@
 #include <netinet/udp.h>	/* struct udphdr */
 #include <linux/if_ether.h>	/* struct ethhdr */
 #else
-#include <ppsi/ppsi.h>
 #include "../lib/network_types.h"
 #define printf pp_printf
 #endif

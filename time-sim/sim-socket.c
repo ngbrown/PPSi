@@ -145,7 +145,7 @@ static int sim_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	if (data->n_pending <= 0)
 		return 0;
 
-	ch = &(NP(ppi)->ch[data->pending->chtype]);
+	ch = &(ppi->ch[data->pending->chtype]);
 
 	ret = -1;
 	if (ch->pkt_present > 0) {
@@ -181,12 +181,12 @@ static int sim_net_send(struct pp_instance *ppi, void *pkt, int len,
 					PP_SLAVE_GEN_PORT :
 					PP_SLAVE_EVT_PORT);
 
-	addr.sin_addr.s_addr = NP(ppi)->mcast_addr;
+	addr.sin_addr.s_addr = ppi->mcast_addr;
 
 	if (t)
 		ppi->t_ops->get(ppi, t);
 
-	ret = sendto(NP(ppi)->ch[chtype].fd, pkt, len, 0,
+	ret = sendto(ppi->ch[chtype].fd, pkt, len, 0,
 		(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 	if (pp_diag_allow(ppi, frames, 2))
 		dump_payloadpkt("send: ", pkt, len, t);
@@ -219,7 +219,7 @@ static int sim_net_send(struct pp_instance *ppi, void *pkt, int len,
 
 	pending.delay_ns = data->n_delay.t_prop_ns + jit_ns;
 	insert_pending(SIM_PPG_ARCH(ppi->glbs), &pending);
-	NP(data->other_ppi)->ch[chtype].pkt_present++;
+	data->other_ppi->ch[chtype].pkt_present++;
 	return ret;
 }
 
@@ -230,11 +230,11 @@ static int sim_net_exit(struct pp_instance *ppi)
 
 	/* only UDP */
 	for (i = PP_NP_GEN; i <= PP_NP_EVT; i++) {
-		fd = NP(ppi)->ch[i].fd;
+		fd = ppi->ch[i].fd;
 		if (fd < 0)
 			continue;
 		close(fd);
-		NP(ppi)->ch[i].fd = -1;
+		ppi->ch[i].fd = -1;
 	}
 	return 0;
 }
@@ -253,7 +253,7 @@ static int sim_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 	if (sock < 0)
 		goto err_out;
 
-	NP(ppi)->ch[chtype].fd = sock;
+	ppi->ch[chtype].fd = sock;
 
 	temp = 1; /* allow address reuse */
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &temp, sizeof(int)) < 0)
@@ -278,21 +278,21 @@ static int sim_open_ch(struct pp_instance *ppi, char *ifname, int chtype)
 		 sizeof(struct sockaddr_in)) < 0)
 		goto err_out;
 
-	NP(ppi)->ch[chtype].fd = sock;
+	ppi->ch[chtype].fd = sock;
 	/*
 	 * Standard ppsi state machine is designed to drop packets coming from
 	 * itself, based on the clockIdentity. This hack avoids this behaviour,
 	 * changing the clockIdentity of the master.
 	 */
 	if (pp_sim_is_master(ppi))
-		memset(NP(ppi)->ch[chtype].addr, 111, 1);
+		memset(ppi->ch[chtype].addr, 111, 1);
 	return 0;
 
 err_out:
 	pp_printf("%s: %s: %s\n", __func__, context, strerror(errno));
 	if (sock >= 0)
 		close(sock);
-	NP(ppi)->ch[chtype].fd = -1;
+	ppi->ch[chtype].fd = -1;
 	return -1;
 }
 
@@ -300,7 +300,7 @@ static int sim_net_init(struct pp_instance *ppi)
 {
 	int i;
 
-	if (NP(ppi)->ch[0].fd > 0)
+	if (ppi->ch[0].fd > 0)
 		sim_net_exit(ppi);
 
 	/* The buffer is inside ppi, but we need to set pointers and align */

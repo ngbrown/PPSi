@@ -24,8 +24,6 @@ void bare_main_loop(struct pp_instance *ppi)
 {
 	int delay_ms;
 
-	NP(ppi)->ptp_offset = 14;
-
 	/*
 	 * The main loop here is based on select. While we are not
 	 * doing anything else but the protocol, this allows extra stuff
@@ -44,11 +42,11 @@ void bare_main_loop(struct pp_instance *ppi)
 
 	again:
 		FD_ZERO(&set);
-		FD_SET(NP(ppi)->ch[PP_NP_GEN].fd, &set);
-		FD_SET(NP(ppi)->ch[PP_NP_EVT].fd, &set);
-		maxfd = NP(ppi)->ch[PP_NP_GEN].fd;
-		if (NP(ppi)->ch[PP_NP_EVT].fd > maxfd)
-			maxfd = NP(ppi)->ch[PP_NP_EVT].fd;
+		FD_SET(ppi->ch[PP_NP_GEN].fd, &set);
+		FD_SET(ppi->ch[PP_NP_EVT].fd, &set);
+		maxfd = ppi->ch[PP_NP_GEN].fd;
+		if (ppi->ch[PP_NP_EVT].fd > maxfd)
+			maxfd = ppi->ch[PP_NP_EVT].fd;
 
 		i = sys_select(maxfd + 1, &set, NULL, NULL, &tv);
 		if (i < 0 && bare_errno != 4 /* EINTR */)
@@ -77,6 +75,6 @@ void bare_main_loop(struct pp_instance *ppi)
 			goto again;
 
 		delay_ms = pp_state_machine(ppi, ppi->rx_ptp,
-					    i - NP(ppi)->ptp_offset);
+					    i - ppi->rx_offset);
 	}
 }

@@ -106,6 +106,7 @@ int main(int argc, char **argv)
 	for (i = 0; i < ppg->max_links; i++) {
 		ppi = INST(ppg, i);
 		ppi->glbs = ppg; // must be done before using sim_set_global_DS
+		ppi->vlans_array_len = CONFIG_VLAN_ARRAY_SIZE;
 		if (sim_ppi_init(ppi, i))
 			return -1;
 	}
@@ -145,8 +146,8 @@ int main(int argc, char **argv)
 		if (ppi->proto == PPSI_PROTO_RAW)
 			pp_printf("Warning: simulator doesn't support raw "
 					"ethernet. Using UDP\n");
-		NP(ppi)->ch[PP_NP_GEN].fd = -1;
-		NP(ppi)->ch[PP_NP_EVT].fd = -1;
+		ppi->ch[PP_NP_GEN].fd = -1;
+		ppi->ch[PP_NP_EVT].fd = -1;
 		ppi->t_ops = &DEFAULT_TIME_OPS;
 		ppi->n_ops = &DEFAULT_NET_OPS;
 		if (pp_sim_is_master(ppi))

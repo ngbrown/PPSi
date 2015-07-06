@@ -18,7 +18,7 @@ static int bare_net_recv(struct pp_instance *ppi, void *pkt, int len,
 	if (t)
 		ppi->t_ops->get(ppi, t);
 
-	ret = sys_recv(NP(ppi)->ch[PP_NP_GEN].fd, pkt, len, 0);
+	ret = sys_recv(ppi->ch[PP_NP_GEN].fd, pkt, len, 0);
 	if (ret > 0 && pp_diag_allow(ppi, frames, 2))
 		dump_1588pkt("recv: ", pkt, ret, t);
 	return ret;
@@ -35,12 +35,12 @@ static int bare_net_send(struct pp_instance *ppi, void *pkt, int len,
 	memcpy(hdr->h_dest, PP_MCAST_MACADDRESS, 6);
 
 	/* raw socket implementation always uses gen socket */
-	memcpy(hdr->h_source, NP(ppi)->ch[PP_NP_GEN].addr, 6);
+	memcpy(hdr->h_source, ppi->ch[PP_NP_GEN].addr, 6);
 
 	if (t)
 		ppi->t_ops->get(ppi, t);
 
-	ret = sys_send(NP(ppi)->ch[chtype].fd, pkt, len, 0);
+	ret = sys_send(ppi->ch[chtype].fd, pkt, len, 0);
 	if (ret > 0 && pp_diag_allow(ppi, frames, 2))
 		dump_1588pkt("send: ", pkt, len, t);
 	return ret;
@@ -82,9 +82,9 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		if (sys_ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
 			goto err_out;
 
-		memcpy(NP(ppi)->ch[PP_NP_GEN].addr,
+		memcpy(ppi->ch[PP_NP_GEN].addr,
 					ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
-		memcpy(NP(ppi)->ch[PP_NP_EVT].addr,
+		memcpy(ppi->ch[PP_NP_EVT].addr,
 					ifr.ifr_ifru.ifru_hwaddr.sa_data, 6);
 
 		/* bind */
@@ -106,8 +106,8 @@ static int bare_open_ch(struct pp_instance *ppi, char *ifname)
 		sys_setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
 			   &pmr, sizeof(pmr)); /* lazily ignore errors */
 
-		NP(ppi)->ch[PP_NP_GEN].fd = sock;
-		NP(ppi)->ch[PP_NP_EVT].fd = sock;
+		ppi->ch[PP_NP_GEN].fd = sock;
+		ppi->ch[PP_NP_EVT].fd = sock;
 
 		/* make timestamps available through recvmsg() -- FIXME: hw? */
 		sys_setsockopt(sock, SOL_SOCKET, SO_TIMESTAMP,
@@ -128,14 +128,14 @@ err_out:
 
 static int bare_net_exit(struct pp_instance *ppi)
 {
-	return sys_shutdown(NP(ppi)->ch[PP_NP_GEN].fd, SHUT_RDWR);
+	return sys_shutdown(ppi->ch[PP_NP_GEN].fd, SHUT_RDWR);
 }
 
 /* This function must be able to be called twice, and clean-up internally */
 static int bare_net_init(struct pp_instance *ppi)
 {
 	/* Here, socket may not be 0 (do we have stdin even if bare) */
-	if (NP(ppi)->ch[PP_NP_GEN].fd)
+	if (ppi->ch[PP_NP_GEN].fd)
 		bare_net_exit(ppi);
 
 	/* The buffer is inside ppi, but we need to set pointers and align */
