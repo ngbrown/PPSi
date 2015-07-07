@@ -10,7 +10,6 @@
 /* TODO: These values need to be tuned! */
 #define SNMP_MAX_OFFSET 1000000
 #define SNMP_MAX_DELTA_RTT 1000000
-#define SNMP_MAX_RXTX_DELTAS 1000000
 
 static const char *servo_name[] = {
 	[WR_UNINITIALIZED] = "Uninitialized",
@@ -419,14 +418,6 @@ int wr_servo_update(struct pp_instance *ppi)
 	 * SNMP_MAX_DELTA_RTT (Used by SNMP) */
 	if (abs(picos_mu_prev - s->picos_mu) > SNMP_MAX_DELTA_RTT)
 		s->n_err_delta_rtt++;
-
-	/* Increase number of servo updates with delta_*x_* bigger than
-	 * SNMP_MAX_RXTX_DELTAS. (Used by SNMP) */
-	if ((s->delta_tx_m > SNMP_MAX_RXTX_DELTAS)
-	    || (s->delta_rx_m > SNMP_MAX_RXTX_DELTAS)
-	    || (s->delta_tx_s > SNMP_MAX_RXTX_DELTAS)
-	    || (s->delta_rx_s > SNMP_MAX_RXTX_DELTAS))
-		s->n_err_rxtx_deltas++;
 
 out:
 	/* shmem unlock */
