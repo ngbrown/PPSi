@@ -304,22 +304,6 @@ int wr_servo_update(struct pp_instance *ppi)
 		 * DSPOR(ppi)->doRestart = TRUE; */
 	}
 
-	if (s->state == WR_UNINITIALIZED)
-		s->state = WR_SYNC_TAI;
-	if (s->state ==WR_SYNC_TAI) /* unsynced: no PPS output */
-		wrp->ops->enable_timing_output(ppi, 0);
-	if (s->state == WR_SYNC_TAI && ts_offset_hw.seconds == 0)
-		s->state = WR_SYNC_NSEC;
-	if (s->state == WR_SYNC_NSEC && ts_offset_hw.nanoseconds == 0)
-		s->state = WR_SYNC_PHASE;
-
-	pp_diag(ppi, servo, 2, "offset_hw: %li.%09li\n",
-		(long)ts_offset_hw.seconds, (long)ts_offset_hw.nanoseconds);
-
-	pp_diag(ppi, servo, 1, "wr_servo state: %s%s\n",
-		servo_name[s->state],
-		s->flags & WR_FLAG_WAIT_HW ? " (wait for hw)" : "");
-
 	/*
 	 * After each action on the hardware, we must verify if it is over.
 	 * However, we loose one iteration every two. To be audited later.
@@ -332,12 +316,31 @@ int wr_servo_update(struct pp_instance *ppi)
 		goto out;
 	}
 
+	/* So, we didn't return. Choose the right state */
+
+	if (s->state == WR_UNINITIALIZED)
+		s->state = WR_SYNC_TAI;
+
+	if (ts_offset_hw.seconds) /* so bad... */
+		s->state = WR_SYNC_TAI;
+	else if (ts_offset_hw.nanoseconds) /* not that bad */
+		s->state = WR_SYNC_NSEC;
+	/* else, let the states below choose the sequence */
+
+
+	pp_diag(ppi, servo, 2, "offset_hw: %li.%09li (+%li)\n",
+		(long)ts_offset_hw.seconds, (long)ts_offset_hw.nanoseconds,
+		(long)ts_offset_hw.phase);
+
+	pp_diag(ppi, servo, 1, "wr_servo state: %s%s\n",
+		servo_name[s->state],
+		s->flags & WR_FLAG_WAIT_HW ? " (wait for hw)" : "");
+
 	switch (s->state) {
 	case WR_SYNC_TAI:
 		wrp->ops->adjust_counters(ts_offset_hw.seconds, 0);
 		wrp->ops->adjust_phase(0);
 		s->flags |= WR_FLAG_WAIT_HW;
-		s->state = WR_SYNC_NSEC;
 		break;
 
 	case WR_SYNC_NSEC:
@@ -359,10 +362,6 @@ int wr_servo_update(struct pp_instance *ppi)
 
 	case WR_WAIT_OFFSET_STABLE:
 
-		if (ts_offset_hw.seconds || ts_offset_hw.nanoseconds) {
-			s->state = WR_SYNC_TAI;
-			break;
-		}
 		/* ts_to_picos() below returns phase alone */
 		remaining_offset = abs(ts_to_picos(ts_offset_hw));
 		if(remaining_offset < WR_SERVO_OFFSET_STABILITY_THRESHOLD) {
