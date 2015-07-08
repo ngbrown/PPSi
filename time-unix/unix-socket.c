@@ -63,8 +63,10 @@ static int unix_recv_msg(struct pp_instance *ppi, int fd, void *pkt, int len,
 		return ret;
 	}
 	if (msg.msg_flags & MSG_TRUNC) {
-		pp_error("%s: truncated message\n", __func__);
-		return 0;
+		/* If we are in VLAN mode, we get everything. This is ok */
+		if (ppi->proto != PPSI_PROTO_VLAN)
+			pp_error("%s: truncated message\n", __func__);
+		return -2; /* like "dropped" */
 	}
 	/* get time stamp of packet */
 	if (msg.msg_flags & MSG_CTRUNC) {
@@ -141,7 +143,7 @@ static int unix_net_recv(struct pp_instance *ppi, void *pkt, int len,
 		if (ret <= 0)
 			return ret;
 		if (hdr->h_proto != htons(ETH_P_1588))
-			return 0;
+			return -2; /* like "dropped", so no error message */
 
 		memcpy(ppi->peer, hdr->h_source, ETH_ALEN);
 		if (pp_diag_allow(ppi, frames, 2)) {

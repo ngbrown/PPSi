@@ -149,7 +149,7 @@ void wrs_main_loop(struct pp_globals *ppg)
 						&ppi->last_rcv_time);
 
 				if (i == -2) {
-					continue; /* dropped */
+					continue; /* dropped or not for us */
 				}
 				if (i == -1) {
 					pp_diag(ppi, frames, 1,
