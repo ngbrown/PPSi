@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3024D255-773F-4993-A0BB-DF7D0B68CE10}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>ppsi</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)arch-win32\include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)arch-win32\include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="arch-win32\win32-startup.c" />
+    <ClCompile Include="diag.c" />
+    <ClCompile Include="fsm.c" />
+    <ClCompile Include="lib\div64.c" />
+    <ClCompile Include="proto-standard\arith.c" />
+    <ClCompile Include="proto-standard\bmc.c" />
+    <ClCompile Include="proto-standard\common-fun.c" />
+    <ClCompile Include="proto-standard\fsm-table.c" />
+    <ClCompile Include="proto-standard\hooks.c" />
+    <ClCompile Include="proto-standard\msg.c" />
+    <ClCompile Include="proto-standard\servo.c" />
+    <ClCompile Include="proto-standard\state-disabled.c" />
+    <ClCompile Include="proto-standard\state-faulty.c" />
+    <ClCompile Include="proto-standard\state-initializing.c" />
+    <ClCompile Include="proto-standard\state-listening.c" />
+    <ClCompile Include="proto-standard\state-master.c" />
+    <ClCompile Include="proto-standard\state-passive.c" />
+    <ClCompile Include="proto-standard\state-pre-master.c" />
+    <ClCompile Include="proto-standard\state-slave.c" />
+    <ClCompile Include="proto-standard\state-uncalibrated.c" />
+    <ClCompile Include="proto-standard\timeout.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="arch-win32\include\arch\arch.h" />
+    <ClInclude Include="arch-win32\include\arch\constants.h" />
+    <ClInclude Include="arch-win32\include\generated\autoconf.h" />
+    <ClInclude Include="include\ppsi\constants.h" />
+    <ClInclude Include="include\ppsi\diag-macros.h" />
+    <ClInclude Include="include\ppsi\ieee1588_types.h" />
+    <ClInclude Include="include\ppsi\jiffies.h" />
+    <ClInclude Include="include\ppsi\lib.h" />
+    <ClInclude Include="include\ppsi\pp-instance.h" />
+    <ClInclude Include="include\ppsi\ppsi.h" />
+    <ClInclude Include="proto-standard\common-fun.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -13,3 +13,16 @@ ppsi.bin
 .config.old
 include/config
 include/generated
+
+# Visual Studio
+*.suo
+*.sdf
+*.vcxproj.user
+*.opensdf
+*.tlog
+*.idb
+*.obj
+*.pdb
+*.log
+*.ilk
+*.exe
