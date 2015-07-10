@@ -9,11 +9,18 @@
 #define ETH_ALEN	6		/* Octets in one ethernet addr	 */
 #define ETH_HLEN	14		/* Total octets in header.	 */
 
-struct ethhdr {
+#ifndef _MSC_VER
+#define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
+#else
+#define PACK( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
+#endif
+
+
+PACK(struct ethhdr {
 	unsigned char	h_dest[ETH_ALEN];	/* destination eth addr */
 	unsigned char	h_source[ETH_ALEN];	/* source ether addr	*/
 	uint16_t	h_proto;		/* packet type ID field */
-} __attribute__((packed));
+});
 
 
 /* From: /usr/include/netinet/ip.h, renaming the bitfield to avoid using them */

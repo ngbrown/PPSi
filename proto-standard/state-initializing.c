@@ -8,6 +8,10 @@
 
 #include <ppsi/ppsi.h>
 
+#ifdef _MSC_VER
+#define __func__ __FUNCTION__
+#endif
+
 /*
  * Initializes network and other stuff
  */

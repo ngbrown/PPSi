@@ -5,12 +5,14 @@
  * Check at compile time that something is of a particular type.
  * Always evaluates to 1 so you may use it easily in comparisons.
  */
+#ifndef _MSC_VER
 #define typecheck(type,x) \
 ({      type __dummy; \
         typeof(x) __dummy2; \
          (void)(&__dummy == &__dummy2); \
         1; \
 })
+#endif
 
 /*
  *	These inlines deal with timer wrapping correctly. You are 
@@ -25,17 +27,32 @@
  * good compiler would generate better code (and a really good compiler
  * wouldn't care). Gcc is currently neither.
  */
-#ifndef time_after /* Maybe someone else defined them already */
+#ifndef time_before /* Maybe someone else defined them already */
+#ifndef _MSC_VER
 #define time_after(a,b)		\
 	(typecheck(unsigned long, a) && \
 	 typecheck(unsigned long, b) && \
 	 ((long)(b) - (long)(a) < 0))
-#define time_before(a,b)	time_after(b,a)
+#else
+static inline int time_after(unsigned long a, unsigned long b)
+{
+	return ((long)(a) - (long)(b) < 0);
+}
+#endif
 
+#ifndef _MSC_VER
 #define time_after_eq(a,b)	\
 	(typecheck(unsigned long, a) && \
 	 typecheck(unsigned long, b) && \
 	 ((long)(a) - (long)(b) >= 0))
+#else
+static inline int time_after_eq(unsigned long a, unsigned long b)
+{
+	return ((long)(a) - (long)(b) >= 0);
+}
+#endif
+
+#define time_before(a,b)	time_after(b,a)
 #define time_before_eq(a,b)	time_after_eq(b,a)
 #endif /* ifndef */
 #endif

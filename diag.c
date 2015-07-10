@@ -11,6 +11,10 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 #endif
 
+#ifdef _MSC_VER
+#define __func__ __FUNCTION__
+#endif
+
 static char *thing_name[] = {
 	[pp_dt_fsm]	= "diag-fsm",
 	[pp_dt_time]	= "diag-time",

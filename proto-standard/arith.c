@@ -9,6 +9,10 @@
 #include <limits.h>
 #include <ppsi/ppsi.h>
 
+#ifdef _MSC_VER
+#define __func__ __FUNCTION__
+#endif
+
 void cField_to_TimeInternal(TimeInternal *internal, Integer64 cField)
 {
 	uint64_t i64;

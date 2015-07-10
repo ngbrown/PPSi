@@ -6,9 +6,15 @@
  */
 #include <ppsi/ppsi.h>
 
+#ifndef _MSC_VER
+#define ATTR_USED __attribute__((used))
+#else
+#define ATTR_USED
+#endif
+
 #define N(n) [n] = #n
 
-static char *timeout_names[__PP_TO_ARRAY_SIZE] __attribute__((used)) = {
+static char *timeout_names[__PP_TO_ARRAY_SIZE] ATTR_USED = {
 	N(PP_TO_DELAYREQ),
 	N(PP_TO_SYNC),
 	N(PP_TO_ANN_RECEIPT),
@@ -45,7 +51,7 @@ void pp_timeout_rand(struct pp_instance *ppi, int index, int logval)
 	if (!seed) {
 		uint32_t *p;
 		/* use the least 32 bits of the mac address as seed */
-		p = (void *)(&DSDEF(ppi)->clockIdentity)
+		p = (char *)(&DSDEF(ppi)->clockIdentity)
 			+ sizeof(ClockIdentity) - 4;
 		seed = *p;
 	}

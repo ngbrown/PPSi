@@ -10,8 +10,9 @@
 #include "common-fun.h"
 
 /* Unpack header from in buffer to msg_tmp_header field */
-int msg_unpack_header(struct pp_instance *ppi, void *buf, int plen)
+int msg_unpack_header(struct pp_instance *ppi, void *buf_v, int plen)
 {
+	char *buf = buf_v;
 	MsgHeader *hdr = &ppi->received_ptp_header;
 
 	hdr->transportSpecific = (*(Nibble *) (buf + 0)) >> 4;
@@ -65,8 +66,10 @@ int msg_unpack_header(struct pp_instance *ppi, void *buf, int plen)
 }
 
 /* Pack header message into out buffer of ppi */
-void msg_pack_header(struct pp_instance *ppi, void *buf)
+void msg_pack_header(struct pp_instance *ppi, void *buf_v)
 {
+	char *buf = buf_v;
+
 	/* (spec annex D and F) */
 	*(UInteger8 *) (buf + 0) = 0; /* message type changed later */
 	*(UInteger4 *) (buf + 1) = DSPOR(ppi)->versionNumber;
@@ -86,7 +89,7 @@ void msg_pack_header(struct pp_instance *ppi, void *buf)
 /* Pack Sync message into out buffer of ppi */
 static void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
-	void *buf;
+	char *buf;
 
 	buf = ppi->tx_ptp;
 
@@ -112,8 +115,10 @@ static void msg_pack_sync(struct pp_instance *ppi, Timestamp *orig_tstamp)
 }
 
 /* Unpack Sync message from in buffer */
-void msg_unpack_sync(void *buf, MsgSync *sync)
+void msg_unpack_sync(void *buf_v, MsgSync *sync)
 {
+	char *buf = buf_v;
+
 	sync->originTimestamp.secondsField.msb =
 		htons(*(UInteger16 *) (buf + 34));
 	sync->originTimestamp.secondsField.lsb =
@@ -125,7 +130,7 @@ void msg_unpack_sync(void *buf, MsgSync *sync)
 /* Pack Announce message into out buffer of ppi */
 static int msg_pack_announce(struct pp_instance *ppi)
 {
-	void *buf;
+	char *buf;
 
 	buf = ppi->tx_ptp;
 	/* changes in header */
@@ -160,8 +165,10 @@ static int msg_pack_announce(struct pp_instance *ppi)
 }
 
 /* Unpack Announce message from in buffer of ppi to msgtmp. Announce */
-void msg_unpack_announce(void *buf, MsgAnnounce *ann)
+void msg_unpack_announce(void *buf_v, MsgAnnounce *ann)
 {
+	char *buf = buf_v;
+
 	ann->originTimestamp.secondsField.msb =
 		htons(*(UInteger16 *) (buf + 34));
 	ann->originTimestamp.secondsField.lsb =
@@ -189,7 +196,7 @@ void msg_unpack_announce(void *buf, MsgAnnounce *ann)
 /* Pack Follow Up message into out buffer of ppi*/
 static void msg_pack_follow_up(struct pp_instance *ppi, Timestamp *prec_orig_tstamp)
 {
-	void *buf;
+	char *buf;
 
 	buf = ppi->tx_ptp;
 
@@ -218,8 +225,10 @@ static void msg_pack_follow_up(struct pp_instance *ppi, Timestamp *prec_orig_tst
 }
 
 /* Unpack FollowUp message from in buffer of ppi to msgtmp.follow */
-void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup)
+void msg_unpack_follow_up(void *buf_v, MsgFollowUp *flwup)
 {
+	char *buf = buf_v;
+
 	flwup->preciseOriginTimestamp.secondsField.msb =
 		htons(*(UInteger16 *) (buf + 34));
 	flwup->preciseOriginTimestamp.secondsField.lsb =
@@ -231,7 +240,7 @@ void msg_unpack_follow_up(void *buf, MsgFollowUp *flwup)
 /* pack DelayReq message into out buffer of ppi */
 static void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 {
-	void *buf;
+	char *buf;
 
 	buf = ppi->tx_ptp;
 
@@ -262,7 +271,7 @@ static void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 static void msg_pack_delay_resp(struct pp_instance *ppi,
 			 MsgHeader *hdr, Timestamp *rcv_tstamp)
 {
-	void *buf;
+	char *buf;
 
 	buf = ppi->tx_ptp;
 
@@ -301,8 +310,10 @@ static void msg_pack_delay_resp(struct pp_instance *ppi,
 }
 
 /* Unpack delayReq message from in buffer of ppi to msgtmp.req */
-void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req)
+void msg_unpack_delay_req(void *buf_v, MsgDelayReq *delay_req)
 {
+	char *buf = buf_v;
+
 	delay_req->originTimestamp.secondsField.msb =
 		htons(*(UInteger16 *) (buf + 34));
 	delay_req->originTimestamp.secondsField.lsb =
@@ -312,8 +323,10 @@ void msg_unpack_delay_req(void *buf, MsgDelayReq *delay_req)
 }
 
 /* Unpack delayResp message from IN buffer of ppi to msgtmp.presp */
-void msg_unpack_delay_resp(void *buf, MsgDelayResp *resp)
+void msg_unpack_delay_resp(void *buf_v, MsgDelayResp *resp)
 {
+	char *buf = buf_v;
+
 	resp->receiveTimestamp.secondsField.msb =
 		htons(*(UInteger16 *) (buf + 34));
 	resp->receiveTimestamp.secondsField.lsb =

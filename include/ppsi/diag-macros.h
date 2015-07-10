@@ -58,9 +58,14 @@ extern unsigned long pp_global_d_flags; /* Supplement ppi-specific ones */
 
 
 /* The function it is better external, since it is variadic */
+#ifndef _MSC_VER
 extern void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 		      int level, char *fmt, ...)
 	__attribute__((format(printf, 4, 5)));
+#else
+extern void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
+		      int level, _Printf_format_string_ char *fmt, ...);
+#endif
 
 /* Now, *still* use PPSI_NO_DIAG as an escape route to kill all diag code */
 #ifdef PPSI_NO_DIAG
@@ -71,11 +76,10 @@ extern void __pp_diag(struct pp_instance *ppi, enum pp_diag_things th,
 
 /* So, this is the function that is to be used by real ppsi code */
 #define pp_diag(ppi_, th_, level_, ...)					\
-	({								\
+	{								\
 	if (PP_HAS_DIAG)						\
 		__pp_diag(ppi_, pp_dt_ ## th_, level_, __VA_ARGS__);	\
-	PP_HAS_DIAG; /* return 1 if done, 0 if not done */		\
-	})
+	}
 
 #define pp_diag_allow(ppi_, th_, level_) \
 		(PP_HAS_DIAG && __PP_DIAG_ALLOW(ppi_,  pp_dt_ ## th_, level_))

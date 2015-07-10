@@ -8,6 +8,10 @@
 
 #include <ppsi/ppsi.h>
 
+#ifdef _MSC_VER
+#define __func__ __FUNCTION__
+#endif
+
 /* Flag Field bits symbolic names (table 57, pag. 151) */
 #define FFB_LI61	0x01
 #define FFB_LI59	0x02

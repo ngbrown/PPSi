@@ -21,11 +21,28 @@
 
 #include <arch/arch.h> /* ntohs and so on -- and wr-api.h for wr archs */
 
+#ifndef DEPRECATED
+#ifdef _MSC_VER
+#define DEPRECATED(x) __declspec(deprecated) x
+#else
+#define DEPRECATED(x) x __attribute__((deprecated))
+#endif
+#endif
+
+#ifndef WARN_UNUSED_RESULT
+#ifdef _MSC_VER
+#define WARN_UNUSED_RESULT(x) _Check_return_ x
+#else
+#define WARN_UNUSED_RESULT(x) x __attribute__((warn_unused_result))
+#endif
+#endif
+
 /* At this point in time, we need ARRAY_SIZE to conditionally build vlan code */
 #undef ARRAY_SIZE
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 /* We can't include pp-printf.h when building freestading, so have it here */
+#ifndef _MSC_VER
 extern int pp_printf(const char *fmt, ...)
 	__attribute__((format(printf, 1, 2)));
 extern int pp_vprintf(const char *fmt, va_list args)
@@ -34,6 +51,12 @@ extern int pp_sprintf(char *s, const char *fmt, ...)
 	__attribute__((format(printf,2,3)));
 extern int pp_vsprintf(char *buf, const char *, va_list)
 	__attribute__ ((format (printf, 2, 0)));
+#else
+extern int pp_printf(_Printf_format_string_ const char *fmt, ...);
+extern int pp_vprintf(_Printf_format_string_ const char *fmt, va_list args);
+extern int pp_sprintf(_Printf_format_string_ char *s, const char *fmt, ...);
+extern int pp_vsprintf(_Printf_format_string_ char *buf, const char *, va_list);
+#endif
 
 /* This structure is never defined, it seems */
 struct pp_vlanhdr {
@@ -98,8 +121,7 @@ static inline struct DSTimeProperties *DSPRO(struct pp_instance *ppi)
 }
 
 /* We used to have a "netpath" structure. Keep this until we merge pdelay */
-static struct pp_instance *NP(struct pp_instance *ppi)
-	__attribute__((deprecated));
+DEPRECATED(static struct pp_instance *NP(struct pp_instance *ppi));
 
 static inline struct pp_instance *NP(struct pp_instance *ppi)
 {
@@ -338,7 +360,7 @@ extern int bmc(struct pp_instance *ppi);
 
 /* msg.c */
 extern void msg_pack_header(struct pp_instance *ppi, void *buf);
-extern int __attribute__((warn_unused_result))
+extern WARN_UNUSED_RESULT(int)
 	msg_unpack_header(struct pp_instance *ppi, void *buf, int plen);
 extern void msg_unpack_sync(void *buf, MsgSync *sync);
 extern void msg_unpack_announce(void *buf, MsgAnnounce *ann);

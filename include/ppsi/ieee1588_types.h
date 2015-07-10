@@ -12,6 +12,12 @@
 
 #include <stdint.h>
 
+#ifdef _MSC_VER
+#ifndef inline
+#define inline __inline
+#endif
+#endif
+
 /* See F.2, pag.223 */
 #define PP_ETHERTYPE	0x88f7
 

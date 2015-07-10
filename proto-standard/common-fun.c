@@ -9,6 +9,10 @@
 #include "common-fun.h"
 #include "../lib/network_types.h"
 
+#ifdef _MSC_VER
+#define __func__ __FUNCTION__
+#endif
+
 #ifdef CONFIG_ARCH_WRS
 #define ARCH_IS_WRS 1
 #else
@@ -27,7 +31,7 @@ static void *__align_pointer(void *p)
 	ip = (unsigned long)p;
 	if (ip & 3)
 		align = 4 - (ip & 3);
-	return p + align;
+	return ((char*)p) + align;
 }
 
 void pp_prepare_pointers(struct pp_instance *ppi)
@@ -55,12 +59,12 @@ void pp_prepare_pointers(struct pp_instance *ppi)
 		ppi->rx_offset = 0;
 		break;
 	}
-	ppi->tx_ptp = __align_pointer(ppi->__tx_buffer + ppi->tx_offset);
-	ppi->rx_ptp = __align_pointer(ppi->__rx_buffer + ppi->rx_offset);
+	ppi->tx_ptp = __align_pointer((char*)ppi->__tx_buffer + ppi->tx_offset);
+	ppi->rx_ptp = __align_pointer((char*)ppi->__rx_buffer + ppi->rx_offset);
 
 	/* Now that ptp payload is aligned, get back the header */
-	ppi->tx_frame = ppi->tx_ptp - ppi->tx_offset;
-	ppi->rx_frame = ppi->rx_ptp - ppi->rx_offset;
+	ppi->tx_frame = (char*)ppi->tx_ptp - ppi->tx_offset;
+	ppi->rx_frame = (char*)ppi->rx_ptp - ppi->rx_offset;
 
 	if (0) { /* enable to verify... it works for me though */
 		pp_printf("%p -> %p %p\n",
