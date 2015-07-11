@@ -88,6 +88,7 @@
     <ClCompile Include="proto-standard\fsm-table.c" />
     <ClCompile Include="proto-standard\hooks.c" />
     <ClCompile Include="proto-standard\msg.c" />
+    <ClCompile Include="proto-standard\open-close.c" />
     <ClCompile Include="proto-standard\servo.c" />
     <ClCompile Include="proto-standard\state-disabled.c" />
     <ClCompile Include="proto-standard\state-faulty.c" />
@@ -104,6 +105,7 @@
     <ClInclude Include="arch-win32\include\arch\arch.h" />
     <ClInclude Include="arch-win32\include\arch\constants.h" />
     <ClInclude Include="arch-win32\include\generated\autoconf.h" />
+    <ClInclude Include="arch-win32\ppsi-win32.h" />
     <ClInclude Include="include\ppsi\constants.h" />
     <ClInclude Include="include\ppsi\diag-macros.h" />
     <ClInclude Include="include\ppsi\ieee1588_types.h" />
