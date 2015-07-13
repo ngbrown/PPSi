@@ -21,6 +21,7 @@ int main(int argc, char **argv)
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
+	unsigned long seed;
 	int i;
 
 	pp_printf("PPSi. Built on " __DATE__ "\n");
@@ -51,5 +52,47 @@ int main(int argc, char **argv)
 	}
 
 	/* Set offset here, so config parsing can override it */
-	// TODO
+	timePropertiesDS.currentUtcOffset = 36;	// TAI = UTC + ~36 seconds, must be manually set as Windows doesn't keep track
+
+	if (pp_parse_cmdline(ppg, argc, argv) != 0)
+		return -1;
+
+	if (ppg->cfg.cfg_items == 0)
+		pp_config_file(ppg, 0, PP_DEFAULT_CONFIGFILE);
+	if (ppg->cfg.cfg_items == 0)
+		pp_config_string(ppg, strdup("link 0; iface Local Network Connection; proto udp; role slave"));
+
+	for (i = 0; i < ppg->nlinks; i++) {
+		ppi = INST(ppg, i);
+		ppi->ch[PP_NP_EVT].fd = -1;
+		ppi->ch[PP_NP_GEN].fd = -1;
+
+		ppi->glbs = ppg;
+		ppi->vlans_array_len = CONFIG_VLAN_ARRAY_SIZE,
+			ppi->iface_name = ppi->cfg.iface_name;
+		ppi->port_name = ppi->cfg.port_name;
+
+		/* The following default names depend on TIME= at build time */
+		ppi->n_ops = &DEFAULT_NET_OPS;
+		ppi->t_ops = &DEFAULT_TIME_OPS;
+
+		ppi->portDS = calloc(1, sizeof(*ppi->portDS));
+		ppi->__tx_buffer = malloc(PP_MAX_FRAME_LENGTH);
+		ppi->__rx_buffer = malloc(PP_MAX_FRAME_LENGTH);
+
+		if (!ppi->portDS || !ppi->__tx_buffer || !ppi->__rx_buffer) {
+			fprintf(stderr, "ppsi: out of memory\n");
+			exit(1);
+		}
+	}
+
+	pp_init_globals(ppg, &__pp_default_rt_opts);
+
+	seed = time(NULL);
+	if (getenv("PPSI_DROP_SEED"))
+		seed = atoi(getenv("PPSI_DROP_SEED"));
+	ppsi_drop_init(ppg, seed);
+
+	win32_main_loop(ppg);
+	return 0; /* never reached */
 }

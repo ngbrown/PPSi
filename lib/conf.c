@@ -8,11 +8,17 @@
 #include <ppsi/ppsi.h>
 /* This file is built in hosted environments, so following headers are Ok */
 #include <stdio.h>
-#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+// may be able to use __declspec(selectany)
+#ifndef _MSC_VER
+#define WEAK(x) x __attribute__((weak))
+#else
+#define WEAK(x) x
+#endif
 
 static inline struct pp_instance *CUR_PPI(struct pp_globals *ppg)
 {
@@ -52,7 +58,7 @@ static int f_port(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 }
 
 #define CHECK_PPI(need) /* Quick hack to factorize errors later */ 	\
-	({if (need && !CUR_PPI(ppg)) {		\
+	if (need && !CUR_PPI(ppg)) {		\
 		pp_printf("config line %i: no port for this config\n", lineno);\
 		return -1; \
 	} \
@@ -60,7 +66,7 @@ static int f_port(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 		pp_printf("config line %i: global config under \"port\"\n", \
 			  lineno); \
 		return -1; \
-	}})
+	}
 
 static int f_if(int lineno, struct pp_globals *ppg, union pp_cfg_arg *arg)
 {
@@ -188,18 +194,18 @@ static struct pp_argname arg_proto[] = {
 	{"raw", PPSI_PROTO_RAW},
 	{"udp", PPSI_PROTO_UDP},
 	/* PROTO_VLAN is an internal modification of PROTO_RAW */
-	{},
+	{ 0 },
 };
 static struct pp_argname arg_role[] = {
 	{"auto", PPSI_ROLE_AUTO},
 	{"master",PPSI_ROLE_MASTER},
 	{"slave", PPSI_ROLE_SLAVE},
-	{},
+	{ 0 },
 };
 static struct pp_argname arg_ext[] = {
 	{"none", PPSI_EXT_NONE},
 	{"whiterabbit", PPSI_EXT_WR},
-	{},
+	{ 0 },
 };
 
 static struct pp_argline pp_global_arglines[] = {
@@ -213,15 +219,15 @@ static struct pp_argline pp_global_arglines[] = {
 	{ f_diag,	"diagnostics",	ARG_STR},
 	{ f_class,	"clock-class",	ARG_INT},
 	{ f_accuracy,	"clock-accuracy", ARG_INT},
-	{}
+	{ 0 }
 };
 
 /* Provide default empty argument lines for architecture and extension */
-struct pp_argline pp_arch_arglines[] __attribute__((weak)) = {
-	{}
+WEAK(struct pp_argline pp_arch_arglines[]) = {
+	{ 0 }
 };
-struct pp_argline pp_ext_arglines[] __attribute__((weak)) = {
-	{}
+WEAK(struct pp_argline pp_ext_arglines[]) = {
+	{ 0 }
 };
 
 /* local implementation of isblank() and isdigit() for bare-metal users */

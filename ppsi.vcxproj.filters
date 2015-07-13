@@ -81,6 +81,24 @@
     <ClCompile Include="proto-standard\open-close.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lib\cmdline.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\conf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="time-win32\win32-socket.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="time-win32\win32-time.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\drop.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="arch-win32\main-loop.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="arch-win32\include\arch\arch.h">

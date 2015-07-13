@@ -113,7 +113,7 @@ enum { /* The two sockets. They are called "net path" for historical reasons */
  */
 struct pp_instance_cfg {
 	char port_name[16];
-	char iface_name[16];
+	char iface_name[256];
 	int ext;   /* 0: none, 1: whiterabbit */ /* FIXME extension enumeration */
 };
 

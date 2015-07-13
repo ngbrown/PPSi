@@ -8,4 +8,7 @@
 
 #include <stdlib.h>    /* abs */
 
+#define DEFAULT_TIME_OPS win32_time_ops
+#define DEFAULT_NET_OPS win32_net_ops
+
 #endif /* __ARCH_H__ */

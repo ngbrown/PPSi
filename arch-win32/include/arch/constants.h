@@ -6,6 +6,7 @@
 #Warning "Please include <ppsi/constants.h> before <arch/constants.h>"
 #endif
 
-/* nothing to do here, we keep project-wide defaults */
+#define PP_DEFAULT_CONFIGFILE			"./ppsi.conf"
+
 
 #endif /* __PPSI_ARCH_CONSTANTS_H__ */
