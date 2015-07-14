@@ -10,7 +10,14 @@
  * honest: bit fields must die. I use masks at run time instead
  */
 
+#ifndef _MSC_VER
+#define PACKED( __Declaration__ ) __Declaration__ __attribute__((__packed__))
+#else
+#define PACKED( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
+#endif
+
 /* Common Message header (table 18, page 124) -- was "MsgHeader */
+PACKED(
 struct ptp_header {
 	/* 0 */
 	uint8_t		type_and_transport_specific; /* LSB = type */
@@ -31,24 +38,27 @@ struct ptp_header {
 	uint16_t	sequenceId;
 	uint8_t		controlField;
 	uint8_t		logMessageInterval;
-} __attribute__((packed));
+});
 
 /* Fucking fucking ieee specification! */
+PACKED(
 struct int48 {
 	uint16_t	msb; /* big endian in packet! */
 	uint32_t	lsb;
-} __attribute__((packed));
+});
 
+PACKED(
 struct stamp {
 	struct int48	sec;
 	uint32_t	nsec;
-} __attribute__((packed));
+});
 
 /*
  * What follows is structures for the individual message types
  */
 
 
+PACKED(
 struct ptp_announce { /* page 129 (149 of pdf) */
 	struct stamp	originTimestamp;		/* 34 */
 	Integer16	currentUtcOffset;		/* 44 */
@@ -59,7 +69,7 @@ struct ptp_announce { /* page 129 (149 of pdf) */
 	ClockIdentity	grandmasterIdentity;		/* 53 */
 	UInteger16	stepsRemoved;			/* 61 */
 	Enumeration8	timeSource;			/* 63 */
-} __attribute__((packed));
+});
 
 struct ptp_sync_etc { /* page 130 (150 of pdf) */
 	/* doc uses different names in different packets: use simple names */
@@ -67,10 +77,11 @@ struct ptp_sync_etc { /* page 130 (150 of pdf) */
 	uint8_t		port[10];	/* 44: only for delay_resp etc */
 };
 
+PACKED(
 struct ptp_tlv { /* page 135 (155) */
 	uint16_t	type;
 	uint16_t	len;
 	uint8_t		oui[3];
 	uint8_t		subtype[3];
 	uint8_t		data[0];
-} __attribute__((packed));
+});

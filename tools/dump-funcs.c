@@ -255,7 +255,7 @@ static void dump_payload(char *prefix, void *pl, int len)
 			       len, donelen, n);
 			break;
 		}
-		donelen += dump_tlv(prefix, pl + donelen, n);
+		donelen += dump_tlv(prefix, (struct ptp_tlv*)(((char*)pl) + donelen), n);
 	}
 out:
 	/* Finally, binary dump of it all */
@@ -273,14 +273,14 @@ int dump_udppkt(char *prefix, void *buf, int len, struct TimeInternal *ti)
 	if (ti)
 		dump_time(prefix, ti);
 
-	ip = buf + dump_eth(prefix, eth);
+	ip = (struct iphdr*)((char*)buf) + dump_eth(prefix, eth);
 	dump_ip(prefix, ip);
 
 	udp = (void *)(ip + 1);
 	dump_udp(prefix, udp);
 
 	payload = (void *)(udp + 1);
-	dump_payload(prefix, payload, len - (payload - buf));
+	dump_payload(prefix, payload, len - (((char*)payload) - ((char*)buf)));
 
 	return 0;
 }
@@ -302,8 +302,8 @@ int dump_1588pkt(char *prefix, void *buf, int len, struct TimeInternal *ti)
 
 	if (ti)
 		dump_time(prefix, ti);
-	payload = buf + dump_eth(prefix, eth);
-	dump_payload(prefix, payload, len - (payload - buf));
+	payload = ((char*)buf) + dump_eth(prefix, eth);
+	dump_payload(prefix, payload, len - (((char*)payload) - ((char*)buf)));
 
 	return 0;
 }

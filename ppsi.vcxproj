@@ -106,6 +106,7 @@
     <ClCompile Include="proto-standard\timeout.c" />
     <ClCompile Include="time-win32\win32-socket.c" />
     <ClCompile Include="time-win32\win32-time.c" />
+    <ClCompile Include="tools\dump-funcs.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="arch-win32\include\arch\arch.h" />
@@ -120,6 +121,8 @@
     <ClInclude Include="include\ppsi\pp-instance.h" />
     <ClInclude Include="include\ppsi\ppsi.h" />
     <ClInclude Include="proto-standard\common-fun.h" />
+    <ClInclude Include="tools\decent_types.h" />
+    <ClInclude Include="tools\ptpdump.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

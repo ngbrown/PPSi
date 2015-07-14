@@ -68,7 +68,7 @@ typedef struct Timestamp { /* page 13 (33) -- no typedef expected */
 } Timestamp;
 
 typedef struct TimeInternal {
-	Integer32	seconds;
+	Integer32	seconds; // TAI seconds since 1970-01-01T00:00:00Z
 	Integer32	nanoseconds;
 	/* White Rabbit extension begin */
 	Integer32	phase;		/* This is the set point */

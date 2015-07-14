@@ -10,13 +10,14 @@
 #define ETH_HLEN	14		/* Total octets in header.	 */
 
 #ifndef _MSC_VER
-#define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
+#define PACKED( __Declaration__ ) __Declaration__ __attribute__((__packed__))
 #else
-#define PACK( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
+#define PACKED( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
 #endif
 
 
-PACK(struct ethhdr {
+PACKED(
+struct ethhdr {
 	unsigned char	h_dest[ETH_ALEN];	/* destination eth addr */
 	unsigned char	h_source[ETH_ALEN];	/* source ether addr	*/
 	uint16_t	h_proto;		/* packet type ID field */

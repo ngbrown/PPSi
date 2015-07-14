@@ -6,6 +6,7 @@
 #Warning "Please include <ppsi/constants.h> before <arch/constants.h>"
 #endif
 
+#undef PP_DEFAULT_CONFIGFILE
 #define PP_DEFAULT_CONFIGFILE			"./ppsi.conf"
 
 

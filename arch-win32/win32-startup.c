@@ -17,7 +17,7 @@ static DSParent parentDS;
 static DSTimeProperties timePropertiesDS;
 static struct pp_servo servo;
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	struct pp_globals *ppg;
 	struct pp_instance *ppi;
@@ -57,10 +57,14 @@ int main(int argc, char **argv)
 	if (pp_parse_cmdline(ppg, argc, argv) != 0)
 		return -1;
 
-	if (ppg->cfg.cfg_items == 0)
+	if (ppg->cfg.cfg_items == 0) {
 		pp_config_file(ppg, 0, PP_DEFAULT_CONFIGFILE);
-	if (ppg->cfg.cfg_items == 0)
-		pp_config_string(ppg, strdup("link 0; iface Local Network Connection; proto udp; role slave"));
+	}
+
+	if (ppg->cfg.cfg_items == 0) {
+		pp_config_string(ppg, _strdup("link 0; iface Local Area Connection; proto udp; role slave"));
+		//pp_config_string(ppg, _strdup("link 0; iface Wireless Network Connection; proto udp; role slave"));
+	}
 
 	for (i = 0; i < ppg->nlinks; i++) {
 		ppi = INST(ppg, i);
