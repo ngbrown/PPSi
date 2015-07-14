@@ -147,7 +147,7 @@ static void dump_msg_resp_etc(char *prefix, char *s, struct ptp_sync_etc *p)
 /* TLV dumper, not yet white-rabbit aware */
 static int dump_tlv(char *prefix, struct ptp_tlv *tlv, int totallen)
 {
-	/* the field includes 6 bytes of the header, ecludes 4 of them. Bah! */
+	/* the field includes 6 bytes of the header, excludes 4 of them. Bah! */
 	int explen = ntohs(tlv->len) + 4;
 
 	printf("%sTLV: type %04x len %i oui %02x:%02x:%02x "

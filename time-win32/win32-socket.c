@@ -128,14 +128,35 @@ static int win32_net_recv(struct pp_instance *ppi, void *pkt, int len,
 static int win32_net_send(struct pp_instance *ppi, void *pkt, int len,
 	TimeInternal *t, int chtype, int use_pdelay_addr)
 {
-	int ret = 0;
+	struct sockaddr_in addr;
+	static uint16_t udpport[] = {
+		[PP_NP_GEN] = PP_GEN_PORT,
+		[PP_NP_EVT] = PP_EVT_PORT,
+	};
+	int ret;
+
+	/* To fake a network frame loss, set the timestamp and do not send */
+	if (ppsi_drop_tx()) {
+		if (t)
+			ppi->t_ops->get(ppi, t);
+		pp_diag(ppi, frames, 1, "Drop sent frame\n");
+		return len;
+	}
 
 	if (ppi->proto == PPSI_PROTO_UDP) {
+		addr.sin_family = AF_INET;
+		addr.sin_port = htons(udpport[chtype]);
+		addr.sin_addr.s_addr = ppi->mcast_addr;
 
+		if (t)
+			ppi->t_ops->get(ppi, t);
+
+		ret = sendto(ppi->ch[chtype].fd, pkt, len, 0,
+			(struct sockaddr *)&addr,
+			sizeof(struct sockaddr_in));
 		if (pp_diag_allow(ppi, frames, 2))
 			dump_payloadpkt("send: ", pkt, len, t);
-
-		return ret;
+		return len;
 	}
 
 	// Don't handle RAW, VLAN
