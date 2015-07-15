@@ -36,6 +36,8 @@ static int win32_time_set(struct pp_instance *ppi, TimeInternal *t)
 {
 	if (!t) { /* Change the network notion of the utc/tai offset */
 		// TODO
+		pp_diag(ppi, time, 1, "New TAI offset: %i\n",
+			DSPRO(ppi)->currentUtcOffset);
 		return 0;
 	}
 
@@ -49,10 +51,32 @@ static int win32_time_set(struct pp_instance *ppi, TimeInternal *t)
 	return 0;
 }
 
+static DWORD systemTimeIncrement; // hardware clock counts (100-nanosecond units)
+
+// return Frequency offset, in units of 1000 ppm (parts per million) - parts per billion?
+//  positive or negative, not -1
 static int win32_time_init_servo(struct pp_instance *ppi)
 {
+	DWORD timeAdjustment; // clock increment per systemTimeIncrement interval (100-nanosecond units)
+	
+	BOOL timeAdjustmentDisabled;
+
+	GetSystemTimeAdjustment(&timeAdjustment, &systemTimeIncrement, &timeAdjustmentDisabled);
+
+	if (timeAdjustmentDisabled) {
+		timeAdjustment = systemTimeIncrement;
+	}
+
+	// 100-nanoseconds per systemTimeIncrement
+	int adjustmentOffset = ((timeAdjustment >= systemTimeIncrement) 
+		? (int)(timeAdjustment - systemTimeIncrement) 
+		: -(int)(systemTimeIncrement - timeAdjustment));
+
+	// ppb
+	int freq_offset = (adjustmentOffset * 1000000000) / systemTimeIncrement; // 100-nanoseconds offset / 100-nanoseconds period * 1 billion
+
 	pp_diag(ppi, time, 2, "%s\n", __FUNCTION__);
-	return -1;
+	return freq_offset;
 }
 
 static int win32_time_adjust(struct pp_instance *ppi, long offset_ns, long freq_ppb)
