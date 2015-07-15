@@ -76,6 +76,7 @@ void msg_pack_header(struct pp_instance *ppi, void *buf_v)
 	*(UInteger8 *) (buf + 4) = DSDEF(ppi)->domainNumber;
 
 	*(UInteger8 *) (buf + 6) = PP_TWO_STEP_FLAG;
+	*(UInteger8 *) (buf + 7) = 0;
 
 	memset((buf + 8), 0, 8);
 	memcpy((buf + 20), &DSPOR(ppi)->portIdentity.clockIdentity,
