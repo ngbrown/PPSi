@@ -266,6 +266,9 @@ static void msg_pack_delay_req(struct pp_instance *ppi, Timestamp *orig_tstamp)
 	*(UInteger16 *) (buf + 34) = htons(orig_tstamp->secondsField.msb);
 	*(UInteger32 *) (buf + 36) = htonl(orig_tstamp->secondsField.lsb);
 	*(UInteger32 *) (buf + 40) = htonl(orig_tstamp->nanosecondsField);
+
+	/* Clear padding that seems to be required */
+	memset(buf + 44, 0, 80);
 }
 
 /* pack DelayResp message into OUT buffer of ppi */
@@ -396,7 +399,7 @@ int msg_issue_delay_req(struct pp_instance *ppi)
 
 	msg_pack_delay_req(ppi, &orig_tstamp);
 
-	return __send_and_log(ppi, PP_DELAY_REQ_LENGTH, PPM_DELAY_REQ,
+	return __send_and_log(ppi, PP_DELAY_REQ_LENGTH + 80, PPM_DELAY_REQ,
 			      PP_NP_EVT);
 }
 
