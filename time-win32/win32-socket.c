@@ -481,8 +481,12 @@ static int win32_net_check_packet(struct pp_globals *ppg, int delay_ms)
 	if (i < 0)
 		return -1;
 
-	if (i == 0)
+	if (i == 0) {
+		/* the time limit expired, so zero out the old_delay_ms for the next run */
+		arch_data->tv.tv_sec = 0;
+		arch_data->tv.tv_usec = 0;
 		return 0;
+	}
 
 	for (j = 0; j < ppg->nlinks; j++) {
 		struct pp_instance *ppi = INST(ppg, j);
